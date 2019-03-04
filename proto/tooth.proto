@@ -1,0 +1,55 @@
+// For 2DCNN
+
+syntax = "proto2";
+
+message TrainConfig{
+
+    // Training batch size
+    optional uint32 batch_size = 1 [default =16];
+
+    // Minutes until a checkpoint
+    optional uint32 checkpoint_min = 2 [default = 5];
+
+    // Number of steps required before early stopping
+    optional uint32 early_stop_step = 3 [default = 10000];
+
+    // Path to saving model
+    optional string result_path = 4;
+
+    // Training steps
+    optional uint32 steps = 5;
+
+    // tf record name
+    optional string input_path = 6;
+
+    // Here are repeatable value
+    // 1 is relu, 2 is default leaky relu
+    repeated float learning_rate = 7;
+
+    repeated float keep_prob = 8;
+
+    repeated string activation = 9;
+
+    repeated Channels channels = 10;
+
+}
+
+// Number of channels in each layer
+message Channels {
+
+    // Should have 11 elemets
+    repeated uint32 channel = 1;
+//    optional uint32 conv1 = 1;
+//    optional uint32 conv2 = 2;
+//    optional uint32 conv3_1 = 3;
+//    optional uint32 conv3_2_1 = 4;
+//    optional uint32 conv3_2_2 = 5;
+//    optional uint32 conv3_3_1 = 6;
+//    optional uint32 conv3_3_2 = 7;
+//    optional uint32 conv3_3_3 = 8;
+//    optional uint32 conv3_4 = 9;
+//    optional uint32 fc5 = 10;
+//    optional uint32 fc6 = 11;
+
+
+}
