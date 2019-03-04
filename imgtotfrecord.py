@@ -4,7 +4,7 @@ import os
 import sys
 import time
 import ast
-
+import warnings
 import cv2
 from random import shuffle
 from ImportData2D import get_label, get_file_name
@@ -79,7 +79,7 @@ def _float_feature(value):
     return tf.train.Feature(float_list=tf.train.FloatList(value=[value]))
 
 
-def run(tfrecord_name):
+def run(tfrecord_name, dataset_folder):
     # Select ype of label to use
     label_data = ["Occ_Sum", "Taper_Sum"]  # Occ_sum: Max = 15, Taper_Sum: Max = 10
     label_type = ["average", "median"]
@@ -88,8 +88,6 @@ def run(tfrecord_name):
     train_eval_ratio = 0.8  # Ratio of training data
     print("Use label from %s of %s category with {%s} train:eval ratio" % (
         label_type[label_type_num], label_data[label_data_num], train_eval_ratio))
-    # Directory of image
-    dataset_folder = "./data/cross_section"  # Folder to get data from
 
     # Start getting all info and zip to tfrecord
     train_name = "train_%s_%s_%s.tfrecords" % (tfrecord_name, label_data[label_data_num], label_type[label_type_num])
@@ -122,11 +120,18 @@ def run(tfrecord_name):
 
     # Group up 4 images and label together first, shuffle
     grouped_address = list()
+    example_grouped_address = list()  # Use for checking the file name, in case of adding more example
     for i in range(len(labels)):
         grouped_address.append([image_address[i * numdeg:(i + 1) * numdeg], labels[i]])
-    shuffle(grouped_address)
+        example_grouped_address.append(image_address[i*numdeg])
+    z = list(zip(grouped_address, example_grouped_address))
+    shuffle(z)
+    grouped_address[:], example_grouped_address[:] = zip(*z)
+    train_amount = int(train_eval_ratio * len(grouped_address))
 
-    exist_train_address = []
+    train_address = list()
+    eval_address = list()
+
     # open file and read the content in a list
     file_name = './data/' + tfrecord_name + '_train_address.txt'
     if os.path.isfile(file_name):
@@ -134,10 +139,15 @@ def run(tfrecord_name):
             for line in filehandle:
                 # remove linebreak which is the last character of the string
                 current_name = line[:-1]
-                # add item to the list
-                exist_train_address.append(ast.literal_eval(current_name))
+                # check if it exist in grouped exist, if found, put in train_address
+                for i, name in enumerate(example_grouped_address):
+                    if current_name in name:
+                        train_address.append(grouped_address[i])
+                        grouped_address.remove(grouped_address[i])
+                        example_grouped_address.remove(example_grouped_address[i])
+                        break
+        print("Use %s examples from previous tfrecords as training" % len(train_address))
 
-    exist_eval_address = []
     # open file and read the content in a list
     file_name = './data/' + tfrecord_name + '_eval_address.txt'
     if os.path.isfile(file_name):
@@ -145,15 +155,25 @@ def run(tfrecord_name):
             for line in filehandle:
                 # remove linebreak which is the last character of the string
                 current_name = line[:-1]
-                # add item to the list
-                exist_eval_address.append(ast.literal_eval(current_name))
-        print(exist_eval_address)
+                # check if it exist in grouped exist, if found, put in eval_address
+                for i, name in enumerate(example_grouped_address):
+                    if current_name in name:
+                        eval_address.append(grouped_address[i])
+                        grouped_address.remove(grouped_address[i])
+                        example_grouped_address.remove(example_grouped_address[i])
+                        break
+        print("Use %s examples from previous tfrecords as evaluation" % len(eval_address))
 
+    print(example_grouped_address)
     # Split training and test (Split 80:20)
-    train_address = grouped_address[0:int(train_eval_ratio * len(labels))]
+    train_amount = train_amount - len(train_address)
+    if train_amount < 0:
+        train_amount = 0
+        warnings.warn("imgtotfrecord: amount of training is not correct, might want to check")
+    train_address.extend(grouped_address[0:train_amount])
     grouped_train_address = tuple(
         [list(e) for e in zip(*train_address)])  # Convert to tuple of list[image address, label]
-    eval_address = grouped_address[int(train_eval_ratio * len(labels)):len(labels)]
+    eval_address.extend(grouped_address[train_amount:])
     grouped_eval_address = tuple(
         [list(e) for e in zip(*eval_address)])  # Convert to tuple of list[image address, label]
 
@@ -175,14 +195,14 @@ def run(tfrecord_name):
     file_name = './data/' + tfrecord_name + '_train_address.txt'
     with open(file_name, 'w') as filehandle:
         for listitem in train_address:
-            new_list_item = [listitem[0][0].replace('_0.png', ''), listitem[1]]
+            new_list_item = listitem[0][0].replace('_0.png', '')
             filehandle.write('%s\n' % new_list_item)
 
     # Save names of files of eval address
     file_name = './data/' + tfrecord_name + '_eval_address.txt'
     with open(file_name, 'w') as filehandle:
         for listitem in eval_address:
-            new_list_item = [listitem[0][0].replace('_0.png', ''), listitem[1]]
+            new_list_item = listitem[0][0].replace('_0.png', '')
             filehandle.write('%s\n' % new_list_item)
 
     # Start writing train dataset
@@ -227,5 +247,7 @@ def run(tfrecord_name):
 if __name__ == '__main__':
     # File name will be [tfrecord_name]_train_Taper_sum_median
     tfrecord_name = "preparation_181_data_test"
-    run(tfrecord_name)
+    # Directory of image
+    dataset_folder = "./data/cross_section"
+    run(tfrecord_name, dataset_folder)
     print("Complete")
