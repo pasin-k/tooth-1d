@@ -8,16 +8,13 @@ from shutil import copy2
 import tensorflow.contrib.slim as slim
 
 from protobuf_helper import protobuf_to_list, protobuf_to_channels
-from proto import tooth_pb2
-from google.protobuf import text_format
-
-# import skopt
-# from skopt import gp_minimize, forest_minimize
-# from skopt.space import Real, Categorical, Integer
-# from skopt.plots import plot_convergence
-# from skopt.plots import plot_objective, plot_evaluations
-# from skopt.plots import plot_histogram, plot_objective_2D
-# from skopt.utils import use_named_args
+import skopt
+from skopt import gp_minimize, forest_minimize
+from skopt.space import Real, Categorical, Integer
+from skopt.plots import plot_convergence
+from skopt.plots import plot_objective, plot_evaluations
+from skopt.plots import plot_histogram, plot_objective_2D
+from skopt.utils import use_named_args
 
 ################# Import Section
 numdegree = 4  # Number of rotations
@@ -35,7 +32,7 @@ args = parser.parse_args()
 def check_exist(params, dict_name, default=None):
     try:
         output = params[dict_name]
-    except (KeyError, TypeError) as error:
+    except KeyError:
         if default is None:
             raise Exception("Parameter %s not defined" % dict_name)
         else:
@@ -56,7 +53,7 @@ def decode(data_dict):
     if numdegree != 4:
         raise Exception('Number of degree specified is not compatible, edit code')
     # Create initial image, then stacking it
-    image_decoded = []
+    image_decoded = list()
 
     # Stacking the rest
     for i in range(0, numdegree):
@@ -205,7 +202,6 @@ def my_model(features, labels, mode, params, config):
     img4 = tf.summary.image("Input_image4", tf.expand_dims(features[:, :, :, 3], 3))
 
     d_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
-    print(d_vars)
     summary_name = ["conv1", "conv2", "conv3_1", "conv3_2_1", "conv3_2", "conv3_3_1",
                     "conv3_3_2", "conv3_3_3", "conv4", "fc5", "fc6", "predict"]
     if len(summary_name) == int(len(d_vars) / 2):
@@ -256,28 +252,21 @@ def eval_input_fn(data_path, batch_size):
     return eval_dataset
 
 
-# @use_named_args(dimensions=dimensions)
-# def fitness(run_params, config_params):
-#     """
-#     Hyper-parameters:
-#     learning_rate:     Learning-rate for the optimizer.
-#     keep_prob:
-#     activation:        Activation function for all layers.
-#     channels
-#     """
-#
-#     # Create the neural network with these hyper-parameters.
-#     accuracy = run(run_params, config_params)
-#
-#     # Print the classification accuracy.
-#     print()
-#     print("Accuracy: {0:.2%}".format(accuracy))
-#     print()
-#
-#     return -accuracy
+def log_dir_name(learning_rate, num_dense_layers,
+                 num_dense_nodes, activation):
+
+    # The dir-name for the TensorBoard log-dir.
+    s = "./19_logs/lr_{0:.0e}_layers_{1}_nodes_{2}_{3}/"
+
+    # Insert all the hyper-parameters in the dir-name.
+    log_dir = s.format(learning_rate,
+                       num_dense_layers,
+                       num_dense_nodes,
+                       activation)
+    return log_dir
 
 
-def run(run_params={}, model_params={}):
+def run(run_params=None, model_params=None):
     # Add exception in case params is missing
     run_params['batch_size'] = check_exist(run_params, 'batch_size', 16)
     run_params['checkpoint_min'] = check_exist(run_params, 'checkpoint_min', 10)
@@ -354,25 +343,20 @@ def run_multiple_params(run_config, model_config):
                     rn_config['result_path'] = name
                     run(rn_config, md_config)
 
+def run_hyperparameter_optimize(run_config, model_config):
+    dim_learning_rate = Real(low=1e-6, high=1e-2, prior='log-uniform', name='learning_rate')
+    dim_keep_prob = Real(low=0, high=1, name='keep_prob')
+    dim_activation = Categorical(categories=[tf.nn.relu, tf.nn.leaky_relu],
+                                 name='activation')
+    dim_channel = Integer(low=1, high=4, name='num_dense_nodes')
+    dimensions = [dim_learning_rate,
+                  dim_keep_prob,
+                  dim_activation,
+                  dim_channel]
+    model_configs['dimensions'] = dimensions
+    default_parameters = [1e-3, 1, tf.nn.relu, 2]
+    best_accuracy = 0.0
 
-# def run_hyperparameter_optimize(run_config, model_config):
-#     dim_learning_rate = Real(low=1e-6, high=1e-2, prior='log-uniform', name='learning_rate')
-#     dim_keep_prob = Real(low=0, high=1, name='keep_prob')
-#     dim_activation = Categorical(categories=[tf.nn.relu, tf.nn.leaky_relu],
-#                                  name='activation')
-#     dim_channel = Integer(low=1, high=4, name='channels')
-#     dimensions = [dim_learning_rate,
-#                   dim_keep_prob,
-#                   dim_activation,
-#                   dim_channel]
-#     model_configs['dimensions'] = dimensions
-#     default_parameters = [1e-3, 1, tf.nn.relu, 2]
-#     best_accuracy = 0.0
-#     search_result = gp_minimize(func=fitness,
-#                                 dimensions=dimensions,
-#                                 acq_func='EI', # Expected Improvement.
-#                                 n_calls=40,
-#                                 x0=default_parameters)
 
 
 if __name__ == '__main__':
@@ -399,8 +383,8 @@ if __name__ == '__main__':
                      'activation_list': activation_list,
                      'channel_list': channel_list
                      }
-    run(run_params=run_configs)
-    # run_multiple_params(run_configs, model_configs)
+    # run()
+    run_multiple_params(run_configs, model_configs)
     print("train.py completed")
 
 ####################################

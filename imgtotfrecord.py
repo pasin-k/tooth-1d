@@ -90,8 +90,8 @@ def run(tfrecord_name, dataset_folder):
         label_type[label_type_num], label_data[label_data_num], train_eval_ratio))
 
     # Start getting all info and zip to tfrecord
-    train_name = "train_%s_%s_%s.tfrecords" % (tfrecord_name, label_data[label_data_num], label_type[label_type_num])
-    eval_name = "eval_%s_%s_%s.tfrecords" % (tfrecord_name, label_data[label_data_num], label_type[label_type_num])
+    train_name = "%s_%s_%s_train.tfrecords" % (tfrecord_name, label_data[label_data_num], label_type[label_type_num])
+    eval_name = "%s_%s_%s_eval.tfrecords" % (tfrecord_name, label_data[label_data_num], label_type[label_type_num])
     train_name = os.path.join("./data", train_name)
     eval_name = os.path.join("./data", eval_name)
 
@@ -246,7 +246,7 @@ def run(tfrecord_name, dataset_folder):
 
 if __name__ == '__main__':
     # File name will be [tfrecord_name]_train_Taper_sum_median
-    tfrecord_name = "preparation_181_data_test"
+    tfrecord_name = "preparation_181_data"
     # Directory of image
     dataset_folder = "./data/cross_section"
     run(tfrecord_name, dataset_folder)
