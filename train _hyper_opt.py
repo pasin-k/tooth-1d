@@ -11,9 +11,6 @@ from protobuf_helper import protobuf_to_list, protobuf_to_channels
 import skopt
 from skopt import gp_minimize, forest_minimize
 from skopt.space import Real, Categorical, Integer
-from skopt.plots import plot_convergence
-from skopt.plots import plot_objective, plot_evaluations
-from skopt.plots import plot_histogram, plot_objective_2D
 from skopt.utils import use_named_args
 
 ################# Import Section

@@ -5,21 +5,15 @@ import os
 import argparse
 from shutil import copy2
 
-import tensorflow.contrib.slim as slim
-
 from protobuf_helper import protobuf_to_list, protobuf_to_channels
 from proto import tooth_pb2
 from google.protobuf import text_format
 
-# import skopt
-# from skopt import gp_minimize, forest_minimize
-# from skopt.space import Real, Categorical, Integer
-# from skopt.plots import plot_convergence
-# from skopt.plots import plot_objective, plot_evaluations
-# from skopt.plots import plot_histogram, plot_objective_2D
-# from skopt.utils import use_named_args
+import skopt
+from skopt import gp_minimize, forest_minimize
+from skopt.space import Real, Categorical, Integer
+from skopt.utils import use_named_args
 
-################# Import Section
 numdegree = 4  # Number of rotations
 image_height = 240  # Used for cropping
 image_width = 360  # Used for cropping
@@ -28,6 +22,17 @@ parser = argparse.ArgumentParser()
 parser.add_argument('config', help="Config directory")
 # parser.add_argument('--config',help="Config directory")
 args = parser.parse_args()
+
+activation_dict = {'0': tf.nn.relu, '1': tf.nn.leaky_relu}
+configs = tooth_pb2.TrainConfig()
+with open(args.config, 'r') as f:
+    text_format.Merge(f.read(), configs)
+
+# Convert protobuf data to list
+learning_rate_list = protobuf_to_list(configs.learning_rate)
+keep_prob_list = protobuf_to_list(configs.keep_prob)
+activation_list = protobuf_to_list(configs.activation, activation_dict)
+channel_list = protobuf_to_channels(configs.channels)
 
 
 # Check if parameters exist, if not, give default parameters or raiseError
@@ -42,6 +47,28 @@ def check_exist(params, dict_name, default=None):
             output = default
             print("Parameters: %s not found, use default value = %s" % (dict_name, default))
     return output
+
+
+run_params = {'batch_size': configs.batch_size,
+              'checkpoint_min': configs.checkpoint_min,
+              'early_stop_step': configs.early_stop_step,
+              'input_path': configs.input_path,
+              'result_path': configs.result_path,
+              'config_path': os.path.abspath(args.config),
+              'steps': configs.steps}
+
+run_params['batch_size'] = check_exist(run_params, 'batch_size', 16)
+run_params['checkpoint_min'] = check_exist(run_params, 'checkpoint_min', 10)
+run_params['early_stop_step'] = check_exist(run_params, 'early_stop_step', 5000)
+run_params['input_path'] = check_exist(run_params, 'input_path')
+run_params['result_path'] = check_exist(run_params, 'result_path')
+run_params['steps'] = check_exist(run_params, 'steps')
+
+model_configs = {'learning_rate_list': learning_rate_list,
+                 'keep_prob_list': keep_prob_list,
+                 'activation_list': activation_list,
+                 'channel_list': channel_list
+                 }
 
 
 # Import tfrecord to dataset
@@ -135,9 +162,6 @@ def dropout(layer, keep_prob, name):
 
 # Define Model
 def my_model(features, labels, mode, params, config):
-    # TODO: Early stopping
-    #
-
     # Input: (Batch_size,240,360,4)
 
     # (1) Filter size: 5x5x64
@@ -195,14 +219,17 @@ def my_model(features, labels, mode, params, config):
         return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
     loss = tf.losses.sparse_softmax_cross_entropy(labels, logits)
     accuracy = tf.metrics.accuracy(labels, predicted_class)
-    my_accuracy = tf.reduce_mean(tf.cast(tf.equal(labels, predicted_class), dtype=tf.float32))  # The one that is not complicated
-    acc = tf.summary.scalar("my_accuracy", my_accuracy)
+    my_accuracy = tf.reduce_mean(tf.cast(tf.equal(labels, predicted_class), dtype=tf.float32))
+    acc = tf.summary.scalar("my_accuracy", my_accuracy)  # Number of correct answer
     # acc2 = tf.summary.scalar("Accuracy_update", accuracy[1])
 
     img1 = tf.summary.image("Input_image1", tf.expand_dims(features[:, :, :, 0], 3))
     img2 = tf.summary.image("Input_image2", tf.expand_dims(features[:, :, :, 1], 3))
     img3 = tf.summary.image("Input_image3", tf.expand_dims(features[:, :, :, 2], 3))
     img4 = tf.summary.image("Input_image4", tf.expand_dims(features[:, :, :, 3], 3))
+
+    ex_prediction = tf.summary.scalar("example_prediction", predicted_class[0])
+    ex_ground_truth = tf.summary.scalar("example_ground_truth", labels[0])
 
     d_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
     print(d_vars)
@@ -231,7 +258,7 @@ def my_model(features, labels, mode, params, config):
         return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op, training_hooks=[saver_hook])
 
     # Evaluate Mode
-    saver_hook = tf.train.SummarySaverHook(save_steps=1000, summary_op=tf.summary.merge_all(),
+    saver_hook = tf.train.SummarySaverHook(save_steps=10, summary_op=tf.summary.merge_all(),
                                            output_dir=config.model_dir + 'eval')
     return tf.estimator.EstimatorSpec(mode=mode, eval_metric_ops={'accuracy': accuracy}, loss=loss,
                                       evaluation_hooks=[saver_hook])
@@ -256,35 +283,9 @@ def eval_input_fn(data_path, batch_size):
     return eval_dataset
 
 
-# @use_named_args(dimensions=dimensions)
-# def fitness(run_params, config_params):
-#     """
-#     Hyper-parameters:
-#     learning_rate:     Learning-rate for the optimizer.
-#     keep_prob:
-#     activation:        Activation function for all layers.
-#     channels
-#     """
-#
-#     # Create the neural network with these hyper-parameters.
-#     accuracy = run(run_params, config_params)
-#
-#     # Print the classification accuracy.
-#     print()
-#     print("Accuracy: {0:.2%}".format(accuracy))
-#     print()
-#
-#     return -accuracy
-
-
-def run(run_params={}, model_params={}):
+def run(model_params={}):
     # Add exception in case params is missing
-    run_params['batch_size'] = check_exist(run_params, 'batch_size', 16)
-    run_params['checkpoint_min'] = check_exist(run_params, 'checkpoint_min', 10)
-    run_params['early_stop_step'] = check_exist(run_params, 'early_stop_step', 5000)
-    run_params['input_path'] = check_exist(run_params, 'input_path')
-    run_params['result_path'] = check_exist(run_params, 'result_path')
-    run_params['steps'] = check_exist(run_params, 'steps')
+
     model_params['learning_rate'] = check_exist(model_params, 'learning_rate', 0.0003)
     model_params['keep_prob'] = check_exist(model_params, 'keep_prob', 1)
     model_params['activation'] = check_exist(model_params, 'activation', tf.nn.relu)
@@ -299,7 +300,7 @@ def run(run_params={}, model_params={}):
     train_data_path = run_params['input_path'].replace('.tfrecords', '') + '_train.tfrecords'
     eval_data_path = run_params['input_path'].replace('.tfrecords', '') + '_eval.tfrecords'
     print("Getting training data from %s" % train_data_path)
-    print("Saved model at %s" % run_params['result_path'])
+    print("Saved model at %s" % run_params['result_path_new'])
 
     tf.logging.set_verbosity(tf.logging.INFO)  # To see some additional info
     # Setting checkpoint config
@@ -317,15 +318,16 @@ def run(run_params={}, model_params={}):
     classifier = tf.estimator.Estimator(
         model_fn=my_model,
         params=model_params,
-        model_dir=run_params['result_path'],
+        model_dir=run_params['result_path_new'],
         config=my_checkpoint_config
     )
     train_hook = tf.contrib.estimator.stop_if_no_decrease_hook(classifier, "loss", run_params['early_stop_step'])
     train_spec = tf.estimator.TrainSpec(
         input_fn=lambda: train_input_fn(train_data_path, batch_size=run_params['batch_size']),
         max_steps=run_params['steps'], hooks=[train_hook])
-    eval_spec = tf.estimator.EvalSpec(input_fn=lambda: eval_input_fn(eval_data_path, batch_size=run_params['batch_size']), steps=None,
-                                      start_delay_secs=0, throttle_secs=0)
+    eval_spec = tf.estimator.EvalSpec(
+        input_fn=lambda: eval_input_fn(eval_data_path, batch_size=run_params['batch_size']), steps=None,
+        start_delay_secs=0, throttle_secs=0)
     # classifier.train(input_fn=lambda: train_input_fn(train_data_path, batch_size=params['batch_size']),
     #     max_steps=params['steps'], hooks=[train_hook])
     # eval_result = classifier.evaluate(input_fn=lambda: eval_input_fn(eval_data_path, batch_size=32))
@@ -336,71 +338,76 @@ def run(run_params={}, model_params={}):
     print("Eval result:")
     print(eval_result)
     # print('\nTest set accuracy: {accuracy:0.3f}\n'.format(**eval_result))
+    return eval_result
 
 
 # Run with multiple parameters
-def run_multiple_params(run_config, model_config):
+def run_multiple_params(model_config):
     for lr in model_config['learning_rate_list']:
         for dr in model_config['keep_prob_list']:
             for act_count, act in enumerate(model_config['activation_list']):
                 for ch_count, ch in enumerate(model_config['channel_list']):
                     name = ("%s/learning_rate_%s_dropout_%s_activation_%s_channels_%s/"
-                            % (run_config['result_path'], round(lr, 5), dr, act_count, ch_count))
+                            % (run_params['result_path'], round(lr, 5), dr, act_count, ch_count))
                     md_config = {'learning_rate': round(lr, 5),
                                  'keep_prob': dr,
                                  'activation': act,
                                  'channel': ch}
-                    rn_config = run_config.copy()
-                    rn_config['result_path'] = name
-                    run(rn_config, md_config)
+                    run_params['result_path_new'] = name
+                    run(md_config)
 
 
-# def run_hyperparameter_optimize(run_config, model_config):
-#     dim_learning_rate = Real(low=1e-6, high=1e-2, prior='log-uniform', name='learning_rate')
-#     dim_keep_prob = Real(low=0, high=1, name='keep_prob')
-#     dim_activation = Categorical(categories=[tf.nn.relu, tf.nn.leaky_relu],
-#                                  name='activation')
-#     dim_channel = Integer(low=1, high=4, name='channels')
-#     dimensions = [dim_learning_rate,
-#                   dim_keep_prob,
-#                   dim_activation,
-#                   dim_channel]
-#     model_configs['dimensions'] = dimensions
-#     default_parameters = [1e-3, 1, tf.nn.relu, 2]
-#     best_accuracy = 0.0
-#     search_result = gp_minimize(func=fitness,
-#                                 dimensions=dimensions,
-#                                 acq_func='EI', # Expected Improvement.
-#                                 n_calls=40,
-#                                 x0=default_parameters)
+dim_learning_rate = Real(low=1e-6, high=1e-2, prior='log-uniform', name='learning_rate')
+dim_keep_prob = Real(low=0, high=1, name='keep_prob')
+dim_activation = Categorical(categories=[tf.nn.relu, tf.nn.leaky_relu],
+                             name='activation')
+dim_channel = Integer(low=1, high=4, name='channels')
+dimensions = [dim_learning_rate,
+              dim_keep_prob,
+              dim_activation,
+              dim_channel]
+
+
+# To transform input as parameters into dictionary
+def run_hyper_parameter_wrapper(learning_rate, keep_prob, activation, channels):
+    md_config = {'learning_rate': learning_rate,
+                 'keep_prob': keep_prob,
+                 'activation': activation,
+                 'channel': channels}
+    acc = run(md_config)
+    return acc
+
+
+@use_named_args(dimensions=dimensions)
+def fitness(learning_rate, keep_prob, activation, channels):
+    """
+    Hyper-parameters:
+    learning_rate:     Learning-rate for the optimizer.
+    keep_prob:
+    activation:        Activation function for all layers.
+    channels
+    """
+    # Create the neural network with these hyper-parameters.
+    accuracy = run_hyper_parameter_wrapper(config_params)
+    # Print the classification accuracy.
+    print()
+    print("Accuracy: {0:.2%}".format(accuracy))
+    print()
+    return -accuracy
+
+
+def run_hyper_parameter_optimize(model_config):
+    default_parameters = [1e-3, 1, tf.nn.relu, 2]
+    search_result = gp_minimize(func=fitness,
+                                dimensions=dimensions,
+                                acq_func='EI',  # Expected Improvement.
+                                n_calls=40,
+                                x0=default_parameters)
 
 
 if __name__ == '__main__':
-    activation_dict = {'1': tf.nn.relu, '2': tf.nn.leaky_relu}
-    config = tooth_pb2.TrainConfig()
-    with open(args.config, 'r') as f:
-        text_format.Merge(f.read(), config)
-
-    # Convert protobuf data to list
-    learning_rate_list = protobuf_to_list(config.learning_rate)
-    keep_prob_list = protobuf_to_list(config.keep_prob)
-    activation_list = protobuf_to_list(config.activation, activation_dict)
-    channel_list = protobuf_to_channels(config.channels)
-
-    run_configs = {'batch_size': config.batch_size,
-                   'checkpoint_min': config.checkpoint_min,
-                   'early_stop_step': config.early_stop_step,
-                   'input_path': config.input_path,
-                   'result_path': config.result_path,
-                   'config_path': os.path.abspath(args.config),
-                   'steps': config.steps}
-    model_configs = {'learning_rate_list': learning_rate_list,
-                     'keep_prob_list': keep_prob_list,
-                     'activation_list': activation_list,
-                     'channel_list': channel_list
-                     }
-    run(run_params=run_configs)
-    # run_multiple_params(run_configs, model_configs)
+    # run()
+    run_multiple_params(model_configs)
     print("train.py completed")
 
 ####################################
