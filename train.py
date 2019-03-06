@@ -232,13 +232,16 @@ def my_model(features, labels, mode, params, config):
     ex_ground_truth = tf.summary.scalar("example_ground_truth", labels[0])
 
     d_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
-    print(d_vars)
+    # print(d_vars)
     summary_name = ["conv1", "conv2", "conv3_1", "conv3_2_1", "conv3_2", "conv3_3_1",
                     "conv3_3_2", "conv3_3_3", "conv4", "fc5", "fc6", "predict"]
     if len(summary_name) == int(len(d_vars) / 2):
         for i in range(len(summary_name)):
             tf.summary.histogram(summary_name[i] + "_weights", d_vars[2 * i])
             tf.summary.histogram(summary_name[i] + "_biases", d_vars[2 * i + 1])
+    else:
+        print("Warning, expected weight&variable not equals")
+        print(d_vars)
 
     summary = tf.summary.histogram("Prediction", predicted_class)
     summary2 = tf.summary.histogram("Ground_Truth", labels)
@@ -290,8 +293,6 @@ def run(model_params={}):
     model_params['keep_prob'] = check_exist(model_params, 'keep_prob', 1)
     model_params['activation'] = check_exist(model_params, 'activation', tf.nn.relu)
     model_params['channels'] = check_exist(model_params, 'channel', [64, 64, 128, 64, 64, 64, 64, 64, 64, 2048, 2048])
-    # model_params['channels'] = check_exist(model_params, 'channel', 2)
-    # model_params['channels'] = [i * model_params['channels'] for i in [16, 16, 32, 16, 16, 16, 16, 16, 16, 512, 512]]
     if len(model_params['channels']) != 11:
         raise Exception("Number of channels not correspond to number of layers [Need size of 11, got %s]"
                         % len(model_params['channels']))
@@ -376,6 +377,7 @@ dimensions = [dim_learning_rate,
 
 # To transform input as parameters into dictionary
 def run_hyper_parameter_wrapper(learning_rate, keep_prob, activation, channels):
+    channels = [i * channels for i in [16, 16, 32, 16, 16, 16, 16, 16, 16, 512, 512]]
     md_config = {'learning_rate': learning_rate,
                  'keep_prob': keep_prob,
                  'activation': activation,
