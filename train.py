@@ -337,8 +337,14 @@ def run(model_params={}):
     copy2(run_params['config_path'], run_params['result_path'])
     print("Eval result:")
     print(eval_result)
+    try:
+        accuracy = eval_result[0]['accuracy']
+    except TypeError:
+        print("Warning, does receive evaluation result")
+        accuracy = 0
+    # print(eval_result[0]['accuracy'])
     # print('\nTest set accuracy: {accuracy:0.3f}\n'.format(**eval_result))
-    return eval_result
+    return accuracy
 
 
 # Run with multiple parameters
