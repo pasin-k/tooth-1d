@@ -8,6 +8,4 @@ RUN git clone https://github.com/jobpasin/tooth-2d
 
 WORKDIR tooth-2d
 
-RUN
-
 CMD python3 train.py tooth_workspace.config
