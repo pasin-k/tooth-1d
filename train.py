@@ -4,6 +4,8 @@ import numpy as np
 import os
 import argparse
 from shutil import copy2
+import csv
+import datetime
 
 from protobuf_helper import protobuf_to_list, protobuf_to_channels
 from proto import tooth_pb2
@@ -62,6 +64,7 @@ run_params['checkpoint_min'] = check_exist(run_params, 'checkpoint_min', 10)
 run_params['early_stop_step'] = check_exist(run_params, 'early_stop_step', 5000)
 run_params['input_path'] = check_exist(run_params, 'input_path')
 run_params['result_path'] = check_exist(run_params, 'result_path')
+# run_params['result_path_new'] = check_exist(run_params, 'result_path')
 run_params['steps'] = check_exist(run_params, 'steps')
 
 model_configs = {'learning_rate_list': learning_rate_list,
@@ -229,7 +232,9 @@ def my_model(features, labels, mode, params, config):
     img4 = tf.summary.image("Input_image4", tf.expand_dims(features[:, :, :, 3], 3))
 
     ex_prediction = tf.summary.scalar("example_prediction", predicted_class[0])
+    print(predicted_class[0])
     ex_ground_truth = tf.summary.scalar("example_ground_truth", labels[0])
+    print(labels[0])
 
     d_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
     # print(d_vars)
@@ -334,20 +339,21 @@ def run(model_params={}):
     # eval_result = classifier.evaluate(input_fn=lambda: eval_input_fn(eval_data_path, batch_size=32))
 
     eval_result = tf.estimator.train_and_evaluate(classifier, train_spec, eval_spec)
-    # Copy config file to result path as well
-    copy2(run_params['config_path'], run_params['result_path'])
     print("Eval result:")
     print(eval_result)
     try:
         accuracy = eval_result[0]['accuracy']
+        global_step = eval_result[0]['global_step']
     except TypeError:
         print("Warning, does receive evaluation result")
         accuracy = 0
+        global_step = 0
     # print(eval_result[0]['accuracy'])
     # print('\nTest set accuracy: {accuracy:0.3f}\n'.format(**eval_result))
-    return accuracy
+    return accuracy, global_step
 
 
+'''
 # Run with multiple parameters
 def run_multiple_params(model_config):
     for lr in model_config['learning_rate_list']:
@@ -362,11 +368,14 @@ def run_multiple_params(model_config):
                                  'channel': ch}
                     run_params['result_path_new'] = name
                     run(md_config)
+                    # Copy config file to result path as well
+                    copy2(run_params['config_path'], run_params['result_path_new'])
+'''
 
 
 dim_learning_rate = Real(low=1e-6, high=1e-2, prior='log-uniform', name='learning_rate')
-dim_keep_prob = Real(low=0, high=1, name='keep_prob')
-dim_activation = Categorical(categories=[tf.nn.relu, tf.nn.leaky_relu],
+dim_keep_prob = Real(low=0.125, high=1, name='keep_prob')
+dim_activation = Categorical(categories=['0', '1'],
                              name='activation')
 dim_channel = Integer(low=1, high=4, name='channels')
 dimensions = [dim_learning_rate,
@@ -374,16 +383,20 @@ dimensions = [dim_learning_rate,
               dim_activation,
               dim_channel]
 
-
+'''
 # To transform input as parameters into dictionary
 def run_hyper_parameter_wrapper(learning_rate, keep_prob, activation, channels):
-    channels = [i * channels for i in [16, 16, 32, 16, 16, 16, 16, 16, 16, 512, 512]]
+    channels_full = [i * channels for i in [16, 16, 32, 16, 16, 16, 16, 16, 16, 512, 512]]
+    name = ("%s/learning_rate_%s_dropout_%s_activation_%s_channels_%s/"
+            % (run_params['result_path'], round(learning_rate, 5), keep_prob, activation, channels))
+    run_params['result_path_new'] = name
     md_config = {'learning_rate': learning_rate,
                  'keep_prob': keep_prob,
-                 'activation': activation,
-                 'channel': channels}
-    acc = run(md_config)
+                 'activation': activation_dict[activation],
+                 'channel': channels_full}
+    acc, global_step = run(md_config)
     return acc
+'''
 
 
 @use_named_args(dimensions=dimensions)
@@ -395,17 +408,36 @@ def fitness(learning_rate, keep_prob, activation, channels):
     activation:        Activation function for all layers.
     channels
     """
-    # Create the neural network with these hyper-parameters.
-    accuracy = run_hyper_parameter_wrapper(config_params)
-    # Print the classification accuracy.
-    print()
-    print("Accuracy: {0:.2%}".format(accuracy))
-    print()
+    # Create the neural network with these hyper-parameters
+    channels_full = [i * channels for i in [16, 16, 32, 16, 16, 16, 16, 16, 16, 512, 512]]
+    name = run_params['result_path'] + "/" + datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S") + "/"
+    # name = ("%s/learning_rate_%s_dropout_%s_activation_%s_channels_%s/"
+    #         % (run_params['result_path'], round(learning_rate, 5), keep_prob, activation, channels))
+    run_params['result_path_new'] = name
+    md_config = {'learning_rate': learning_rate,
+                 'keep_prob': keep_prob,
+                 'activation': activation_dict[activation],
+                 'channel': channels_full}
+    accuracy, global_step = run(md_config)
+    # accuracy = run_hyper_parameter_wrapper(learning_rate, keep_prob, activation, channels)
+
+    # Save necessary info to csv file, as reference
+    info_dict = run_params.copy()
+    info_dict['learning_rate'] = learning_rate
+    info_dict['keep_prob'] = keep_prob
+    info_dict['activation'] = activation
+    info_dict['channels'] = channels
+    info_dict['steps'] = global_step
+    with open(name + "config.csv", "w") as csvfile:
+        writer = csv.writer(csvfile)
+        for key, val in A.items():
+            writer.writerow([key, val])
+
     return -accuracy
 
 
 def run_hyper_parameter_optimize(model_config):
-    default_parameters = [1e-3, 1, tf.nn.relu, 2]
+    default_parameters = [1e-3, 1, '0', 2]
     search_result = gp_minimize(func=fitness,
                                 dimensions=dimensions,
                                 acq_func='EI',  # Expected Improvement.
@@ -415,7 +447,8 @@ def run_hyper_parameter_optimize(model_config):
 
 if __name__ == '__main__':
     # run()
-    run_multiple_params(model_configs)
+    # run_multiple_params(model_configs)
+    run_hyper_parameter_optimize(model_configs)
     print("train.py completed")
 
 ####################################
