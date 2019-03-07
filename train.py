@@ -4,6 +4,8 @@ import numpy as np
 import os
 import argparse
 from shutil import copy2
+import csv
+import datetime
 
 from protobuf_helper import protobuf_to_list, protobuf_to_channels
 from proto import tooth_pb2
@@ -337,20 +339,21 @@ def run(model_params={}):
     # eval_result = classifier.evaluate(input_fn=lambda: eval_input_fn(eval_data_path, batch_size=32))
 
     eval_result = tf.estimator.train_and_evaluate(classifier, train_spec, eval_spec)
-    # Copy config file to result path as well
-    copy2(run_params['config_path'], run_params['result_path_new'])
     print("Eval result:")
     print(eval_result)
     try:
         accuracy = eval_result[0]['accuracy']
+        global_step = eval_result[0]['global_step']
     except TypeError:
         print("Warning, does receive evaluation result")
         accuracy = 0
+        global_step = 0
     # print(eval_result[0]['accuracy'])
     # print('\nTest set accuracy: {accuracy:0.3f}\n'.format(**eval_result))
-    return accuracy
+    return accuracy, global_step
 
 
+'''
 # Run with multiple parameters
 def run_multiple_params(model_config):
     for lr in model_config['learning_rate_list']:
@@ -365,6 +368,9 @@ def run_multiple_params(model_config):
                                  'channel': ch}
                     run_params['result_path_new'] = name
                     run(md_config)
+                    # Copy config file to result path as well
+                    copy2(run_params['config_path'], run_params['result_path_new'])
+'''
 
 
 dim_learning_rate = Real(low=1e-6, high=1e-2, prior='log-uniform', name='learning_rate')
@@ -388,7 +394,7 @@ def run_hyper_parameter_wrapper(learning_rate, keep_prob, activation, channels):
                  'keep_prob': keep_prob,
                  'activation': activation_dict[activation],
                  'channel': channels_full}
-    acc = run(md_config)
+    acc, global_step = run(md_config)
     return acc
 '''
 
@@ -404,19 +410,29 @@ def fitness(learning_rate, keep_prob, activation, channels):
     """
     # Create the neural network with these hyper-parameters
     channels_full = [i * channels for i in [16, 16, 32, 16, 16, 16, 16, 16, 16, 512, 512]]
-    name = ("%s/learning_rate_%s_dropout_%s_activation_%s_channels_%s/"
-            % (run_params['result_path'], round(learning_rate, 5), keep_prob, activation, channels))
+    name = run_params['result_path'] + "/" + datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S") + "/"
+    # name = ("%s/learning_rate_%s_dropout_%s_activation_%s_channels_%s/"
+    #         % (run_params['result_path'], round(learning_rate, 5), keep_prob, activation, channels))
     run_params['result_path_new'] = name
     md_config = {'learning_rate': learning_rate,
                  'keep_prob': keep_prob,
                  'activation': activation_dict[activation],
                  'channel': channels_full}
-    accuracy = run(md_config)
-    #accuracy = run_hyper_parameter_wrapper(learning_rate, keep_prob, activation, channels)
-    # Print the classification accuracy.
-    print()
-    print("Accuracy: {0:.2%}".format(accuracy))
-    print()
+    accuracy, global_step = run(md_config)
+    # accuracy = run_hyper_parameter_wrapper(learning_rate, keep_prob, activation, channels)
+
+    # Save necessary info to csv file, as reference
+    info_dict = run_params.copy()
+    info_dict['learning_rate'] = learning_rate
+    info_dict['keep_prob'] = keep_prob
+    info_dict['activation'] = activation
+    info_dict['channels'] = channels
+    info_dict['steps'] = global_step
+    with open(name + "config.csv", "w") as csvfile:
+        writer = csv.writer(csvfile)
+        for key, val in A.items():
+            writer.writerow([key, val])
+
     return -accuracy
 
 
