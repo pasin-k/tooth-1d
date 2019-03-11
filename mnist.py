@@ -139,7 +139,7 @@ def cnn_model_fn(features, labels, mode):
         "classes": tf.argmax(input=logits, axis=1),
         # Add `softmax_tensor` to the graph. It is used for PREDICT and by the
         # `logging_hook`.
-        "probabilities": tf.keras.layers.Softmax(name="softmax_tensor")(logits)
+        "probabilities": tf.nn.softmax(logits=logits, name="softmax_tensor")
     }
     if mode == tf.estimator.ModeKeys.PREDICT:
         return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)

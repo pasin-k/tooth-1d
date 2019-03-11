@@ -162,7 +162,7 @@ def max_pool_layer(layer, pooling_size, name=None, stride=-1):
 
 
 def dropout(layer, keep_prob, training, name):
-    return tf.nn.dropout(layer, keep_prob=keep_prob, training = training, name=name)
+    return tf.nn.dropout(layer, keep_prob=keep_prob, training=training, name=name)
 
 
 # Define Model
