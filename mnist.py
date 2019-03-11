@@ -126,7 +126,8 @@ def cnn_model_fn(features, labels, mode):
     dense = tf.keras.layers.Dense(units=1024, activation=tf.nn.relu)(pool2_flat)
 
     # Add dropout operation; 0.6 probability that element will be kept
-    dropout = tf.keras.layers.Dropout(rate=0.4, training=mode == tf.estimator.ModeKeys.TRAIN)(dense)
+
+    dropout = tf.keras.layers.Dropout(rate=0.4)(dense)
 
     # Logits layer
     # Input Tensor Shape: [batch_size, 1024]
@@ -203,4 +204,4 @@ def main(unused_argv):
 
 
 if __name__ == "__main__":
-    tf.app.run()
+    mainz

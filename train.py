@@ -161,8 +161,8 @@ def max_pool_layer(layer, pooling_size, name=None, stride=-1):
     return tf.layers.max_pooling2d(layer, pooling_size, stride, padding="same", name=name)
 
 
-def dropout(layer, keep_prob, name):
-    return tf.nn.dropout(layer, keep_prob=keep_prob, name=name)
+def dropout(layer, keep_prob, training, name):
+    return tf.nn.dropout(layer, keep_prob=keep_prob, training = training, name=name)
 
 
 # Define Model
@@ -206,10 +206,10 @@ def my_model(features, labels, mode, params, config):
 
     fc5 = flatten_layer(pool4)
     fc5 = fc_layer(fc5, params['channels'][9], activation=params['activation'], name='fc5')
-    dropout5 = dropout(fc5, params['keep_prob'], name="dropout5")
+    dropout5 = dropout(fc5, params['keep_prob'],training=mode == tf.estimator.ModeKeys.TRAIN,  name="dropout5")
 
     fc6 = fc_layer(dropout5, params['channels'][10], activation=params['activation'], name='fc6')
-    dropout6 = dropout(fc6, params['keep_prob'], name="dropout6")
+    dropout6 = dropout(fc6, params['keep_prob'],training=mode == tf.estimator.ModeKeys.TRAIN, name="dropout6")
 
     logits = fc_layer(dropout6, 11, activation=params['activation'], name='predict')
     # Predict Mode
