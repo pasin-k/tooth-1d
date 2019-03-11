@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 import tensorflow as tf
 import numpy as np
+print(tf.__version__)
 
 # tf.enable_eager_execution()
 import numpy as np
@@ -187,7 +188,7 @@ def main(unused_argv):
         tensors=tensors_to_log, every_n_iter=50)
 
     # Train the model
-    train_input_fn = tf.compat.v1.estimator.inputs.numpy_input_fn(
+    train_input_fn = tf.estimator.inputs.numpy_input_fn(
         x={"x": train_data},
         y=train_labels,
         batch_size=100,
@@ -199,7 +200,7 @@ def main(unused_argv):
         hooks=[logging_hook])
 
     # Evaluate the model and print results
-    eval_input_fn = tf.compat.v1.estimator.inputs.numpy_input_fn(
+    eval_input_fn = tf.estimator.inputs.numpy_input_fn(
         x={"x": eval_data}, y=eval_labels, num_epochs=1, shuffle=False)
     eval_results = mnist_classifier.evaluate(input_fn=eval_input_fn)
     print(eval_results)
