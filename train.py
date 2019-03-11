@@ -385,6 +385,7 @@ dimensions = [dim_learning_rate,
               dim_channel]
 default_parameters = [1e-3, 0.125, '1', 2]
 
+
 '''
 # To transform input as parameters into dictionary
 def run_hyper_parameter_wrapper(learning_rate, keep_prob, activation, channels):
