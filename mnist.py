@@ -167,11 +167,14 @@ def cnn_model_fn(features, labels, mode):
 
 def main(unused_argv):
     # Load training and eval data
-    mnist = tf.contrib.learn.datasets.load_dataset("mnist")
-    train_data = mnist.train.images  # Returns np.array
-    train_labels = np.asarray(mnist.train.labels, dtype=np.int32)
-    eval_data = mnist.test.images  # Returns np.array
-    eval_labels = np.asarray(mnist.test.labels, dtype=np.int32)
+    ((train_data, train_labels),
+     (eval_data, eval_labels)) = tf.keras.datasets.mnist.load_data()
+
+    train_data = train_data / np.float32(255)
+    train_labels = train_labels.astype(np.int32)  # not required
+
+    eval_data = eval_data / np.float32(255)
+    eval_labels = eval_labels.astype(np.int32)  # not required
 
     # Create the Estimator
     mnist_classifier = tf.estimator.Estimator(
