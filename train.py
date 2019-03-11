@@ -355,7 +355,6 @@ def run(model_params={}):
     return accuracy, global_step
 
 
-
 # Run with multiple parameters
 def run_multiple_params(model_config):
     for lr in model_config['learning_rate_list']:
