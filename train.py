@@ -355,7 +355,7 @@ def run(model_params={}):
     return accuracy, global_step
 
 
-'''
+
 # Run with multiple parameters
 def run_multiple_params(model_config):
     for lr in model_config['learning_rate_list']:
@@ -372,7 +372,6 @@ def run_multiple_params(model_config):
                     run(md_config)
                     # Copy config file to result path as well
                     copy2(run_params['config_path'], run_params['result_path_new'])
-'''
 
 
 dim_learning_rate = Real(low=1e-5, high=1e-2, prior='log-uniform', name='learning_rate')
