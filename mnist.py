@@ -189,7 +189,7 @@ def main(unused_argv):
         x={"x": train_data},
         y=train_labels,
         batch_size=100,
-        num_epochs=None,
+        num_epochs=50000,
         shuffle=True)
     mnist_classifier.train(
         input_fn=train_input_fn,
