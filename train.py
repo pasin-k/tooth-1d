@@ -452,8 +452,8 @@ def run_hyper_parameter_optimize(model_config):
 
 if __name__ == '__main__':
     # run()
-    # run_multiple_params(model_configs)
-    run_hyper_parameter_optimize(model_configs)
+    run_multiple_params(model_configs)
+    # run_hyper_parameter_optimize(model_configs)
     print("train.py completed")
 
 
