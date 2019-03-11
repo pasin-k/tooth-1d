@@ -20,12 +20,13 @@ numdegree = 4  # Number of rotations
 image_height = 240  # Used for cropping
 image_width = 360  # Used for cropping
 
+# Read tooth.config file
 parser = argparse.ArgumentParser()
-parser.add_argument('config', help="Config directory")
+parser.add_argument('config', help="Directory of config file")
 # parser.add_argument('--config',help="Config directory")
 args = parser.parse_args()
 
-activation_dict = {'0': tf.nn.relu, '1': tf.nn.leaky_relu}
+activation_dict = {'0': tf.nn.relu, '1': tf.nn.leaky_relu}  # Declare global dictionary
 configs = tooth_pb2.TrainConfig()
 with open(args.config, 'r') as f:
     text_format.Merge(f.read(), configs)
@@ -51,6 +52,7 @@ def check_exist(params, dict_name, default=None):
     return output
 
 
+# These are important parameters
 run_params = {'batch_size': configs.batch_size,
               'checkpoint_min': configs.checkpoint_min,
               'early_stop_step': configs.early_stop_step,
@@ -373,7 +375,7 @@ def run_multiple_params(model_config):
 '''
 
 
-dim_learning_rate = Real(low=1e-6, high=1e-2, prior='log-uniform', name='learning_rate')
+dim_learning_rate = Real(low=1e-5, high=1e-2, prior='log-uniform', name='learning_rate')
 dim_keep_prob = Real(low=0.125, high=1, name='keep_prob')
 dim_activation = Categorical(categories=['0', '1'],
                              name='activation')
@@ -382,6 +384,7 @@ dimensions = [dim_learning_rate,
               dim_keep_prob,
               dim_activation,
               dim_channel]
+default_parameters = [1e-3, 0.125, '1', 2]
 
 '''
 # To transform input as parameters into dictionary
@@ -412,7 +415,7 @@ def fitness(learning_rate, keep_prob, activation, channels):
     channels_full = [i * channels for i in [16, 16, 32, 16, 16, 16, 16, 16, 16, 512, 512]]
     name = run_params['result_path'] + "/" + datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S") + "/"
     # name = ("%s/learning_rate_%s_dropout_%s_activation_%s_channels_%s/"
-    #         % (run_params['result_path'], round(learning_rate, 5), keep_prob, activation, channels))
+    #         % (run_params['result_path'], round(learning_rate, 6), keep_prob, activation, channels))
     run_params['result_path_new'] = name
     md_config = {'learning_rate': learning_rate,
                  'keep_prob': keep_prob,
@@ -430,19 +433,21 @@ def fitness(learning_rate, keep_prob, activation, channels):
     info_dict['steps'] = global_step
     with open(name + "config.csv", "w") as csvfile:
         writer = csv.writer(csvfile)
-        for key, val in A.items():
+        for key, val in info_dict.items():
             writer.writerow([key, val])
 
     return -accuracy
 
 
 def run_hyper_parameter_optimize(model_config):
-    default_parameters = [1e-3, 1, '0', 2]
     search_result = gp_minimize(func=fitness,
                                 dimensions=dimensions,
                                 acq_func='EI',  # Expected Improvement.
-                                n_calls=40,
+                                n_calls=11,
                                 x0=default_parameters)
+    print(search_result)
+    space = search_result.space
+    print("Best result: %s" % space.point_to_dict(search_result.x))
 
 
 if __name__ == '__main__':
@@ -451,4 +456,4 @@ if __name__ == '__main__':
     run_hyper_parameter_optimize(model_configs)
     print("train.py completed")
 
-####################################
+

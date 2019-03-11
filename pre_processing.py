@@ -32,6 +32,8 @@ def main():
     stl_points = list()
     stl_points_augmented = list()
     error_file_names = list()  # Names of file that cannot get cross-section image
+    min_point = 1000
+    max_point = 0
     for i in range(len(name_dir)):
         for augment in augment_config:
             points = getSlicer(name_dir[i], 0, degree, augment, axis=1)
@@ -43,6 +45,11 @@ def main():
                 label.pop(index * 2)  # Do it again if we double the data
                 break
             else:
+                if len(points[0]) > max_point:
+                    max_point = len(points[0])
+                if len(points[0]) < min_point:
+                    min_point = len(points[0])
+                print(len(points[0]))
                 if augment:
                     stl_points_augmented.append(points)
                 else:
@@ -50,8 +57,9 @@ def main():
 
     # The output is list(examples) of list(degrees) of numpy array (N*2 coordinates)
     print("Finished with %d examples, %d augmented examples" % (len(stl_points), len(stl_points_augmented)))
-    print("Number of score received: %d (Originally: %d") % (len(label), len(label) / 2)
+    print("Number of score received: %d (Originally: %d" % (len(label), len(label) / 2))
 
+    print("Max point: %s, min  point: %s" % (max_point, min_point))
     # augment_num = int(len(label)/len(label_name))
     # label_name_aug = [val for val in label_name for _ in range(augment_num)]
 
