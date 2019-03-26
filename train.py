@@ -17,7 +17,7 @@ from skopt.space import Real, Categorical, Integer
 from skopt.utils import use_named_args
 
 from model import my_model
-from get_data import train_input_fn, eval_input_fn
+from get_data import train_input_fn, eval_input_fn, get_data_from_path
 
 
 # Read tooth.config file
@@ -96,7 +96,7 @@ def run(model_params={}):
     # Setting checkpoint config
     my_checkpoint_config = tf.estimator.RunConfig(
         save_checkpoints_secs=run_params['checkpoint_min'] * 60,
-        # save_summary_steps=params['checkpoint_min'] * 10,
+        # save_summary_steps=pareval_data_pathams['checkpoint_min'] * 10,
         keep_checkpoint_max=10,
         log_step_count_steps=500,
         session_config=tf.ConfigProto(allow_soft_placement=True)
@@ -116,7 +116,7 @@ def run(model_params={}):
         input_fn=lambda: train_input_fn(train_data_path, batch_size=run_params['batch_size']),
         max_steps=run_params['steps'], hooks=[train_hook])
     eval_spec = tf.estimator.EvalSpec(
-        input_fn=lambda: eval_input_fn(eval_data_path, batch_size=run_params['batch_size']), steps=None,
+        input_fn=lambda: eval_input_fn(eval_data_path, batch_size=32), steps=None,
         start_delay_secs=0, throttle_secs=0)
     # classifier.train(input_fn=lambda: train_input_fn(train_data_path, batch_size=params['batch_size']),
     #     max_steps=params['steps'], hooks=[train_hook])
@@ -132,9 +132,27 @@ def run(model_params={}):
         print("Warning, does receive evaluation result")
         accuracy = 0
         global_step = 0
+
+    predictions = classifier.predict(lambda: eval_input_fn(eval_data_path, batch_size=run_params['batch_size']))
+    print(predictions)
+    images, expected = get_data_from_path(data_path)
+    predict_score = ['Prediction']
+    probability_score = ['Probability']
+    label_score = ['Label']
+    for pred_dict, expec in zip(predictions, expected):
+        print(pred_dict)
+        class_id = pred_dict['class_ids'][0]
+        probability = pred_dict['probabilities'][class_id]
+        print("Actual score: %s, Predicted score: %s with probability %s" % (expec, class_id, probability))
+        predict_score.append(class_id)
+        label_score.append(expec)
+        probability_score.append(probability)
+
+    predict_result = zip(label_score, predict_score, probability_score)
+
     # print(eval_result[0]['accuracy'])
     # print('\nTest set accuracy: {accuracy:0.3f}\n'.format(**eval_result))
-    return accuracy, global_step
+    return accuracy, global_step, predict_result
 
 
 # Run with multiple parameters
@@ -202,7 +220,7 @@ def fitness(learning_rate, dropout_rate, activation, channels):
                  'dropout_rate': dropout_rate,
                  'activation': activation_dict[activation],
                  'channel': channels_full}
-    accuracy, global_step = run(md_config)
+    accuracy, global_step, result = run(md_config)
     # accuracy = run_hyper_parameter_wrapper(learning_rate, dropout_rate, activation, channels)
 
     # Save necessary info to csv file, as reference
@@ -218,7 +236,10 @@ def fitness(learning_rate, dropout_rate, activation, channels):
         writer = csv.writer(csvfile)
         for key, val in info_dict.items():
             writer.writerow([key, val])
-
+    with open(name + "result.csv", "w") as csvfile:
+        writer = csv.writer(csvfile)
+        for row in result:
+            writer.writerow(row)
     return -accuracy
 
 
@@ -234,7 +255,7 @@ def run_hyper_parameter_optimize(model_config):
     print("All hyper-parameter searched: %s" % searched_parameter)
     hyperparameter_filename = "hyperparameters_" + datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S") + ".csv"
     searched_parameter = [list(i) for i in searched_parameter]
-    with open(hyperparameter_filename, 'w', newline='') as myfile:
+    with open(run_params['result_path']+ '/' + hyperparameter_filename, 'w', newline='') as myfile:
         wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
         wr.writerow(searched_parameter)
     # space = search_result.space

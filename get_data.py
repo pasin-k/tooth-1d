@@ -53,8 +53,8 @@ def train_input_fn(data_path, batch_size):
     dataset = tf.data.TFRecordDataset(data_path)
     dataset = dataset.map(deserialize, num_parallel_calls=7)
     dataset = dataset.map(decode, num_parallel_calls=7)
-    dataset = dataset.batch(batch_size, drop_remainder=False)  # Maybe batch after repeat?
     dataset = dataset.shuffle(100)
+    dataset = dataset.batch(batch_size, drop_remainder=False)  # Maybe batch after repeat?
     dataset = dataset.repeat(None)
     dataset = dataset.prefetch(buffer_size=None)
     return dataset
@@ -66,3 +66,19 @@ def eval_input_fn(data_path, batch_size):
     eval_dataset = eval_dataset.map(decode)
     eval_dataset = eval_dataset.batch(batch_size, drop_remainder=False)  # No need to shuffle this time
     return eval_dataset
+
+
+def get_data_from_path(data_path):
+    dataset = tf.data.TFRecordDataset(data_path)
+    # print(dataset)
+    dataset = dataset.map(deserialize)
+    dataset = dataset.map(decode)
+
+    dataset = dataset.batch(1000, drop_remainder=False)
+    whole_dataset_tensors = tf.data.experimental.get_single_element(dataset)
+    with tf.Session() as sess:
+        whole_dataset_arrays = sess.run(whole_dataset_tensors)
+    images = whole_dataset_arrays[0]
+    label = whole_dataset_arrays[1]
+    return images, label
+

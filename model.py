@@ -228,7 +228,7 @@ def my_model(features, labels, mode, params, config):
     loss = tf.losses.sparse_softmax_cross_entropy(labels, logits)
     accuracy = tf.metrics.accuracy(labels, predicted_class)
     my_accuracy = tf.reduce_mean(tf.cast(tf.equal(labels, predicted_class), dtype=tf.float32))
-    acc = tf.summary.scalar("my_accuracy", my_accuracy)  # Number of correct answer
+    acc = tf.summary.scalar("accuracy_manual", my_accuracy)  # Number of correct answer
     # acc2 = tf.summary.scalar("Accuracy_update", accuracy[1])
 
     img1 = tf.summary.image("Input_image1", tf.expand_dims(features[:, :, :, 0], 3))
