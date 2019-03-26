@@ -10,6 +10,10 @@ RUN pip install h5py scikit-optimize
 
 RUN git clone https://github.com/jobpasin/tooth-2d
 
+# RUN export CUDA_VISIBLE_DEVICES=1
+
+RUN printenv
+
 WORKDIR tooth-2d
 
 # CMD bash

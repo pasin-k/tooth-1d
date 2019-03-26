@@ -78,6 +78,9 @@ def main():
             filehandle.write('%s\n' % listitem)
 
 
+def pca(train_images,test_images, pca_components):
+
+
 if __name__ == '__main__':
     main()
     print("pre_processing.py: done")

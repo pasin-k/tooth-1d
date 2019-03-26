@@ -26,7 +26,7 @@ message TrainConfig{
     // 1 is relu, 2 is default leaky relu
     repeated float learning_rate = 7;
 
-    repeated float keep_prob = 8;
+    repeated float dropout_rate = 8;
 
     repeated string activation = 9;
 

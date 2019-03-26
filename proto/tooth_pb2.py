@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='proto/tooth.proto',
   package='',
   syntax='proto2',
-  serialized_pb=_b('\n\x11proto/tooth.proto\"\xf3\x01\n\x0bTrainConfig\x12\x16\n\nbatch_size\x18\x01 \x01(\r:\x02\x31\x36\x12\x19\n\x0e\x63heckpoint_min\x18\x02 \x01(\r:\x01\x35\x12\x1e\n\x0f\x65\x61rly_stop_step\x18\x03 \x01(\r:\x05\x31\x30\x30\x30\x30\x12\x13\n\x0bresult_path\x18\x04 \x01(\t\x12\r\n\x05steps\x18\x05 \x01(\r\x12\x12\n\ninput_path\x18\x06 \x01(\t\x12\x15\n\rlearning_rate\x18\x07 \x03(\x02\x12\x11\n\tkeep_prob\x18\x08 \x03(\x02\x12\x12\n\nactivation\x18\t \x03(\t\x12\x1b\n\x08\x63hannels\x18\n \x03(\x0b\x32\t.Channels\"\x1b\n\x08\x43hannels\x12\x0f\n\x07\x63hannel\x18\x01 \x03(\r')
+  serialized_pb=_b('\n\x11proto/tooth.proto\"\xf6\x01\n\x0bTrainConfig\x12\x16\n\nbatch_size\x18\x01 \x01(\r:\x02\x31\x36\x12\x19\n\x0e\x63heckpoint_min\x18\x02 \x01(\r:\x01\x35\x12\x1e\n\x0f\x65\x61rly_stop_step\x18\x03 \x01(\r:\x05\x31\x30\x30\x30\x30\x12\x13\n\x0bresult_path\x18\x04 \x01(\t\x12\r\n\x05steps\x18\x05 \x01(\r\x12\x12\n\ninput_path\x18\x06 \x01(\t\x12\x15\n\rlearning_rate\x18\x07 \x03(\x02\x12\x14\n\x0c\x64ropout_rate\x18\x08 \x03(\x02\x12\x12\n\nactivation\x18\t \x03(\t\x12\x1b\n\x08\x63hannels\x18\n \x03(\x0b\x32\t.Channels\"\x1b\n\x08\x43hannels\x12\x0f\n\x07\x63hannel\x18\x01 \x03(\r')
 )
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
@@ -83,7 +83,7 @@ _TRAINCONFIG = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='keep_prob', full_name='TrainConfig.keep_prob', index=7,
+      name='dropout_rate', full_name='TrainConfig.dropout_rate', index=7,
       number=8, type=2, cpp_type=6, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -116,7 +116,7 @@ _TRAINCONFIG = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=22,
-  serialized_end=265,
+  serialized_end=268,
 )
 
 
@@ -146,8 +146,8 @@ _CHANNELS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=267,
-  serialized_end=294,
+  serialized_start=270,
+  serialized_end=297,
 )
 
 _TRAINCONFIG.fields_by_name['channels'].message_type = _CHANNELS
