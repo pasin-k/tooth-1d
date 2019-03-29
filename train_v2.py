@@ -16,8 +16,8 @@ from skopt import gp_minimize, forest_minimize
 from skopt.space import Real, Categorical, Integer
 from skopt.utils import use_named_args
 
-from model import my_model
-from get_data import train_input_fn, eval_input_fn, get_data_from_path
+from model_v2 import my_model
+from get_data_v2 import train_input_fn, eval_input_fn, get_data_from_path
 
 # Read tooth.config file
 parser = argparse.ArgumentParser()
@@ -91,14 +91,14 @@ def run(model_params={}):
     print("Getting training data from %s" % train_data_path)
     print("Saved model at %s" % run_params['result_path_new'])
 
-    tf.logging.set_verbosity(tf.logging.INFO)  # To see some additional info
+    tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.INFO)  # To see some additional info
     # Setting checkpoint config
     my_checkpoint_config = tf.estimator.RunConfig(
         save_checkpoints_secs=run_params['checkpoint_min'] * 60,
         # save_summary_steps=pareval_data_pathams['checkpoint_min'] * 10,
         keep_checkpoint_max=10,
         log_step_count_steps=500,
-        session_config=tf.ConfigProto(allow_soft_placement=True)
+        session_config=tf.compat.v1.ConfigProto(allow_soft_placement=True)
     )
     # Or set up the model directory
     #   estimator = DNNClassifier(
@@ -110,7 +110,7 @@ def run(model_params={}):
         model_dir=run_params['result_path_new'],
         config=my_checkpoint_config
     )
-    train_hook = tf.contrib.estimator.stop_if_no_decrease_hook(classifier, "loss", run_params['early_stop_step'])
+    train_hook = tf.estimator.experimental.stop_if_no_decrease_hook(classifier, "loss", run_params['early_stop_step'])
     train_spec = tf.estimator.TrainSpec(
         input_fn=lambda: train_input_fn(train_data_path, batch_size=run_params['batch_size']),
         max_steps=run_params['steps'], hooks=[train_hook])
