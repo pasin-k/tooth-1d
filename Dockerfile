@@ -18,4 +18,4 @@ WORKDIR tooth-2d
 
 # CMD bash
 
-CMD python3 mnist.py tooth_workspace.config
+CMD python3 train.py tooth_workspace.config
