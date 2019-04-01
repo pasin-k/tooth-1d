@@ -62,142 +62,43 @@ def dropout(layer, dropout_rate, training, name):
 
 
 # Using average pooling
-def customized_incepnet(features, mode, params):
+def cifar10(features, mode, params):
+    # Input size: 32x32x3
+
     # (1) Filter size: 5x5x64
-    conv1 = cnn_2d(features, 5, params['channels'][0], activation=params['activation'], name="conv1")
-    pool1 = avg_pool_layer(conv1, 4, "pool1")
-    # Output: 60x90x64
+    # conv1 = cnn_2d(features, 5, params['channels'][0], activation=params['activation'], name="conv1")
+    # pool1 = avg_pool_layer(conv1, 4, "pool1")
+    # Output: 60x90x16
 
     # (2) Filter size: 3x3x64
-    conv2 = cnn_2d(pool1, 3, params['channels'][1], activation=params['activation'], name="conv2")
+    conv2 = cnn_2d(features, 3, params['channels'][1], activation=params['activation'], name="conv2")
     pool2 = avg_pool_layer(conv2, 2, "pool2")
-    # Output: 30x45x64
+    # Output: 16x16x32
 
     # (3.1) Max Pool, then Filter size: 64
     pool3_1 = max_pool_layer(pool2, 3, "pool3_1", stride=1)  # Special stride to keep same dimension
     conv3_1 = cnn_2d(pool3_1, 1, params['channels'][2], activation=params['activation'], name="conv3_1")
-    # Output: 30x45x64
+    # Output: 16x16x32
 
     # (3.2) Filter size: 1x1x64, then 3x3x64
     conv3_2 = cnn_2d(pool2, 1, params['channels'][3], activation=params['activation'], name="conv3_2_1")
     conv3_2 = cnn_2d(conv3_2, 3, params['channels'][4], activation=params['activation'], name="conv3_2")
-    # Output: 30x45x64
+    # Output: 16x16x32
 
     # (3.3) Filter size: 1x1x64, then 5x5x64
     conv3_3 = cnn_2d(pool2, 1, params['channels'][5], activation=params['activation'], name="conv3_3_1")
     conv3_3 = cnn_2d(conv3_3, 3, params['channels'][6], activation=params['activation'], name="conv3_3_2")
     conv3_3 = cnn_2d(conv3_3, 3, params['channels'][7], activation=params['activation'], name="conv3_3_3")
     # conv3_3 = cnn_2d(conv3_3, 5, 64)  # Might use 2 3x3 CNN instead, look at inception net paper
-    # Output: 30x45x64
+    # Output: 16x16x32
 
     # (3.4) Filter size: 1x1x256
     conv3_4 = cnn_2d(pool2, 1, params['channels'][8], activation=params['activation'], name="conv3_4")
-    # Output: 30x45x64
+    # Output: 16x16x32
 
     concat4 = tf.concat([conv3_1, conv3_2, conv3_3, conv3_4], 3)
-    pool4 = avg_pool_layer(concat4, 3, name="pool4")
-    # Output: 10x15x256 = 38400
-
-    fc5 = flatten_layer(pool4)
-    fc5 = fc_layer(fc5, params['channels'][9], activation=params['activation'], name='fc5')
-    dropout5 = tf.layers.dropout(fc5, rate=params['dropout_rate'], training=mode == tf.estimator.ModeKeys.TRAIN,
-                                 name="dropout5")
-
-    fc6 = fc_layer(dropout5, params['channels'][10], activation=params['activation'], name='fc6')
-    dropout6 = tf.layers.dropout(fc6, rate=params['dropout_rate'], training=mode == tf.estimator.ModeKeys.TRAIN,
-                                 name="dropout6")
-
-    logits = fc_layer(dropout6, 11, activation=params['activation'], name='predict')
-    return logits
-
-
-# Using max pooling
-def customized_incepnet_v2(features, mode, params):
-    # (1) Filter size: 5x5x64
-    conv1 = cnn_2d(features, 5, params['channels'][0], activation=params['activation'], name="conv1")
-    pool1 = max_pool_layer(conv1, 4, "pool1")
-    # Output: 60x90x64
-
-    # (2) Filter size: 3x3x64
-    conv2 = cnn_2d(pool1, 3, params['channels'][1], activation=params['activation'], name="conv2")
-    pool2 = max_pool_layer(conv2, 2, "pool2")
-    # Output: 30x45x64
-
-    # (3.1) Max Pool, then Filter size: 64
-    pool3_1 = max_pool_layer(pool2, 3, "pool3_1", stride=1)  # Special stride to keep same dimension
-    conv3_1 = cnn_2d(pool3_1, 1, params['channels'][2], activation=params['activation'], name="conv3_1")
-    # Output: 30x45x64
-
-    # (3.2) Filter size: 1x1x64, then 3x3x64
-    conv3_2 = cnn_2d(pool2, 1, params['channels'][3], activation=params['activation'], name="conv3_2_1")
-    conv3_2 = cnn_2d(conv3_2, 3, params['channels'][4], activation=params['activation'], name="conv3_2")
-    # Output: 30x45x64
-
-    # (3.3) Filter size: 1x1x64, then 5x5x64
-    conv3_3 = cnn_2d(pool2, 1, params['channels'][5], activation=params['activation'], name="conv3_3_1")
-    conv3_3 = cnn_2d(conv3_3, 3, params['channels'][6], activation=params['activation'], name="conv3_3_2")
-    conv3_3 = cnn_2d(conv3_3, 3, params['channels'][7], activation=params['activation'], name="conv3_3_3")
-    # conv3_3 = cnn_2d(conv3_3, 5, 64)  # Might use 2 3x3 CNN instead, look at inception net paper
-    # Output: 30x45x64
-
-    # (3.4) Filter size: 1x1x256
-    conv3_4 = cnn_2d(pool2, 1, params['channels'][8], activation=params['activation'], name="conv3_4")
-    # Output: 30x45x64
-
-    concat4 = tf.concat([conv3_1, conv3_2, conv3_3, conv3_4], 3)
-    pool4 = max_pool_layer(concat4, 3, name="pool4")
-    # Output: 10x15x256 = 38400
-
-    fc5 = flatten_layer(pool4)
-    fc5 = fc_layer(fc5, params['channels'][9], activation=params['activation'], name='fc5')
-    dropout5 = tf.layers.dropout(fc5, rate=params['dropout_rate'], training=mode == tf.estimator.ModeKeys.TRAIN,
-                                 name="dropout5")
-
-    fc6 = fc_layer(dropout5, params['channels'][10], activation=params['activation'], name='fc6')
-    dropout6 = tf.layers.dropout(fc6, rate=params['dropout_rate'], training=mode == tf.estimator.ModeKeys.TRAIN,
-                                 name="dropout6")
-
-    logits = fc_layer(dropout6, 11, activation=params['activation'], name='predict')
-    return logits
-
-
-# Add cnn with pooling everywhere
-def customized_incepnet_v3(features, mode, params):
-    # (1) Filter size: 5x5x64
-    conv1 = cnn_2d(features, 5, params['channels'][0], activation=params['activation'], name="conv1")
-    pool1 = max_and_cnn_layer(conv1, 4, params['channels'][0], activation=params['activation'], name ="pool1")
-    # Output: 60x90x64
-
-    # (2) Filter size: 3x3x64
-    conv2 = cnn_2d(pool1, 3, params['channels'][1], activation=params['activation'], name="conv2")
-    pool2 = max_and_cnn_layer(conv1, 2, params['channels'][1], activation=params['activation'], name ="pool2")
-    # Output: 30x45x64
-
-    # (3.1) Max Pool, then Filter size: 64
-    pool3_1 = max_pool_layer(pool2, 3, "pool3_1", stride=1)  # Special stride to keep same dimension
-    conv3_1 = cnn_2d(pool3_1, 1, params['channels'][2], activation=params['activation'], name="conv3_1")
-    # Output: 30x45x64
-
-    # (3.2) Filter size: 1x1x64, then 3x3x64
-    conv3_2 = cnn_2d(pool2, 1, params['channels'][3], activation=params['activation'], name="conv3_2_1")
-    conv3_2 = cnn_2d(conv3_2, 3, params['channels'][4], activation=params['activation'], name="conv3_2")
-    # Output: 30x45x64
-
-    # (3.3) Filter size: 1x1x64, then 5x5x64
-    conv3_3 = cnn_2d(pool2, 1, params['channels'][5], activation=params['activation'], name="conv3_3_1")
-    conv3_3 = cnn_2d(conv3_3, 3, params['channels'][6], activation=params['activation'], name="conv3_3_2")
-    conv3_3 = cnn_2d(conv3_3, 3, params['channels'][7], activation=params['activation'], name="conv3_3_3")
-    # conv3_3 = cnn_2d(conv3_3, 5, 64)  # Might use 2 3x3 CNN instead, look at inception net paper
-    # Output: 30x45x64
-
-    # (3.4) Filter size: 1x1x256
-    conv3_4 = cnn_2d(pool2, 1, params['channels'][8], activation=params['activation'], name="conv3_4")
-    # Output: 30x45x64
-
-    concat4 = tf.concat([conv3_1, conv3_2, conv3_3, conv3_4], 3)
-    total_layer = params['channels'][2] + params['channels'][4] + params['channels'][7] + params['channels'][8]
-    pool4 = max_and_cnn_layer(concat4, 3, total_layer, activation=params['activation'], name ="pool4")
-    # Output: 10x15x256 = 38400
+    pool4 = avg_pool_layer(concat4, 2, name="pool4")
+    # Output: 8x8x96 = 6144
 
     fc5 = flatten_layer(pool4)
     fc5 = fc_layer(fc5, params['channels'][9], activation=params['activation'], name='fc5')
@@ -214,8 +115,8 @@ def customized_incepnet_v3(features, mode, params):
 
 # Define Model
 def my_model(features, labels, mode, params, config):
-    # Input: (Batch_size,240,360,4)
-    logits = customized_incepnet_v2(features, mode, params)
+    # Input: (Batch_size,32,32,3)
+    logits = cifar10(features, mode, params)
 
     # Predict Mode
     predicted_class = tf.argmax(logits, 1)
@@ -232,10 +133,7 @@ def my_model(features, labels, mode, params, config):
     acc = tf.summary.scalar("accuracy_manual", my_accuracy)  # Number of correct answer
     # acc2 = tf.summary.scalar("Accuracy_update", accuracy[1])
 
-    img1 = tf.summary.image("Input_image1", tf.expand_dims(features[:, :, :, 0], 3))
-    img2 = tf.summary.image("Input_image2", tf.expand_dims(features[:, :, :, 1], 3))
-    img3 = tf.summary.image("Input_image3", tf.expand_dims(features[:, :, :, 2], 3))
-    img4 = tf.summary.image("Input_image4", tf.expand_dims(features[:, :, :, 3], 3))
+    img1 = tf.summary.image("Input_image1", features)
 
     ex_prediction = tf.summary.scalar("example_prediction", predicted_class[0])
     # print(predicted_class[0])

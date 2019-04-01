@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='proto/tooth.proto',
   package='',
   syntax='proto2',
-  serialized_pb=_b('\n\x11proto/tooth.proto\"\xf6\x01\n\x0bTrainConfig\x12\x16\n\nbatch_size\x18\x01 \x01(\r:\x02\x31\x36\x12\x19\n\x0e\x63heckpoint_min\x18\x02 \x01(\r:\x01\x35\x12\x1e\n\x0f\x65\x61rly_stop_step\x18\x03 \x01(\r:\x05\x31\x30\x30\x30\x30\x12\x13\n\x0bresult_path\x18\x04 \x01(\t\x12\r\n\x05steps\x18\x05 \x01(\r\x12\x12\n\ninput_path\x18\x06 \x01(\t\x12\x15\n\rlearning_rate\x18\x07 \x03(\x02\x12\x14\n\x0c\x64ropout_rate\x18\x08 \x03(\x02\x12\x12\n\nactivation\x18\t \x03(\t\x12\x1b\n\x08\x63hannels\x18\n \x03(\x0b\x32\t.Channels\"\x1b\n\x08\x43hannels\x12\x0f\n\x07\x63hannel\x18\x01 \x03(\r')
+  serialized_pb=_b('\n\x11proto/tooth.proto\"\xf6\x01\n\x0bTrainConfig\x12\x16\n\nbatch_size\x18\x01 \x01(\r:\x02\x31\x36\x12\x19\n\x0e\x63heckpoint_min\x18\x02 \x01(\r:\x01\x35\x12\x1e\n\x0f\x65\x61rly_stop_step\x18\x03 \x01(\r:\x05\x33\x30\x30\x30\x30\x12\x13\n\x0bresult_path\x18\x04 \x01(\t\x12\r\n\x05steps\x18\x05 \x01(\r\x12\x12\n\ninput_path\x18\x06 \x01(\t\x12\x15\n\rlearning_rate\x18\x07 \x03(\x02\x12\x14\n\x0c\x64ropout_rate\x18\x08 \x03(\x02\x12\x12\n\nactivation\x18\t \x03(\t\x12\x1b\n\x08\x63hannels\x18\n \x03(\x0b\x32\t.Channels\"\x1b\n\x08\x43hannels\x12\x0f\n\x07\x63hannel\x18\x01 \x03(\r')
 )
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
@@ -50,7 +50,7 @@ _TRAINCONFIG = _descriptor.Descriptor(
     _descriptor.FieldDescriptor(
       name='early_stop_step', full_name='TrainConfig.early_stop_step', index=2,
       number=3, type=13, cpp_type=3, label=1,
-      has_default_value=True, default_value=10000,
+      has_default_value=True, default_value=30000,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),

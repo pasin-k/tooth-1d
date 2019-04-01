@@ -58,6 +58,7 @@ def read_file(file_name, label):
     return file_values
 
 
+'''
 # Read and load image
 def load_image(addr):
     img = cv2.imread(addr, cv2.IMREAD_GRAYSCALE)
@@ -65,6 +66,7 @@ def load_image(addr):
     # cv2.waitKey()
     # print(np.shape(img))
     return img
+'''
 
 
 def _int64_feature(value):
@@ -90,10 +92,10 @@ def run(tfrecord_name, dataset_folder):
         label_type[label_type_num], label_data[label_data_num], train_eval_ratio))
 
     # Start getting all info and zip to tfrecord
-    train_name = "%s_%s_%s_train.tfrecords" % (tfrecord_name, label_data[label_data_num], label_type[label_type_num])
-    eval_name = "%s_%s_%s_eval.tfrecords" % (tfrecord_name, label_data[label_data_num], label_type[label_type_num])
-    train_name = os.path.join("./data", train_name)
-    eval_name = os.path.join("./data", eval_name)
+    tfrecord_train_name = "%s_%s_%s_train.tfrecords" % (tfrecord_name, label_data[label_data_num], label_type[label_type_num])
+    tfrecord_eval_name = "%s_%s_%s_eval.tfrecords" % (tfrecord_name, label_data[label_data_num], label_type[label_type_num])
+    tfrecord_train_name = os.path.join("./data", tfrecord_train_name)
+    tfrecord_eval_name = os.path.join("./data", tfrecord_eval_name)
 
     image_address, _ = get_file_name(folder_name=dataset_folder, file_name=None)
     labels, label_name = get_label(label_data[label_data_num], label_type[label_type_num], double_data=True,
@@ -207,14 +209,14 @@ def run(tfrecord_name, dataset_folder):
 
     # Start writing train dataset
     train_dataset = tf.data.Dataset.from_tensor_slices(grouped_train_address)
-    train_dataset = train_dataset.map(read_file)
+    train_dataset = train_dataset.map(read_file)  # Read file address, and get info as string
 
     it = train_dataset.make_one_shot_iterator()
 
     elem = it.get_next()
 
     with tf.Session() as sess:
-        writer = tf.python_io.TFRecordWriter(train_name)
+        writer = tf.python_io.TFRecordWriter(tfrecord_train_name)
         while True:
             try:
                 elem_result = serialize(sess.run(elem))
@@ -224,29 +226,30 @@ def run(tfrecord_name, dataset_folder):
                 break
         writer.close()
 
-    eval_address = tf.data.Dataset.from_tensor_slices(grouped_eval_address)
-    eval_address = eval_address.map(read_file)
+    eval_dataset = tf.data.Dataset.from_tensor_slices(grouped_eval_address)
+    eval_dataset = eval_dataset.map(read_file)
 
-    it = eval_address.make_one_shot_iterator()
+    it = eval_dataset.make_one_shot_iterator()
 
     elem = it.get_next()
 
     with tf.Session() as sess:
-        writer = tf.python_io.TFRecordWriter(eval_name)
+        writer = tf.python_io.TFRecordWriter(tfrecord_eval_name)
         while True:
             try:
                 elem_result = serialize(sess.run(elem))
-
+                # print(elem_result)
                 writer.write(elem_result)
             except tf.errors.OutOfRangeError:
                 break
         writer.close()
-    print("TFrecords created: %s, %s" % (train_name, eval_name))
+    print("TFrecords created: %s, %s" % (tfrecord_train_name, tfrecord_eval_name))
 
 
 if __name__ == '__main__':
     # File name will be [tfrecord_name]_train_Taper_sum_median
-    tfrecord_name = "preparation_181_data"
+    #tfrecord_name = "preparation_181_data"
+    tfrecord_name = "test"
     # Directory of image
     dataset_folder = "./data/cross_section"
     run(tfrecord_name, dataset_folder)

@@ -3,38 +3,25 @@ import tensorflow as tf
 import numpy as np
 
 # Fixed parameter
-numdegree = 4  # Number of rotations
-image_height = 240  # Used for cropping
-image_width = 360  # Used for cropping
+DEPTH = 3  # Number of rotations
+HEIGHT = 32  # Used for cropping
+WIDTH = 32  # Used for cropping
 
 
 # Import tfrecord to dataset
 def deserialize(example):
-    feature = {'label': tf.FixedLenFeature([], tf.int64)}
-    for i in range(numdegree):
-        feature['img' + str(i)] = tf.FixedLenFeature([], tf.string)
+    feature = {'label': tf.FixedLenFeature([], tf.int64), 'img': tf.FixedLenFeature([], tf.string)}
     return tf.parse_single_example(example, feature)
 
 
 def decode(data_dict):
-    if numdegree != 4:
-        raise Exception('Number of degree specified is not compatible, edit code')
-    # Create initial image, then stacking it
-    image_decoded = []
-
-    # Stacking the rest
-    for i in range(0, numdegree):
-        img = data_dict['img' + str(i)]
-        file_decoded = tf.image.decode_png(img, channels=1)
-        file_cropped = tf.squeeze(tf.image.resize_image_with_crop_or_pad(file_decoded, image_height, image_width))
-        image_decoded.append(file_cropped)
-
-    image_stacked = tf.stack([image_decoded[0], image_decoded[1], image_decoded[2], image_decoded[3]], axis=2)
-    image_stacked = tf.cast(image_stacked, tf.float32)
-    label = tf.cast(data_dict['label'], tf.int32)
+    image = tf.decode_raw(data_dict['img'], tf.uint8)
+    image.set_shape([DEPTH * HEIGHT * WIDTH])
+    image = tf.cast(tf.reshape(image, [HEIGHT, WIDTH, DEPTH]), tf.float32)
+    label = tf.cast(data_dict['label'], tf.int64)
     # output = (image_stacked, label)
     # return {'images': image_stacked, 'label': label}  # Output is [Channel, Height, Width]
-    return image_stacked, label
+    return image, label
 
 
 def _int64_feature(value):
@@ -45,14 +32,13 @@ def _bytes_feature(value):
     return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
 
 
-def _float_feature(value):
-    return tf.train.Feature(float_list=tf.train.FloatList(value=[value]))
-
-
 def train_input_fn(data_path, batch_size):
     dataset = tf.data.TFRecordDataset(data_path)
+    print(dataset)
     dataset = dataset.map(deserialize, num_parallel_calls=7)
+    print(dataset)
     dataset = dataset.map(decode, num_parallel_calls=7)
+    print(dataset)
     dataset = dataset.shuffle(100)
     dataset = dataset.batch(batch_size, drop_remainder=False)  # Maybe batch after repeat?
     dataset = dataset.repeat(None)
@@ -81,4 +67,3 @@ def get_data_from_path(data_path):
     images = whole_dataset_arrays[0]
     label = whole_dataset_arrays[1]
     return images, label
-

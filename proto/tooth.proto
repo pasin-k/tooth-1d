@@ -11,7 +11,7 @@ message TrainConfig{
     optional uint32 checkpoint_min = 2 [default = 5];
 
     // Number of steps required before early stopping
-    optional uint32 early_stop_step = 3 [default = 10000];
+    optional uint32 early_stop_step = 3 [default = 30000];
 
     // Path to saving model
     optional string result_path = 4;
