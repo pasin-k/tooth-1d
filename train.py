@@ -80,7 +80,7 @@ def run(model_params={}):
     model_params['learning_rate'] = check_exist(model_params, 'learning_rate', 0.0003)
     model_params['dropout_rate'] = check_exist(model_params, 'dropout_rate', 1)
     model_params['activation'] = check_exist(model_params, 'activation', tf.nn.relu)
-    model_params['channels'] = check_exist(model_params, 'channel', [64, 64, 128, 64, 64, 64, 64, 64, 64, 2048, 2048])
+    model_params['channels'] = check_exist(model_params, 'channels', [64, 64, 128, 64, 64, 64, 64, 64, 64, 2048, 2048])
     if len(model_params['channels']) != 11:
         raise Exception("Number of channels not correspond to number of layers [Need size of 11, got %s]"
                         % len(model_params['channels']))
@@ -133,7 +133,6 @@ def run(model_params={}):
         global_step = 0
 
     predictions = classifier.predict(input_fn=lambda: eval_input_fn(eval_data_path, batch_size=1))
-    print(predictions)
     images, expected = get_data_from_path(eval_data_path)
     predict_score = ['Prediction']
     probability_score = ['Probability']
@@ -220,7 +219,7 @@ def fitness(learning_rate, dropout_rate, activation, channels):
     md_config = {'learning_rate': learning_rate,
                  'dropout_rate': dropout_rate,
                  'activation': activation_dict[activation],
-                 'channel': channels_full}
+                 'channels': channels_full}
     accuracy, global_step, result = run(md_config)
     # accuracy = run_hyper_parameter_wrapper(learning_rate, dropout_rate, activation, channels)
 

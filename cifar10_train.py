@@ -20,12 +20,14 @@ from cifar10_model import my_model
 from cifar10_get_data import train_input_fn, eval_input_fn, get_data_from_path
 
 
+activation_dict = {'0': tf.nn.relu, '1': tf.nn.leaky_relu}  # Declare global dictionary
+
 # These are important parameters
 run_params = {'batch_size': 4,
               'checkpoint_min': 5,
               'early_stop_step': 10000,
               'input_path': './data/cifar10.tfrecords',
-              'result_path_new': '/home/pasin/Documents/Pasin/model/cifar10',
+              'result_path': '/home/pasin/Documents/Pasin/model/cifar10_hyper',
               'config_path': '',
               'steps': 100000}
 
@@ -91,7 +93,8 @@ def run(model_params={}):
         global_step = 0
 
     predictions = classifier.predict(input_fn=lambda: eval_input_fn(eval_data_path, batch_size=1))
-    print(predictions)
+
+    '''  
     images, expected = get_data_from_path(eval_data_path)
     predict_score = ['Prediction']
     probability_score = ['Probability']
@@ -106,15 +109,92 @@ def run(model_params={}):
         label_score.append(expec)
         probability_score.append(probability)
 
-    predict_result = zip(label_score, predict_score, probability_score)
+    # predict_result = zip(label_score, predict_score, probability_score)
+    '''
 
+    predict_result = None
     # print(eval_result[0]['accuracy'])
     # print('\nTest set accuracy: {accuracy:0.3f}\n'.format(**eval_result))
     return accuracy, global_step, predict_result
 
 
+dim_learning_rate = Real(low=1e-5, high=1e-2, prior='log-uniform', name='learning_rate')
+dim_dropout_rate = Real(low=0, high=0.875, name='dropout_rate')
+dim_activation = Categorical(categories=['0', '1'],
+                             name='activation')
+dim_channel = Integer(low=1, high=4, name='channels')
+dimensions = [dim_learning_rate,
+              dim_dropout_rate,
+              dim_activation,
+              dim_channel]
+default_parameters = [1e-3, 0.125, '1', 2]
+
+
+@use_named_args(dimensions=dimensions)
+def fitness(learning_rate, dropout_rate, activation, channels):
+    """
+    Hyper-parameters:
+    learning_rate:     Learning-rate for the optimizer.
+    dropout_rate:
+    activation:        Activation function for all layers.
+    channels
+    """
+    # Create the neural network with these hyper-parameters
+    print("Learning_rate, Dropout_rate, Activation, Channels = %s, %s, %s, %s" % (
+    learning_rate, dropout_rate, activation, channels))
+    channels_full = [i * channels for i in [16, 16, 32, 16, 16, 16, 16, 16, 16, 512, 512]]
+    name = run_params['result_path'] + "/" + datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S") + "/"
+    # name = ("%s/learning_rate_%s_dropout_%s_activation_%s_channels_%s/"
+    #         % (run_params['result_path'], round(learning_rate, 6), dropout_rate, activation, channels))
+    run_params['result_path_new'] = name
+    md_config = {'learning_rate': learning_rate,
+                 'dropout_rate': dropout_rate,
+                 'activation': activation_dict[activation],
+                 'channels': channels_full}
+    accuracy, global_step, result = run(md_config)
+    # accuracy = run_hyper_parameter_wrapper(learning_rate, dropout_rate, activation, channels)
+
+    # Save necessary info to csv file, as reference
+    info_dict = run_params.copy()
+    info_dict['comments'] = "Try hyper search on cifar10"
+    info_dict['learning_rate'] = learning_rate
+    info_dict['dropout_rate'] = dropout_rate
+    info_dict['activation'] = activation
+    info_dict['channels'] = channels
+    info_dict['steps'] = global_step
+    info_dict['accuracy'] = accuracy
+    with open(name + "config.csv", "w") as csvfile:
+        writer = csv.writer(csvfile)
+        for key, val in info_dict.items():
+            writer.writerow([key, val])
+    with open(name + "result.csv", "w") as csvfile:
+        writer = csv.writer(csvfile)
+        for row in result:
+            writer.writerow(row)
+    return -accuracy
+
+
+def run_hyper_parameter_optimize(model_config):
+    search_result = gp_minimize(func=fitness,
+                                dimensions=dimensions,
+                                acq_func='EI',  # Expected Improvement.
+                                n_calls=20,
+                                x0=default_parameters)
+    print(search_result)
+    print("Best hyper-parameters: %s" % search_result.x)
+    searched_parameter = sorted(list(zip(search_result.func_vals, search_result.x_iters)))
+    print("All hyper-parameter searched: %s" % searched_parameter)
+    hyperparameter_filename = "hyperparameters_" + datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S") + ".csv"
+    searched_parameter = [list(i) for i in searched_parameter]
+    with open(run_params['result_path'] + '/' + hyperparameter_filename, 'w', newline='') as myfile:
+        wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
+        wr.writerow(searched_parameter)
+    # space = search_result.space
+    # print("Best result: %s" % space.point_to_dict(search_result.x))
+
+
 if __name__ == '__main__':
     # read_file()
-    acc, steps, predict_result = run(model_configs)
+    run_hyper_parameter_optimize(model_configs)
     print(predict_result)
     print("train.py completed")

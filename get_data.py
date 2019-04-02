@@ -73,11 +73,11 @@ def get_data_from_path(data_path):
     # print(dataset)
     dataset = dataset.map(deserialize)
     dataset = dataset.map(decode)
-
     dataset = dataset.batch(1000, drop_remainder=False)
     whole_dataset_tensors = tf.data.experimental.get_single_element(dataset)
     with tf.Session() as sess:
         whole_dataset_arrays = sess.run(whole_dataset_tensors)
+        print(whole_dataset_arrays)
     images = whole_dataset_arrays[0]
     label = whole_dataset_arrays[1]
     return images, label
