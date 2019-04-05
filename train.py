@@ -253,11 +253,20 @@ def run_hyper_parameter_optimize(model_config):
     print("Best hyper-parameters: %s" % search_result.x)
     searched_parameter = sorted(list(zip(search_result.func_vals, search_result.x_iters)))
     print("All hyper-parameter searched: %s" % searched_parameter)
-    hyperparameter_filename = "hyperparameters_" + datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S") + ".csv"
-    searched_parameter = [list(i) for i in searched_parameter]
+    hyperparameter_filename = "hyperparameters_result_" + datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S") + ".csv"
+    newData = []
+    for i in searched_parameter:
+        data = {'value': i[0],
+                'learning_rate': i[1][0],
+                'dropout_rate': i[1][1],
+                'activation': i[1][1],
+                'channels': i[1][1], }
+        newData.append(data)
     with open(run_params['result_path'] + '/' + hyperparameter_filename, 'w', newline='') as myfile:
-        wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
-        wr.writerow(searched_parameter)
+        writer = csv.DictWriter(csvFile,
+                                fieldnames=['value', 'learning_rate', 'dropout_rate', 'activation', 'channels'])
+        writer.writeheader()
+        writer.writerows(newData)
     # space = search_result.space
     # print("Best result: %s" % space.point_to_dict(search_result.x))
 
