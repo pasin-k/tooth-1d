@@ -247,7 +247,7 @@ def run_hyper_parameter_optimize(model_config):
     search_result = gp_minimize(func=fitness,
                                 dimensions=dimensions,
                                 acq_func='EI',  # Expected Improvement.
-                                n_calls=20,
+                                n_calls=11,
                                 x0=default_parameters)
     print(search_result)
     print("Best hyper-parameters: %s" % search_result.x)
@@ -262,7 +262,7 @@ def run_hyper_parameter_optimize(model_config):
                 'activation': i[1][1],
                 'channels': i[1][1], }
         newData.append(data)
-    with open(run_params['result_path'] + '/' + hyperparameter_filename, 'w', newline='') as myfile:
+    with open(run_params['result_path'] + '/' + hyperparameter_filename, 'w', newline='') as csvFile:
         writer = csv.DictWriter(csvFile,
                                 fieldnames=['value', 'learning_rate', 'dropout_rate', 'activation', 'channels'])
         writer.writeheader()

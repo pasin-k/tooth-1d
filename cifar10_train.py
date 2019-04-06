@@ -19,7 +19,6 @@ from skopt.utils import use_named_args
 from cifar10_model import my_model
 from cifar10_get_data import train_input_fn, eval_input_fn, get_data_from_path
 
-
 activation_dict = {'0': tf.nn.relu, '1': tf.nn.leaky_relu}  # Declare global dictionary
 
 # These are important parameters
@@ -30,7 +29,6 @@ run_params = {'batch_size': 4,
               'result_path': '/home/pasin/Documents/Pasin/model/cifar10_hyper',
               'config_path': '',
               'steps': 100000}
-
 
 model_configs = {'learning_rate': 0.0001,
                  'dropout_rate': 0.1,
@@ -94,7 +92,6 @@ def run(model_params={}):
 
     predictions = classifier.predict(input_fn=lambda: eval_input_fn(eval_data_path, batch_size=1))
 
-    '''  
     images, expected = get_data_from_path(eval_data_path)
     predict_score = ['Prediction']
     probability_score = ['Probability']
@@ -110,7 +107,6 @@ def run(model_params={}):
         probability_score.append(probability)
 
     # predict_result = zip(label_score, predict_score, probability_score)
-    '''
 
     predict_result = None
     # print(eval_result[0]['accuracy'])
@@ -141,7 +137,7 @@ def fitness(learning_rate, dropout_rate, activation, channels):
     """
     # Create the neural network with these hyper-parameters
     print("Learning_rate, Dropout_rate, Activation, Channels = %s, %s, %s, %s" % (
-    learning_rate, dropout_rate, activation, channels))
+        learning_rate, dropout_rate, activation, channels))
     channels_full = [i * channels for i in [16, 16, 32, 16, 16, 16, 16, 16, 16, 512, 512]]
     name = run_params['result_path'] + "/" + datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S") + "/"
     # name = ("%s/learning_rate_%s_dropout_%s_activation_%s_channels_%s/"
@@ -185,16 +181,33 @@ def run_hyper_parameter_optimize(model_config):
     searched_parameter = sorted(list(zip(search_result.func_vals, search_result.x_iters)))
     print("All hyper-parameter searched: %s" % searched_parameter)
     hyperparameter_filename = "hyperparameters_" + datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S") + ".csv"
-    searched_parameter = [list(i) for i in searched_parameter]
-    with open(run_params['result_path'] + '/' + hyperparameter_filename, 'w', newline='') as myfile:
-        wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
-        wr.writerow(searched_parameter)
+    newData = []
+    for i in searched_parameter:
+        data = {'value': i[0],
+                'learning_rate': i[1][0],
+                'dropout_rate': i[1][1],
+                'activation': i[1][1],
+                'channels': i[1][1], }
+        newData.append(data)
+    with open(run_params['result_path'] + '/' + hyperparameter_filename, 'w', newline='') as csvFile:
+        writer = csv.DictWriter(csvFile,
+                                fieldnames=['value', 'learning_rate', 'dropout_rate', 'activation', 'channels'])
+        writer.writeheader()
+        writer.writerows(newData)
     # space = search_result.space
     # print("Best result: %s" % space.point_to_dict(search_result.x))
 
 
 if __name__ == '__main__':
     # read_file()
-    run_hyper_parameter_optimize(model_configs)
-    print(predict_result)
+    if True:
+        md_configs = {'learning_rate': model_configs['learning_rate'],
+                      'dropout_rate': model_configs['dropout_rate'],
+                      'activation': model_configs['activation'],
+                      'channels': model_configs['channels']
+                      }
+        run_params['result_path_new'] = run_params['result_path']
+        run(md_configs)
+    else:
+        run_hyper_parameter_optimize(model_configs)
     print("train.py completed")

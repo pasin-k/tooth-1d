@@ -56,16 +56,19 @@ def get_data_from_path(data_path):
     # print(dataset)
     dataset = dataset.map(deserialize)
     dataset = dataset.map(decode)
-    print(dataset)
-    # dataset = dataset.batch(1000, drop_remainder=False)
-    # whole_dataset_tensors = tf.data.experimental.get_single_element(dataset)
-    for record in dataset.take(-1):
-        print(record)
-    # with tf.Session() as sess:
-        # print(whole_dataset_tensors)
-        # whole_dataset_arrays = sess.run(whole_dataset_tensors)
-    images = None
-    label = None
-    # images = whole_dataset_arrays[0]
-    # label = whole_dataset_arrays[1]
+    iterator = dataset.make_one_shot_iterator()
+    next_image_data = iterator.get_next()
+    images = []
+    label = []
+    with tf.Session() as sess:
+        sess.run(tf.global_variables_initializer())
+
+        try:
+            # Keep extracting data till TFRecord is exhausted
+            while True:
+                data = sess.run(next_image_data)
+                images.append(data[0])
+                label.append(data[1])
+        except:
+            pass
     return images, label
