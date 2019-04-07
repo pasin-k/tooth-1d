@@ -108,7 +108,7 @@ def run(model_params={}):
 
     # predict_result = zip(label_score, predict_score, probability_score)
 
-    predict_result = None
+    predict_result = zip(label_score, predict_score, probability_score)
     # print(eval_result[0]['accuracy'])
     # print('\nTest set accuracy: {accuracy:0.3f}\n'.format(**eval_result))
     return accuracy, global_step, predict_result
@@ -181,26 +181,26 @@ def run_hyper_parameter_optimize(model_config):
     searched_parameter = sorted(list(zip(search_result.func_vals, search_result.x_iters)))
     print("All hyper-parameter searched: %s" % searched_parameter)
     hyperparameter_filename = "hyperparameters_" + datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S") + ".csv"
-    newData = []
+    new_data = []
+    field_name = ['accuracy', 'learning_rate', 'dropout_rate', 'activation', 'channels']
     for i in searched_parameter:
-        data = {'value': i[0],
-                'learning_rate': i[1][0],
-                'dropout_rate': i[1][1],
-                'activation': i[1][1],
-                'channels': i[1][1], }
-        newData.append(data)
+        data = {field_name[0]: i[0] * -1,
+                field_name[1]: i[1][0],
+                field_name[2]: i[1][1],
+                field_name[3]: i[1][1],
+                field_name[4]: i[1][1]}
+        new_data.append(data)
     with open(run_params['result_path'] + '/' + hyperparameter_filename, 'w', newline='') as csvFile:
-        writer = csv.DictWriter(csvFile,
-                                fieldnames=['value', 'learning_rate', 'dropout_rate', 'activation', 'channels'])
+        writer = csv.DictWriter(csvFile, fieldnames=field_name)
         writer.writeheader()
-        writer.writerows(newData)
+        writer.writerows(new_data)
     # space = search_result.space
     # print("Best result: %s" % space.point_to_dict(search_result.x))
 
 
 if __name__ == '__main__':
     # read_file()
-    if True:
+    if False:
         md_configs = {'learning_rate': model_configs['learning_rate'],
                       'dropout_rate': model_configs['dropout_rate'],
                       'activation': model_configs['activation'],

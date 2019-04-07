@@ -81,7 +81,7 @@ def _float_feature(value):
     return tf.train.Feature(float_list=tf.train.FloatList(value=[value]))
 
 
-def run(tfrecord_name, dataset_folder):
+def run(tfrecord_name, dataset_folder, csv_dir=None):
     # Select ype of label to use
     label_data = ["Occ_Sum", "Taper_Sum"]  # Occ_sum: Max = 15, Taper_Sum: Max = 10
     label_type = ["average", "median"]
@@ -92,15 +92,20 @@ def run(tfrecord_name, dataset_folder):
         label_type[label_type_num], label_data[label_data_num], train_eval_ratio))
 
     # Start getting all info and zip to tfrecord
-    tfrecord_train_name = "%s_%s_%s_train.tfrecords" % (tfrecord_name, label_data[label_data_num], label_type[label_type_num])
-    tfrecord_eval_name = "%s_%s_%s_eval.tfrecords" % (tfrecord_name, label_data[label_data_num], label_type[label_type_num])
+    tfrecord_train_name = "%s_%s_%s_train.tfrecords" % (
+        tfrecord_name, label_data[label_data_num], label_type[label_type_num])
+    tfrecord_eval_name = "%s_%s_%s_eval.tfrecords" % (
+        tfrecord_name, label_data[label_data_num], label_type[label_type_num])
     tfrecord_train_name = os.path.join("./data", tfrecord_train_name)
     tfrecord_eval_name = os.path.join("./data", tfrecord_eval_name)
 
     image_address, _ = get_file_name(folder_name=dataset_folder, file_name=None)
-    labels, label_name = get_label(label_data[label_data_num], label_type[label_type_num], double_data=True,
-                                   one_hotted=False, normalized=False)
-
+    if csv_dir is None:
+        labels, label_name = get_label(label_data[label_data_num], label_type[label_type_num], double_data=True,
+                                       one_hotted=False, normalized=False)
+    else:
+        labels, label_name = get_label(label_data[label_data_num], label_type[label_type_num], double_data=True,
+                                       one_hotted=False, normalized=False, file_dir=csv_dir)
     # Check list of name that has error, remove it from label
     error_file_names = []
     with open('./data/cross_section/error_file.txt', 'r') as filehandle:
@@ -110,22 +115,26 @@ def run(tfrecord_name, dataset_folder):
             # add item to the list
             error_file_names.append(current_name)
     for name in error_file_names:
-        index = label_name.index(name)
-        label_name.pop(index)
-        labels.pop(index * 2)
-        labels.pop(index * 2)  # Do it again if we double the data
+        try:
+            index = label_name.index(name)
+            label_name.pop(index)
+            labels.pop(index * 2)
+            labels.pop(index * 2)  # Do it again if we double the data
+        except ValueError:
+            pass
 
     if len(image_address) / len(labels) != numdeg:
         print(image_address)
         raise Exception(
-            '# of images and labels is not compatible: %d images, %d labels' % (len(image_address), len(labels)))
+            '# of images and labels is not compatible: %d images, %d labels. Expected # of images to be 4 times of label' % (
+                len(image_address), len(labels)))
 
     # Group up 4 images and label together first, shuffle
     grouped_address = list()
     example_grouped_address = list()  # Use for checking the file name, in case of adding more example
     for i in range(len(labels)):
         grouped_address.append([image_address[i * numdeg:(i + 1) * numdeg], labels[i]])
-        example_grouped_address.append(image_address[i*numdeg])
+        example_grouped_address.append(image_address[i * numdeg])
     z = list(zip(grouped_address, example_grouped_address))
     shuffle(z)
     grouped_address[:], example_grouped_address[:] = zip(*z)
@@ -248,9 +257,10 @@ def run(tfrecord_name, dataset_folder):
 
 if __name__ == '__main__':
     # File name will be [tfrecord_name]_train_Taper_sum_median
-    #tfrecord_name = "preparation_181_data"
-    tfrecord_name = "test"
+    # tfrecord_name = "preparation_181_data"
+    tfrecord_name = "original_preparation_data"
+    csv_name = "../global_data/Ground Truth Score_50.csv"
     # Directory of image
-    dataset_folder = "./data/cross_section"
-    run(tfrecord_name, dataset_folder)
+    dataset_folder = "./data/cross_section_original"
+    run(tfrecord_name, dataset_folder, csv_name)
     print("Complete")

@@ -13,6 +13,7 @@ v = '1.2.0'
 # 1.2: Now save image with their own name
 print("pre_processing.py version: " + str(v))
 
+degree = list([0, 45, 90, 135])
 
 def main():
     # Get data and transformed to cross-section image
@@ -26,7 +27,6 @@ def main():
         raise Exception("ERROR, image and label not similar: %d images, %d labels. Possible missing files: %s"
                         % (len(image_name), (len(label_name)), diff))
 
-    degree = list([0, 45, 90, 135])
     augment_config = list([False, True])  # Original data once, Augmented once
     # Prepare two set of list, one for data, another for augmented data
     stl_points = list()
@@ -49,7 +49,6 @@ def main():
                     max_point = len(points[0])
                 if len(points[0]) < min_point:
                     min_point = len(points[0])
-                print(len(points[0]))
                 if augment:
                     stl_points_augmented.append(points)
                 else:
@@ -62,7 +61,10 @@ def main():
     print("Max point: %s, min  point: %s" % (max_point, min_point))
     # augment_num = int(len(label)/len(label_name))
     # label_name_aug = [val for val in label_name for _ in range(augment_num)]
+    return stl_points, label_name, degree
 
+
+def save_image(stl_points, label_name):
     # Save data as png image
     png_name = "PreparationScan" + "_0"
     save_plot(stl_points, "./data/cross_section", png_name, label_name, degree)
@@ -78,9 +80,26 @@ def main():
             filehandle.write('%s\n' % listitem)
 
 
+def save_movement(stl_points, label_name):
+    new_stl_points = []
+    for i in len(stl_points)[0]:
+        new_points = []
+        for d in range(len(degree)):
+            points = stl_points[i][d]
+        new_stl_points.append(new_points)
+
+
 def pca(train_images,test_images, pca_components):
+    pass
 
 
 if __name__ == '__main__':
-    main()
+    stl_points, label_name, degree = main()  # Output as list[list[numpy]] (example_data, degrees, points)
+    print(type(stl_points))
+    print(len(stl_points))
+    print(type(stl_points[0]))
+    print(len(stl_points[0]))
+    print(type(stl_points[0][0]))
+    print(len(stl_points[0][0]))
+    # save_image(stl_points, label_name)
     print("pre_processing.py: done")
