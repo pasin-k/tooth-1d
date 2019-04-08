@@ -231,7 +231,7 @@ def my_model(features, labels, mode, params, config):
         }
         return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
 
-    # one_hot_label = tf.one_hot(indices=labels, depth=11)
+    # one_hot_label = tf.one_hot(indices=labels, depth=11) New
 
     loss = tf.losses.sparse_softmax_cross_entropy(labels, logits)  # Not applicable for score
 
