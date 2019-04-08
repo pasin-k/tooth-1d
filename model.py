@@ -215,7 +215,7 @@ def customized_incepnet_v3(features, mode, params):
 # Define Model
 def my_model(features, labels, mode, params, config):
     # Input: (Batch_size,240,360,4)
-    logits = customized_incepnet(features, mode, params)
+    logits = customized_incepnet_v2(features, mode, params)
 
     # Predict Mode
     predicted_class = tf.argmax(logits, 1)
@@ -228,6 +228,7 @@ def my_model(features, labels, mode, params, config):
         return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
     loss = tf.losses.sparse_softmax_cross_entropy(labels, logits)
     accuracy = tf.metrics.accuracy(labels, predicted_class)
+    predicted_class = tf.cast(predicted_class, tf.int32)
     my_accuracy = tf.reduce_mean(tf.cast(tf.equal(labels, predicted_class), dtype=tf.float32))
     acc = tf.summary.scalar("accuracy_manual", my_accuracy)  # Number of correct answer
     # acc2 = tf.summary.scalar("Accuracy_update", accuracy[1])

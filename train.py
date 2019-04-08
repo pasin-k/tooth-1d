@@ -273,12 +273,13 @@ def run_hyper_parameter_optimize():
 
 if __name__ == '__main__':
     # Need special way to get hyperpara from config.csv
-    md_configs = {'learning_rate': model_configs['learning_rate'],
-                  'dropout_rate': model_configs['dropout_rate'],
-                  'activation': model_configs['activation'],
-                  'channels': model_configs['channels']
+    md_configs = {'learning_rate': model_configs['learning_rate_list'],
+                  'dropout_rate': model_configs['dropout_rate_list'],
+                  'activation': model_configs['activation_list'],
+                  'channels': model_configs['channel_list']
                   }
     run_params['result_path_new'] = run_params['result_path']
+    print("Batch size: %s" % run_params['batch_size'])
     # run(md_configs)
     # run_multiple_params(model_configs)
     run_hyper_parameter_optimize()
