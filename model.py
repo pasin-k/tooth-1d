@@ -226,7 +226,9 @@ def my_model(features, labels, mode, params, config):
             'logits': logits
         }
         return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
-    loss = tf.losses.sparse_softmax_cross_entropy(labels, logits)
+
+    # loss = tf.losses.sparse_softmax_cross_entropy(labels, logits)  # Not applicable for score
+    loss = tf.squared_difference(labels, predicted_class)
     accuracy = tf.metrics.accuracy(labels, predicted_class)
     predicted_class = tf.cast(predicted_class, tf.int32)
     my_accuracy = tf.reduce_mean(tf.cast(tf.equal(labels, predicted_class), dtype=tf.float32))

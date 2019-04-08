@@ -225,7 +225,7 @@ def fitness(learning_rate, dropout_rate, activation, channels):
 
     # Save necessary info to csv file, as reference
     info_dict = run_params.copy()
-    info_dict['comments'] = "Max pooling, batch_size of 1"
+    info_dict['comments'] = "Max pooling, new loss"
     info_dict['learning_rate'] = learning_rate
     info_dict['dropout_rate'] = dropout_rate
     info_dict['activation'] = activation
@@ -251,7 +251,7 @@ def run_hyper_parameter_optimize():
                                 x0=default_parameters)
     print(search_result)
     print("Best hyper-parameters: %s" % search_result.x)
-    searched_parameter = sorted(list(zip(search_result.func_vals, search_result.x_iters)))
+    searched_parameter = list(zip(search_result.func_vals, search_result.x_iters))  # List of tuple of (Acc, [Hyperparams])
     print("All hyper-parameter searched: %s" % searched_parameter)
     hyperparameter_filename = "hyperparameters_result_" + datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S") + ".csv"
     new_data = []
@@ -260,8 +260,8 @@ def run_hyper_parameter_optimize():
         data = {field_name[0]: i[0] * -1,
                 field_name[1]: i[1][0],
                 field_name[2]: i[1][1],
-                field_name[3]: i[1][1],
-                field_name[4]: i[1][1]}
+                field_name[3]: i[1][2],
+                field_name[4]: i[1][3]}
         new_data.append(data)
     with open(run_params['result_path'] + '/' + hyperparameter_filename, 'w', newline='') as csvFile:
         writer = csv.DictWriter(csvFile, fieldnames=field_name)
