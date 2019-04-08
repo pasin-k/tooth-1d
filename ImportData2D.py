@@ -210,7 +210,7 @@ def mattovoxel(targetfolder, dataname='gridOUTPUT', foldername="mat s"):
     num_example = len(namelist)
     if (num_example == 0):
         print("Folder directory does not exist or no file in directory")
-        return voxel
+        return None
 
     data = scipy.io.loadmat(os.path.join(folder_dir, namelist[0]))
     (row, col, dep) = np.shape(data[dataname])

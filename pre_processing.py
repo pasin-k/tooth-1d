@@ -61,10 +61,10 @@ def main():
     print("Max point: %s, min  point: %s" % (max_point, min_point))
     # augment_num = int(len(label)/len(label_name))
     # label_name_aug = [val for val in label_name for _ in range(augment_num)]
-    return stl_points, label_name, degree
+    return stl_points, stl_points_augmented, label_name, error_file_names, degree
 
 
-def save_image(stl_points, label_name):
+def save_image(stl_points, stl_points_augmented, label_name, error_file_names):
     # Save data as png image
     png_name = "PreparationScan" + "_0"
     save_plot(stl_points, "./data/cross_section", png_name, label_name, degree)
@@ -94,12 +94,12 @@ def pca(train_images,test_images, pca_components):
 
 
 if __name__ == '__main__':
-    stl_points, label_name, degree = main()  # Output as list[list[numpy]] (example_data, degrees, points)
-    print(type(stl_points))
-    print(len(stl_points))
-    print(type(stl_points[0]))
-    print(len(stl_points[0]))
-    print(type(stl_points[0][0]))
-    print(len(stl_points[0][0]))
-    # save_image(stl_points, label_name)
+    points, points_aug, lbl_name, err_name, deg = main()  # Output as list[list[numpy]] (example_data, degrees, points)
+    print(type(points))
+    print(len(points))
+    print(type(points[0]))
+    print(len(points[0]))
+    print(type(points[0][0]))
+    print(len(points[0][0]))
+    # save_image(points, points_aug, lbl_name, err_name)
     print("pre_processing.py: done")

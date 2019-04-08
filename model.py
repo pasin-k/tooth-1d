@@ -212,6 +212,10 @@ def customized_incepnet_v3(features, mode, params):
     return logits
 
 
+def my_one_hot(labels, depth):
+    pass
+
+
 # Define Model
 def my_model(features, labels, mode, params, config):
     # Input: (Batch_size,240,360,4)
@@ -227,10 +231,11 @@ def my_model(features, labels, mode, params, config):
         }
         return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
 
-    # loss = tf.losses.sparse_softmax_cross_entropy(labels, logits)  # Not applicable for score
-    loss = tf.squared_difference(labels, predicted_class)
+    # one_hot_label = tf.one_hot(indices=labels, depth=11)
+
+    loss = tf.losses.sparse_softmax_cross_entropy(labels, logits)  # Not applicable for score
+
     accuracy = tf.metrics.accuracy(labels, predicted_class)
-    predicted_class = tf.cast(predicted_class, tf.int32)
     my_accuracy = tf.reduce_mean(tf.cast(tf.equal(labels, predicted_class), dtype=tf.float32))
     acc = tf.summary.scalar("accuracy_manual", my_accuracy)  # Number of correct answer
     # acc2 = tf.summary.scalar("Accuracy_update", accuracy[1])
