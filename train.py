@@ -247,7 +247,7 @@ def run_hyper_parameter_optimize():
     search_result = gp_minimize(func=fitness,
                                 dimensions=dimensions,
                                 acq_func='EI',  # Expected Improvement.
-                                n_calls=11,
+                                n_calls=30,
                                 x0=default_parameters)
     print(search_result)
     print("Best hyper-parameters: %s" % search_result.x)
