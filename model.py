@@ -219,7 +219,7 @@ def my_one_hot(labels, depth):
 # Define Model
 def my_model(features, labels, mode, params, config):
     # Input: (Batch_size,240,360,4)
-    logits = customized_incepnet(features, mode, params)
+    logits = customized_incepnet_v2(features, mode, params)
 
     # Predict Mode
     predicted_class = tf.argmax(logits, 1)
