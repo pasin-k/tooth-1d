@@ -208,7 +208,8 @@ def customized_incepnet_v3(features, mode, params):
     dropout6 = tf.layers.dropout(fc6, rate=params['dropout_rate'], training=mode == tf.estimator.ModeKeys.TRAIN,
                                  name="dropout6")
 
-    logits = fc_layer(dropout6, 11, activation=params['activation'], name='predict')
+    # logits = fc_layer(dropout6, 11, activation=params['activation'], name='predict')
+    logits = fc_layer(dropout6, 1, activation=params['activation'], name='predict')  # Regression with one output
     return logits
 
 
@@ -222,19 +223,20 @@ def my_model(features, labels, mode, params, config):
     logits = customized_incepnet_v2(features, mode, params)
 
     # Predict Mode
-    predicted_class = tf.argmax(logits, 1)
+    # predicted_class = tf.argmax(logits, 1)
     if mode == tf.estimator.ModeKeys.PREDICT:
         predictions = {
-            'score': predicted_class[:, tf.newaxis],
-            'probabilities': tf.nn.softmax(logits),
-            'logits': logits
+            'score': logits
+            # 'probabilities': tf.nn.softmax(logits),
+            # 'logits': logits
         }
         return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
 
     # one_hot_label = tf.one_hot(indices=labels, depth=11)
 
-    loss = tf.losses.sparse_softmax_cross_entropy(labels, logits)  # Not applicable for score
-
+    loss = tf.squared_difference(labels, logits)
+    # loss = tf.losses.sparse_softmax_cross_entropy(labels, logits)  # Not applicable for score
+    predicted_class = tf.math.round(logits)
     accuracy = tf.metrics.accuracy(labels, predicted_class)
     my_accuracy = tf.reduce_mean(tf.cast(tf.equal(labels, predicted_class), dtype=tf.float32))
     acc = tf.summary.scalar("accuracy_manual", my_accuracy)  # Number of correct answer
