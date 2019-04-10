@@ -61,7 +61,7 @@ run_params = {'batch_size': configs.batch_size,
               'config_path': os.path.abspath(args.config),
               'steps': configs.steps}
 
-run_params['batch_size'] = check_exist(run_params, 'batch_size', 16)
+run_params['batch_size'] = check_exist(run_params, 'batch_size')
 run_params['checkpoint_min'] = check_exist(run_params, 'checkpoint_min', 10)
 run_params['early_stop_step'] = check_exist(run_params, 'early_stop_step', 5000)
 run_params['input_path'] = check_exist(run_params, 'input_path')
@@ -99,11 +99,11 @@ def run(model_params={}):
 
     tf.logging.set_verbosity(tf.logging.INFO)  # To see some additional info
     # Setting for multiple GPUs
-    mirrored_strategy = tf.contrib.distribute.MirroredStrategy(num_gpus=len(get_available_gpus()))
+    mirrored_strategy = tf.distribute.MirroredStrategy(devices=get_available_gpus())
     # Setting checkpoint config
     my_checkpoint_config = tf.estimator.RunConfig(
         save_checkpoints_secs=run_params['checkpoint_min'] * 60,
-        # save_summary_steps=pareval_data_pathams['checkpoint_min'] * 10,
+        # save_summary_steps=params['checkpoint_min'] * 10,
         keep_checkpoint_max=10,
         log_step_count_steps=500,
         session_config=tf.ConfigProto(allow_soft_placement=True),
@@ -125,7 +125,7 @@ def run(model_params={}):
         input_fn=lambda: train_input_fn(train_data_path, batch_size=run_params['batch_size']),
         max_steps=run_params['steps'], hooks=[train_hook])
     eval_spec = tf.estimator.EvalSpec(
-        input_fn=lambda: eval_input_fn(eval_data_path, batch_size=16), steps=None,
+        input_fn=lambda: eval_input_fn(eval_data_path, batch_size=run_params['batch_size']), steps=None,
         start_delay_secs=0, throttle_secs=0)
     # classifier.train(input_fn=lambda: train_input_fn(train_data_path, batch_size=params['batch_size']),
     #     max_steps=params['steps'], hooks=[train_hook])
@@ -257,7 +257,7 @@ def run_hyper_parameter_optimize():
     search_result = gp_minimize(func=fitness,
                                 dimensions=dimensions,
                                 acq_func='EI',  # Expected Improvement.
-                                n_calls=30,
+                                n_calls=20,
                                 x0=default_parameters)
     print(search_result)
     print("Best hyper-parameters: %s" % search_result.x)
