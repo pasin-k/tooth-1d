@@ -104,7 +104,7 @@ def customized_incepnet(features, mode, params):
     fc6 = fc_layer(dropout5, params['channels'][10], activation=params['activation'], name='fc6')
     dropout6 = tf.keras.layers.Dropout(rate=params['dropout_rate'])(fc6)
 
-    logits = fc_layer(dropout6, 1, activation=tf.nn.tanh, name='predict')
+    logits = fc_layer(dropout6, 11, activation=tf.nn.tanh, name='predict')
     return logits
 
 
@@ -152,7 +152,7 @@ def customized_incepnet_v2(features, mode, params):
     fc6 = fc_layer(dropout5, params['channels'][10], activation=params['activation'], name='fc6')
     dropout6 = tf.keras.layers.Dropout(rate=params['dropout_rate'])(fc6)
 
-    logits = fc_layer(dropout6, 1, activation=tf.nn.tanh, name='predict')
+    logits = fc_layer(dropout6, 11, activation=tf.nn.tanh, name='predict')
     return logits
 
 
@@ -202,32 +202,33 @@ def customized_incepnet_v3(features, mode, params):
     dropout6 = tf.keras.layers.Dropout(rate=params['dropout_rate'])(fc6)
 
     # logits = fc_layer(dropout6, 11, activation=params['activation'], name='predict')
-    logits = fc_layer(dropout6, 1, activation=tf.nn.tanh, name='predict')  # Regression with one output
+    logits = fc_layer(dropout6, 11, activation=tf.nn.tanh, name='predict')  # Regression with one output
     return logits
+
+
+def my_one_hot(labels, depth):
+    pass
 
 
 # Define Model
 def my_model(features, labels, mode, params, config):
     # Input: (Batch_size,240,360,4)
     logits = customized_incepnet(features, mode, params)
-    logits = tf.squeeze(logits,1)
-    logits_aft = tf.math.scalar_mul(5, logits) + 5
     # Predict Mode
-    # predicted_class = tf.argmax(logits, 1)
+    predicted_class = tf.argmax(logits, 1)
     if mode == tf.estimator.ModeKeys.PREDICT:
         predictions = {
-            'score': logits_aft
-            # 'probabilities': tf.nn.softmax(logits),
-            # 'logits': logits
+            'score': predicted_class[:, tf.newaxis],
+            'probabilities': tf.nn.softmax(logits),
+            'logits': logits
         }
         return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
 
     # one_hot_label = tf.one_hot(indices=labels, depth=11)
 
-    loss = tf.losses.mean_squared_error(labels, logits_aft)
-    # loss = tf.losses.sparse_softmax_cross_entropy(labels, logits)  # Not applicable for score
-    predicted_class = tf.math.round(logits_aft)
+    loss = tf.losses.sparse_softmax_cross_entropy(labels, logits)  # Not applicable for score
     accuracy = tf.metrics.accuracy(labels, predicted_class)
+
     my_accuracy = tf.reduce_mean(tf.cast(tf.equal(labels, predicted_class), dtype=tf.float32))
     acc = tf.summary.scalar("accuracy_manual", my_accuracy)  # Number of correct answer
     # acc2 = tf.summary.scalar("Accuracy_update", accuracy[1])

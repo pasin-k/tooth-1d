@@ -286,6 +286,6 @@ if __name__ == '__main__':
     # Need special way to get hyperpara from config.csv
     run_params['result_path_new'] = run_params['result_path']
     print("Batch size: %s" % run_params['batch_size'])
-    # run(model_configs)
-    run_hyper_parameter_optimize()
+    run(model_configs)
+    # run_hyper_parameter_optimize()
     print("train.py completed")

@@ -31,7 +31,7 @@ def decode(data_dict):
 
     image_stacked = tf.stack([image_decoded[0], image_decoded[1], image_decoded[2], image_decoded[3]], axis=2)
     image_stacked = tf.cast(image_stacked, tf.float32)
-    label = tf.cast(data_dict['label'], tf.int64)
+    label = tf.cast(data_dict['label'], tf.float32)
     # output = (image_stacked, label)
     # return {'images': image_stacked, 'label': label}  # Output is [Channel, Height, Width]
     return image_stacked, label
