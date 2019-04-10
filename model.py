@@ -107,7 +107,7 @@ def customized_incepnet(features, mode, params):
     dropout6 = tf.layers.dropout(fc6, rate=params['dropout_rate'], training=mode == tf.estimator.ModeKeys.TRAIN,
                                  name="dropout6")
 
-    logits = fc_layer(dropout6, 11, activation=params['activation'], name='predict')
+    logits = fc_layer(dropout6, 11, activation=tf.nn.tanh, name='predict')
     return logits
 
 
@@ -157,7 +157,7 @@ def customized_incepnet_v2(features, mode, params):
     dropout6 = tf.layers.dropout(fc6, rate=params['dropout_rate'], training=mode == tf.estimator.ModeKeys.TRAIN,
                                  name="dropout6")
 
-    logits = fc_layer(dropout6, 11, activation=params['activation'], name='predict')
+    logits = fc_layer(dropout6, 11, activation=tf.nn.tanh, name='predict')
     return logits
 
 
@@ -209,7 +209,7 @@ def customized_incepnet_v3(features, mode, params):
                                  name="dropout6")
 
     # logits = fc_layer(dropout6, 11, activation=params['activation'], name='predict')
-    logits = fc_layer(dropout6, 1, activation=params['activation'], name='predict')  # Regression with one output
+    logits = fc_layer(dropout6, 1, activation=tf.nn.tanh, name='predict')  # Regression with one output
     return logits
 
 
@@ -221,7 +221,7 @@ def my_one_hot(labels, depth):
 def my_model(features, labels, mode, params, config):
     # Input: (Batch_size,240,360,4)
     logits = customized_incepnet_v2(features, mode, params)
-
+    logits = tf.math.scalar_mul(5, logits) + 5
     # Predict Mode
     # predicted_class = tf.argmax(logits, 1)
     if mode == tf.estimator.ModeKeys.PREDICT:
