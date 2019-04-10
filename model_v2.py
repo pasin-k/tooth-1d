@@ -14,7 +14,6 @@ def cnn_2d(layer,
     layer = tf.keras.layers.Conv2D(num_filters, conv_filter_size, strides=stride, padding="same",
                                    activation=activation)(layer)
     return layer
-    # TODO: Find way to show weight
 
 
 def flatten_layer(layer):  # Flatten from 2D/3D to 1D (not count batch dimension)
@@ -45,9 +44,9 @@ def max_pool_layer(layer, pooling_size, name=None, stride=-1):
     return tf.keras.layers.MaxPooling2D(pooling_size, stride, padding="same")(layer)
 
 
-def max_and_cnn_layer(layer, pooling_size, num_filters, activation, name):
-    pool = tf.keras.layers.MaxPooling2D(pooling_size, stride, padding="same")(layer)
-    conv = tf.keras.layers.Conv2D(num_filters, pooling_size, strides=pooling_size, padding="same",
+def max_and_cnn_layer(layer, pl_size, num_filters, activation, name):
+    pool = tf.keras.layers.MaxPooling2D(pl_size, pl_size, padding="same")(layer)
+    conv = tf.keras.layers.Conv2D(num_filters, pl_size, strides=pl_size, padding="same",
                                   activation=activation)(layer)
     concat = tf.keras.layers.concatenate([pool, conv], 3)
     return concat

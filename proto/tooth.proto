@@ -24,13 +24,13 @@ message TrainConfig{
 
     // Here are repeatable value
     // 1 is relu, 2 is default leaky relu
-    repeated float learning_rate = 7;
+    optional float learning_rate = 7;
 
-    repeated float dropout_rate = 8;
+    optional float dropout_rate = 8;
 
-    repeated string activation = 9;
+    optional string activation = 9;
 
-    repeated Channels channels = 10;
+    optional uint32 channels = 10;
 
 }
 
