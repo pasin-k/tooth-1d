@@ -1,5 +1,6 @@
 import tensorflow as tf
 # tf.enable_eager_execution()
+from tensorflow.python.client import device_lib
 import numpy as np
 import os
 import argparse
@@ -75,6 +76,11 @@ model_configs = {'learning_rate_list': learning_rate_list,
                  }
 
 
+def get_available_gpus():
+    local_device_protos = device_lib.list_local_devices()
+    return [x.name for x in local_device_protos if x.device_type == 'GPU']
+
+
 def run(model_params={}):
     # Add exception in case params is missing
     model_params['learning_rate'] = check_exist(model_params, 'learning_rate', 0.0003)
@@ -92,13 +98,16 @@ def run(model_params={}):
     print("Saved model at %s" % run_params['result_path_new'])
 
     tf.logging.set_verbosity(tf.logging.INFO)  # To see some additional info
+    # Setting for multiple GPUs
+    mirrored_strategy = tf.contrib.distribute.MirroredStrategy(num_gpus=len(get_available_gpus()))
     # Setting checkpoint config
     my_checkpoint_config = tf.estimator.RunConfig(
         save_checkpoints_secs=run_params['checkpoint_min'] * 60,
         # save_summary_steps=pareval_data_pathams['checkpoint_min'] * 10,
         keep_checkpoint_max=10,
         log_step_count_steps=500,
-        session_config=tf.ConfigProto(allow_soft_placement=True)
+        session_config=tf.ConfigProto(allow_soft_placement=True),
+        train_distribute=mirrored_strategy
     )
     # Or set up the model directory
     #   estimator = DNNClassifier(
@@ -110,6 +119,7 @@ def run(model_params={}):
         model_dir=run_params['result_path_new'],
         config=my_checkpoint_config
     )
+
     train_hook = tf.contrib.estimator.stop_if_no_decrease_hook(classifier, "loss", run_params['early_stop_step'])
     train_spec = tf.estimator.TrainSpec(
         input_fn=lambda: train_input_fn(train_data_path, batch_size=run_params['batch_size']),
