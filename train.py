@@ -146,19 +146,17 @@ def run(model_params={}):
     predictions = classifier.predict(input_fn=lambda: eval_input_fn(eval_data_path, batch_size=1))
     images, expected = get_data_from_path(eval_data_path)
     predict_score = ['Prediction']
-    probability_score = ['Probability']
     label_score = ['Label']
     for pred_dict, expec in zip(predictions, expected):
         # print(pred_dict)
-        print("Score" + str(pred_dict['score']))
-        class_id = pred_dict['score'][0]
-        probability = pred_dict['probabilities'][class_id]
-        print("Actual score: %s, Predicted score: %s with probability %s" % (expec, class_id, probability))
+        # print("Score: " + str(pred_dict['score']))
+        class_id = pred_dict['score']
+        # probability = pred_dict['probabilities'][class_id]
+        print("Actual score: %s, Predicted score: %s " % (expec, class_id))
         predict_score.append(class_id)
         label_score.append(expec)
-        probability_score.append(probability)
 
-    predict_result = zip(label_score, predict_score, probability_score)
+    predict_result = zip(label_score, predict_score)
 
     # print(eval_result[0]['accuracy'])
     # print('\nTest set accuracy: {accuracy:0.3f}\n'.format(**eval_result))
@@ -286,6 +284,6 @@ if __name__ == '__main__':
     # Need special way to get hyperpara from config.csv
     run_params['result_path_new'] = run_params['result_path']
     print("Batch size: %s" % run_params['batch_size'])
-    run(model_configs)
-    # run_hyper_parameter_optimize()
+    # run(model_configs)
+    run_hyper_parameter_optimize()
     print("train.py completed")
