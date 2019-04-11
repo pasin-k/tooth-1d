@@ -257,10 +257,10 @@ def run(tfrecord_name, dataset_folder, csv_dir=None):
 
 if __name__ == '__main__':
     # File name will be [tfrecord_name]_train_Taper_sum_median
-    # tfrecord_name = "preparation_181_data"
-    tfrecord_name = "original_preparation_data"
-    csv_name = "../global_data/Ground Truth Score_50.csv"
+    tfrecord_name = "preparation_181_data"
+    # tfrecord_name = "original_preparation_data"
+    # csv_name = "../global_data/Ground Truth Score_50.csv"
     # Directory of image
-    dataset_folder = "./data/cross_section_original"
-    run(tfrecord_name, dataset_folder, csv_name)
+    dataset_folder = "./data/cross_section"
+    run(tfrecord_name, dataset_folder)
     print("Complete")
