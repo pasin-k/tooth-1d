@@ -15,7 +15,9 @@ print("pre_processing.py version: " + str(v))
 
 degree = list([0, 45, 90, 135])
 
-def main():
+
+# Get stl file and label, convert to stl_file
+def get_cross_section():
     # Get data and transformed to cross-section image
     name_dir, image_name = get_file_name(folder_name='../global_data/', file_name="PreparationScan.stl")
     label, label_name = get_label("Taper_Sum", "median", double_data=True, one_hotted=False, normalized=False)
@@ -80,26 +82,19 @@ def save_image(stl_points, stl_points_augmented, label_name, error_file_names):
             filehandle.write('%s\n' % listitem)
 
 
-def save_movement(stl_points, label_name):
+def stl_point_to_movement(stl_points):  # stl_points is list of all file (all examples)
     new_stl_points = []
-    for i in len(stl_points)[0]:
-        new_points = []
-        for d in range(len(degree)):
-            points = stl_points[i][d]
-        new_stl_points.append(new_points)
-
-
-def pca(train_images,test_images, pca_components):
-    pass
+    for stl_point_sample in stl_points:  # stl_point_sample is one example of stl_points
+        new_points_sample = []
+        for stl_point_image in stl_point_sample:  # stl_point_image is one degree of cross-section
+            difference = stl_point_image[1:, :] - stl_point_image[0:-1, :]  # Find difference between each position
+            new_points_sample.append(difference)
+        new_stl_points.append(new_points_sample)
+    return new_stl_points
 
 
 if __name__ == '__main__':
-    points, points_aug, lbl_name, err_name, deg = main()  # Output as list[list[numpy]] (example_data, degrees, points)
-    print(type(points))
-    print(len(points))
-    print(type(points[0]))
-    print(len(points[0]))
-    print(type(points[0][0]))
-    print(len(points[0][0]))
-    # save_image(points, points_aug, lbl_name, err_name)
+    # Output 'points' as list[list[numpy]] (example_data, degrees, points)
+    points, points_aug, lbl_name, err_name, deg = get_cross_section()
+    save_image(points, points_aug, lbl_name, err_name)
     print("pre_processing.py: done")

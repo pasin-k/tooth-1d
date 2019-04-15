@@ -12,35 +12,7 @@ from ImportData2D import get_label, get_file_name
 numdeg = 4  # Number of images on each example
 
 
-# Version 1.1.0
 # Run images from pre_processing.py into tfrecords
-
-
-# def serialize(img_addr,img_label,tffilename):
-#     # open the TFRecords file
-#     writer = tf.python_io.TFRecordWriter(tffilename)
-#     for i in range(len(img_addr)):
-#         # print how many images are saved every 100 images
-#         if not i % 100:
-#             print('Saving {} data: {}/{}'.format(tffilename, i, len(img_addr)))
-#             sys.stdout.flush()
-#         # Create a feature
-#         feature = {}
-#         feature['label'] = _float_feature(img_label[i])
-#
-#         for j in range(len(img_addr[0])):
-#             # Load the image
-#             img = load_image(img_addr[i][j])
-#             feature['img'+str(j)] = _bytes_feature(tf.compat.as_bytes(img.tostring()))
-#         # Create an example protocol buffer
-#         example = tf.train.Example(features=tf.train.Features(feature=feature))
-#
-#         # Serialize to string and write on the file
-#         writer.write(example.SerializeToString())
-#
-#     writer.close()
-#     sys.stdout.flush()
-
 def serialize(example):
     feature = {'label': _int64_feature(example['label'])}
     for i in range(numdeg):
@@ -257,10 +229,10 @@ def run(tfrecord_name, dataset_folder, csv_dir=None):
 
 if __name__ == '__main__':
     # File name will be [tfrecord_name]_train_Taper_sum_median
-    tfrecord_name = "preparation_181_data"
+    tfrecord_file_name = "preparation_181_data"
     # tfrecord_name = "original_preparation_data"
     # csv_name = "../global_data/Ground Truth Score_50.csv"
     # Directory of image
-    dataset_folder = "./data/cross_section"
-    run(tfrecord_name, dataset_folder)
+    dataset_folder_dir = "./data/cross_section"
+    run(tfrecord_file_name, dataset_folder_dir)
     print("Complete")

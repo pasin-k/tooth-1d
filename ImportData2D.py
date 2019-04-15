@@ -129,6 +129,40 @@ def get_label(dataname, datatype, double_data=True, one_hotted=False, normalized
         return labels_data, labels_name
 
 
+# Plot the list of coordinates and save it as PNG image
+# Input     CoorList        -> List of {List of numpy coordinates <- get from stlSlicer}
+#           outDirectory    -> String, Directory to save output
+#           fileName        -> String, name of file to save
+#           image_num       -> List of name of the image
+#           Degree          -> List of angles used in
+#           fileType        -> [Optional], such as png,jpeg,...
+# Output    none            -> Only save as output outside
+def save_plot(coor_list, out_directory, file_name, image_name, degree, file_type="png"):
+    if len(coor_list) != len(image_name):
+        raise ValueError("save_plot: number of image(%s) is not equal to number of image_name(%s)"
+                         % (len(coor_list), len(image_name)))
+    out_directory = os.path.abspath(out_directory)
+    if len(degree) != len(coor_list[0]):
+        print("# of Degree expected: %d" % len(degree))
+        print("# of Degree found: %d" % len(coor_list[0]))
+        raise Exception('Number of degree specified is not equals to coordinate ')
+
+    for i in range(len(coor_list)):
+        for d in range(len(degree)):
+            coor = coor_list[i][d]
+            plt.plot(coor[:, 0], coor[:, 1], color='black', linewidth=1)
+            plt.axis('off')
+            # Name with some additional data
+            fullname = "%s_%s_%d.%s" % (file_name, image_name[i], degree[d], file_type)
+            output_name = os.path.join(out_directory, fullname)
+
+            plt.savefig(output_name, bbox_inches='tight')
+            plt.clf()
+    print("Finished plotting for %d images with %d rotations at %s" % (len(coor_list), len(degree), out_directory))
+
+
+# Below are unused stl-to-voxel functions
+'''
 def create_name(num_file, exceptions=[-1]):
     name = []
     num_files = num_file
@@ -260,99 +294,5 @@ def get2DImage(directory, name, singleval=False, realVal=False, threshold=253):
         grayim = grayim.astype(int)
         print("Get 2D images from %s done with size: (%d,%d,%d)" % (name, w, h, num_im))
         return grayim
-
-
-# Plot the list of coordinates and save it as PNG image
-# Input     CoorList        -> List of {List of numpy coordinates <- get from stlSlicer}
-#           outDirectory    -> String, Directory to save output
-#           fileName        -> String, name of file to save
-#           image_num       -> List of name of the image
-#           Degree          -> List of angles used in
-#           fileType        -> [Optional], such as png,jpeg,...
-# Output    none            -> Only save as output outside
-def save_plot(coor_list, out_directory, file_name, image_name, degree, file_type="png"):
-    if len(coor_list) != len(image_name):
-        raise ValueError("save_plot: number of image(%s) is not equal to number of image_name(%s)"
-                         % (len(coor_list), len(image_name)))
-    out_directory = os.path.abspath(out_directory)
-    if len(degree) != len(coor_list[0]):
-        print("# of Degree expected: %d" % len(degree))
-        print("# of Degree found: %d" % len(coor_list[0]))
-        raise Exception('Number of degree specified is not equals to coordinate ')
-
-    for i in range(len(coor_list)):
-        for d in range(len(degree)):
-            coor = coor_list[i][d]
-            plt.plot(coor[:, 0], coor[:, 1], color='black', linewidth=1)
-            plt.axis('off')
-            # Name with some additional data
-            fullname = "%s_%s_%d.%s" % (file_name, image_name[i], degree[d], file_type)
-            output_name = os.path.join(out_directory, fullname)
-
-            plt.savefig(output_name, bbox_inches='tight')
-            plt.clf()
-    print("Finished plotting for %d images with %d rotations at %s" % (len(coor_list), len(degree), out_directory))
-
-
-# def countexist(im):
-#     for i in range(0, np.max(im) + 1):
-#         a = i in im
-#         if (a):
-#             count = (im == i).sum()
-#             print("Value %d: %s with %d times" % (i, a, count))
-
-
 '''
-def shuffleData(X,y,numtrain,numvalid): 
-    #Input: X:all examples, y:label, numtrain = # of training examples, numvalid = # of validation examples
-    #This shuffle and put examples into different variable (float32)
-    (h,w,d,num_ex) = np.shape(X)
-    X = X.astype('float32')
-    if(num_ex != len(y)):
-        print("Size of X and y is not equals")
-        return 0,0,0
-    elif(num_ex <= numtrain+numvalid):
-        print("Number of train and validate is too many: There is " + str(num_ex) + " examples")
-        return 0,0,0
-    else:
-        numtest = num_ex-numtrain-numvalid
-    shuff = list(range(num_ex))
-    random.shuffle(shuff)
-    X_train = np.zeros((h,w,d,numtrain),dtype = 'float32')
-    y_train = np.zeros((numtrain),dtype = 'float32')
-    X_valid = np.zeros((h,w,d,numvalid),dtype = 'float32')
-    y_valid = np.zeros((numvalid),dtype = 'float32')
-    X_test = np.zeros((h,w,d,numtest),dtype = 'float32')
-    y_test = np.zeros((numtest),dtype = 'float32')
-    for i in range(numtrain):
-        X_train[:,:,:,i] = X[:,:,:,shuff[i]]
-        y_train[i] = y[i]
-    for i in range(numvalid):
-        X_valid[:,:,:,i] = X[:,:,:,shuff[i + numtrain]]
-        y_valid[i] = y[i + numtrain]
-    for i in range(numtest):
-        X_test[:,:,:,i] = X[:,:,:,shuff[i + numtrain + numvalid]]
-        y_test[i] = y[i + numtrain + numvalid]   
-    train = [X_train, y_train]
-    valid = [X_valid, y_valid]
-    test = [X_test, y_test]
-    print("Number of example: %s, (Train,Valid,Test) size = (%s,%s,%s)" % (num_ex,numtrain,numvalid,numtest))
-    print("Input shape:" + str(np.shape(train[0])))
-    return train,valid,test
-'''
-# Get list of filename in specific folder (Deprecrated)
-# Targetfolder is 'PreparationScan' of 'WaxupScan'
-# Look at rootfolder/targetfolder/subfolder
-# def getFilename(targetfolder, subfoldername="stl"):
-#     print("Warning: This function is deprecrated, use get_file_name instead")
-#     rootfolder = '../global_data/'
-#     targetfolder = 'PreparationScan'
-#     foldername = 'stl'
-#     folder_dir = os.path.join(rootfolder, targetfolder, subfoldername)
-#     namelist = []
-#     for root, dirs, files in os.walk(folder_dir):
-#         for filename in files:
-#             fullpath = os.path.join(os.path.abspath(folder_dir), filename)
-#             namelist.append(fullpath)
-#     print("Get filename from folder: " + os.path.abspath(folder_dir) + " " + str(len(namelist)) + "files")
-#     return namelist
+
