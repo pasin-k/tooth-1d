@@ -1,7 +1,4 @@
 /data/*
 /model/*
-misc.xml
-modules.xml
-my2DCNN.iml
-my2DCNN.xml
-vcs.xml
+*.mxl
+/.idea/*

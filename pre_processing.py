@@ -3,7 +3,7 @@
 
 # Import Libraries
 import time
-from ImportData2D import get_label, get_file_name, save_plot
+from ImportData2D import get_label, get_file_name, save_plot, save_coordinate
 from stlSlicer import getSlicer, slicecoor, rotatestl
 import numpy as np
 
@@ -14,6 +14,7 @@ v = '1.2.0'
 print("pre_processing.py version: " + str(v))
 
 degree = list([0, 45, 90, 135])
+numdeg = len(degree)
 
 
 # Get stl file and label, convert to stl_file
@@ -58,12 +59,12 @@ def get_cross_section():
 
     # The output is list(examples) of list(degrees) of numpy array (N*2 coordinates)
     print("Finished with %d examples, %d augmented examples" % (len(stl_points), len(stl_points_augmented)))
-    print("Number of score received: %d (Originally: %d" % (len(label), len(label) / 2))
+    print("Number of score received (bugged file removed): %d (Originally: %d)" % (len(label), len(label) / 2))
 
     print("Max point: %s, min  point: %s" % (max_point, min_point))
     # augment_num = int(len(label)/len(label_name))
     # label_name_aug = [val for val in label_name for _ in range(augment_num)]
-    return stl_points, stl_points_augmented, label_name, error_file_names, degree
+    return stl_points, stl_points_augmented, label, label_name, error_file_names, degree
 
 
 def save_image(stl_points, stl_points_augmented, label_name, error_file_names):
@@ -93,8 +94,33 @@ def stl_point_to_movement(stl_points):  # stl_points is list of all file (all ex
     return new_stl_points
 
 
+def save_stl_point(stl_points, stl_points_augmented, label_name, error_file_names):
+    # Save data as png image
+    png_name = "PreparationScan" + "_0"
+    save_coordinate(stl_points, "./data/coordinates", png_name, label_name, degree)
+    print("Finished saving first set of data")
+    # Save again for augmented data
+    png_name = "PreparationScan" + "_1"
+    save_coordinate(stl_points_augmented, "./data/coordinates", png_name, label_name, degree)
+    print("Finished saving second set of data")
+
+    # Save names which has defect on it, use when convert to tfrecord
+    with open('./data/coordinates/error_file.txt', 'w') as filehandle:
+        for listitem in error_file_names:
+            filehandle.write('%s\n' % listitem)
+
+
 if __name__ == '__main__':
     # Output 'points' as list[list[numpy]] (example_data, degrees, points)
-    points, points_aug, lbl_name, err_name, deg = get_cross_section()
-    save_image(points, points_aug, lbl_name, err_name)
+    save_img = False
+    save_coor = True
+    points, points_aug, lbl, lbl_name, err_name, deg = get_cross_section()
+
+    if save_img:
+        save_image(points, points_aug, lbl_name, err_name)
+
+    if save_coor:
+        points = stl_point_to_movement(points)
+        points_aug = stl_point_to_movement(points_aug)
+        save_stl_point(points, points_aug, lbl_name, err_name)
     print("pre_processing.py: done")

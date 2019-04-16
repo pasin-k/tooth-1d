@@ -130,14 +130,14 @@ def get_label(dataname, datatype, double_data=True, one_hotted=False, normalized
 
 
 # Plot the list of coordinates and save it as PNG image
-# Input     CoorList        -> List of {List of numpy coordinates <- get from stlSlicer}
-#           outDirectory    -> String, Directory to save output
-#           fileName        -> String, name of file to save
-#           image_num       -> List of name of the image
-#           Degree          -> List of angles used in
-#           fileType        -> [Optional], such as png,jpeg,...
-# Output    none            -> Only save as output outside
-def save_plot(coor_list, out_directory, file_name, image_name, degree, file_type="png"):
+# Input     coor_list        -> List of {List of numpy coordinates <- get from stlSlicer}
+#           out_directory    -> String, Directory to save output
+#           file_header_name -> String, header of name of the file, follow by image_num
+#           image_num        -> List of name of the image
+#           degree           -> List of angles used in, add the angle in file name as well
+#           file_type        -> [Optional], such as png,jpeg,...
+# Output    none             -> Only save as output outside
+def save_plot(coor_list, out_directory, file_header_name, image_name, degree, file_type="png"):
     if len(coor_list) != len(image_name):
         raise ValueError("save_plot: number of image(%s) is not equal to number of image_name(%s)"
                          % (len(coor_list), len(image_name)))
@@ -153,12 +153,33 @@ def save_plot(coor_list, out_directory, file_name, image_name, degree, file_type
             plt.plot(coor[:, 0], coor[:, 1], color='black', linewidth=1)
             plt.axis('off')
             # Name with some additional data
-            fullname = "%s_%s_%d.%s" % (file_name, image_name[i], degree[d], file_type)
+            fullname = "%s_%s_%d.%s" % (file_header_name, image_name[i], degree[d], file_type)
             output_name = os.path.join(out_directory, fullname)
 
             plt.savefig(output_name, bbox_inches='tight')
             plt.clf()
     print("Finished plotting for %d images with %d rotations at %s" % (len(coor_list), len(degree), out_directory))
+
+
+# Save coordinate as .npy file
+def save_coordinate(coor_list, out_directory, file_header_name, image_name, degree):
+    if len(coor_list) != len(image_name):
+        raise ValueError("save_plot: number of image(%s) is not equal to number of image_name(%s)"
+                         % (len(coor_list), len(image_name)))
+    out_directory = os.path.abspath(out_directory)
+    if len(degree) != len(coor_list[0]):
+        print("# of Degree expected: %d" % len(degree))
+        print("# of Degree found: %d" % len(coor_list[0]))
+        raise Exception('Number of degree specified is not equals to coordinate ')
+
+    for i in range(len(coor_list)):
+        for d in range(len(degree)):
+            coor = coor_list[i][d]
+            # Name with some additional data
+            fullname = "%s_%s_%d.npy" % (file_header_name, image_name[i], degree[d])
+            output_name = os.path.join(out_directory, fullname)
+            np.save(output_name, coor)
+    print("Finished saving coordinates: %d files with %d rotations at dir: %s" % (len(coor_list), len(degree), out_directory))
 
 
 # Below are unused stl-to-voxel functions
