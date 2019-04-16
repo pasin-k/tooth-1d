@@ -15,6 +15,8 @@ mpl.use('TkAgg')
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure
 
+from random import shuffle
+
 v = '2.3.1'  # Add getFilename function, get absolute path now
 # 1.8 Works with pycharm
 # 1.9 Edit Name of dataname and datatype
@@ -180,6 +182,132 @@ def save_coordinate(coor_list, out_directory, file_header_name, image_name, degr
             output_name = os.path.join(out_directory, fullname)
             np.save(output_name, coor)
     print("Finished saving coordinates: %d files with %d rotations at dir: %s" % (len(coor_list), len(degree), out_directory))
+
+
+def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs):
+    numdeg = configs['numdeg']
+    image_address, _ = get_file_name(folder_name=dataset_folder, file_name=None)
+    if csv_dir is None:
+        labels, label_name = get_label(configs['label_data'], configs['label_type'], double_data=True,
+                                       one_hotted=False, normalized=False)
+    else:
+        labels, label_name = get_label(configs['label_data'], configs['label_type'], double_data=True,
+                                       one_hotted=False, normalized=False, file_dir=csv_dir)
+    # Check list of name that has error, remove it from label
+    error_file_names = []
+    with open(dataset_folder + '/error_file.txt', 'r') as filehandle:
+        for line in filehandle:
+            # remove linebreak which is the last character of the string
+            current_name = line[:-1]
+            # add item to the list
+            error_file_names.append(current_name)
+    for name in error_file_names:
+        try:
+            index = label_name.index(name)
+            label_name.pop(index)
+            labels.pop(index * 2)
+            labels.pop(index * 2)  # Do it again if we double the data
+        except ValueError:
+            pass
+
+    if len(image_address) / len(labels) != numdeg:
+        print(image_address)
+        raise Exception(
+            '# of images and labels is not compatible: %d images, %d labels. Expected # of images to be 4 times of label' % (
+                len(image_address), len(labels)))
+
+    # Group up 4 images and label together first, shuffle
+    grouped_address = []
+    example_grouped_address = []  # A 0 degree filename used when adding more example
+    for i in range(len(labels)):
+        grouped_address.append([image_address[i * numdeg:(i + 1) * numdeg], labels[i]])  # All degrees
+        example_grouped_address.append(image_address[i * numdeg].split('.')[0])  # Only 0 degree
+
+    # Zip, shuffle, unzip
+    z = list(zip(grouped_address, example_grouped_address))
+    shuffle(z)
+    grouped_address[:], example_grouped_address[:] = zip(*z)
+    train_amount = int(configs['train_eval_ratio'] * len(grouped_address))  # Calculate amount of training data
+
+    train_address = list()
+    eval_address = list()
+
+    # Open file and read the content in a list
+    file_name = "./data/%s_%s_%s.txt" % (tfrecord_name, configs['label_data'], configs['label_type'])
+    if os.path.isfile(file_name):  # Check if file exist
+        with open(file_name) as f:
+            filehandle = f.read().splitlines()
+        is_training = True
+        if not (filehandle[0] == 'train'):
+            print(filehandle[0])
+            raise KeyError("File does not have correct format, need 'train' and 'eval' keyword within file")
+        for line in filehandle[1:]:
+            if is_training:
+                if line == 'eval':
+                    is_training = False
+                else:
+                    # check if it exist in grouped exist, if found, put in train_address
+                    for i, name in enumerate(example_grouped_address):
+                        if line in name:
+                            train_address.append(grouped_address[i])
+                            grouped_address.remove(grouped_address[i])
+                            example_grouped_address.remove(example_grouped_address[i])
+                            break
+            else:
+                for i, name in enumerate(example_grouped_address):
+                    if line in name:
+                        eval_address.append(grouped_address[i])
+                        grouped_address.remove(grouped_address[i])
+                        example_grouped_address.remove(example_grouped_address[i])
+                        break
+        print("Use %s train examples, %s eval examples from previous tfrecords as training" % (
+            len(train_address), len(eval_address)))
+
+    # print("Example grouped address: %s" % example_grouped_address)
+    # Split training and test (Split 80:20)
+    train_amount = train_amount - len(train_address)
+    if train_amount < 0:
+        train_amount = 0
+        warnings.warn("imgtotfrecord: amount of training is not correct, might want to check")
+    train_address.extend(grouped_address[0:train_amount])
+    grouped_train_address = tuple(
+        [list(e) for e in zip(*train_address)])  # Convert to tuple of list[image address, label]
+    eval_address.extend(grouped_address[train_amount:])
+    grouped_eval_address = tuple(
+        [list(e) for e in zip(*eval_address)])  # Convert to tuple of list[image address, label]
+
+    # print(grouped_eval_address)
+    print("Train files: %d, Evaluate Files: %d" % (len(grouped_train_address[0]), len(grouped_eval_address[0])))
+
+    # Save names of files of train address
+    file_name = "./data/%s_%s_%s.txt" % (tfrecord_name, configs['label_data'], configs['label_type'])
+    with open(file_name, 'w') as filehandle:
+        # Header with 'train'
+        filehandle.write('train\n')
+        for listitem in train_address:
+            # For each filename, select 0 degree angle and remove _0.png
+            if listitem[0][0].count('.') != 1:
+                raise KeyError("train_address has string '.' more than once in name, please check")
+            new_list_item = listitem[0][0].split('.')[0]
+            filehandle.write('%s\n' % new_list_item)
+
+        # Headder with 'eval'
+        filehandle.write('eval\n')
+        for listitem in eval_address:
+            # For each filename, select 0 degree angle and remove _0.png
+            if listitem[0][0].count('.') != 1:
+                raise KeyError("eval_address has string '.' more than once in name, please check")
+            new_list_item = listitem[0][0].split('.')[0]
+            filehandle.write('%s\n' % new_list_item)
+    '''
+    # Save names of files of eval address
+    file_name = './data/' + tfrecord_name + '_eval_address.txt'
+    with open(file_name, 'w') as filehandle:
+        for listitem in eval_address:
+            new_list_item = listitem[0][0].replace('_0.png', '')
+            filehandle.write('%s\n' % new_list_item)
+    '''
+    return grouped_train_address, grouped_eval_address
 
 
 # Below are unused stl-to-voxel functions
