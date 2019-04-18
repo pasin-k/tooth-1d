@@ -53,15 +53,37 @@ def get_file_name(folder_name='../global_data/', file_name='PreparationScan.stl'
     return file_dir, folder_dir
 
 
+# Since some score can only be in a certain range (E.g. 1,3 or 5), if any median score that is outside of this range
+# appear, move it to the nearby value instead based on average. (Round the other direction from average)
+def readjust_median_label(label, avg_data):
+    possible_value = [1,3,5]
+    if len(label) != len(avg_data):
+        raise ValueError("Size of label and average data is not equal")
+    for i, label_value in enumerate(label):
+        if not (label_value in possible_value):
+            # Check if value is over/under boundary, if so, choose the min/max value
+            if label_value < possible_value[0]:
+                label[i] = possible_value[0]
+            elif label_value > possible_value[-1]:
+                label[i] = possible_value[-1]
+            else:
+                if label_value > avg_data[i]:  # If median is more than average, round up
+                    label[i] = min(filter(lambda x: x > label_value, possible_value))
+                else:  # If median is less or equal to average, around down
+                    label[i] = max(filter(lambda x: x < label_value, possible_value))
+    return label
+
 # double: Duplicate score twice for augmentation
 # one_hotted: False-> Output will be continuous, True-> Output will be vector with 1 on the correct score
 # normalized: True will give result as maximum of 1, False will give raw value
 # output labels_name is only for checking missing files
-def get_label(dataname, datatype, double_data=True, one_hotted=False, normalized=True,
+def get_label(dataname, datatype, double_data=True, one_hotted=False, normalized=False,
               file_dir='../global_data/Ground Truth Score_new.csv'):
-    label_name = {"Occ_B": 0, "Occ_F": 3, "Occ_L": 6, "Occ_Sum": 9, "BL": 12, "MD": 15, "Taper_Sum": 18}
-    label_max_score = {"Occ_B": 5, "Occ_F": 5, "Occ_L": 5, "Occ_Sum": 15, "BL": 5, "MD": 5, "Taper_Sum": 10}
-    type = {"average": 1, "median": 2}
+    label_name = {"Occ_B": 0, "Occ_F": 3, "Occ_L": 6, "Occ_Sum": 9,
+                  "BL": 12, "MD": 15, "Taper_Sum": 18}
+    label_max_score = {"Occ_B": 5, "Occ_F": 5, "Occ_L": 5, "Occ_Sum": 15,
+                       "BL": 5, "MD": 5, "Taper_Sum": 10}
+    stat_type = {"average": 1, "median": 2}
 
     try:
         data_column = label_name[dataname]
@@ -74,13 +96,15 @@ def get_label(dataname, datatype, double_data=True, one_hotted=False, normalized
             datatype = 2
             print("Note: One-hot mode only supported median")
         label_column = data_column
-        data_column = data_column + type[datatype]  # Shift the interested column by one or two, depends on type
+        avg_column = data_column + 1
+        data_column = data_column + stat_type[datatype]  # Shift the interested column by one or two, depends on type
     except:
         raise Exception("Wrong datatype, Type as %s, Valid name: (\"average\",\"median\")" % datatype)
 
     max_score = label_max_score[dataname]
     labels_name = []
     labels_data = []
+    avg_data = []
     print("get_label: Import from %s" % os.path.join(file_dir))
     with open(file_dir) as csvfile:
         readCSV = csv.reader(csvfile, delimiter=',')
@@ -92,12 +116,18 @@ def get_label(dataname, datatype, double_data=True, one_hotted=False, normalized
                 if row[data_column] != '':
                     label = row[label_column]
                     val = row[data_column]
+                    avg_val = row[avg_column]
                     if one_hotted or (not normalized):  # Don't normalize if output is one hot encoding
                         normalized_value = int(val)  # Turn string to int
                     else:
                         normalized_value = float(val) / max_score  # Turn string to float
                     labels_name.append(label)
                     labels_data.append(normalized_value)
+                    avg_data.append(float(avg_val))
+
+    # If consider median data on anything except Taper_Sum/Occ_sum and does not normalized
+    if (datatype is "median" and (not normalized) and dataname is not "Occ_Sum" and dataname is not "Taper_Sum"):
+        labels_data = readjust_median_label(labels_data, avg_data)
 
     # Sort data by name
     labels_name, labels_data = zip(*sorted(zip(labels_name, labels_data)))

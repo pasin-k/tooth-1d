@@ -3,6 +3,7 @@
 
 # Import Libraries
 import time
+import csv
 from ImportData2D import get_label, get_file_name, save_plot, save_coordinate
 from stlSlicer import getSlicer, slicecoor, rotatestl
 import numpy as np
@@ -18,10 +19,10 @@ numdeg = len(degree)
 
 
 # Get stl file and label, convert to stl_file
-def get_cross_section():
+def get_cross_section(data_type, stat_type):
     # Get data and transformed to cross-section image
     name_dir, image_name = get_file_name(folder_name='../global_data/', file_name="PreparationScan.stl")
-    label, label_name = get_label("Taper_Sum", "median", double_data=True, one_hotted=False, normalized=False)
+    label, label_name = get_label(data_type, stat_type, double_data=True, one_hotted=False, normalized=False)
     # Number of data should be the same as number of label
     if image_name != label_name:
         print(image_name)
@@ -113,9 +114,9 @@ def save_stl_point(stl_points, stl_points_augmented, label_name, error_file_name
 if __name__ == '__main__':
     # Output 'points' as list[list[numpy]] (example_data, degrees, points)
     save_img = False
-    save_coor = True
-    points, points_aug, lbl, lbl_name, err_name, deg = get_cross_section()
-
+    save_coor = False
+    # points, points_aug, lbl, lbl_name, err_name, deg = get_cross_section(data_type="BL", stat_type="median")
+    lbl, label_name = get_label("BL", "median", double_data=True, one_hotted=False, normalized=False)
     if save_img:
         save_image(points, points_aug, lbl_name, err_name)
 
@@ -123,4 +124,16 @@ if __name__ == '__main__':
         points = stl_point_to_movement(points)
         points_aug = stl_point_to_movement(points_aug)
         save_stl_point(points, points_aug, lbl_name, err_name)
+
+    print(label_name[180:190])
+    print(lbl[360:379])
+    '''
+    with open("check_value.csv", 'w', newline='') as myfile:
+        wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
+        wr.writerow(lbl)
+
+    with open("check_name.csv", 'w', newline='') as myfile:
+        wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
+        wr.writerow(label_name)
+    '''
     print("pre_processing.py: done")
