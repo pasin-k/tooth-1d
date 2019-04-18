@@ -73,6 +73,7 @@ def readjust_median_label(label, avg_data):
                     label[i] = max(filter(lambda x: x < label_value, possible_value))
     return label
 
+
 # double: Duplicate score twice for augmentation
 # one_hotted: False-> Output will be continuous, True-> Output will be vector with 1 on the correct score
 # normalized: True will give result as maximum of 1, False will give raw value
@@ -166,10 +167,11 @@ def get_label(dataname, datatype, double_data=True, one_hotted=False, normalized
 #           out_directory    -> String, Directory to save output
 #           file_header_name -> String, header of name of the file, follow by image_num
 #           image_num        -> List of name of the image
+#           augment_number   -> Since augmentation has same image_number, we use this to differentiate
 #           degree           -> List of angles used in, add the angle in file name as well
 #           file_type        -> [Optional], such as png,jpeg,...
 # Output    none             -> Only save as output outside
-def save_plot(coor_list, out_directory, file_header_name, image_name, degree, file_type="png"):
+def save_plot(coor_list, out_directory, file_header_name, image_name, augment_number, degree, file_type="png"):
     if len(coor_list) != len(image_name):
         raise ValueError("save_plot: number of image(%s) is not equal to number of image_name(%s)"
                          % (len(coor_list), len(image_name)))
@@ -185,33 +187,12 @@ def save_plot(coor_list, out_directory, file_header_name, image_name, degree, fi
             plt.plot(coor[:, 0], coor[:, 1], color='black', linewidth=1)
             plt.axis('off')
             # Name with some additional data
-            fullname = "%s_%s_%d.%s" % (file_header_name, image_name[i], degree[d], file_type)
+            fullname = "%s_%s_%s_%d.%s" % (file_header_name, image_name[i], augment_number, degree[d], file_type)
             output_name = os.path.join(out_directory, fullname)
 
             plt.savefig(output_name, bbox_inches='tight')
             plt.clf()
     print("Finished plotting for %d images with %d rotations at %s" % (len(coor_list), len(degree), out_directory))
-
-
-# Save coordinate as .npy file
-def save_coordinate(coor_list, out_directory, file_header_name, image_name, degree):
-    if len(coor_list) != len(image_name):
-        raise ValueError("save_plot: number of image(%s) is not equal to number of image_name(%s)"
-                         % (len(coor_list), len(image_name)))
-    out_directory = os.path.abspath(out_directory)
-    if len(degree) != len(coor_list[0]):
-        print("# of Degree expected: %d" % len(degree))
-        print("# of Degree found: %d" % len(coor_list[0]))
-        raise Exception('Number of degree specified is not equals to coordinate ')
-
-    for i in range(len(coor_list)):
-        for d in range(len(degree)):
-            coor = coor_list[i][d]
-            # Name with some additional data
-            fullname = "%s_%s_%d.npy" % (file_header_name, image_name[i], degree[d])
-            output_name = os.path.join(out_directory, fullname)
-            np.save(output_name, coor)
-    print("Finished saving coordinates: %d files with %d rotations at dir: %s" % (len(coor_list), len(degree), out_directory))
 
 
 def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs):
@@ -250,6 +231,7 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs):
     grouped_address = []
     example_grouped_address = []  # A 0 degree filename used when adding more example
     for i in range(len(labels)):
+        print([image_address[i * numdeg:(i + 1) * numdeg], labels[i]])
         grouped_address.append([image_address[i * numdeg:(i + 1) * numdeg], labels[i]])  # All degrees
         example_grouped_address.append(image_address[i * numdeg].split('.')[0])  # Only 0 degree
 

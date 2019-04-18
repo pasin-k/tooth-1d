@@ -4,7 +4,8 @@
 # Import Libraries
 import time
 import csv
-from ImportData2D import get_label, get_file_name, save_plot, save_coordinate
+import os
+from ImportData2D import get_label, get_file_name, save_plot
 from stlSlicer import getSlicer, slicecoor, rotatestl
 import numpy as np
 
@@ -21,7 +22,7 @@ numdeg = len(degree)
 # Get stl file and label, convert to stl_file
 def get_cross_section(data_type, stat_type):
     # Get data and transformed to cross-section image
-    name_dir, image_name = get_file_name(folder_name='../global_data/', file_name="PreparationScan.stl")
+    name_dir, image_name = get_file_name(folder_name='../global_data/stl_data', file_name="PreparationScan.stl")
     label, label_name = get_label(data_type, stat_type, double_data=True, one_hotted=False, normalized=False)
     # Number of data should be the same as number of label
     if image_name != label_name:
@@ -69,17 +70,18 @@ def get_cross_section(data_type, stat_type):
 
 
 def save_image(stl_points, stl_points_augmented, label_name, error_file_names):
+    # Directory to save image and errorfile
+    image_dir = "./data/cross_section"
     # Save data as png image
-    png_name = "PreparationScan" + "_0"
-    save_plot(stl_points, "./data/cross_section", png_name, label_name, degree)
+    png_name = "PreparationScan"
+    save_plot(stl_points, image_dir, png_name, label_name, 0, degree)
     print("Finished saving first set of data")
     # Save again for augmented data
-    png_name = "PreparationScan" + "_1"
-    save_plot(stl_points_augmented, "./data/cross_section", png_name, label_name, degree)
+    save_plot(stl_points_augmented, image_dir, png_name, label_name, 1, degree)
     print("Finished saving second set of data")
 
     # Save names which has defect on it, use when convert to tfrecord
-    with open('./data/cross_section/error_file.txt', 'w') as filehandle:
+    with open(image_dir + '/error_file.txt', 'w') as filehandle:
         for listitem in error_file_names:
             filehandle.write('%s\n' % listitem)
 
@@ -95,45 +97,60 @@ def stl_point_to_movement(stl_points):  # stl_points is list of all file (all ex
     return new_stl_points
 
 
+# Save coordinate as .npy file
+def save_coordinate(coor_list, out_directory, file_header_name, image_name, augment_number, degree):
+    if len(coor_list) != len(image_name):
+        raise ValueError("save_plot: number of image(%s) is not equal to number of image_name(%s)"
+                         % (len(coor_list), len(image_name)))
+    out_directory = os.path.abspath(out_directory)
+    if len(degree) != len(coor_list[0]):
+        print("# of Degree expected: %d" % len(degree))
+        print("# of Degree found: %d" % len(coor_list[0]))
+        raise Exception('Number of degree specified is not equals to coordinate ')
+
+    for i in range(len(coor_list)):
+        for d in range(len(degree)):
+            coor = coor_list[i][d]
+            # Name with some additional data
+            fullname = "%s_%s_%s_%d.npy" % (file_header_name, image_name[i], augment_number, degree[d])
+            output_name = os.path.join(out_directory, fullname)
+            np.save(output_name, coor)
+            np.savetxt("%s_%s_%d.txt" % (file_header_name, image_name[i], degree[d]), coor)
+    print("Finished saving coordinates: %d files with %d rotations at dir: %s" % (len(coor_list), len(degree), out_directory))
+
+
 def save_stl_point(stl_points, stl_points_augmented, label_name, error_file_names):
+    # Directory to save coordinates
+    file_dir = "./data/coordinates"
+    # This convert coordinates into vector between each coordinate
+    stl_points = stl_point_to_movement(stl_points)
+    stl_points_augmented = stl_point_to_movement(stl_points_augmented)
     # Save data as png image
-    png_name = "PreparationScan" + "_0"
-    save_coordinate(stl_points, "./data/coordinates", png_name, label_name, degree)
+    coor_name = "PreparationScan"
+    save_coordinate(stl_points, file_dir, coor_name, label_name, 0, degree)
     print("Finished saving first set of data")
     # Save again for augmented data
-    png_name = "PreparationScan" + "_1"
-    save_coordinate(stl_points_augmented, "./data/coordinates", png_name, label_name, degree)
+    coor_name = "PreparationScan" + "_1"
+    save_coordinate(stl_points_augmented, file_dir, coor_name, label_name, 0, degree)
     print("Finished saving second set of data")
 
     # Save names which has defect on it, use when convert to tfrecord
-    with open('./data/coordinates/error_file.txt', 'w') as filehandle:
+    with open(file_dir + '/error_file.txt', 'w') as filehandle:
         for listitem in error_file_names:
             filehandle.write('%s\n' % listitem)
 
 
 if __name__ == '__main__':
     # Output 'points' as list[list[numpy]] (example_data, degrees, points)
-    save_img = False
+    save_img = True
     save_coor = False
-    # points, points_aug, lbl, lbl_name, err_name, deg = get_cross_section(data_type="BL", stat_type="median")
-    lbl, label_name = get_label("BL", "median", double_data=True, one_hotted=False, normalized=False)
+
+    # data_type, stat_type will not be used unless you want to look at lbl value
+    points, points_aug, lbl, lbl_name, err_name, deg = get_cross_section(data_type="BL", stat_type="median")
+
     if save_img:
         save_image(points, points_aug, lbl_name, err_name)
 
     if save_coor:
-        points = stl_point_to_movement(points)
-        points_aug = stl_point_to_movement(points_aug)
         save_stl_point(points, points_aug, lbl_name, err_name)
-
-    print(label_name[180:190])
-    print(lbl[360:379])
-    '''
-    with open("check_value.csv", 'w', newline='') as myfile:
-        wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
-        wr.writerow(lbl)
-
-    with open("check_name.csv", 'w', newline='') as myfile:
-        wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
-        wr.writerow(label_name)
-    '''
     print("pre_processing.py: done")

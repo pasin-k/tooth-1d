@@ -1,11 +1,7 @@
 import tensorflow as tf
 import numpy as np
 import os
-import sys
-import time
-import ast
 import warnings
-import cv2
 from ImportData2D import get_label, get_file_name, get_input_and_label
 
 numdeg = 4  # Number of images on each example
@@ -34,10 +30,24 @@ def read_image(file_name, label):
     return file_values
 
 
+# Run images from pre_processing.py into tfrecords
+def serialize_coordinate(example):
+    feature = {'label': _int64_feature(example['label'])}
+    for i in range(numdeg):
+        feature['img' + str(i)] = _float_feature(example['img' + str(i)])
+
+    tf_example = tf.train.Example(features=tf.train.Features(feature=feature))
+    return tf_example.SerializeToString()
+
+
 def read_coordinate(file_name, label):
     file_values = {'label': label}
     for i in range(numdeg):
-        file_values['img' + str(i)] = np.load(file_name[i]).tolist()
+        print(file_name[i])
+        data = np.load(file_name[i])
+        # data = tf.read_file(file_name[i])
+        print(type(data))
+        file_values['img' + str(i)] = data
     return file_values
 
 
@@ -66,7 +76,6 @@ def _float_feature(value):
 
 def image_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None):
     grouped_train_address, grouped_eval_address = get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs)
-
     # Start writing train dataset
     train_dataset = tf.data.Dataset.from_tensor_slices(grouped_train_address)
     train_dataset = train_dataset.map(read_image)  # Read file address, and get info as string
@@ -117,26 +126,25 @@ def image_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None):
 # csv_dir : Folder of label data (If not specified, will use the default directory)
 def coordinate_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None):
     grouped_train_address, grouped_eval_address = get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs)
-
     # Start writing train dataset
     train_dataset = tf.data.Dataset.from_tensor_slices(grouped_train_address)
-    train_dataset = train_dataset.map(read_file)  # Read file address, and get info as string
+    train_dataset = train_dataset.map(read_coordinate)  # Read file address, and get info as string
 
     it = train_dataset.make_one_shot_iterator()
 
     elem = it.get_next()
 
     # Start getting all info and zip to tfrecord
-    tfrecord_train_name = os.path.join("./data", "%s_%s_%s_train.tfrecords" % (
+    tfrecord_train_name = os.path.join("./data", "%s_%s_%s_coor_train.tfrecords" % (
         tfrecord_name, configs['label_data'], configs['label_type']))
-    tfrecord_eval_name = os.path.join("./data", "%s_%s_%s_eval.tfrecords" % (
+    tfrecord_eval_name = os.path.join("./data", "%s_%s_%s_coor_eval.tfrecords" % (
         tfrecord_name, configs['label_data'], configs['label_type']))
 
     with tf.Session() as sess:
         writer = tf.python_io.TFRecordWriter(tfrecord_train_name)
         while True:
             try:
-                elem_result = serialize(sess.run(elem))
+                elem_result = serialize_coordinate(sess.run(elem))
 
                 writer.write(elem_result)
             except tf.errors.OutOfRangeError:
@@ -144,7 +152,7 @@ def coordinate_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None):
         writer.close()
 
     eval_dataset = tf.data.Dataset.from_tensor_slices(grouped_eval_address)
-    eval_dataset = eval_dataset.map(read_file)
+    eval_dataset = eval_dataset.map(read_coordinate)
 
     it = eval_dataset.make_one_shot_iterator()
 
@@ -154,7 +162,7 @@ def coordinate_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None):
         writer = tf.python_io.TFRecordWriter(tfrecord_eval_name)
         while True:
             try:
-                elem_result = serialize(sess.run(elem))
+                elem_result = serialize_coordinate(sess.run(elem))
                 # print(elem_result)
                 writer.write(elem_result)
             except tf.errors.OutOfRangeError:
@@ -164,23 +172,27 @@ def coordinate_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None):
 
 
 if __name__ == '__main__':
+    get_image = True
     # Select type of label to use
-    label_data = ["Occ_Sum", "Taper_Sum", "Occ_L", "Occ_Sum", "BL", "MD",
-                  "Taper_Sum"]  # Occ_sum: Max = 15, Taper_Sum: Max = 10
+    label_data = ["Occ_Sum", "Taper_Sum", "Occ_L", "Occ_F", "Occ_B", "BL", "MD", "Taper_Sum"]
     label_type = ["average", "median"]
     configs['numdeg'] = 4
     configs['train_eval_ratio'] = 0.8
-    configs['label_data'] = "MD"
+    configs['label_data'] = "BL"
     configs['label_type'] = "median"
-
 
     print("Use label from %s category (%s) with {%s} train:eval ratio" % (
         configs['label_data'], configs['label_type'], configs['train_eval_ratio']))
     # File name will be [tfrecord_name]_train_Taper_sum_median
-    tfrecord_file_name = "preparation_362"
+    tfrecord_file_name = "preparation_361"
     # tfrecord_name = "original_preparation_data"
     # csv_name = "../global_data/Ground Truth Score_50.csv"
     # Directory of image
-    dataset_folder_dir = "./data/cross_section"
-    image_to_tfrecord(tfrecord_file_name, dataset_folder_dir)
+
+    if get_image:
+        dataset_folder_dir = "./data/cross_section"
+        image_to_tfrecord(tfrecord_file_name, dataset_folder_dir)
+    else:
+        dataset_folder_dir = "./data/coordinates"
+        coordinate_to_tfrecord(tfrecord_file_name, dataset_folder_dir)
     print("Complete")
