@@ -241,8 +241,9 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs):
     grouped_address[:], example_grouped_address[:] = zip(*z)
     train_amount = int(configs['train_eval_ratio'] * len(grouped_address))  # Calculate amount of training data
 
-    train_address = list()
-    eval_address = list()
+    train_address = []
+    eval_address = []
+    eval_score_list = []  # Use for prediction since cannot read file directly from tfrecord
 
     # Open file and read the content in a list
     file_name = "./data/%s_%s_%s.txt" % (tfrecord_name, configs['label_data'], configs['label_type'])

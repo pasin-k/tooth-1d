@@ -17,7 +17,8 @@ from skopt import gp_minimize, forest_minimize
 from skopt.space import Real, Categorical, Integer
 from skopt.utils import use_named_args
 
-from model import my_model
+# from model import my_model
+from model_classify import my_model
 from get_data import train_input_fn, eval_input_fn, get_data_from_path
 
 # Read tooth.config file
@@ -60,7 +61,9 @@ run_params = {'batch_size': configs.batch_size,
               'input_path': configs.input_path,
               'result_path': configs.result_path,
               'config_path': os.path.abspath(args.config),
-              'steps': configs.steps}
+              'steps': configs.steps,
+              'loss_weight': configs.loss_weight,
+              'comment': configs.comment}
 
 run_params['batch_size'] = check_exist(run_params, 'batch_size')
 run_params['checkpoint_min'] = check_exist(run_params, 'checkpoint_min', 10)
@@ -234,7 +237,7 @@ def fitness(learning_rate, dropout_rate, activation, channels):
 
     # Save necessary info to csv file, as reference
     info_dict = run_params.copy()
-    info_dict['comments'] = "Max pooling, new loss"
+    info_dict['comments'] = run_params['comment']
     info_dict['learning_rate'] = learning_rate
     info_dict['dropout_rate'] = dropout_rate
     info_dict['activation'] = activation

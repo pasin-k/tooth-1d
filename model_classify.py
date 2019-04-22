@@ -104,7 +104,7 @@ def customized_incepnet(features, mode, params):
     fc6 = fc_layer(dropout5, params['channels'][10], activation=params['activation'], name='fc6')
     dropout6 = tf.keras.layers.Dropout(rate=params['dropout_rate'])(fc6)
 
-    logits = fc_layer(dropout6, 11, activation=tf.nn.tanh, name='predict')
+    logits = fc_layer(dropout6, 3, activation=tf.nn.tanh, name='predict')
     return logits
 
 
@@ -152,7 +152,7 @@ def customized_incepnet_v2(features, mode, params):
     fc6 = fc_layer(dropout5, params['channels'][10], activation=params['activation'], name='fc6')
     dropout6 = tf.keras.layers.Dropout(rate=params['dropout_rate'])(fc6)
 
-    logits = fc_layer(dropout6, 11, activation=tf.nn.tanh, name='predict')
+    logits = fc_layer(dropout6, 3, activation=tf.nn.tanh, name='predict')
     return logits
 
 
@@ -202,7 +202,7 @@ def customized_incepnet_v3(features, mode, params):
     dropout6 = tf.keras.layers.Dropout(rate=params['dropout_rate'])(fc6)
 
     # logits = fc_layer(dropout6, 11, activation=params['activation'], name='predict')
-    logits = fc_layer(dropout6, 11, activation=tf.nn.tanh, name='predict')  # Regression with one output
+    logits = fc_layer(dropout6, 3, activation=tf.nn.tanh, name='predict')  # Regression with one output
     return logits
 
 
@@ -212,6 +212,7 @@ def my_one_hot(labels, depth):
 
 # Define Model
 def my_model(features, labels, mode, params, config):
+    labels = tf.cast((labels-1)/2, tf.int64)
     # Input: (Batch_size,240,360,4)
     logits = customized_incepnet_v2(features, mode, params)
     # Predict Mode

@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto2',
   serialized_options=None,
-  serialized_pb=_b('\n\x11proto/tooth.proto\"\xeb\x01\n\x0bTrainConfig\x12\x16\n\nbatch_size\x18\x01 \x01(\r:\x02\x31\x36\x12\x19\n\x0e\x63heckpoint_min\x18\x02 \x01(\r:\x01\x35\x12\x1e\n\x0f\x65\x61rly_stop_step\x18\x03 \x01(\r:\x05\x33\x30\x30\x30\x30\x12\x13\n\x0bresult_path\x18\x04 \x01(\t\x12\r\n\x05steps\x18\x05 \x01(\r\x12\x12\n\ninput_path\x18\x06 \x01(\t\x12\x15\n\rlearning_rate\x18\x07 \x01(\x02\x12\x14\n\x0c\x64ropout_rate\x18\x08 \x01(\x02\x12\x12\n\nactivation\x18\t \x01(\t\x12\x10\n\x08\x63hannels\x18\n \x01(\r\"\x1b\n\x08\x43hannels\x12\x0f\n\x07\x63hannel\x18\x01 \x03(\r')
+  serialized_pb=_b('\n\x11proto/tooth.proto\"\x91\x02\n\x0bTrainConfig\x12\x16\n\nbatch_size\x18\x01 \x01(\r:\x02\x31\x36\x12\x19\n\x0e\x63heckpoint_min\x18\x02 \x01(\r:\x01\x35\x12\x1e\n\x0f\x65\x61rly_stop_step\x18\x03 \x01(\r:\x05\x33\x30\x30\x30\x30\x12\x13\n\x0bresult_path\x18\x04 \x01(\t\x12\r\n\x05steps\x18\x05 \x01(\r\x12\x12\n\ninput_path\x18\x06 \x01(\t\x12\x15\n\rlearning_rate\x18\x07 \x01(\x02\x12\x14\n\x0c\x64ropout_rate\x18\x08 \x01(\x02\x12\x12\n\nactivation\x18\t \x01(\t\x12\x10\n\x08\x63hannels\x18\n \x01(\r\x12\x13\n\x0bloss_weight\x18\x0b \x01(\x02\x12\x0f\n\x07\x63omment\x18\x0c \x01(\t\"\x1b\n\x08\x43hannels\x12\x0f\n\x07\x63hannel\x18\x01 \x03(\r')
 )
 
 
@@ -102,6 +102,20 @@ _TRAINCONFIG = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='loss_weight', full_name='TrainConfig.loss_weight', index=10,
+      number=11, type=2, cpp_type=6, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='comment', full_name='TrainConfig.comment', index=11,
+      number=12, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -115,7 +129,7 @@ _TRAINCONFIG = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=22,
-  serialized_end=257,
+  serialized_end=295,
 )
 
 
@@ -145,8 +159,8 @@ _CHANNELS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=259,
-  serialized_end=286,
+  serialized_start=297,
+  serialized_end=324,
 )
 
 DESCRIPTOR.message_types_by_name['TrainConfig'] = _TRAINCONFIG
