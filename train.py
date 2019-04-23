@@ -41,16 +41,19 @@ channel_list = protobuf_to_channels(configs.channels)
 
 # Check if parameters exist, if not, give default parameters or raiseError
 # params: dictionary, dict_name: string, default: value (if None will raiseError)
-def check_exist(params, dict_name, default=None):
-    try:
-        output = params[dict_name]
-    except (KeyError, TypeError) as error:
-        if default is None:
-            raise Exception("Parameter '%s' not defined" % dict_name)
-        else:
-            output = default
-            print("Parameters: %s not found, use default value = %s" % (dict_name, default))
-    return output
+def check_exist(dictionary, **kwargs):
+    output_dict = dictionary
+    for key, value in kwargs.items():
+        try:
+            output_dict[key] = dictionary[key]
+            # output = params[dict_name]
+        except (KeyError, TypeError) as error:
+            if value is None:
+                raise KeyError("Parameter '%s' not defined" % key)
+            else:
+                output_dict[key] = value
+                print("Parameters: %s not found, use default value = %s" % (key, value))
+    return output_dict
 
 
 # These are important parameters
@@ -64,13 +67,18 @@ run_params = {'batch_size': configs.batch_size,
               'loss_weight': configs.loss_weight,
               'comment': configs.comment}
 
-run_params['batch_size'] = check_exist(run_params, 'batch_size')
-run_params['checkpoint_min'] = check_exist(run_params, 'checkpoint_min', 10)
-run_params['early_stop_step'] = check_exist(run_params, 'early_stop_step', 5000)
-run_params['input_path'] = check_exist(run_params, 'input_path')
-run_params['result_path'] = check_exist(run_params, 'result_path')
-# run_params['result_path_new'] = check_exist(run_params, 'result_path')
-run_params['steps'] = check_exist(run_params, 'steps')
+run_params = check_exist(run_params, batch_size=None,
+                         checkpoint_min=10, early_stop_step=5000,
+                         input_path=None, result_path=None,
+                         steps=None, config_path=None,
+                         loss_weight=None)
+# run_params['batch_size'] = check_exist(run_params, 'batch_size')
+# run_params['checkpoint_min'] = check_exist(run_params, 'checkpoint_min', 10)
+# run_params['early_stop_step'] = check_exist(run_params, 'early_stop_step', 5000)
+# run_params['input_path'] = check_exist(run_params, 'input_path')
+# run_params['result_path'] = check_exist(run_params, 'result_path')
+# # run_params['result_path_new'] = check_exist(run_params, 'result_path')
+# run_params['steps'] = check_exist(run_params, 'steps')
 
 model_configs = {'learning_rate': configs.learning_rate,
                  'dropout_rate': configs.dropout_rate,
@@ -84,13 +92,18 @@ def get_available_gpus():
     return [x.name for x in local_device_protos if x.device_type == 'GPU']
 
 
-def run(model_params={}):
-    # Add exception in case params is missing
-    model_params['learning_rate'] = check_exist(model_params, 'learning_rate')
-    model_params['dropout_rate'] = check_exist(model_params, 'dropout_rate')
-    model_params['activation'] = check_exist(model_params, 'activation')
-    model_params['channels'] = check_exist(model_params, 'channels')
-    model_params['result_path'] = check_exist(model_params, 'result_path')
+def run(model_params=None):
+    if model_params is None:
+        raise ValueError("No model_params found")
+    # Check if all values exist
+    model_params = check_exist(model_params, learning_rate=None,
+                               dropout_rate=None, activation=None,
+                               channels=None, result_path=None)
+    # model_params['learning_rate'] = check_exist(model_params, 'learning_rate')
+    # model_params['dropout_rate'] = check_exist(model_params, 'dropout_rate')
+    # model_params['activation'] = check_exist(model_params, 'activation')
+    # model_params['channels'] = check_exist(model_params, 'channels')
+    # model_params['result_path'] = check_exist(model_params, 'result_path')
     if len(model_params['channels']) != 11:
         raise Exception("Number of channels not correspond to number of layers [Need size of 11, got %s]"
                         % len(model_params['channels']))
@@ -131,7 +144,6 @@ def run(model_params={}):
     # classifier.train(input_fn=lambda: train_input_fn(train_data_path, batch_size=params['batch_size']),
     #     max_steps=params['steps'], hooks=[train_hook])
     # eval_result = classifier.evaluate(input_fn=lambda: eval_input_fn(eval_data_path, batch_size=32))
-
 
     eval_result = tf.estimator.train_and_evaluate(classifier, train_spec, eval_spec)
     print("Eval result:")
@@ -194,11 +206,13 @@ dim_dropout_rate = Real(low=0, high=0.875, name='dropout_rate')
 dim_activation = Categorical(categories=['0', '1'],
                              name='activation')
 dim_channel = Integer(low=1, high=4, name='channels')
+dim_channel_fc = Integer(low=1, high=4, name='fully_connect_channels')  # Fully conencted
 dimensions = [dim_learning_rate,
               dim_dropout_rate,
               dim_activation,
-              dim_channel]
-default_parameters = [1e-3, 0.125, '0', 2]
+              dim_channel,
+              dim_channel_fc]
+default_parameters = [1e-3, 0.125, '0', 2, 2]
 
 '''
 # To transform input as parameters into dictionary
@@ -217,7 +231,7 @@ def run_hyper_parameter_wrapper(learning_rate, dropout_rate, activation, channel
 
 
 @use_named_args(dimensions=dimensions)
-def fitness(learning_rate, dropout_rate, activation, channels):
+def fitness(learning_rate, dropout_rate, activation, channels, fully_connect_channels):
     """
     Hyper-parameters:
     learning_rate:     Learning-rate for the optimizer.
@@ -226,13 +240,17 @@ def fitness(learning_rate, dropout_rate, activation, channels):
     channels
     """
     # Create the neural network with these hyper-parameters
-    print("Learning_rate, Dropout_rate, Activation, Channels = %s, %s, %s, %s" % (
-        learning_rate, dropout_rate, activation, channels))
-    channels_full = [i * channels for i in [16, 16, 32, 16, 16, 16, 16, 16, 16, 512, 512]]
+    print("Learning_rate, Dropout_rate, Activation, Channels, FC channel = %s, %s, %s, %s, %s" % (
+        learning_rate, dropout_rate, activation, channels, fully_connect_channels))
+    cnn_channels = [i * channels for i in [16, 16, 32, 16, 16, 16, 16, 16, 16]]
+    fc_channel = [i * fully_connect_channels for i in [1024, 1024]]
+    channels_full = cnn_channels + fc_channel
+    print(channels_full)
     # name = run_params['result_path'] + "/" + datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S") + "/"
     # name = ("%s/learning_rate_%s_dropout_%s_activation_%s_channels_%s/"
     #         % (run_params['result_path'], round(learning_rate, 6), dropout_rate, activation, channels))
-    run_params['result_path_new'] = run_params['result_path'] + "/" + datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S") + "/"
+    run_params['result_path_new'] = run_params['result_path'] + "/" + datetime.datetime.now().strftime(
+        "%Y%m%d_%H_%M_%S") + "/"
     md_config = {'learning_rate': learning_rate,
                  'dropout_rate': dropout_rate,
                  'activation': activation_dict[activation],
@@ -247,7 +265,8 @@ def fitness(learning_rate, dropout_rate, activation, channels):
     info_dict['learning_rate'] = learning_rate
     info_dict['dropout_rate'] = dropout_rate
     info_dict['activation'] = activation
-    info_dict['channels'] = channels
+    info_dict['cnn_channels'] = channels
+    info_dict['fc_channels'] = fully_connect_channels
     info_dict['steps'] = global_step
     info_dict['accuracy'] = accuracy
     with open((run_params['result_path_new'] + "config.csv"), "w") as csvfile:
