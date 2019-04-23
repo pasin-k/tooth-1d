@@ -245,7 +245,7 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs):
     eval_score_list = []  # Use for prediction since cannot read file directly from tfrecord
 
     # Open file and read the content in a list
-    file_name = "./data/%s_%s_%s.txt" % (tfrecord_name, configs['label_data'], configs['label_type'])
+    file_name = "./data/tfrecord/%s_%s_%s.txt" % (tfrecord_name, configs['label_data'], configs['label_type'])
     if os.path.isfile(file_name):  # Check if file exist
         with open(file_name) as f:
             filehandle = f.read().splitlines()
@@ -293,7 +293,7 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs):
     print("Train files: %d, Evaluate Files: %d" % (len(grouped_train_address[0]), len(grouped_eval_address[0])))
 
     # Save names of files of train address
-    file_name = "./data/%s_%s_%s.txt" % (tfrecord_name, configs['label_data'], configs['label_type'])
+    file_name = "./data/tfrecord/%s_%s_%s.txt" % (tfrecord_name, configs['label_data'], configs['label_type'])
     with open(file_name, 'w') as filehandle:
         # Header with 'train'
         filehandle.write('train\n')

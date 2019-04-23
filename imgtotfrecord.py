@@ -185,7 +185,7 @@ if __name__ == '__main__':
     label_type = ["average", "median"]
     configs['numdeg'] = 4
     configs['train_eval_ratio'] = 0.8
-    configs['label_data'] = "BL"
+    configs['label_data'] = "Occ_Sum"
     configs['label_type'] = "median"
 
     print("Use label from %s category (%s) with {%s} train:eval ratio" % (
