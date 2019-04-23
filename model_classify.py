@@ -1,6 +1,7 @@
 import tensorflow as tf
 tf.enable_eager_execution()
 import numpy as np
+from custom_hook import EvalResultHook
 
 
 # Default stride of 1, padding:same
@@ -212,7 +213,6 @@ def my_one_hot(labels, depth):
 
 # Define Model
 def my_model(features, labels, mode, params, config):
-    labels = tf.cast((labels-1)/2, tf.int64)
     # Input: (Batch_size,240,360,4)
     logits = customized_incepnet_v2(features, mode, params)
     # Predict Mode
@@ -226,6 +226,7 @@ def my_model(features, labels, mode, params, config):
         return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
 
     # one_hot_label = tf.one_hot(indices=labels, depth=11)
+    labels = tf.cast((labels - 1) / 2, tf.int64)
 
     loss = tf.losses.sparse_softmax_cross_entropy(labels, logits)  # Not applicable for score
     accuracy = tf.metrics.accuracy(labels, predicted_class)
@@ -276,5 +277,7 @@ def my_model(features, labels, mode, params, config):
     # Evaluate Mode
     saver_hook = tf.train.SummarySaverHook(save_steps=10, summary_op=tf.summary.merge_all(),
                                            output_dir=config.model_dir + 'eval')
+
+    eval_hook = EvalResultHook(labels, predicted_class)
     return tf.estimator.EstimatorSpec(mode=mode, eval_metric_ops={'accuracy': accuracy}, loss=loss,
-                                      evaluation_hooks=[saver_hook])
+                                      evaluation_hooks=[saver_hook, eval_hook])

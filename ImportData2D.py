@@ -231,7 +231,6 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs):
     grouped_address = []
     example_grouped_address = []  # A 0 degree filename used when adding more example
     for i in range(len(labels)):
-        print([image_address[i * numdeg:(i + 1) * numdeg], labels[i]])
         grouped_address.append([image_address[i * numdeg:(i + 1) * numdeg], labels[i]])  # All degrees
         example_grouped_address.append(image_address[i * numdeg].split('.')[0])  # Only 0 degree
 
@@ -270,6 +269,7 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs):
                 for i, name in enumerate(example_grouped_address):
                     if line in name:
                         eval_address.append(grouped_address[i])
+                        eval_score_list.append(grouped_address[i][1])
                         grouped_address.remove(grouped_address[i])
                         example_grouped_address.remove(example_grouped_address[i])
                         break
@@ -320,7 +320,7 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs):
             new_list_item = listitem[0][0].replace('_0.png', '')
             filehandle.write('%s\n' % new_list_item)
     '''
-    return grouped_train_address, grouped_eval_address
+    return grouped_train_address, grouped_eval_address, eval_score_list
 
 
 # Below are unused stl-to-voxel functions

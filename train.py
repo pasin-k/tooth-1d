@@ -1,5 +1,4 @@
 import tensorflow as tf
-# tf.enable_eager_execution()
 from tensorflow.python.client import device_lib
 import numpy as np
 import os
@@ -8,7 +7,6 @@ from shutil import copy2
 import csv
 import datetime
 
-from protobuf_helper import protobuf_to_list, protobuf_to_channels
 from proto import tooth_pb2
 from google.protobuf import text_format
 
@@ -39,6 +37,7 @@ dropout_rate_list = protobuf_to_list(configs.dropout_rate)
 activation_list = protobuf_to_list(configs.activation, activation_dict)
 channel_list = protobuf_to_channels(configs.channels)
 '''
+
 
 # Check if parameters exist, if not, give default parameters or raiseError
 # params: dictionary, dict_name: string, default: value (if None will raiseError)
@@ -146,8 +145,13 @@ def run(model_params={}):
         accuracy = 0
         global_step = 0
 
+    # images, expected = get_data_from_path(eval_data_path)
+    score_address = run_params['input_path'].replace('.tfrecords', '') + '_score.npy'
+    print(score_address)
+    expected = np.load(score_address)
+    print(expected)
     predictions = classifier.predict(input_fn=lambda: eval_input_fn(eval_data_path, batch_size=1))
-    images, expected = get_data_from_path(eval_data_path)
+
     predict_score = ['Prediction']
     label_score = ['Label']
     for pred_dict, expec in zip(predictions, expected):
@@ -155,7 +159,7 @@ def run(model_params={}):
         # print("Score: " + str(pred_dict['score']))
         class_id = pred_dict['score']
         # probability = pred_dict['probabilities'][class_id]
-        print("Actual score: %s, Predicted score: %s " % (expec, class_id))
+        # print("Actual score: %s, Predicted score: %s " % (expec, class_id))
         predict_score.append(class_id)
         label_score.append(expec)
 
@@ -222,7 +226,7 @@ def fitness(learning_rate, dropout_rate, activation, channels):
     """
     # Create the neural network with these hyper-parameters
     print("Learning_rate, Dropout_rate, Activation, Channels = %s, %s, %s, %s" % (
-    learning_rate, dropout_rate, activation, channels))
+        learning_rate, dropout_rate, activation, channels))
     channels_full = [i * channels for i in [16, 16, 32, 16, 16, 16, 16, 16, 16, 512, 512]]
     name = run_params['result_path'] + "/" + datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S") + "/"
     # name = ("%s/learning_rate_%s_dropout_%s_activation_%s_channels_%s/"
@@ -263,7 +267,8 @@ def run_hyper_parameter_optimize():
                                 x0=default_parameters)
     print(search_result)
     print("Best hyper-parameters: %s" % search_result.x)
-    searched_parameter = list(zip(search_result.func_vals, search_result.x_iters))  # List of tuple of (Acc, [Hyperparams])
+    searched_parameter = list(
+        zip(search_result.func_vals, search_result.x_iters))  # List of tuple of (Acc, [Hyperparams])
     print("All hyper-parameter searched: %s" % searched_parameter)
     hyperparameter_filename = "hyperparameters_result_" + datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S") + ".csv"
     new_data = []
@@ -284,9 +289,16 @@ def run_hyper_parameter_optimize():
 
 
 if __name__ == '__main__':
-    # Need special way to get hyperpara from config.csv
-    run_params['result_path_new'] = run_params['result_path']
-    print("Batch size: %s" % run_params['batch_size'])
-    # run(model_configs)
-    run_hyper_parameter_optimize()
+    run_single = False
+
+    if run_single:
+        run_params['result_path'] = run_params['result_path'] + '/' + datetime.datetime.now().strftime(
+            "%Y%m%d_%H_%M_%S") + '/'
+        run_params['result_path_new'] = run_params['result_path']
+        print(run_params['result_path'])
+        print("Batch size: %s" % run_params['batch_size'])
+        print(run_params['input_path'])
+        run(model_configs)
+    else:
+        run_hyper_parameter_optimize()
     print("train.py completed")

@@ -75,7 +75,7 @@ def _float_feature(value):
 
 
 def image_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None):
-    grouped_train_address, grouped_eval_address = get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs)
+    grouped_train_address, grouped_eval_address, eval_score = get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs)
     # Start writing train dataset
     train_dataset = tf.data.Dataset.from_tensor_slices(grouped_train_address)
     train_dataset = train_dataset.map(read_image)  # Read file address, and get info as string
@@ -85,10 +85,15 @@ def image_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None):
     elem = it.get_next()
 
     # Start getting all info and zip to tfrecord
-    tfrecord_train_name = os.path.join("./data", "%s_%s_%s_train.tfrecords" % (
+    tfrecord_train_name = os.path.join("./data/tfrecord", "%s_%s_%s_train.tfrecords" % (
         tfrecord_name, configs['label_data'], configs['label_type']))
-    tfrecord_eval_name = os.path.join("./data", "%s_%s_%s_eval.tfrecords" % (
+    tfrecord_eval_name = os.path.join("./data/tfrecord", "%s_%s_%s_eval.tfrecords" % (
         tfrecord_name, configs['label_data'], configs['label_type']))
+    eval_score_name = os.path.join("./data/tfrecord", "%s_%s_%s_score.npy" % (
+        tfrecord_name, configs['label_data'], configs['label_type']))
+    print(eval_score_name)
+    print(type(eval_score))
+    np.save(eval_score_name, np.asarray(eval_score))
 
     with tf.Session() as sess:
         writer = tf.python_io.TFRecordWriter(tfrecord_train_name)
@@ -118,6 +123,8 @@ def image_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None):
             except tf.errors.OutOfRangeError:
                 break
         writer.close()
+
+
     print("TFrecords created: %s, %s" % (tfrecord_train_name, tfrecord_eval_name))
 
 
@@ -135,9 +142,9 @@ def coordinate_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None):
     elem = it.get_next()
 
     # Start getting all info and zip to tfrecord
-    tfrecord_train_name = os.path.join("./data", "%s_%s_%s_coor_train.tfrecords" % (
+    tfrecord_train_name = os.path.join("./data/tfrecord", "%s_%s_%s_coor_train.tfrecords" % (
         tfrecord_name, configs['label_data'], configs['label_type']))
-    tfrecord_eval_name = os.path.join("./data", "%s_%s_%s_coor_eval.tfrecords" % (
+    tfrecord_eval_name = os.path.join("./data/tfrecord", "%s_%s_%s_coor_eval.tfrecords" % (
         tfrecord_name, configs['label_data'], configs['label_type']))
 
     with tf.Session() as sess:
