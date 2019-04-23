@@ -19,6 +19,7 @@ class EvalResultHook(tf.train.SessionRunHook):
         predicted_classes = run_values.results[1]
         probabilities = run_values.results[2]
         result_path = run_values.results[3]
+
         with open(result_path, "a") as csvfile:
             writer = csv.writer(csvfile)
             for label, pred, prob in zip(labels, predicted_classes, probabilities):
@@ -26,4 +27,5 @@ class EvalResultHook(tf.train.SessionRunHook):
                 label = (label * 2) + 1
                 pred = (pred * 2) + 1
                 writer.writerow([label, pred, prob])
+                # print("Label: %s, Prediction: %s" % (label, pred))
 
