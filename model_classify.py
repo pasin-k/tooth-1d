@@ -1,4 +1,6 @@
 import tensorflow as tf
+import csv
+import os
 tf.enable_eager_execution()
 import numpy as np
 from custom_hook import EvalResultHook
@@ -275,9 +277,18 @@ def my_model(features, labels, mode, params, config):
         return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op, training_hooks=[saver_hook])
 
     # Evaluate Mode
+
+    # Create result(.csv) file, if not exist
+    if not os.path.isfile(params['result_path']):
+        with open(params['result_path'] + "result.csv", "w") as csvfile:
+            fieldnames = ['Label', 'Predicted Class', 'Confident level']
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            writer.writeheader()
+
+    # Create hooks
     saver_hook = tf.train.SummarySaverHook(save_steps=10, summary_op=tf.summary.merge_all(),
                                            output_dir=config.model_dir + 'eval')
-
-    eval_hook = EvalResultHook(labels, predicted_class)
+    csv_name = tf.convert_to_tensor(params['result_path'] + "result.csv", dtype=tf.string)
+    eval_hook = EvalResultHook(labels, predicted_class, tf.nn.softmax(logits), csv_name)
     return tf.estimator.EstimatorSpec(mode=mode, eval_metric_ops={'accuracy': accuracy}, loss=loss,
                                       evaluation_hooks=[saver_hook, eval_hook])

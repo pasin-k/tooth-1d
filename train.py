@@ -90,6 +90,7 @@ def run(model_params={}):
     model_params['dropout_rate'] = check_exist(model_params, 'dropout_rate')
     model_params['activation'] = check_exist(model_params, 'activation')
     model_params['channels'] = check_exist(model_params, 'channels')
+    model_params['result_path'] = check_exist(model_params, 'result_path')
     if len(model_params['channels']) != 11:
         raise Exception("Number of channels not correspond to number of layers [Need size of 11, got %s]"
                         % len(model_params['channels']))
@@ -112,10 +113,7 @@ def run(model_params={}):
         session_config=tf.ConfigProto(allow_soft_placement=True),
         train_distribute=mirrored_strategy
     )
-    # Or set up the model directory
-    #   estimator = DNNClassifier(
-    #       config=tf.estimator.RunConfig(
-    #           model_dir='/my_model', save_summary_steps=100),
+
     classifier = tf.estimator.Estimator(
         model_fn=my_model,
         params=model_params,
@@ -134,6 +132,7 @@ def run(model_params={}):
     #     max_steps=params['steps'], hooks=[train_hook])
     # eval_result = classifier.evaluate(input_fn=lambda: eval_input_fn(eval_data_path, batch_size=32))
 
+
     eval_result = tf.estimator.train_and_evaluate(classifier, train_spec, eval_spec)
     print("Eval result:")
     print(eval_result)
@@ -145,47 +144,49 @@ def run(model_params={}):
         accuracy = 0
         global_step = 0
 
-    # images, expected = get_data_from_path(eval_data_path)
-    score_address = run_params['input_path'].replace('.tfrecords', '') + '_score.npy'
-    print(score_address)
-    expected = np.load(score_address)
-    print(expected)
-    predictions = classifier.predict(input_fn=lambda: eval_input_fn(eval_data_path, batch_size=1))
-
-    predict_score = ['Prediction']
-    label_score = ['Label']
-    for pred_dict, expec in zip(predictions, expected):
-        # print(pred_dict)
-        # print("Score: " + str(pred_dict['score']))
-        class_id = pred_dict['score']
-        # probability = pred_dict['probabilities'][class_id]
-        # print("Actual score: %s, Predicted score: %s " % (expec, class_id))
-        predict_score.append(class_id)
-        label_score.append(expec)
-
-    predict_result = zip(label_score, predict_score)
+    # No need to use predict since we can get data from hook now
+    # # images, expected = get_data_from_path(eval_data_path)
+    # score_address = run_params['input_path'].replace('.tfrecords', '') + '_score.npy'
+    # print(score_address)
+    # expected = np.load(score_address)
+    # print(expected)
+    # predictions = classifier.predict(input_fn=lambda: eval_input_fn(eval_data_path, batch_size=1))
+    #
+    # predict_score = ['Prediction']
+    # label_score = ['Label']
+    # for pred_dict, expec in zip(predictions, expected):
+    #     # print(pred_dict)
+    #     # print("Score: " + str(pred_dict['score']))
+    #     class_id = pred_dict['score']
+    #     # probability = pred_dict['probabilities'][class_id]
+    #     # print("Actual score: %s, Predicted score: %s " % (expec, class_id))
+    #     predict_score.append(class_id)
+    #     label_score.append(expec)
+    #
+    # predict_result = zip(label_score, predict_score)
 
     # print(eval_result[0]['accuracy'])
     # print('\nTest set accuracy: {accuracy:0.3f}\n'.format(**eval_result))
+    predict_result = None
     return accuracy, global_step, predict_result
 
 
-# Run with multiple parameters
-def run_multiple_params(model_config):
-    for lr in model_config['learning_rate_list']:
-        for dr in model_config['dropout_rate_list']:
-            for act_count, act in enumerate(model_config['activation_list']):
-                for ch_count, ch in enumerate(model_config['channel_list']):
-                    name = ("%s/learning_rate_%s_dropout_%s_activation_%s_channels_%s/"
-                            % (run_params['result_path'], round(lr, 5), dr, act_count, ch_count))
-                    md_config = {'learning_rate': round(lr, 5),
-                                 'dropout_rate': dr,
-                                 'activation': act,
-                                 'channels': ch}
-                    run_params['result_path_new'] = name
-                    run(md_config)
-                    # Copy config file to result path as well
-                    copy2(run_params['config_path'], run_params['result_path_new'])
+# # Run with multiple parameters (Grid-search)
+# def run_multiple_params(model_config):
+#     for lr in model_config['learning_rate_list']:
+#         for dr in model_config['dropout_rate_list']:
+#             for act_count, act in enumerate(model_config['activation_list']):
+#                 for ch_count, ch in enumerate(model_config['channel_list']):
+#                     name = ("%s/learning_rate_%s_dropout_%s_activation_%s_channels_%s/"
+#                             % (run_params['result_path'], round(lr, 5), dr, act_count, ch_count))
+#                     md_config = {'learning_rate': round(lr, 5),
+#                                  'dropout_rate': dr,
+#                                  'activation': act,
+#                                  'channels': ch}
+#                     run_params['result_path_new'] = name
+#                     run(md_config)
+#                     # Copy config file to result path as well
+#                     copy2(run_params['config_path'], run_params['result_path_new'])
 
 
 dim_learning_rate = Real(low=1e-5, high=1e-2, prior='log-uniform', name='learning_rate')
@@ -228,14 +229,15 @@ def fitness(learning_rate, dropout_rate, activation, channels):
     print("Learning_rate, Dropout_rate, Activation, Channels = %s, %s, %s, %s" % (
         learning_rate, dropout_rate, activation, channels))
     channels_full = [i * channels for i in [16, 16, 32, 16, 16, 16, 16, 16, 16, 512, 512]]
-    name = run_params['result_path'] + "/" + datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S") + "/"
+    # name = run_params['result_path'] + "/" + datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S") + "/"
     # name = ("%s/learning_rate_%s_dropout_%s_activation_%s_channels_%s/"
     #         % (run_params['result_path'], round(learning_rate, 6), dropout_rate, activation, channels))
-    run_params['result_path_new'] = name
+    run_params['result_path_new'] = run_params['result_path'] + "/" + datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S") + "/"
     md_config = {'learning_rate': learning_rate,
                  'dropout_rate': dropout_rate,
                  'activation': activation_dict[activation],
-                 'channels': channels_full}
+                 'channels': channels_full,
+                 'result_path': run_params['result_path_new']}
     accuracy, global_step, result = run(md_config)
     # accuracy = run_hyper_parameter_wrapper(learning_rate, dropout_rate, activation, channels)
 
@@ -248,14 +250,16 @@ def fitness(learning_rate, dropout_rate, activation, channels):
     info_dict['channels'] = channels
     info_dict['steps'] = global_step
     info_dict['accuracy'] = accuracy
-    with open(name + "config.csv", "w") as csvfile:
+    with open((run_params['result_path_new'] + "config.csv"), "w") as csvfile:
         writer = csv.writer(csvfile)
         for key, val in info_dict.items():
             writer.writerow([key, val])
-    with open(name + "result.csv", "w") as csvfile:
-        writer = csv.writer(csvfile)
-        for row in result:
-            writer.writerow(row)
+
+    # Unnecessary since we save file in hook instead
+    # with open((run_params['result_path_new'] + "result.csv"), "w") as csvfile:
+    #     writer = csv.writer(csvfile)
+    #     for row in result:
+    #         writer.writerow(row)
     return -accuracy
 
 
