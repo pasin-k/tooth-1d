@@ -71,7 +71,7 @@ def get_cross_section(data_type, stat_type):
 
 def save_image(stl_points, stl_points_augmented, label_name, error_file_names):
     # Directory to save image and errorfile
-    image_dir = "./data/cross_section_test"
+    image_dir = "./data/cross_section"
     # Save data as png image
     png_name = "PreparationScan"
     save_plot(stl_points, image_dir, png_name, label_name, 0, degree)
