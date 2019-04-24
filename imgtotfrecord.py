@@ -91,8 +91,6 @@ def image_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None):
         tfrecord_name, configs['label_data'], configs['label_type']))
     eval_score_name = os.path.join("./data/tfrecord", "%s_%s_%s_score.npy" % (
         tfrecord_name, configs['label_data'], configs['label_type']))
-    print(eval_score_name)
-    print(type(eval_score))
     np.save(eval_score_name, np.asarray(eval_score))
 
     with tf.Session() as sess:
@@ -185,21 +183,24 @@ if __name__ == '__main__':
     label_type = ["average", "median"]
     configs['numdeg'] = 4
     configs['train_eval_ratio'] = 0.8
-    configs['label_data'] = "Taper_Sum"
+    # configs['label_data'] = "Taper_Sum"
     configs['label_type'] = "median"
 
-    print("Use label from %s category (%s) with {%s} train:eval ratio" % (
-        configs['label_data'], configs['label_type'], configs['train_eval_ratio']))
-    # File name will be [tfrecord_name]_train_Taper_sum_median
-    tfrecord_file_name = "preparation_361"
-    # tfrecord_name = "original_preparation_data"
-    # csv_name = "../global_data/Ground Truth Score_50.csv"
-    # Directory of image
+    label_datas = ["Taper_Sum", "BL", "MD", "Occ_Sum"]  # Too lazy to do all of these one at a time
+    for i in label_datas:
+        configs['label_data'] = i
+        print("Use label from %s category '%s' with (%s) train:eval ratio" % (
+            configs['label_data'], configs['label_type'], configs['train_eval_ratio']))
+        # File name will be [tfrecord_name]_train_Taper_sum_median
+        tfrecord_file_name = "preparation_361"
+        # tfrecord_name = "original_preparation_data"
+        # csv_name = "../global_data/Ground Truth Score_50.csv"
+        # Directory of image
 
-    if get_image:
-        dataset_folder_dir = "./data/cross_section"
-        image_to_tfrecord(tfrecord_file_name, dataset_folder_dir)
-    else:
-        dataset_folder_dir = "./data/coordinates"
-        coordinate_to_tfrecord(tfrecord_file_name, dataset_folder_dir)
+        if get_image:
+            dataset_folder_dir = "./data/cross_section"
+            image_to_tfrecord(tfrecord_file_name, dataset_folder_dir)
+        else:
+            dataset_folder_dir = "./data/coordinates"
+            coordinate_to_tfrecord(tfrecord_file_name, dataset_folder_dir)
     print("Complete")
