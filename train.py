@@ -114,7 +114,7 @@ def run(model_params=None):
     print("Getting training data from %s" % train_data_path)
     print("Saved model at %s" % run_params['result_path_new'])
 
-    tf.logging.set_verbosity(tf.logging.INFO)  # To see some additional info
+    # tf.logging.set_verbosity(tf.logging.INFO)  # To see some additional info
     # Setting for multiple GPUs
     mirrored_strategy = tf.distribute.MirroredStrategy(devices=get_available_gpus())
     # Setting checkpoint config
@@ -206,7 +206,7 @@ dim_dropout_rate = Real(low=0, high=0.875, name='dropout_rate')
 dim_activation = Categorical(categories=['0', '1'],
                              name='activation')
 dim_channel = Integer(low=1, high=4, name='channels')
-dim_channel_fc = Integer(low=1, high=4, name='fully_connect_channels')  # Fully conencted
+dim_channel_fc = Integer(low=1, high=2, name='fully_connect_channels')  # Fully conencted
 dimensions = [dim_learning_rate,
               dim_dropout_rate,
               dim_activation,
@@ -245,7 +245,6 @@ def fitness(learning_rate, dropout_rate, activation, channels, fully_connect_cha
     cnn_channels = [i * channels for i in [16, 16, 32, 16, 16, 16, 16, 16, 16]]
     fc_channel = [i * fully_connect_channels for i in [1024, 1024]]
     channels_full = cnn_channels + fc_channel
-    print(channels_full)
     # name = run_params['result_path'] + "/" + datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S") + "/"
     # name = ("%s/learning_rate_%s_dropout_%s_activation_%s_channels_%s/"
     #         % (run_params['result_path'], round(learning_rate, 6), dropout_rate, activation, channels))
@@ -295,13 +294,14 @@ def run_hyper_parameter_optimize():
     print("All hyper-parameter searched: %s" % searched_parameter)
     hyperparameter_filename = "hyperparameters_result_" + datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S") + ".csv"
     new_data = []
-    field_name = ['accuracy', 'learning_rate', 'dropout_rate', 'activation', 'channels']
+    field_name = ['accuracy', 'learning_rate', 'dropout_rate', 'activation', 'cnn_channels','fc_channels']
     for i in searched_parameter:
         data = {field_name[0]: i[0] * -1,
                 field_name[1]: i[1][0],
                 field_name[2]: i[1][1],
                 field_name[3]: i[1][2],
-                field_name[4]: i[1][3]}
+                field_name[4]: i[1][3],
+                field_name[5]: i[1][4]}
         new_data.append(data)
     with open(run_params['result_path'] + '/' + hyperparameter_filename, 'w', newline='') as csvFile:
         writer = csv.DictWriter(csvFile, fieldnames=field_name)

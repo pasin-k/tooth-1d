@@ -181,17 +181,25 @@ def save_plot(coor_list, out_directory, file_header_name, image_name, augment_nu
         print("# of Degree found: %d" % len(coor_list[0]))
         raise Exception('Number of degree specified is not equals to coordinate ')
 
+    fig = plt.figure(figsize=(6, 4))
+
     for i in range(len(coor_list)):
         for d in range(len(degree)):
             coor = coor_list[i][d]
-            plt.plot(coor[:, 0], coor[:, 1], color='black', linewidth=1)
-            plt.axis('off')
+            # plt.plot(coor[:, 0], coor[:, 1], color='black', linewidth=1)
+            # plt.axis('off')
             # Name with some additional data
             fullname = "%s_%s_%s_%d.%s" % (file_header_name, image_name[i], augment_number, degree[d], file_type)
             output_name = os.path.join(out_directory, fullname)
 
-            plt.savefig(output_name, bbox_inches='tight')
-            plt.clf()
+            # plt.savefig(output_name, bbox_inches='tight')
+            # plt.clf()
+
+            ax = fig.add_subplot(111)
+            ax.plot(coor[:,0], coor[:,1], color='black', linewidth=1)
+            ax.axis('off')
+            fig.savefig(output_name, dpi=60)
+            fig.clf()
     print("Finished plotting for %d images with %d rotations at %s" % (len(coor_list), len(degree), out_directory))
 
 
