@@ -206,7 +206,7 @@ def simple_cnn(features, mode, params):
 # Define Model
 def my_model(features, labels, mode, params, config):
     # Input: (Batch_size,240,360,4)
-    logits = customized_incepnet_v2(features, mode, params)
+    logits = simple_cnn(features, mode, params)
     # Predict Mode
     predicted_class = tf.argmax(logits, 1)
     if mode == tf.estimator.ModeKeys.PREDICT:

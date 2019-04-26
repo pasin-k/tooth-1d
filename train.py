@@ -285,7 +285,9 @@ def run_hyper_parameter_optimize():
         if prev_data[-1][0] != 'end':  # Check if the previous file doesn't end properly
             n_calls = n_calls - len(prev_data)
             l_data = prev_data[-1][1:]  # Latest_data
-            default_parameters = [float(l_data[0]), float(l_data[1]),l_data[2],int(l_data[3]),int(l_data[4])]
+            default_param = [float(l_data[0]), float(l_data[1]),l_data[2],int(l_data[3]),int(l_data[4])]
+    else:
+        default_param = [1e-3, 0.125, '0', 2, 2]
 
     if n_calls < 11:
         print("Hyper parameter optimize ENDED: run enough calls already")
@@ -294,7 +296,7 @@ def run_hyper_parameter_optimize():
                                     dimensions=dimensions,
                                     acq_func='EI',  # Expected Improvement.
                                     n_calls=n_calls,
-                                    x0=default_parameters)
+                                    x0=default_param)
         print(search_result)
         print("Best hyper-parameters: %s" % search_result.x)
         searched_parameter = list(
