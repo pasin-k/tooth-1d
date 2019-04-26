@@ -56,7 +56,7 @@ def get_file_name(folder_name='../global_data/', file_name='PreparationScan.stl'
 # Since some score can only be in a certain range (E.g. 1,3 or 5), if any median score that is outside of this range
 # appear, move it to the nearby value instead based on average. (Round the other direction from average)
 def readjust_median_label(label, avg_data):
-    possible_value = [1,3,5]
+    possible_value = [1, 3, 5]
     if len(label) != len(avg_data):
         raise ValueError("Size of label and average data is not equal")
     for i, label_value in enumerate(label):
@@ -196,7 +196,7 @@ def save_plot(coor_list, out_directory, file_header_name, image_name, augment_nu
             # plt.clf()
 
             ax = fig.add_subplot(111)
-            ax.plot(coor[:,0], coor[:,1], color='black', linewidth=1)
+            ax.plot(coor[:, 0], coor[:, 1], color='black', linewidth=1)
             ax.axis('off')
             fig.savefig(output_name, dpi=60)
             fig.clf()
@@ -289,7 +289,7 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs):
     train_amount = train_amount - len(train_address)
     if train_amount < 0:
         train_amount = 0
-        warnings.warn("imgtotfrecord: amount of training is not correct, might want to check")
+        print("imgtotfrecord: amount of training is not correct, might want to check")
     train_address.extend(grouped_address[0:train_amount])
     grouped_train_address = tuple(
         [list(e) for e in zip(*train_address)])  # Convert to tuple of list[image address, label]
@@ -465,4 +465,3 @@ def get2DImage(directory, name, singleval=False, realVal=False, threshold=253):
         print("Get 2D images from %s done with size: (%d,%d,%d)" % (name, w, h, num_im))
         return grayim
 '''
-

@@ -114,7 +114,7 @@ def run(model_params=None):
     print("Getting training data from %s" % train_data_path)
     print("Saved model at %s" % run_params['result_path_new'])
 
-    # tf.logging.set_verbosity(tf.logging.INFO)  # To see some additional info
+    tf.logging.set_verbosity(tf.logging.INFO)  # To see some additional info
     # Setting for multiple GPUs
     mirrored_strategy = tf.distribute.MirroredStrategy(devices=get_available_gpus())
     # Setting checkpoint config

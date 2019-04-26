@@ -2,6 +2,7 @@ import tensorflow as tf
 import csv
 
 
+# Save result from evaluation into csv file
 class EvalResultHook(tf.train.SessionRunHook):
     def __init__(self, labels, predicted_class, probability, result_path):
         self.labels = labels

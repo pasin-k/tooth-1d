@@ -5,8 +5,8 @@
 import time
 import csv
 import os
-from ImportData2D import get_label, get_file_name, save_plot
-from stlSlicer import getSlicer, slicecoor, rotatestl
+from open_save_file import get_label, get_file_name, save_plot
+from stlSlicer import getSlicer, slicecoor
 import numpy as np
 
 v = '1.2.0'

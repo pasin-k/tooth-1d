@@ -2,7 +2,7 @@ import tensorflow as tf
 import numpy as np
 import os
 import warnings
-from ImportData2D import get_label, get_file_name, get_input_and_label
+from open_save_file import get_label, get_file_name, get_input_and_label
 
 numdeg = 4  # Number of images on each example
 
