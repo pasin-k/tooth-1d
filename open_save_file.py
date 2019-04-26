@@ -331,6 +331,35 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs):
     return grouped_train_address, grouped_eval_address, eval_score_list
 
 
+def read_file(csv_dir, header=False):
+    header_name = []
+    data = []
+    with open(csv_dir) as csvFile:
+        readCSV = csv.reader(csvFile, delimiter=',')
+        for row in readCSV:
+            print(row)
+            if header:
+                header_name.append(row)
+                header = False
+            else:
+                data.append(row)
+    if not header_name:
+        return data
+    else:
+        return data, header_name
+
+
+def save_file(csv_dir, all_data, field_name=None, write_mode='w'):
+    with open(csv_dir, write_mode) as csvFile:
+        if field_name is None:
+            writer = csv.writer(csvFile)
+        else:
+            writer = csv.DictWriter(csvFile, fieldnames=field_name)
+            writer.writeheader()
+        for data in all_data:
+            writer.writerow(data)
+
+
 # Below are unused stl-to-voxel functions
 '''
 def create_name(num_file, exceptions=[-1]):

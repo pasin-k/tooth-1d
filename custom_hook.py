@@ -21,8 +21,8 @@ class EvalResultHook(tf.train.SessionRunHook):
         probabilities = run_values.results[2]
         result_path = run_values.results[3]
 
-        with open(result_path, "a") as csvfile:
-            writer = csv.writer(csvfile)
+        with open(result_path, "a") as csvFile:
+            writer = csv.writer(csvFile)
             for label, pred, prob in zip(labels, predicted_classes, probabilities):
                 prob = prob[pred]  # Show probability of the predicted class
                 label = (label * 2) + 1

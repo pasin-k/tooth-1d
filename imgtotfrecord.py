@@ -121,8 +121,6 @@ def image_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None):
             except tf.errors.OutOfRangeError:
                 break
         writer.close()
-
-
     print("TFrecords created: %s, %s" % (tfrecord_train_name, tfrecord_eval_name))
 
 

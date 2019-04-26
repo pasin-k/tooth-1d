@@ -2,6 +2,7 @@ import tensorflow as tf
 from tensorflow.python.client import device_lib
 import numpy as np
 import os
+import glob
 import argparse
 from shutil import copy2
 import csv
@@ -18,6 +19,7 @@ from skopt.utils import use_named_args
 # from model import my_model
 from model_classify import my_model
 from get_data import train_input_fn, eval_input_fn, get_data_from_path
+from open_save_file import read_file, save_file
 
 # Read tooth.config file
 parser = argparse.ArgumentParser()
@@ -72,13 +74,6 @@ run_params = check_exist(run_params, batch_size=None,
                          input_path=None, result_path=None,
                          steps=None, config_path=None,
                          loss_weight=None)
-# run_params['batch_size'] = check_exist(run_params, 'batch_size')
-# run_params['checkpoint_min'] = check_exist(run_params, 'checkpoint_min', 10)
-# run_params['early_stop_step'] = check_exist(run_params, 'early_stop_step', 5000)
-# run_params['input_path'] = check_exist(run_params, 'input_path')
-# run_params['result_path'] = check_exist(run_params, 'result_path')
-# # run_params['result_path_new'] = check_exist(run_params, 'result_path')
-# run_params['steps'] = check_exist(run_params, 'steps')
 
 model_configs = {'learning_rate': configs.learning_rate,
                  'dropout_rate': configs.dropout_rate,
@@ -99,14 +94,9 @@ def run(model_params=None):
     model_params = check_exist(model_params, learning_rate=None,
                                dropout_rate=None, activation=None,
                                channels=None, result_path=None)
-    # model_params['learning_rate'] = check_exist(model_params, 'learning_rate')
-    # model_params['dropout_rate'] = check_exist(model_params, 'dropout_rate')
-    # model_params['activation'] = check_exist(model_params, 'activation')
-    # model_params['channels'] = check_exist(model_params, 'channels')
-    # model_params['result_path'] = check_exist(model_params, 'result_path')
-    if len(model_params['channels']) != 11:
-        raise Exception("Number of channels not correspond to number of layers [Need size of 11, got %s]"
-                        % len(model_params['channels']))
+    # if len(model_params['channels']) != 11:
+    #     raise Exception("Number of channels not correspond to number of layers [Need size of 11, got %s]"
+    #                     % len(model_params['channels']))
 
     # Type in file name
     train_data_path = run_params['input_path'].replace('.tfrecords', '') + '_train.tfrecords'
@@ -242,9 +232,9 @@ def fitness(learning_rate, dropout_rate, activation, channels, fully_connect_cha
     # Create the neural network with these hyper-parameters
     print("Learning_rate, Dropout_rate, Activation, Channels, FC channel = %s, %s, %s, %s, %s" % (
         learning_rate, dropout_rate, activation, channels, fully_connect_channels))
-    cnn_channels = [i * channels for i in [16, 16, 32, 16, 16, 16, 16, 16, 16]]
-    fc_channel = [i * fully_connect_channels for i in [1024, 1024]]
-    channels_full = cnn_channels + fc_channel
+    # cnn_channels = [i * channels for i in [16, 16, 32, 16, 16, 16, 16, 16, 16]]
+    # fc_channel = [i * fully_connect_channels for i in [1024, 1024]]
+    channels_full = [channels, fully_connect_channels]
     # name = run_params['result_path'] + "/" + datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S") + "/"
     # name = ("%s/learning_rate_%s_dropout_%s_activation_%s_channels_%s/"
     #         % (run_params['result_path'], round(learning_rate, 6), dropout_rate, activation, channels))
@@ -282,33 +272,53 @@ def fitness(learning_rate, dropout_rate, activation, channels, fully_connect_cha
 
 
 def run_hyper_parameter_optimize():
-    search_result = gp_minimize(func=fitness,
-                                dimensions=dimensions,
-                                acq_func='EI',  # Expected Improvement.
-                                n_calls=20,
-                                x0=default_parameters)
-    print(search_result)
-    print("Best hyper-parameters: %s" % search_result.x)
-    searched_parameter = list(
-        zip(search_result.func_vals, search_result.x_iters))  # List of tuple of (Acc, [Hyperparams])
-    print("All hyper-parameter searched: %s" % searched_parameter)
-    hyperparameter_filename = "hyperparameters_result_" + datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S") + ".csv"
-    new_data = []
-    field_name = ['accuracy', 'learning_rate', 'dropout_rate', 'activation', 'cnn_channels','fc_channels']
-    for i in searched_parameter:
-        data = {field_name[0]: i[0] * -1,
-                field_name[1]: i[1][0],
-                field_name[2]: i[1][1],
-                field_name[3]: i[1][2],
-                field_name[4]: i[1][3],
-                field_name[5]: i[1][4]}
-        new_data.append(data)
-    with open(run_params['result_path'] + '/' + hyperparameter_filename, 'w', newline='') as csvFile:
-        writer = csv.DictWriter(csvFile, fieldnames=field_name)
-        writer.writeheader()
-        writer.writerows(new_data)
-    # space = search_result.space
-    # print("Best result: %s" % space.point_to_dict(search_result.x))
+    hyperparameter_filename = run_params['result_path'] + '/' + "hyperparameters_result_" + datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S") + ".csv"
+
+    n_calls = 20  # Expected number of trainings
+
+    file_name = []
+    for file in glob.glob(run_params['result_path'] + '/' + "hyperparameters_result_" + '*'):
+        file_name.append(file)
+    file_name.sort()
+    if len(file_name) > 0:
+        prev_data, header = read_file(file_name[-1], header=True)
+        if prev_data[-1][0] != 'end':  # Check if the previous file doesn't end properly
+            n_calls = n_calls - len(prev_data)
+            l_data = prev_data[-1][1:]  # Latest_data
+            default_parameters = [float(l_data[0]), float(l_data[1]),l_data[2],int(l_data[3]),int(l_data[4])]
+
+    if n_calls < 11:
+        print("Hyper parameter optimize ENDED: run enough calls already")
+    else:
+        search_result = gp_minimize(func=fitness,
+                                    dimensions=dimensions,
+                                    acq_func='EI',  # Expected Improvement.
+                                    n_calls=n_calls,
+                                    x0=default_parameters)
+        print(search_result)
+        print("Best hyper-parameters: %s" % search_result.x)
+        searched_parameter = list(
+            zip(search_result.func_vals, search_result.x_iters))  # List of tuple of (Acc, [Hyperparams])
+        print("All hyper-parameter searched: %s" % searched_parameter)
+
+        new_data = []
+        field_name = ['accuracy', 'learning_rate', 'dropout_rate', 'activation', 'cnn_channels','fc_channels']
+        for i in searched_parameter:
+            data = {field_name[0]: i[0] * -1,
+                    field_name[1]: i[1][0],
+                    field_name[2]: i[1][1],
+                    field_name[3]: i[1][2],
+                    field_name[4]: i[1][3],
+                    field_name[5]: i[1][4]}
+            new_data.append(data)
+
+        with open(hyperparameter_filename, 'w', newline='') as csvFile:
+            writer = csv.DictWriter(csvFile, fieldnames=field_name)
+            writer.writeheader()
+            writer.writerows(new_data)
+            writer.writerow("end")  # Ending mark
+        # space = search_result.space
+        # print("Best result: %s" % space.point_to_dict(search_result.x))
 
 
 if __name__ == '__main__':

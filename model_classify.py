@@ -1,6 +1,7 @@
 import tensorflow as tf
 import csv
 import os
+
 tf.enable_eager_execution()
 import numpy as np
 from custom_hook import EvalResultHook
@@ -12,9 +13,10 @@ def cnn_2d(layer,
            num_filters,  # [Scalar]
            activation=tf.nn.relu,
            stride=1,
+           padding='same',
            name=''):  # Stride of CNN
     # We shall define the weights that will be trained using create_weights function.
-    layer = tf.keras.layers.Conv2D(num_filters, conv_filter_size, strides=stride, padding="same",
+    layer = tf.keras.layers.Conv2D(num_filters, conv_filter_size, strides=stride, padding=padding,
                                    activation=activation)(layer)
 
     # cnn_sum = tf.summary.histogram(name+'_activation',layer)
@@ -66,34 +68,34 @@ def dropout(layer, dropout_rate, training, name):
 # Using average pooling
 def customized_incepnet(features, mode, params):
     # (1) Filter size: 5x5x64
-    conv1 = cnn_2d(features, 5, params['channels'][0], activation=params['activation'], name="conv1")
+    conv1 = cnn_2d(features, 5, params['channels'][0] * 16, activation=params['activation'], name="conv1")
     pool1 = avg_pool_layer(conv1, 4, "pool1")
     # Output: 60x90x64
 
     # (2) Filter size: 3x3x64
-    conv2 = cnn_2d(pool1, 3, params['channels'][1], activation=params['activation'], name="conv2")
+    conv2 = cnn_2d(pool1, 3, params['channels'][0] * 16, activation=params['activation'], name="conv2")
     pool2 = avg_pool_layer(conv2, 2, "pool2")
     # Output: 30x45x64
 
     # (3.1) Max Pool, then Filter size: 64
     pool3_1 = max_pool_layer(pool2, 3, "pool3_1", stride=1)  # Special stride to keep same dimension
-    conv3_1 = cnn_2d(pool3_1, 1, params['channels'][2], activation=params['activation'], name="conv3_1")
+    conv3_1 = cnn_2d(pool3_1, 1, params['channels'][0] * 32, activation=params['activation'], name="conv3_1")
     # Output: 30x45x64
 
     # (3.2) Filter size: 1x1x64, then 3x3x64
-    conv3_2 = cnn_2d(pool2, 1, params['channels'][3], activation=params['activation'], name="conv3_2_1")
-    conv3_2 = cnn_2d(conv3_2, 3, params['channels'][4], activation=params['activation'], name="conv3_2")
+    conv3_2 = cnn_2d(pool2, 1, params['channels'][0] * 16, activation=params['activation'], name="conv3_2_1")
+    conv3_2 = cnn_2d(conv3_2, 3, params['channels'][0] * 16, activation=params['activation'], name="conv3_2")
     # Output: 30x45x64
 
     # (3.3) Filter size: 1x1x64, then 5x5x64
-    conv3_3 = cnn_2d(pool2, 1, params['channels'][5], activation=params['activation'], name="conv3_3_1")
-    conv3_3 = cnn_2d(conv3_3, 3, params['channels'][6], activation=params['activation'], name="conv3_3_2")
-    conv3_3 = cnn_2d(conv3_3, 3, params['channels'][7], activation=params['activation'], name="conv3_3_3")
+    conv3_3 = cnn_2d(pool2, 1, params['channels'][0] * 16, activation=params['activation'], name="conv3_3_1")
+    conv3_3 = cnn_2d(conv3_3, 3, params['channels'][0] * 16, activation=params['activation'], name="conv3_3_2")
+    conv3_3 = cnn_2d(conv3_3, 3, params['channels'][0] * 16, activation=params['activation'], name="conv3_3_3")
     # conv3_3 = cnn_2d(conv3_3, 5, 64)  # Might use 2 3x3 CNN instead, look at inception net paper
     # Output: 30x45x64
 
     # (3.4) Filter size: 1x1x256
-    conv3_4 = cnn_2d(pool2, 1, params['channels'][8], activation=params['activation'], name="conv3_4")
+    conv3_4 = cnn_2d(pool2, 1, params['channels'][0] * 16, activation=params['activation'], name="conv3_4")
     # Output: 30x45x64
 
     concat4 = tf.concat([conv3_1, conv3_2, conv3_3, conv3_4], 3)
@@ -101,10 +103,10 @@ def customized_incepnet(features, mode, params):
     # Output: 10x15x256 = 38400
 
     fc5 = flatten_layer(pool4)
-    fc5 = fc_layer(fc5, params['channels'][9], activation=params['activation'], name='fc5')
+    fc5 = fc_layer(fc5, params['channels'][1] * 1024, activation=params['activation'], name='fc5')
     dropout5 = tf.keras.layers.Dropout(rate=params['dropout_rate'])(fc5)
 
-    fc6 = fc_layer(dropout5, params['channels'][10], activation=params['activation'], name='fc6')
+    fc6 = fc_layer(dropout5, params['channels'][1] * 1024, activation=params['activation'], name='fc6')
     dropout6 = tf.keras.layers.Dropout(rate=params['dropout_rate'])(fc6)
 
     logits = fc_layer(dropout6, 3, activation=tf.nn.tanh, name='predict')
@@ -114,34 +116,34 @@ def customized_incepnet(features, mode, params):
 # Using max pooling
 def customized_incepnet_v2(features, mode, params):
     # (1) Filter size: 5x5x64
-    conv1 = cnn_2d(features, 5, params['channels'][0], activation=params['activation'], name="conv1")
+    conv1 = cnn_2d(features, 5, params['channels'][0] * 16, activation=params['activation'], name="conv1")
     pool1 = max_pool_layer(conv1, 4, "pool1")
     # Output: 60x90x64
 
     # (2) Filter size: 3x3x64
-    conv2 = cnn_2d(pool1, 3, params['channels'][1], activation=params['activation'], name="conv2")
+    conv2 = cnn_2d(pool1, 3, params['channels'][0] * 16, activation=params['activation'], name="conv2")
     pool2 = max_pool_layer(conv2, 2, "pool2")
     # Output: 30x45x64
 
     # (3.1) Max Pool, then Filter size: 64
     pool3_1 = max_pool_layer(pool2, 3, "pool3_1", stride=1)  # Special stride to keep same dimension
-    conv3_1 = cnn_2d(pool3_1, 1, params['channels'][2], activation=params['activation'], name="conv3_1")
+    conv3_1 = cnn_2d(pool3_1, 1, params['channels'][0] * 32, activation=params['activation'], name="conv3_1")
     # Output: 30x45x64
 
     # (3.2) Filter size: 1x1x64, then 3x3x64
-    conv3_2 = cnn_2d(pool2, 1, params['channels'][3], activation=params['activation'], name="conv3_2_1")
-    conv3_2 = cnn_2d(conv3_2, 3, params['channels'][4], activation=params['activation'], name="conv3_2")
+    conv3_2 = cnn_2d(pool2, 1, params['channels'][0] * 16, activation=params['activation'], name="conv3_2_1")
+    conv3_2 = cnn_2d(conv3_2, 3, params['channels'][0] * 16, activation=params['activation'], name="conv3_2")
     # Output: 30x45x64
 
     # (3.3) Filter size: 1x1x64, then 5x5x64
-    conv3_3 = cnn_2d(pool2, 1, params['channels'][5], activation=params['activation'], name="conv3_3_1")
-    conv3_3 = cnn_2d(conv3_3, 3, params['channels'][6], activation=params['activation'], name="conv3_3_2")
-    conv3_3 = cnn_2d(conv3_3, 3, params['channels'][7], activation=params['activation'], name="conv3_3_3")
+    conv3_3 = cnn_2d(pool2, 1, params['channels'][0] * 16, activation=params['activation'], name="conv3_3_1")
+    conv3_3 = cnn_2d(conv3_3, 3, params['channels'][0] * 16, activation=params['activation'], name="conv3_3_2")
+    conv3_3 = cnn_2d(conv3_3, 3, params['channels'][0] * 16, activation=params['activation'], name="conv3_3_3")
     # conv3_3 = cnn_2d(conv3_3, 5, 64)  # Might use 2 3x3 CNN instead, look at inception net paper
     # Output: 30x45x64
 
     # (3.4) Filter size: 1x1x256
-    conv3_4 = cnn_2d(pool2, 1, params['channels'][8], activation=params['activation'], name="conv3_4")
+    conv3_4 = cnn_2d(pool2, 1, params['channels'][0] * 16, activation=params['activation'], name="conv3_4")
     # Output: 30x45x64
 
     concat4 = tf.concat([conv3_1, conv3_2, conv3_3, conv3_4], 3)
@@ -149,68 +151,56 @@ def customized_incepnet_v2(features, mode, params):
     # Output: 10x15x256 = 38400
 
     fc5 = flatten_layer(pool4)
-    fc5 = fc_layer(fc5, params['channels'][9], activation=params['activation'], name='fc5')
+    fc5 = fc_layer(fc5, params['channels'][1] * 1024, activation=params['activation'], name='fc5')
     dropout5 = tf.keras.layers.Dropout(rate=params['dropout_rate'])(fc5)
 
-    fc6 = fc_layer(dropout5, params['channels'][10], activation=params['activation'], name='fc6')
+    fc6 = fc_layer(dropout5, params['channels'][1] * 1024, activation=params['activation'], name='fc6')
     dropout6 = tf.keras.layers.Dropout(rate=params['dropout_rate'])(fc6)
 
     logits = fc_layer(dropout6, 3, activation=tf.nn.tanh, name='predict')
     return logits
 
 
-# Add cnn with pooling everywhere
-def customized_incepnet_v3(features, mode, params):
-    # (1) Filter size: 5x5x64
-    conv1 = cnn_2d(features, 5, params['channels'][0], activation=params['activation'], name="conv1")
-    pool1 = max_and_cnn_layer(conv1, 4, params['channels'][0], activation=params['activation'], name ="pool1")
-    # Output: 60x90x64
+# Based on vgg16
+def simple_cnn(features, mode, params):
+    # Input: 240x360xn
+    conv1 = cnn_2d(features, 3, params['channels'][0] * 8, activation=params['activation'], name="conv1")
+    conv1 = cnn_2d(conv1, 3, params['channels'][0] * 8, activation=params['activation'], name="conv1")
+    pool1 = max_pool_layer(conv1, 2, "pool1")
+
 
     # (2) Filter size: 3x3x64
-    conv2 = cnn_2d(pool1, 3, params['channels'][1], activation=params['activation'], name="conv2")
-    pool2 = max_and_cnn_layer(conv1, 2, params['channels'][1], activation=params['activation'], name ="pool2")
-    # Output: 30x45x64
+    conv2 = cnn_2d(pool1, 3, params['channels'][0] * 16, activation=params['activation'], name="conv2")
+    conv2 = cnn_2d(conv2, 3, params['channels'][0] * 16, activation=params['activation'], name="conv2")
+    pool2 = max_pool_layer(conv2, 2, "pool2")
 
-    # (3.1) Max Pool, then Filter size: 64
-    pool3_1 = max_pool_layer(pool2, 3, "pool3_1", stride=1)  # Special stride to keep same dimension
-    conv3_1 = cnn_2d(pool3_1, 1, params['channels'][2], activation=params['activation'], name="conv3_1")
-    # Output: 30x45x64
+    # (2) Filter size: 3x3x64
+    conv3 = cnn_2d(pool2, 3, params['channels'][0] * 32, activation=params['activation'], name="conv3")
+    conv3 = cnn_2d(conv3, 3, params['channels'][0] * 32, activation=params['activation'], name="conv3")
+    conv3 = cnn_2d(conv3, 1, params['channels'][0] * 32, activation=params['activation'], name="conv3")
+    pool3 = max_pool_layer(conv3, 2, "pool2")
 
-    # (3.2) Filter size: 1x1x64, then 3x3x64
-    conv3_2 = cnn_2d(pool2, 1, params['channels'][3], activation=params['activation'], name="conv3_2_1")
-    conv3_2 = cnn_2d(conv3_2, 3, params['channels'][4], activation=params['activation'], name="conv3_2")
-    # Output: 30x45x64
+    # (2) Filter size: 3x3x64
+    conv4 = cnn_2d(pool3, 3, params['channels'][0] * 32, activation=params['activation'], name="conv4")
+    conv4 = cnn_2d(conv4, 3, params['channels'][0] * 32, activation=params['activation'], name="conv4")
+    conv4 = cnn_2d(conv4, 1, params['channels'][0] * 32, activation=params['activation'], name="conv4")
+    pool4 = max_pool_layer(conv4, 2, "pool4")
 
-    # (3.3) Filter size: 1x1x64, then 5x5x64
-    conv3_3 = cnn_2d(pool2, 1, params['channels'][5], activation=params['activation'], name="conv3_3_1")
-    conv3_3 = cnn_2d(conv3_3, 3, params['channels'][6], activation=params['activation'], name="conv3_3_2")
-    conv3_3 = cnn_2d(conv3_3, 3, params['channels'][7], activation=params['activation'], name="conv3_3_3")
-    # conv3_3 = cnn_2d(conv3_3, 5, 64)  # Might use 2 3x3 CNN instead, look at inception net paper
-    # Output: 30x45x64
+    # (2) Filter size: 3x3x64
+    conv5 = cnn_2d(pool4, 3, params['channels'][0] * 32, activation=params['activation'], name="conv5")
+    conv5 = cnn_2d(conv5, 3, params['channels'][0] * 32, activation=params['activation'], name="conv5")
+    conv5 = cnn_2d(conv5, 1, params['channels'][0] * 32, activation=params['activation'], name="conv5")
+    conv5 = max_pool_layer(conv5, 2, "pool4")
 
-    # (3.4) Filter size: 1x1x256
-    conv3_4 = cnn_2d(pool2, 1, params['channels'][8], activation=params['activation'], name="conv3_4")
-    # Output: 30x45x64
-
-    concat4 = tf.concat([conv3_1, conv3_2, conv3_3, conv3_4], 3)
-    total_layer = params['channels'][2] + params['channels'][4] + params['channels'][7] + params['channels'][8]
-    pool4 = max_and_cnn_layer(concat4, 3, total_layer, activation=params['activation'], name ="pool4")
-    # Output: 10x15x256 = 38400
-
-    fc5 = flatten_layer(pool4)
-    fc5 = fc_layer(fc5, params['channels'][9], activation=params['activation'], name='fc5')
+    fc5 = flatten_layer(conv5)
+    fc5 = fc_layer(fc5, params['channels'][1] * 2048, activation=params['activation'], name='fc5')
     dropout5 = tf.keras.layers.Dropout(rate=params['dropout_rate'])(fc5)
 
-    fc6 = fc_layer(dropout5, params['channels'][10], activation=params['activation'], name='fc6')
+    fc6 = fc_layer(dropout5, params['channels'][1] * 1024, activation=params['activation'], name='fc6')
     dropout6 = tf.keras.layers.Dropout(rate=params['dropout_rate'])(fc6)
 
-    # logits = fc_layer(dropout6, 11, activation=params['activation'], name='predict')
-    logits = fc_layer(dropout6, 3, activation=tf.nn.tanh, name='predict')  # Regression with one output
+    logits = fc_layer(dropout6, 3, activation=tf.nn.tanh, name='predict')
     return logits
-
-
-def my_one_hot(labels, depth):
-    pass
 
 
 # Define Model
