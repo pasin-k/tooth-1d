@@ -146,6 +146,17 @@ def run(model_params=None):
         accuracy = 0
         global_step = 0
 
+    #Evaluate using train set
+    model_params['result_file_name'] = 'train_result.csv'
+    classifier = tf.estimator.Estimator(
+        model_fn=my_model,
+        params=model_params,
+        model_dir=run_params['result_path_new'],
+        config=my_checkpoint_config
+    )
+    eval_result = classifier.evaluate(
+        input_fn=lambda: eval_input_fn(train_data_path, batch_size=run_params['batch_size']))
+
     # No need to use predict since we can get data from hook now
     # # images, expected = get_data_from_path(eval_data_path)
     # score_address = run_params['input_path'].replace('.tfrecords', '') + '_score.npy'
@@ -244,7 +255,8 @@ def fitness(learning_rate, dropout_rate, activation, channels, fully_connect_cha
                  'dropout_rate': dropout_rate,
                  'activation': activation_dict[activation],
                  'channels': channels_full,
-                 'result_path': run_params['result_path_new']}
+                 'result_path': run_params['result_path_new'],
+                 'result_file_name': 'result.csv'}
     accuracy, global_step, result = run(md_config)
     # accuracy = run_hyper_parameter_wrapper(learning_rate, dropout_rate, activation, channels)
 
@@ -272,25 +284,31 @@ def fitness(learning_rate, dropout_rate, activation, channels, fully_connect_cha
 
 
 def run_hyper_parameter_optimize():
-    hyperparameter_filename = run_params['result_path'] + '/' + "hyperparameters_result_" + datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S") + ".csv"
+    hyperparameter_filename = run_params[
+                                  'result_path'] + '/' + "hyperparameters_result_" + datetime.datetime.now().strftime(
+        "%Y%m%d_%H_%M_%S") + ".csv"
 
     n_calls = 20  # Expected number of trainings
 
-    file_name = []
+    previous_record_files = []
     for file in glob.glob(run_params['result_path'] + '/' + "hyperparameters_result_" + '*'):
-        file_name.append(file)
-    file_name.sort()
-    if len(file_name) > 0:
-        prev_data, header = read_file(file_name[-1], header=True)
+        previous_record_files.append(file)
+    previous_record_files.sort()
+    if len(previous_record_files) > 0:
+        prev_data, header = read_file(previous_record_files[-1], header=True)
         if prev_data[-1][0] != 'end':  # Check if the previous file doesn't end properly
             n_calls = n_calls - len(prev_data)
             l_data = prev_data[-1][1:]  # Latest_data
-            default_param = [float(l_data[0]), float(l_data[1]),l_data[2],int(l_data[3]),int(l_data[4])]
+            default_param = [float(l_data[0]), float(l_data[1]), l_data[2], int(l_data[3]), int(l_data[4])]
+        else:
+            default_param = default_parameters
     else:
-        default_param = [1e-3, 0.125, '0', 2, 2]
+        default_param = default_parameters
 
+    print("Running remaining: %s time" % n_calls)
     if n_calls < 11:
         print("Hyper parameter optimize ENDED: run enough calls already")
+        save_file(previous_record_files[-1], ['end'], write_mode='a')
     else:
         search_result = gp_minimize(func=fitness,
                                     dimensions=dimensions,
@@ -304,7 +322,7 @@ def run_hyper_parameter_optimize():
         print("All hyper-parameter searched: %s" % searched_parameter)
 
         new_data = []
-        field_name = ['accuracy', 'learning_rate', 'dropout_rate', 'activation', 'cnn_channels','fc_channels']
+        field_name = ['accuracy', 'learning_rate', 'dropout_rate', 'activation', 'cnn_channels', 'fc_channels']
         for i in searched_parameter:
             data = {field_name[0]: i[0] * -1,
                     field_name[1]: i[1][0],
@@ -318,7 +336,10 @@ def run_hyper_parameter_optimize():
             writer = csv.DictWriter(csvFile, fieldnames=field_name)
             writer.writeheader()
             writer.writerows(new_data)
-            writer.writerow("end")  # Ending mark
+
+        with open(hyperparameter_filename, 'a', newline='') as csvFile:
+            writer = csv.writer(csvFile)
+            writer.writerow(["end"])  # Ending mark
         # space = search_result.space
         # print("Best result: %s" % space.point_to_dict(search_result.x))
 

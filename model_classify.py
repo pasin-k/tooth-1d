@@ -253,6 +253,8 @@ def my_model(features, labels, mode, params, config):
     summary2 = tf.summary.histogram("Ground_Truth", labels)
     # global_step = tf.summary.scalar("Global steps",tf.train.get_global_step())
 
+
+
     # Train Mode
     if mode == tf.estimator.ModeKeys.TRAIN:
         steps = tf.train.get_global_step()
@@ -270,7 +272,7 @@ def my_model(features, labels, mode, params, config):
 
     # Create result(.csv) file, if not exist
     if not os.path.isfile(params['result_path']):
-        with open(params['result_path'] + "result.csv", "w") as csvfile:
+        with open(params['result_path'] + params['result_file_name'], "w") as csvfile:
             fieldnames = ['Label', 'Predicted Class', 'Confident level']
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             writer.writeheader()
@@ -278,7 +280,7 @@ def my_model(features, labels, mode, params, config):
     # Create hooks
     saver_hook = tf.train.SummarySaverHook(save_steps=10, summary_op=tf.summary.merge_all(),
                                            output_dir=config.model_dir + 'eval')
-    csv_name = tf.convert_to_tensor(params['result_path'] + "result.csv", dtype=tf.string)
+    csv_name = tf.convert_to_tensor(params['result_path'] + params['result_file_name'], dtype=tf.string)
     eval_hook = EvalResultHook(labels, predicted_class, tf.nn.softmax(logits), csv_name)
     return tf.estimator.EstimatorSpec(mode=mode, eval_metric_ops={'accuracy': accuracy}, loss=loss,
                                       evaluation_hooks=[saver_hook, eval_hook])

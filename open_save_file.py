@@ -337,7 +337,6 @@ def read_file(csv_dir, header=False):
     with open(csv_dir) as csvFile:
         readCSV = csv.reader(csvFile, delimiter=',')
         for row in readCSV:
-            print(row)
             if header:
                 header_name.append(row)
                 header = False
@@ -357,7 +356,7 @@ def save_file(csv_dir, all_data, field_name=None, write_mode='w'):
             writer = csv.DictWriter(csvFile, fieldnames=field_name)
             writer.writeheader()
         for data in all_data:
-            writer.writerow(data)
+            writer.writerow([data])
 
 
 # Below are unused stl-to-voxel functions
