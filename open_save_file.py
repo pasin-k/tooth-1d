@@ -1,11 +1,7 @@
 # import sys
-import importlib
-import scipy.io
 import os
 # import glob
 import csv
-import random
-import imageio
 # %matplotlib inline
 # import matplotlib.pyplot as plt
 import numpy as np
