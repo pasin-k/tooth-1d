@@ -203,7 +203,8 @@ def save_plot(coor_list, out_directory, file_header_name, image_name, augment_nu
     print("Finished plotting for %d images with %d rotations at %s" % (len(coor_list), len(degree), out_directory))
 
 
-def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs):
+# get_data is true will return info instead of file name
+def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_data = False):
     numdeg = configs['numdeg']
     image_address, _ = get_file_name(folder_name=dataset_folder, file_name=None)
     if csv_dir is None:
@@ -291,11 +292,37 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs):
         train_amount = 0
         print("imgtotfrecord: amount of training is not correct, might want to check")
     train_address.extend(grouped_address[0:train_amount])
+    eval_address.extend(grouped_address[train_amount:])
+
+    # Convert name to data (only for .npy version)
+    train_data = []
+    eval_data = []
+    if get_data:
+        for addr in train_address:
+            label = addr[1]
+            img = []
+            for i in range(numdeg):
+                img.append(np.load(addr[0][i]))
+            train_data.append([img,label])
+        for addr in eval_address:
+            label = addr[1]
+            img = []
+            for i in range(numdeg):
+                img.append(np.load(addr[0][i]))
+            eval_data.append([img, label])
+
     grouped_train_address = tuple(
         [list(e) for e in zip(*train_address)])  # Convert to tuple of list[image address, label]
-    eval_address.extend(grouped_address[train_amount:])
+
     grouped_eval_address = tuple(
         [list(e) for e in zip(*eval_address)])  # Convert to tuple of list[image address, label]
+
+    if get_data:
+        grouped_train_data = tuple(
+            [list(e) for e in zip(*train_data)])  # Convert to tuple of list[image address, label]
+
+        grouped_eval_data = tuple(
+            [list(e) for e in zip(*eval_data)])  # Convert to tuple of list[image address, label]
 
     # print(grouped_eval_address)
     print("Train files: %d, Evaluate Files: %d" % (len(grouped_train_address[0]), len(grouped_eval_address[0])))
@@ -328,7 +355,9 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs):
             new_list_item = listitem[0][0].replace('_0.png', '')
             filehandle.write('%s\n' % new_list_item)
     '''
-    return grouped_train_address, grouped_eval_address, eval_score_list
+    if get_data:
+        return grouped_train_data, grouped_eval_data
+    return grouped_train_address, grouped_eval_address #, eval_score_list
 
 
 def read_file(csv_dir, header=False):
@@ -348,15 +377,19 @@ def read_file(csv_dir, header=False):
         return data, header_name
 
 
-def save_file(csv_dir, all_data, field_name=None, write_mode='w'):
+# one_row = true means that all data will be written in one row
+def save_file(csv_dir, all_data, field_name=None, write_mode='w', one_row=False):
     with open(csv_dir, write_mode) as csvFile:
         if field_name is None:
             writer = csv.writer(csvFile)
         else:
             writer = csv.DictWriter(csvFile, fieldnames=field_name)
             writer.writeheader()
-        for data in all_data:
-            writer.writerow([data])
+        if not one_row:
+            for data in all_data:
+                writer.writerow([data])
+        else:
+            writer.writerow(all_data)
 
 
 # Below are unused stl-to-voxel functions

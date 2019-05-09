@@ -19,7 +19,45 @@ degree = list([0, 45, 90, 135])
 numdeg = len(degree)
 
 
-# Get stl file and label, convert to stl_file
+# Only can be used for 'normalize_coor' function
+def get_coor_distance(stl_points, mode_remove):
+    distance = []
+    if mode_remove:
+        for i in range((np.shape(stl_points)[0]) - 2):
+            distance.append(np.linalg.norm(stl_points[i, :] - stl_points[i + 1, :]) +
+                            np.linalg.norm(stl_points[i + 1, :] - stl_points[i + 2, :]))
+    else:
+        for i in range((np.shape(stl_points)[0]) - 1):
+            distance.append(np.linalg.norm(stl_points[i, :] - stl_points[i + 1, :]))
+    return distance
+
+
+# stl_points are expected to be numpy arrays of coordinate of a single image
+def fix_amount_of_point(stl_points, coor_amount):
+    if type(stl_points).__module__ != np.__name__:
+        raise ValueError("Input is not numpy array, currently %s" % type(stl_points))
+    stl_points = stl_points.astype(float)
+    # In case stl_point is too much, need to remove
+    if np.shape(stl_points)[0] > coor_amount:
+        # Remove index of the closest distance until satisfy
+        for i in range(np.shape(stl_points)[0] - coor_amount):
+            # Calculate distance between two points which are two space away (Actually focus on i+1, behind and forward)
+            distance = get_coor_distance(stl_points, True)
+            distance_index = np.argsort(distance)
+            remove_index = distance_index[0]  # Choose min distance as the index to remove
+            stl_points = np.delete(stl_points, remove_index + 1, axis=0)  # Remove from the points
+    else:
+        for i in range(coor_amount - np.shape(stl_points)[0]):
+            # Find distance between each point
+            distance = get_coor_distance(stl_points, False)
+            distance_index = np.argsort(distance)
+            add_index = distance_index[-1]  # Choose max distance as the index to add coordinate
+            new_point = (stl_points[add_index, :] + stl_points[add_index + 1, :]) / 2
+            stl_points = np.insert(stl_points, add_index+1, new_point, axis=0)
+    return stl_points
+
+
+# Get stl file and label, convert to stl_file <-- This is the main function
 def get_cross_section(data_type, stat_type):
     # Get data and transformed to cross-section image
     name_dir, image_name = get_file_name(folder_name='../global_data/stl_data', file_name="PreparationScan.stl")
@@ -69,9 +107,7 @@ def get_cross_section(data_type, stat_type):
     return stl_points, stl_points_augmented, label, label_name, error_file_names, degree
 
 
-def save_image(stl_points, stl_points_augmented, label_name, error_file_names):
-    # Directory to save image and errorfile
-    image_dir = "./data/cross_section"
+def save_image(stl_points, stl_points_augmented, label_name, error_file_names, image_dir = "./data/cross_section"):
     # Save data as png image
     png_name = "PreparationScan"
     save_plot(stl_points, image_dir, png_name, label_name, 0, degree)
@@ -99,6 +135,7 @@ def stl_point_to_movement(stl_points):  # stl_points is list of all file (all ex
 
 # Save coordinate as .npy file
 def save_coordinate(coor_list, out_directory, file_header_name, image_name, augment_number, degree):
+    # Check if size coordinate, image name has same length
     if len(coor_list) != len(image_name):
         raise ValueError("save_plot: number of image(%s) is not equal to number of image_name(%s)"
                          % (len(coor_list), len(image_name)))
@@ -108,20 +145,19 @@ def save_coordinate(coor_list, out_directory, file_header_name, image_name, augm
         print("# of Degree found: %d" % len(coor_list[0]))
         raise Exception('Number of degree specified is not equals to coordinate ')
 
-    for i in range(len(coor_list)):
-        for d in range(len(degree)):
-            coor = coor_list[i][d]
+    for corr_index in range(len(coor_list)):
+        for deg_index in range(len(degree)):
+            coor = coor_list[corr_index][deg_index]
+            print(np.shape(coor))
             # Name with some additional data
-            fullname = "%s_%s_%s_%d.npy" % (file_header_name, image_name[i], augment_number, degree[d])
+            fullname = "%s_%s_%s_%d.npy" % (file_header_name, image_name[corr_index], augment_number, degree[deg_index])
             output_name = os.path.join(out_directory, fullname)
             np.save(output_name, coor)
-            np.savetxt("%s_%s_%d.txt" % (file_header_name, image_name[i], degree[d]), coor)
+            # np.savetxt(output_name.replace(".npy",".txt"), coor)
     print("Finished saving coordinates: %d files with %d rotations at dir: %s" % (len(coor_list), len(degree), out_directory))
 
 
-def save_stl_point(stl_points, stl_points_augmented, label_name, error_file_names):
-    # Directory to save coordinates
-    file_dir = "./data/coordinates"
+def save_stl_point(stl_points, stl_points_augmented, label_name, error_file_names, file_dir = "./data/coordinates"):
     # This convert coordinates into vector between each coordinate
     stl_points = stl_point_to_movement(stl_points)
     stl_points_augmented = stl_point_to_movement(stl_points_augmented)
@@ -130,8 +166,7 @@ def save_stl_point(stl_points, stl_points_augmented, label_name, error_file_name
     save_coordinate(stl_points, file_dir, coor_name, label_name, 0, degree)
     print("Finished saving first set of data")
     # Save again for augmented data
-    coor_name = "PreparationScan" + "_1"
-    save_coordinate(stl_points_augmented, file_dir, coor_name, label_name, 0, degree)
+    save_coordinate(stl_points_augmented, file_dir, coor_name, label_name, 1, degree)
     print("Finished saving second set of data")
 
     # Save names which has defect on it, use when convert to tfrecord
@@ -142,15 +177,24 @@ def save_stl_point(stl_points, stl_points_augmented, label_name, error_file_name
 
 if __name__ == '__main__':
     # Output 'points' as list[list[numpy]] (example_data, degrees, points)
-    save_img = True
-    save_coor = False
+    save_img = False
+    save_coor = True
+    is_fix_amount = True
+    fix_amount = 301  # After get the movement, it will be reduced to 300
 
     # data_type, stat_type will not be used unless you want to look at lbl value
     points, points_aug, lbl, lbl_name, err_name, deg = get_cross_section(data_type="BL", stat_type="median")
-
+    if fix_amount:
+        print("Adjusting number of coordinates...")
+        for p_index in range(len(points)):
+            for d_index in range(len(degree)):
+                points[p_index][d_index] = fix_amount_of_point(points[p_index][d_index], fix_amount)
+                points_aug[p_index][d_index] = fix_amount_of_point(points_aug[p_index][d_index], fix_amount)
     if save_img:
-        save_image(points, points_aug, lbl_name, err_name)
+        print("Start saving images...")
+        save_image(points, points_aug, lbl_name, err_name, image_dir = "./data/cross_section")
 
     if save_coor:
-        save_stl_point(points, points_aug, lbl_name, err_name)
+        print("Start saving coordinates...")
+        save_stl_point(points, points_aug, lbl_name, err_name, file_dir = "./data/coordinate_300_point")
     print("pre_processing.py: done")

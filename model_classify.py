@@ -217,10 +217,14 @@ def my_model(features, labels, mode, params, config):
         }
         return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
 
-    # one_hot_label = tf.one_hot(indices=labels, depth=11)
+    one_hot_label = tf.one_hot(indices=tf.cast(labels,tf.int32), depth=3)
     labels = tf.cast((labels - 1) / 2, tf.int64)
 
-    loss = tf.losses.sparse_softmax_cross_entropy(labels, logits)  # Not applicable for score
+    weight = tf.constant([[1,params['loss_weight'], 1]],dtype=tf.float32)
+    loss_weight = tf.matmul(one_hot_label,weight,transpose_b=True,a_is_sparse=True)
+
+    loss = tf.losses.sparse_softmax_cross_entropy(labels, logits,weights=loss_weight)  # labels is int of class, logits is vector
+
     accuracy = tf.metrics.accuracy(labels, predicted_class)
 
     my_accuracy = tf.reduce_mean(tf.cast(tf.equal(labels, predicted_class), dtype=tf.float32))
