@@ -1,17 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="770e0596-62ef-4176-bd6c-3bded3f7c783" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/coor_train.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Playground.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Playground.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/imgtotfrecord.py" beforeDir="false" afterPath="$PROJECT_DIR$/imgtotfrecord.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model_classify.py" beforeDir="false" afterPath="$PROJECT_DIR$/model_classify.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/open_save_file.py" beforeDir="false" afterPath="$PROJECT_DIR$/open_save_file.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pre_processing.py" beforeDir="false" afterPath="$PROJECT_DIR$/pre_processing.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tooth.config" beforeDir="false" afterPath="$PROJECT_DIR$/tooth.config" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/train.py" beforeDir="false" afterPath="$PROJECT_DIR$/train.py" afterDir="false" />
-    </list>
+    <list default="true" id="770e0596-62ef-4176-bd6c-3bded3f7c783" name="Default Changelist" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -270,10 +260,10 @@
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="1920" />
-    <option name="y" value="-2" />
-    <option name="width" value="1920" />
-    <option name="height" value="1202" />
+    <option name="x" value="9" />
+    <option name="y" value="147" />
+    <option name="width" value="1813" />
+    <option name="height" value="789" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
@@ -651,7 +641,14 @@
       <option name="project" value="LOCAL" />
       <updated>1557218782108</updated>
     </task>
-    <option name="localTasksCounter" value="33" />
+    <task id="LOCAL-00033" summary="Better at resuming runs">
+      <created>1557410561873</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1557410561873</updated>
+    </task>
+    <option name="localTasksCounter" value="34" />
     <servers />
   </component>
   <component name="TodoView">
@@ -740,7 +737,8 @@
     <MESSAGE value="Fix stl-&gt;image to be 240x360 pixel (fixed)" />
     <MESSAGE value="Create new type of model (Simple CNN)&#10;Hyperparameter optimize now work with optimization" />
     <MESSAGE value="Now save final result of training data as csv file" />
-    <option name="LAST_COMMIT_MESSAGE" value="Now save final result of training data as csv file" />
+    <MESSAGE value="Better at resuming runs" />
+    <option name="LAST_COMMIT_MESSAGE" value="Better at resuming runs" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$USER_HOME$/anaconda3/envs/ps36/lib/python3.6/site-packages/tensorflow/python/framework/op_def_library.py">
