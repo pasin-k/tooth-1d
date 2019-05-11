@@ -278,7 +278,7 @@ def fitness(learning_rate, dropout_rate, activation, channels, fully_connect_cha
         for key, val in info_dict.items():
             writer.writerow([key, val])
 
-    save_file(run_params['summary_file_path'], [learning_rate, dropout_rate, activation, channels, fully_connect_channels, loss_weight], write_mode='a', one_row=True)
+    save_file(run_params['summary_file_path'], [accuracy, learning_rate, dropout_rate, activation, channels, fully_connect_channels, loss_weight], write_mode='a', one_row=True)
     return -accuracy
 
 
@@ -286,6 +286,7 @@ def run_hyper_parameter_optimize():
     run_params['summary_file_path'] = run_params['result_path'] + '/' + "hyperparameters_result_" \
                                       + datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S") + ".csv"
     field_name = [i.name for i in dimensions]
+    field_name.insert(0,'accuracy')
 
     n_calls = 20  # Expected number of trainings
 

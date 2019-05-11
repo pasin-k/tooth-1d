@@ -150,9 +150,10 @@ def save_coordinate(coor_list, out_directory, file_header_name, image_name, augm
             coor = coor_list[corr_index][deg_index]
             print(np.shape(coor))
             # Name with some additional data
-            fullname = "%s_%s_%s_%d.npy" % (file_header_name, image_name[corr_index], augment_number, degree[deg_index])
+            fullname = "%s_%s_%s_%d.csv" % (file_header_name, image_name[corr_index], augment_number, degree[deg_index])
             output_name = os.path.join(out_directory, fullname)
-            np.save(output_name, coor)
+            np.savetxt(output_name, coor, delimiter = ',')
+            # np.save(output_name, coor)
             # np.savetxt(output_name.replace(".npy",".txt"), coor)
     print("Finished saving coordinates: %d files with %d rotations at dir: %s" % (len(coor_list), len(degree), out_directory))
 
@@ -180,7 +181,7 @@ if __name__ == '__main__':
     save_img = False
     save_coor = True
     is_fix_amount = True
-    fix_amount = 301  # After get the movement, it will be reduced to 300
+    fix_amount = 300  # After get the movement, it will be reduced to 300
 
     # data_type, stat_type will not be used unless you want to look at lbl value
     points, points_aug, lbl, lbl_name, err_name, deg = get_cross_section(data_type="BL", stat_type="median")
@@ -196,5 +197,5 @@ if __name__ == '__main__':
 
     if save_coor:
         print("Start saving coordinates...")
-        save_stl_point(points, points_aug, lbl_name, err_name, file_dir = "./data/coordinate_300_point")
+        save_stl_point(points, points_aug, lbl_name, err_name, file_dir = "./data/coordinate_debug_2")
     print("pre_processing.py: done")

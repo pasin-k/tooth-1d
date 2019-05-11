@@ -115,7 +115,7 @@ def serialize_coordinate(example):
 def read_coordinate(file_name, label):
     file_values = {'label': label}
     for i in range(numdeg):
-        file_values['img' + str(i)] = file_name
+        file_values['img' + str(i)] = (file_name[i]*10000).tostring()
     return file_values
 
 
@@ -123,53 +123,36 @@ def read_coordinate(file_name, label):
 # dataset_folder : Folder of the data (Not include label)
 # csv_dir : Folder of label data (If not specified, will use the default directory)
 def coordinate_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None):
-    grouped_train_address, grouped_eval_address = get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs,
-                                                                      get_data=True)
-
-    # Start writing train dataset
-    train_dataset = tf.data.Dataset.from_tensor_slices(grouped_train_address)
-    train_dataset = train_dataset.map(read_coordinate)  # Read file address, and get info as string
-
-    it = train_dataset.make_one_shot_iterator()
-
-    elem = it.get_next()
-
+    grouped_train_address, grouped_eval_address = get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_data=True)
     # Start getting all info and zip to tfrecord
     tfrecord_train_name = os.path.join("./data/tfrecord", "%s_%s_%s_coor_train.tfrecords" % (
         tfrecord_name, configs['label_data'], configs['label_type']))
     tfrecord_eval_name = os.path.join("./data/tfrecord", "%s_%s_%s_coor_eval.tfrecords" % (
         tfrecord_name, configs['label_data'], configs['label_type']))
 
-    with tf.Session() as sess:
-        writer = tf.python_io.TFRecordWriter(tfrecord_train_name)
-        while True:
-            try:
+    with tf.python_io.TFRecordWriter(tfrecord_train_name) as writer:
+        for train_data in grouped_train_address:
+            feature = {'label': _int64_feature(train_data[1])}
+            for i in range(numdeg):
+                for j in range(2):
+                    val = train_data[0][i][:,j].reshape(-1)
+                    feature['img_%s_%s' % (i,j)] =tf.train.Feature(float_list=tf.train.FloatList(value=val))
+            example = tf.train.Example(features=tf.train.Features(feature=feature))
+            # Write TFrecord file
+            writer.write(example.SerializeToString())
 
-                elem_result = serialize_coordinate(sess.run(elem))
+    with tf.python_io.TFRecordWriter(tfrecord_eval_name) as writer:
+        for train_data in grouped_eval_address:
+            feature = {'label': _int64_feature(train_data[1])}
+            for i in range(numdeg):
+                for j in range(2):
+                    val = train_data[0][i][:, j].reshape(-1)
+                    feature['img_%s_%s' % (i, j)] = tf.train.Feature(float_list=tf.train.FloatList(value=val))
+            example = tf.train.Example(features=tf.train.Features(feature=feature))
+            # print(example)
 
-                writer.write(elem_result)
-            except tf.errors.OutOfRangeError:
-                break
-        writer.close()
-
-    eval_dataset = tf.data.Dataset.from_tensor_slices(grouped_eval_address)
-    eval_dataset = eval_dataset.map(read_coordinate)
-
-    it = eval_dataset.make_one_shot_iterator()
-
-    elem = it.get_next()
-
-    with tf.Session() as sess:
-        writer = tf.python_io.TFRecordWriter(tfrecord_eval_name)
-        while True:
-            try:
-                item = sess.run(elem)
-                elem_result = serialize_coordinate(item)
-                # print(elem_result)
-                writer.write(elem_result)
-            except tf.errors.OutOfRangeError:
-                break
-        writer.close()
+            # Write TFrecord file
+            writer.write(example.SerializeToString())
     print("TFrecords created: %s, %s" % (tfrecord_train_name, tfrecord_eval_name))
 
 
@@ -198,5 +181,6 @@ if __name__ == '__main__':
         if get_image:
             image_to_tfrecord(tfrecord_name="preparation_361", dataset_folder="./data/cross_section")
         else:
-            coordinate_to_tfrecord(tfrecord_name="preparation_coor_361", dataset_folder="./data/coordinate_300_point")
+            coordinate_to_tfrecord(tfrecord_name="preparation_coor_smallraw", dataset_folder="./data/coordinate_debug"
+                                   , csv_dir="/home/pasin/Documents/Link to Tooth/Tooth/Model/global_data/Ground Truth Score_debug.csv")
     print("Complete")

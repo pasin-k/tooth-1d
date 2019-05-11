@@ -36,16 +36,16 @@ def decode(data_dict):
     return image_stacked, label
 
 
-def _int64_feature(value):
-    return tf.train.Feature(int64_list=tf.train.Int64List(value=[value]))
-
-
-def _bytes_feature(value):
-    return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
-
-
-def _float_feature(value):
-    return tf.train.Feature(float_list=tf.train.FloatList(value=[value]))
+# def _int64_feature(value):
+#     return tf.train.Feature(int64_list=tf.train.Int64List(value=[value]))
+#
+#
+# def _bytes_feature(value):
+#     return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
+#
+#
+# def _float_feature(value):
+#     return tf.train.Feature(float_list=tf.train.FloatList(value=[value]))
 
 
 def train_input_fn(data_path, batch_size):
@@ -75,8 +75,8 @@ def get_data_from_path(data_path):
 
     iterator = dataset.make_one_shot_iterator()
     next_image_data = iterator.get_next()
-    images = [1]
-    label = [2]
+    images = []
+    label = []
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
 
@@ -88,13 +88,5 @@ def get_data_from_path(data_path):
                 label.append(data[1])
         except tf.errors.OutOfRangeError:
             pass
-
-    # dataset = dataset.batch(1000, drop_remainder=False)
-    # whole_dataset_tensors = tf.data.experimental.get_single_element(dataset)
-    # with tf.Session() as sess:
-    #     whole_dataset_arrays = sess.run(whole_dataset_tensors)
-    #     print(whole_dataset_arrays)
-    # images = whole_dataset_arrays[0]
-    # label = whole_dataset_arrays[1]
     return images, label
 

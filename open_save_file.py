@@ -313,13 +313,6 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
     grouped_eval_address = tuple(
         [list(e) for e in zip(*eval_address)])  # Convert to tuple of list[image address, label]
 
-    if get_data:
-        grouped_train_data = tuple(
-            [list(e) for e in zip(*train_data)])  # Convert to tuple of list[image address, label]
-
-        grouped_eval_data = tuple(
-            [list(e) for e in zip(*eval_data)])  # Convert to tuple of list[image address, label]
-
     # print(grouped_eval_address)
     print("Train files: %d, Evaluate Files: %d" % (len(grouped_train_address[0]), len(grouped_eval_address[0])))
 
@@ -352,7 +345,7 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
             filehandle.write('%s\n' % new_list_item)
     '''
     if get_data:
-        return grouped_train_data, grouped_eval_data
+        return train_data, eval_data
     return grouped_train_address, grouped_eval_address #, eval_score_list
 
 

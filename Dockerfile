@@ -8,6 +8,8 @@ RUN apt-get update && apt-get install -y git
 
 RUN pip install h5py scikit-optimize
 
+RUN pip install matplotlib
+
 RUN git clone https://github.com/jobpasin/tooth-2d
 
 # RUN export CUDA_VISIBLE_DEVICES=1

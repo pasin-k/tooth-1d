@@ -18,8 +18,8 @@ from skopt.utils import use_named_args
 
 # from model import my_model
 from model_classify import my_model
-from get_data import train_input_fn, eval_input_fn, get_data_from_path
-from open_save_file import read_file, save_file
+# from get_data import train_input_fn, eval_input_fn, get_data_from_path
+from open_save_file import read_file, save_file, get_input_and_label
 
 # Read tooth.config file
 parser = argparse.ArgumentParser()
@@ -86,9 +86,6 @@ def get_available_gpus():
     return [x.name for x in local_device_protos if x.device_type == 'GPU']
 
 
-def get_data(file_dir):
-
-
 def run(model_params=None):
     if model_params is None:
         raise ValueError("No model_params found")
@@ -148,7 +145,7 @@ def run(model_params=None):
         accuracy = 0
         global_step = 0
 
-    #Evaluate using train set
+    # Evaluate using train set
     model_params['result_file_name'] = 'train_result.csv'
     classifier = tf.estimator.Estimator(
         model_fn=my_model,
@@ -157,7 +154,7 @@ def run(model_params=None):
         config=my_checkpoint_config
     )
     eval_result = classifier.evaluate(
-        input_fn=lambda: eval_input_fn(train_data_path, batch_size=run_params['batch_size']))
+        input_fn=lambda: eval_input_fn(train_data_path, batch_size=run_params['batch_size']))  # Just run to save data
 
     # No need to use predict since we can get data from hook now
     # # images, expected = get_data_from_path(eval_data_path)
@@ -217,7 +214,7 @@ dimensions = [dim_learning_rate,
               dim_channel,
               dim_channel_fc,
               dim_loss_weight]
-default_parameters = [1e-3, 0.125, '0', 2, 2, 1.5]
+default_parameters = [1e-3, 0.125, '0', 2, 2, 1]
 
 '''
 # To transform input as parameters into dictionary
@@ -273,6 +270,7 @@ def fitness(learning_rate, dropout_rate, activation, channels, fully_connect_cha
     info_dict['activation'] = activation
     info_dict['cnn_channels'] = channels
     info_dict['fc_channels'] = fully_connect_channels
+    info_dict['loss_weight'] = loss_weight
     info_dict['steps'] = global_step
     info_dict['accuracy'] = accuracy
     with open((run_params['result_path_new'] + "config.csv"), "w") as csvfile:
@@ -280,40 +278,40 @@ def fitness(learning_rate, dropout_rate, activation, channels, fully_connect_cha
         for key, val in info_dict.items():
             writer.writerow([key, val])
 
-    # Unnecessary since we save file in hook instead
-    # with open((run_params['result_path_new'] + "result.csv"), "w") as csvfile:
-    #     writer = csv.writer(csvfile)
-    #     for row in result:
-    #         writer.writerow(row)
+    save_file(run_params['summary_file_path'], [accuracy, learning_rate, dropout_rate, activation, channels, fully_connect_channels, loss_weight], write_mode='a', one_row=True)
     return -accuracy
 
 
 def run_hyper_parameter_optimize():
-    hyperparameter_filename = run_params[
-                                  'result_path'] + '/' + "hyperparameters_result_" + datetime.datetime.now().strftime(
-        "%Y%m%d_%H_%M_%S") + ".csv"
+    run_params['summary_file_path'] = run_params['result_path'] + '/' + "hyperparameters_result_" \
+                                      + datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S") + ".csv"
+    field_name = [i.name for i in dimensions]
+    field_name.insert(0,'accuracy')
 
-    n_calls = 30  # Expected number of trainings
+    n_calls = 20  # Expected number of trainings
 
     previous_record_files = []
     for file in glob.glob(run_params['result_path'] + '/' + "hyperparameters_result_" + '*'):
         previous_record_files.append(file)
     previous_record_files.sort()
-    if len(previous_record_files) > 0:
+    if len(previous_record_files) > 1:
         prev_data, header = read_file(previous_record_files[-1], header=True)
         if prev_data[-1][0] != 'end':  # Check if the previous file doesn't end properly
             n_calls = n_calls - len(prev_data)
             l_data = prev_data[-1][1:]  # Latest_data
             default_param = [float(l_data[0]), float(l_data[1]), l_data[2], int(l_data[3]), int(l_data[4])]
+            run_params['summary_file_path'] = previous_record_files[-1]
         else:
+            save_file(run_params['summary_file_path'], [], field_name=field_name, write_mode='w')  # Create new summary file
             default_param = default_parameters
     else:
+        save_file(run_params['summary_file_path'], [], field_name=field_name, write_mode='w')  # Create new summary file
         default_param = default_parameters
 
     print("Running remaining: %s time" % n_calls)
     if n_calls < 11:
         print("Hyper parameter optimize ENDED: run enough calls already")
-        save_file(previous_record_files[-1], ['end'], write_mode='a')
+        save_file(run_params['summary_file_path'], ['end', datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S")], write_mode='a', one_row=True)
     else:
         search_result = gp_minimize(func=fitness,
                                     dimensions=dimensions,
@@ -327,7 +325,7 @@ def run_hyper_parameter_optimize():
         print("All hyper-parameter searched: %s" % searched_parameter)
 
         new_data = []
-        field_name = ['accuracy', 'learning_rate', 'dropout_rate', 'activation', 'cnn_channels', 'fc_channels']
+
         for i in searched_parameter:
             data = {field_name[0]: i[0] * -1,
                     field_name[1]: i[1][0],
@@ -337,14 +335,7 @@ def run_hyper_parameter_optimize():
                     field_name[5]: i[1][4]}
             new_data.append(data)
 
-        with open(hyperparameter_filename, 'w', newline='') as csvFile:
-            writer = csv.DictWriter(csvFile, fieldnames=field_name)
-            writer.writeheader()
-            writer.writerows(new_data)
-
-        with open(hyperparameter_filename, 'a', newline='') as csvFile:
-            writer = csv.writer(csvFile)
-            writer.writerow(["end"])  # Ending mark
+        save_file(run_params['summary_file_path'], ['end', datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S")], write_mode='a', one_row=True)
         # space = search_result.space
         # print("Best result: %s" % space.point_to_dict(search_result.x))
 
