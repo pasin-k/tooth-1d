@@ -18,8 +18,8 @@ from skopt.utils import use_named_args
 
 # from model import my_model
 from model_classify import my_model
-# from get_data import train_input_fn, eval_input_fn, get_data_from_path
-from open_save_file import read_file, save_file, get_input_and_label
+from coor_get_data import train_input_fn, eval_input_fn, get_data_from_path
+from open_save_file import read_file, save_file
 
 # Read tooth.config file
 parser = argparse.ArgumentParser()
@@ -63,27 +63,29 @@ run_params = {'batch_size': configs.batch_size,
               'checkpoint_min': configs.checkpoint_min,
               'early_stop_step': configs.early_stop_step,
               'input_path': configs.input_path,
-              'result_path': configs.result_path,
+              'result_path_base': configs.result_path,
               'config_path': os.path.abspath(args.config),
               'steps': configs.steps,
               'comment': configs.comment}
 
 run_params = check_exist(run_params, batch_size=None,
                          checkpoint_min=10, early_stop_step=5000,
-                         input_path=None, result_path=None,
+                         input_path=None, result_path_base=None,
                          steps=None, config_path=None)
 
 model_configs = {'learning_rate': configs.learning_rate,
                  'dropout_rate': configs.dropout_rate,
                  'activation': activation_dict[configs.activation],
                  'channels': configs.channels * [16, 16, 32, 16, 16, 16, 16, 16, 16, 512, 512],
-                 'loss_weight': configs.loss_weight,
                  }
 
 
 def get_available_gpus():
     local_device_protos = device_lib.list_local_devices()
     return [x.name for x in local_device_protos if x.device_type == 'GPU']
+
+
+class_value = ['1', '3', '5']
 
 
 def run(model_params=None):
@@ -93,15 +95,29 @@ def run(model_params=None):
     model_params = check_exist(model_params, learning_rate=None,
                                dropout_rate=None, activation=None,
                                channels=None, result_path=None)
-    # if len(model_params['channels']) != 11:
-    #     raise Exception("Number of channels not correspond to number of layers [Need size of 11, got %s]"
-    #                     % len(model_params['channels']))
+    # Note on some model_params:    loss_weight is calculated inside
+    #                               channels (in CNN case) is [CNN channels, Dense channels]
 
     # Type in file name
     train_data_path = run_params['input_path'].replace('.tfrecords', '') + '_train.tfrecords'
     eval_data_path = run_params['input_path'].replace('.tfrecords', '') + '_eval.tfrecords'
+    info_path = run_params['input_path'].replace('.tfrecords', '.txt')
+    label_hist = dict()
+    with open(info_path) as f:
+        filehandle = f.read().splitlines()
+        if not (filehandle[0] == 'distribution'):
+            print(filehandle[0])
+            raise KeyError("File does not have correct format, need 'train' and 'eval' keyword within file")
+        for line in filehandle[1:]:
+            if line == 'train':
+                break
+            else:
+                [key, val] = line.split('_')
+                label_hist[key] = int(val)
+    total = label_hist['1'] + label_hist['3'] + label_hist['5']
+    model_params['loss_weight'] = [total / label_hist['1'], total / label_hist['3'], total / label_hist['5']]
     print("Getting training data from %s" % train_data_path)
-    print("Saved model at %s" % run_params['result_path_new'])
+    print("Saved model at %s" % run_params['result_path'])
 
     tf.logging.set_verbosity(tf.logging.INFO)  # To see some additional info
     # Setting for multiple GPUs
@@ -119,7 +135,7 @@ def run(model_params=None):
     classifier = tf.estimator.Estimator(
         model_fn=my_model,
         params=model_params,
-        model_dir=run_params['result_path_new'],
+        model_dir=run_params['result_path'],
         config=my_checkpoint_config
     )
 
@@ -150,11 +166,11 @@ def run(model_params=None):
     classifier = tf.estimator.Estimator(
         model_fn=my_model,
         params=model_params,
-        model_dir=run_params['result_path_new'],
+        model_dir=run_params['result_path'],
         config=my_checkpoint_config
     )
     eval_result = classifier.evaluate(
-        input_fn=lambda: eval_input_fn(train_data_path, batch_size=run_params['batch_size']))  # Just run to save data
+        input_fn=lambda: eval_input_fn(train_data_path, batch_size=run_params['batch_size']))
 
     # No need to use predict since we can get data from hook now
     # # images, expected = get_data_from_path(eval_data_path)
@@ -180,6 +196,22 @@ def run(model_params=None):
     # print(eval_result[0]['accuracy'])
     # print('\nTest set accuracy: {accuracy:0.3f}\n'.format(**eval_result))
     predict_result = None
+
+    # Save necessary info to csv file, as reference
+    info_dict = run_params.copy()
+    info_dict['learning_rate'] = model_params['learning_rate']
+    info_dict['dropout_rate'] = model_params['dropout_rate']
+    info_dict['activation'] = model_params['activation']
+    info_dict['cnn_channels'] = model_params['channels'][0]
+    info_dict['fc_channels'] = model_params['channels'][1]
+    info_dict['loss_weight'] = model_params['loss_weight']
+    info_dict['steps'] = global_step
+    info_dict['accuracy'] = accuracy
+    with open((run_params['result_path'] + "config.csv"), "w") as csvfile:
+        writer = csv.writer(csvfile)
+        for key, val in info_dict.items():
+            writer.writerow([key, val])
+
     return accuracy, global_step, predict_result
 
 
@@ -190,15 +222,15 @@ def run(model_params=None):
 #             for act_count, act in enumerate(model_config['activation_list']):
 #                 for ch_count, ch in enumerate(model_config['channel_list']):
 #                     name = ("%s/learning_rate_%s_dropout_%s_activation_%s_channels_%s/"
-#                             % (run_params['result_path'], round(lr, 5), dr, act_count, ch_count))
+#                             % (run_params['result_path_base'], round(lr, 5), dr, act_count, ch_count))
 #                     md_config = {'learning_rate': round(lr, 5),
 #                                  'dropout_rate': dr,
 #                                  'activation': act,
 #                                  'channels': ch}
-#                     run_params['result_path_new'] = name
+#                     run_params['result_path'] = name
 #                     run(md_config)
 #                     # Copy config file to result path as well
-#                     copy2(run_params['config_path'], run_params['result_path_new'])
+#                     copy2(run_params['config_path'], run_params['result_path'])
 
 
 dim_learning_rate = Real(low=1e-5, high=1e-2, prior='log-uniform', name='learning_rate')
@@ -212,28 +244,12 @@ dimensions = [dim_learning_rate,
               dim_dropout_rate,
               dim_activation,
               dim_channel,
-              dim_channel_fc,
-              dim_loss_weight]
-default_parameters = [1e-3, 0.125, '0', 2, 2, 1]
-
-'''
-# To transform input as parameters into dictionary
-def run_hyper_parameter_wrapper(learning_rate, dropout_rate, activation, channels):
-    channels_full = [i * channels for i in [16, 16, 32, 16, 16, 16, 16, 16, 16, 512, 512]]
-    name = ("%s/learning_rate_%s_dropout_%s_activation_%s_channels_%s/"
-            % (run_params['result_path'], round(learning_rate, 5), dropout_rate, activation, channels))
-    run_params['result_path_new'] = name
-    md_config = {'learning_rate': learning_rate,
-                 'dropout_rate': dropout_rate,
-                 'activation': activation_dict[activation],
-                 'channel': channels_full}
-    acc, global_step = run(md_config)
-    return acc
-'''
+              dim_channel_fc]
+default_parameters = [1e-3, 0.125, '0', 2, 2]
 
 
 @use_named_args(dimensions=dimensions)
-def fitness(learning_rate, dropout_rate, activation, channels, fully_connect_channels, loss_weight):
+def fitness(learning_rate, dropout_rate, activation, channels, fully_connect_channels):
     """
     Hyper-parameters:
     learning_rate:     Learning-rate for the optimizer.
@@ -244,54 +260,35 @@ def fitness(learning_rate, dropout_rate, activation, channels, fully_connect_cha
     # Create the neural network with these hyper-parameters
     print("Learning_rate, Dropout_rate, Activation, Channels, FC channel = %s, %s, %s, %s, %s" % (
         learning_rate, dropout_rate, activation, channels, fully_connect_channels))
-    # cnn_channels = [i * channels for i in [16, 16, 32, 16, 16, 16, 16, 16, 16]]
-    # fc_channel = [i * fully_connect_channels for i in [1024, 1024]]
-    channels_full = [channels, fully_connect_channels]
-    # name = run_params['result_path'] + "/" + datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S") + "/"
-    # name = ("%s/learning_rate_%s_dropout_%s_activation_%s_channels_%s/"
-    #         % (run_params['result_path'], round(learning_rate, 6), dropout_rate, activation, channels))
-    run_params['result_path_new'] = run_params['result_path'] + "/" + datetime.datetime.now().strftime(
+
+    # Set result path combine with current time of running
+    run_params['result_path'] = run_params['result_path_base'] + "/" + datetime.datetime.now().strftime(
         "%Y%m%d_%H_%M_%S") + "/"
+    channels_full = [channels, fully_connect_channels]
     md_config = {'learning_rate': learning_rate,
                  'dropout_rate': dropout_rate,
                  'activation': activation_dict[activation],
                  'channels': channels_full,
-                 'result_path': run_params['result_path_new'],
-                 'result_file_name': 'result.csv',
-                 'loss_weight': loss_weight}
+                 'result_path': run_params['result_path'],
+                 'result_file_name': 'result.csv', }
     accuracy, global_step, result = run(md_config)
-    # accuracy = run_hyper_parameter_wrapper(learning_rate, dropout_rate, activation, channels)
-
-    # Save necessary info to csv file, as reference
-    info_dict = run_params.copy()
-    info_dict['comments'] = run_params['comment']
-    info_dict['learning_rate'] = learning_rate
-    info_dict['dropout_rate'] = dropout_rate
-    info_dict['activation'] = activation
-    info_dict['cnn_channels'] = channels
-    info_dict['fc_channels'] = fully_connect_channels
-    info_dict['loss_weight'] = loss_weight
-    info_dict['steps'] = global_step
-    info_dict['accuracy'] = accuracy
-    with open((run_params['result_path_new'] + "config.csv"), "w") as csvfile:
-        writer = csv.writer(csvfile)
-        for key, val in info_dict.items():
-            writer.writerow([key, val])
-
-    save_file(run_params['summary_file_path'], [accuracy, learning_rate, dropout_rate, activation, channels, fully_connect_channels, loss_weight], write_mode='a', one_row=True)
+    # Save info of hyperparameter search in a specific csv file
+    save_file(run_params['summary_file_path'], [accuracy, learning_rate, dropout_rate, activation,
+                                                channels, fully_connect_channels], write_mode='a', one_row=True)
     return -accuracy
 
 
 def run_hyper_parameter_optimize():
-    run_params['summary_file_path'] = run_params['result_path'] + '/' + "hyperparameters_result_" \
+    # Name of the summary result from hyperparameter search (This variable is not used in run)
+    run_params['summary_file_path'] = run_params['result_path_base'] + '/' + "hyperparameters_result_" \
                                       + datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S") + ".csv"
     field_name = [i.name for i in dimensions]
-    field_name.insert(0,'accuracy')
+    field_name.insert(0, 'accuracy')
 
     n_calls = 20  # Expected number of trainings
 
     previous_record_files = []
-    for file in glob.glob(run_params['result_path'] + '/' + "hyperparameters_result_" + '*'):
+    for file in glob.glob(run_params['result_path_base'] + '/' + "hyperparameters_result_" + '*'):
         previous_record_files.append(file)
     previous_record_files.sort()
     if len(previous_record_files) > 1:
@@ -302,7 +299,8 @@ def run_hyper_parameter_optimize():
             default_param = [float(l_data[0]), float(l_data[1]), l_data[2], int(l_data[3]), int(l_data[4])]
             run_params['summary_file_path'] = previous_record_files[-1]
         else:
-            save_file(run_params['summary_file_path'], [], field_name=field_name, write_mode='w')  # Create new summary file
+            save_file(run_params['summary_file_path'], [], field_name=field_name,
+                      write_mode='w')  # Create new summary file
             default_param = default_parameters
     else:
         save_file(run_params['summary_file_path'], [], field_name=field_name, write_mode='w')  # Create new summary file
@@ -311,7 +309,8 @@ def run_hyper_parameter_optimize():
     print("Running remaining: %s time" % n_calls)
     if n_calls < 11:
         print("Hyper parameter optimize ENDED: run enough calls already")
-        save_file(run_params['summary_file_path'], ['end', datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S")], write_mode='a', one_row=True)
+        save_file(run_params['summary_file_path'], ['end', datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S")],
+                  write_mode='a', one_row=True)
     else:
         search_result = gp_minimize(func=fitness,
                                     dimensions=dimensions,
@@ -335,7 +334,8 @@ def run_hyper_parameter_optimize():
                     field_name[5]: i[1][4]}
             new_data.append(data)
 
-        save_file(run_params['summary_file_path'], ['end', datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S")], write_mode='a', one_row=True)
+        save_file(run_params['summary_file_path'], ['end', datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S")],
+                  write_mode='a', one_row=True)
         # space = search_result.space
         # print("Best result: %s" % space.point_to_dict(search_result.x))
 
@@ -344,9 +344,8 @@ if __name__ == '__main__':
     run_single = False
 
     if run_single:
-        run_params['result_path'] = run_params['result_path'] + '/' + datetime.datetime.now().strftime(
+        run_params['result_path'] = run_params['result_path_base'] + '/' + datetime.datetime.now().strftime(
             "%Y%m%d_%H_%M_%S") + '/'
-        run_params['result_path_new'] = run_params['result_path']
         model_configs['result_path'] = run_params['result_path_new']
         model_configs['result_file_name'] = 'result.csv',
         run(model_configs)

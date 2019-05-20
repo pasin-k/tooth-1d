@@ -168,7 +168,6 @@ def simple_cnn(features, mode, params):
     conv1 = cnn_2d(conv1, 3, params['channels'][0] * 8, activation=params['activation'], name="conv1")
     pool1 = max_pool_layer(conv1, 2, "pool1")
 
-
     # (2) Filter size: 3x3x64
     conv2 = cnn_2d(pool1, 3, params['channels'][0] * 16, activation=params['activation'], name="conv2")
     conv2 = cnn_2d(conv2, 3, params['channels'][0] * 16, activation=params['activation'], name="conv2")
@@ -217,13 +216,15 @@ def my_model(features, labels, mode, params, config):
         }
         return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
 
-    one_hot_label = tf.one_hot(indices=tf.cast(labels,tf.int32), depth=3)
+    one_hot_label = tf.one_hot(indices=tf.cast(labels, tf.int32), depth=3)
     labels = tf.cast((labels - 1) / 2, tf.int64)
 
-    weight = tf.constant([[1,params['loss_weight'], 1]],dtype=tf.float32)
-    loss_weight = tf.matmul(one_hot_label,weight,transpose_b=True,a_is_sparse=True)
+    weight = tf.constant([[params['loss_weight'][0], params['loss_weight'][1], params['loss_weight'][2]]],
+                         dtype=tf.float32)
+    loss_weight = tf.matmul(one_hot_label, weight, transpose_b=True, a_is_sparse=True)
 
-    loss = tf.losses.sparse_softmax_cross_entropy(labels, logits,weights=loss_weight)  # labels is int of class, logits is vector
+    loss = tf.losses.sparse_softmax_cross_entropy(labels, logits,
+                                                  weights=loss_weight)  # labels is int of class, logits is vector
 
     accuracy = tf.metrics.accuracy(labels, predicted_class)
 
@@ -256,8 +257,6 @@ def my_model(features, labels, mode, params, config):
     summary = tf.summary.histogram("Prediction", predicted_class)
     summary2 = tf.summary.histogram("Ground_Truth", labels)
     # global_step = tf.summary.scalar("Global steps",tf.train.get_global_step())
-
-
 
     # Train Mode
     if mode == tf.estimator.ModeKeys.TRAIN:

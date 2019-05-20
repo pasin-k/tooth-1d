@@ -53,6 +53,12 @@ def load_image(addr):
 
 
 def image_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None):
+    # Create new directory if not created, get all info and zip to tfrecord
+    tfrecord_dir = os.path.join("./data/tfrecord", tfrecord_name)
+    if not os.path.exists(tfrecord_dir):
+        os.makedirs(tfrecord_dir)
+
+    #Get file name from dataset_folder
     grouped_train_address, grouped_eval_address = get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs)
     # Start writing train dataset
     train_dataset = tf.data.Dataset.from_tensor_slices(grouped_train_address)
@@ -62,10 +68,11 @@ def image_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None):
 
     elem = it.get_next()
 
-    # Start getting all info and zip to tfrecord
-    tfrecord_train_name = os.path.join("./data/tfrecord", "%s_%s_%s_train.tfrecords" % (
+
+
+    tfrecord_train_name = os.path.join(tfrecord_dir, "%s_%s_%s_train.tfrecords" % (
         tfrecord_name, configs['label_data'], configs['label_type']))
-    tfrecord_eval_name = os.path.join("./data/tfrecord", "%s_%s_%s_eval.tfrecords" % (
+    tfrecord_eval_name = os.path.join(tfrecord_dir, "%s_%s_%s_eval.tfrecords" % (
         tfrecord_name, configs['label_data'], configs['label_type']))
     # eval_score_name = os.path.join("./data/tfrecord", "%s_%s_%s_score.npy" % (
     #     tfrecord_name, configs['label_data'], configs['label_type']))
@@ -123,11 +130,17 @@ def read_coordinate(file_name, label):
 # dataset_folder : Folder of the data (Not include label)
 # csv_dir : Folder of label data (If not specified, will use the default directory)
 def coordinate_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None):
+    # Create new directory if not created, get all info and zip to tfrecord
+    tfrecord_dir = os.path.join("./data/tfrecord", tfrecord_name)
+    if not os.path.exists(tfrecord_dir):
+        os.makedirs(tfrecord_dir)
+
+    # Get data from dataset_folder
     grouped_train_address, grouped_eval_address = get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_data=True)
-    # Start getting all info and zip to tfrecord
-    tfrecord_train_name = os.path.join("./data/tfrecord", "%s_%s_%s_coor_train.tfrecords" % (
+
+    tfrecord_train_name = os.path.join(tfrecord_dir, "%s_%s_%s_train.tfrecords" % (
         tfrecord_name, configs['label_data'], configs['label_type']))
-    tfrecord_eval_name = os.path.join("./data/tfrecord", "%s_%s_%s_coor_eval.tfrecords" % (
+    tfrecord_eval_name = os.path.join(tfrecord_dir, "%s_%s_%s_eval.tfrecords" % (
         tfrecord_name, configs['label_data'], configs['label_type']))
 
     with tf.python_io.TFRecordWriter(tfrecord_train_name) as writer:
@@ -181,6 +194,5 @@ if __name__ == '__main__':
         if get_image:
             image_to_tfrecord(tfrecord_name="preparation_361", dataset_folder="./data/cross_section")
         else:
-            coordinate_to_tfrecord(tfrecord_name="preparation_coor_smallraw", dataset_folder="./data/coordinate_debug"
-                                   , csv_dir="/home/pasin/Documents/Link to Tooth/Tooth/Model/global_data/Ground Truth Score_debug.csv")
+            coordinate_to_tfrecord(tfrecord_name="preparation_coor_300", dataset_folder="./data/coordinate_300_point")
     print("Complete")

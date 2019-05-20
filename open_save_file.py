@@ -6,6 +6,7 @@ import csv
 # import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib as mpl
+import collections
 
 mpl.use('TkAgg')
 import matplotlib.pyplot as plt
@@ -200,7 +201,8 @@ def save_plot(coor_list, out_directory, file_header_name, image_name, augment_nu
 
 
 # get_data is true will return info instead of file name
-def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_data = False):
+# This function is used in imgtotfrecord
+def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_data=False):
     numdeg = configs['numdeg']
     image_address, _ = get_file_name(folder_name=dataset_folder, file_name=None)
     if csv_dir is None:
@@ -209,6 +211,8 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
     else:
         labels, label_name = get_label(configs['label_data'], configs['label_type'], double_data=True,
                                        one_hotted=False, normalized=False, file_dir=csv_dir)
+
+    label_count = collections.Counter(labels)
     # Check list of name that has error, remove it from label
     error_file_names = []
     with open(dataset_folder + '/error_file.txt', 'r') as filehandle:
@@ -250,18 +254,22 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
     eval_score_list = []  # Use for prediction since cannot read file directly from tfrecord
 
     # Open file and read the content in a list
-    file_name = "./data/tfrecord/%s_%s_%s.txt" % (tfrecord_name, configs['label_data'], configs['label_type'])
+    file_name = "./data/tfrecord/%s/%s_%s_%s.txt" % (
+        tfrecord_name, tfrecord_name, configs['label_data'], configs['label_type'])
     if os.path.isfile(file_name):  # Check if file exist
         with open(file_name) as f:
             filehandle = f.read().splitlines()
-        is_training = True
-        if not (filehandle[0] == 'train'):
+        is_training = 0  # 0 = checking for distribution, 1 = checking for train, 2 = checking for eval
+        if not (filehandle[0] == 'distribution'):
             print(filehandle[0])
             raise KeyError("File does not have correct format, need 'train' and 'eval' keyword within file")
         for line in filehandle[1:]:
-            if is_training:
+            if is_training == 0:
+                if line == 'train':
+                    is_training = 1
+            elif is_training == 1:
                 if line == 'eval':
-                    is_training = False
+                    is_training = 2
                 else:
                     # check if it exist in grouped exist, if found, put in train_address
                     for i, name in enumerate(example_grouped_address):
@@ -278,6 +286,7 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
                         grouped_address.remove(grouped_address[i])
                         example_grouped_address.remove(example_grouped_address[i])
                         break
+
         print("Use %s train examples, %s eval examples from previous tfrecords as training" % (
             len(train_address), len(eval_address)))
 
@@ -290,7 +299,7 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
     train_address.extend(grouped_address[0:train_amount])
     eval_address.extend(grouped_address[train_amount:])
 
-    # Convert name to data (only for .npy version)
+    # Convert name to data (only if request output to be value, not file name)
     train_data = []
     eval_data = []
     if get_data:
@@ -299,7 +308,7 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
             img = []
             for i in range(numdeg):
                 img.append(np.load(addr[0][i]))
-            train_data.append([img,label])
+            train_data.append([img, label])
         for addr in eval_address:
             label = addr[1]
             img = []
@@ -317,8 +326,14 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
     print("Train files: %d, Evaluate Files: %d" % (len(grouped_train_address[0]), len(grouped_eval_address[0])))
 
     # Save names of files of train address
-    file_name = "./data/tfrecord/%s_%s_%s.txt" % (tfrecord_name, configs['label_data'], configs['label_type'])
+    file_name = "./data/tfrecord/%s/%s_%s_%s.txt" % (
+        tfrecord_name, tfrecord_name, configs['label_data'], configs['label_type'])
     with open(file_name, 'w') as filehandle:
+        # Header with 'eval'
+        filehandle.write('distribution\n')
+        for score, freq in label_count.items():
+            filehandle.write('%s_%s\n' % (score, freq))
+
         # Header with 'train'
         filehandle.write('train\n')
         for listitem in train_address:
@@ -328,7 +343,7 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
             new_list_item = listitem[0][0].split('.')[0]
             filehandle.write('%s\n' % new_list_item)
 
-        # Headder with 'eval'
+        # Header with 'eval'
         filehandle.write('eval\n')
         for listitem in eval_address:
             # For each filename, select 0 degree angle and remove _0.png
@@ -346,7 +361,7 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
     '''
     if get_data:
         return train_data, eval_data
-    return grouped_train_address, grouped_eval_address #, eval_score_list
+    return grouped_train_address, grouped_eval_address  # , eval_score_list
 
 
 def read_file(csv_dir, header=False):
@@ -367,13 +382,20 @@ def read_file(csv_dir, header=False):
 
 
 # one_row = true means that all data will be written in one row
-def save_file(csv_dir, all_data, field_name=None, write_mode='w', one_row=False):
+def save_file(csv_dir, all_data, field_name=None, write_mode='w', one_row=False, create_folder=False):
+    # Create a folder if not exist
+    if create_folder:
+        if not os.path.exists(csv_dir):
+            os.makedirs(csv_dir)
     with open(csv_dir, write_mode) as csvFile:
+        # Check if there is fieldname, if so, create first
         if field_name is None:
             writer = csv.writer(csvFile)
         else:
             writer = csv.DictWriter(csvFile, fieldnames=field_name)
             writer.writeheader()
+        # If one_row is true -> use when data is list of one row, want to write in single row
+        # else it will be split in to multiple row
         if not one_row:
             for data in all_data:
                 writer.writerow([data])

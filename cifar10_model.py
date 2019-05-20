@@ -16,7 +16,6 @@ def cnn_2d(layer,
 
     # cnn_sum = tf.summary.histogram(name+'_activation',layer)
     return layer
-    # TODO: Find way to show weight
 
 
 def flatten_layer(layer):  # Flatten from 2D/3D to 1D (not count batch dimension)
