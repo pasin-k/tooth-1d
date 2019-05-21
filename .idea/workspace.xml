@@ -2,15 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="770e0596-62ef-4176-bd6c-3bded3f7c783" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/coor_model.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coor_tooth.config" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Playground.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Playground.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/coor_get_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/coor_get_data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/coor_train.py" beforeDir="false" afterPath="$PROJECT_DIR$/coor_train.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/open_save_file.py" beforeDir="false" afterPath="$PROJECT_DIR$/open_save_file.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tooth.config" beforeDir="false" afterPath="$PROJECT_DIR$/tooth.config" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/train.py" beforeDir="false" afterPath="$PROJECT_DIR$/train.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/coor_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/coor_model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tooth_workspace.config" beforeDir="false" afterPath="$PROJECT_DIR$/tooth_workspace.config" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -22,11 +16,11 @@
     <splitter split-orientation="horizontal" split-proportion="0.5114754">
       <split-first>
         <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-          <file pinned="false" current-in-tab="false">
+          <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/train.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="155">
-                  <caret line="310" column="56" selection-start-line="310" selection-start-column="56" selection-end-line="310" selection-end-column="56" />
+                <state relative-caret-position="-475">
+                  <caret line="64" column="26" selection-start-line="64" selection-start-column="14" selection-end-line="64" selection-end-column="26" />
                   <folding>
                     <element signature="e#0#23#0" expanded="true" />
                   </folding>
@@ -61,7 +55,7 @@
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/get_data.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="1094">
+                <state relative-caret-position="435">
                   <caret line="85" column="48" selection-start-line="85" selection-start-column="48" selection-end-line="85" selection-end-column="48" />
                   <folding>
                     <element signature="e#0#23#0" expanded="true" />
@@ -73,7 +67,7 @@
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/coor_train.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="-70">
+                <state relative-caret-position="605">
                   <caret line="205" column="46" selection-start-line="205" selection-start-column="46" selection-end-line="205" selection-end-column="46" />
                   <folding>
                     <element signature="e#0#23#0" expanded="true" />
@@ -82,11 +76,11 @@
               </provider>
             </entry>
           </file>
-          <file pinned="false" current-in-tab="true">
+          <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/coor_get_data.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="330">
-                  <caret line="26" column="64" lean-forward="true" selection-start-line="26" selection-start-column="64" selection-end-line="26" selection-end-column="64" />
+                <state relative-caret-position="255">
+                  <caret line="33" column="4" lean-forward="true" selection-start-line="33" selection-start-column="4" selection-end-line="33" selection-end-column="4" />
                   <folding>
                     <element signature="e#0#23#0" expanded="true" />
                   </folding>
@@ -97,8 +91,8 @@
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/coor_model.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="-735">
-                  <caret line="70" column="100" selection-start-line="70" selection-start-column="100" selection-end-line="70" selection-end-column="100" />
+                <state relative-caret-position="365">
+                  <caret line="71" column="68" selection-start-line="71" selection-start-column="68" selection-end-line="71" selection-end-column="68" />
                   <folding>
                     <element signature="e#0#23#0" expanded="true" />
                   </folding>
@@ -119,11 +113,11 @@
               </provider>
             </entry>
           </file>
-          <file pinned="false" current-in-tab="true">
+          <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/coor_tooth.config">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="60">
-                  <caret line="4" column="91" lean-forward="true" selection-start-line="4" selection-start-column="12" selection-end-line="4" selection-end-column="91" />
+                <state>
+                  <caret column="13" lean-forward="true" selection-start-column="13" selection-end-column="13" />
                 </state>
               </provider>
             </entry>
@@ -137,11 +131,11 @@
               </provider>
             </entry>
           </file>
-          <file pinned="false" current-in-tab="false">
+          <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/tooth_workspace.config">
               <provider selected="true" editor-type-id="text-editor">
                 <state relative-caret-position="60">
-                  <caret line="4" column="49" lean-forward="true" selection-start-line="4" selection-start-column="49" selection-end-line="4" selection-end-column="49" />
+                  <caret line="4" column="47" lean-forward="true" selection-start-line="4" selection-start-column="47" selection-end-line="4" selection-end-column="47" />
                 </state>
               </provider>
             </entry>
@@ -171,8 +165,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>file_name</find>
-      <find>result_file_name</find>
       <find>run_params</find>
       <find>max point</find>
       <find>grouped_train_address</find>
@@ -199,8 +191,10 @@
       <find>channels</find>
       <find>run_params['summary_file_path']</find>
       <find>result_path</find>
-      <find>features</find>
       <find>train_data</find>
+      <find>features</find>
+      <find>run_params['input_path']</find>
+      <find>'input_path'</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -223,7 +217,6 @@
         <option value="$APPLICATION_CONFIG_DIR$/scratches/scratch_7.py" />
         <option value="$APPLICATION_CONFIG_DIR$/scratches/scratch_8.py" />
         <option value="$PROJECT_DIR$/ImportData2D.py" />
-        <option value="$PROJECT_DIR$/tooth_workspace.config" />
         <option value="$PROJECT_DIR$/custom_hook.py" />
         <option value="$APPLICATION_CONFIG_DIR$/scratches/scratch_9.py" />
         <option value="$PROJECT_DIR$/Dockerfile" />
@@ -237,10 +230,11 @@
         <option value="$PROJECT_DIR$/tooth.config" />
         <option value="$PROJECT_DIR$/coor_tooth.config" />
         <option value="$PROJECT_DIR$/open_save_file.py" />
-        <option value="$PROJECT_DIR$/train.py" />
         <option value="$PROJECT_DIR$/coor_train.py" />
-        <option value="$PROJECT_DIR$/coor_model.py" />
         <option value="$PROJECT_DIR$/coor_get_data.py" />
+        <option value="$PROJECT_DIR$/train.py" />
+        <option value="$PROJECT_DIR$/coor_model.py" />
+        <option value="$PROJECT_DIR$/tooth_workspace.config" />
       </list>
     </option>
   </component>
@@ -688,7 +682,21 @@
       <option name="project" value="LOCAL" />
       <updated>1558337334558</updated>
     </task>
-    <option name="localTasksCounter" value="39" />
+    <task id="LOCAL-00039" summary="Optimize parameters in train.py &#10;&#10;Now adapting to coor_train">
+      <created>1558438295535</created>
+      <option name="number" value="00039" />
+      <option name="presentableId" value="LOCAL-00039" />
+      <option name="project" value="LOCAL" />
+      <updated>1558438295535</updated>
+    </task>
+    <task id="LOCAL-00040" summary="Optimize parameters in train.py &#10;&#10;Now adapting to coor_train">
+      <created>1558438489828</created>
+      <option name="number" value="00040" />
+      <option name="presentableId" value="LOCAL-00040" />
+      <option name="project" value="LOCAL" />
+      <updated>1558438489828</updated>
+    </task>
+    <option name="localTasksCounter" value="41" />
     <servers />
   </component>
   <component name="TodoView">
@@ -957,39 +965,12 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/get_data.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1094">
-          <caret line="85" column="48" selection-start-line="85" selection-start-column="48" selection-end-line="85" selection-end-column="48" />
-          <folding>
-            <element signature="e#0#23#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/tooth_workspace.config">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="60">
-          <caret line="4" column="49" lean-forward="true" selection-start-line="4" selection-start-column="49" selection-end-line="4" selection-end-column="49" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/open_save_file.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="200">
           <caret line="389" column="30" selection-start-line="389" selection-start-column="30" selection-end-line="389" selection-end-column="30" />
           <folding>
             <element signature="e#13#22#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/train.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="155">
-          <caret line="310" column="56" selection-start-line="310" selection-start-column="56" selection-end-line="310" selection-end-column="56" />
-          <folding>
-            <element signature="e#0#23#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1024,10 +1005,34 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/coor_train.py">
+    <entry file="file://$PROJECT_DIR$/tooth.config">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-70">
-          <caret line="205" column="46" selection-start-line="205" selection-start-column="46" selection-end-line="205" selection-end-column="46" />
+        <state relative-caret-position="60">
+          <caret line="4" column="13" lean-forward="true" selection-start-line="4" selection-start-column="13" selection-end-line="4" selection-end-column="80" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/coor_get_data.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="255">
+          <caret line="33" column="4" lean-forward="true" selection-start-line="33" selection-start-column="4" selection-end-line="33" selection-end-column="4" />
+          <folding>
+            <element signature="e#0#23#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/coor_tooth.config">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="13" lean-forward="true" selection-start-column="13" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/get_data.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="435">
+          <caret line="85" column="48" selection-start-line="85" selection-start-column="48" selection-end-line="85" selection-end-column="48" />
           <folding>
             <element signature="e#0#23#0" expanded="true" />
           </folding>
@@ -1036,32 +1041,35 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/coor_model.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-735">
-          <caret line="70" column="100" selection-start-line="70" selection-start-column="100" selection-end-line="70" selection-end-column="100" />
+        <state relative-caret-position="365">
+          <caret line="71" column="68" selection-start-line="71" selection-start-column="68" selection-end-line="71" selection-end-column="68" />
           <folding>
             <element signature="e#0#23#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/tooth.config">
+    <entry file="file://$PROJECT_DIR$/coor_train.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="60">
-          <caret line="4" column="13" lean-forward="true" selection-start-line="4" selection-start-column="13" selection-end-line="4" selection-end-column="80" />
+        <state relative-caret-position="605">
+          <caret line="205" column="46" selection-start-line="205" selection-start-column="46" selection-end-line="205" selection-end-column="46" />
+          <folding>
+            <element signature="e#0#23#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/coor_tooth.config">
+    <entry file="file://$PROJECT_DIR$/tooth_workspace.config">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="60">
-          <caret line="4" column="91" lean-forward="true" selection-start-line="4" selection-start-column="12" selection-end-line="4" selection-end-column="91" />
+          <caret line="4" column="47" lean-forward="true" selection-start-line="4" selection-start-column="47" selection-end-line="4" selection-end-column="47" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/coor_get_data.py">
+    <entry file="file://$PROJECT_DIR$/train.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="330">
-          <caret line="26" column="64" lean-forward="true" selection-start-line="26" selection-start-column="64" selection-end-line="26" selection-end-column="64" />
+        <state relative-caret-position="-475">
+          <caret line="64" column="26" selection-start-line="64" selection-start-column="14" selection-end-line="64" selection-end-column="26" />
           <folding>
             <element signature="e#0#23#0" expanded="true" />
           </folding>
