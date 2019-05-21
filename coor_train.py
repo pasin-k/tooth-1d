@@ -17,7 +17,7 @@ from skopt.space import Real, Categorical, Integer
 from skopt.utils import use_named_args
 
 # from model import my_model
-from model_classify import my_model
+from coor_model import my_model
 from coor_get_data import train_input_fn, eval_input_fn, get_data_from_path
 from open_save_file import read_file, save_file
 
@@ -79,6 +79,12 @@ model_configs = {'learning_rate': configs.learning_rate,
                  'channels': configs.channels * [16, 16, 32, 16, 16, 16, 16, 16, 16, 512, 512],
                  }
 
+# Final Parameters:
+# run_params: batch_size, checkpoint_min, early_stop_step, input_path, result_path_base, config_path, steps, comment
+#             result_path(result_path_base + data&time), summary_file_path(doesn't use in run, just a global param)
+
+# model_params: learning_rate, dropout_rate, activation, channels, loss_weight,
+#               result_path(same as in run_params), result_file_name
 
 def get_available_gpus():
     local_device_protos = device_lib.list_local_devices()
@@ -141,10 +147,10 @@ def run(model_params=None):
 
     train_hook = tf.contrib.estimator.stop_if_no_decrease_hook(classifier, "loss", run_params['early_stop_step'])
     train_spec = tf.estimator.TrainSpec(
-        input_fn=lambda: train_input_fn(train_data_path, batch_size=run_params['batch_size']),
+        input_fn=lambda: train_input_fn(train_data_path, batch_size=run_params['batch_size'], data_type=0),
         max_steps=run_params['steps'], hooks=[train_hook])
     eval_spec = tf.estimator.EvalSpec(
-        input_fn=lambda: eval_input_fn(eval_data_path, batch_size=run_params['batch_size']), steps=None,
+        input_fn=lambda: eval_input_fn(eval_data_path, batch_size=run_params['batch_size'], data_type=0), steps=None,
         start_delay_secs=0, throttle_secs=0)
     # classifier.train(input_fn=lambda: train_input_fn(train_data_path, batch_size=params['batch_size']),
     #     max_steps=params['steps'], hooks=[train_hook])
@@ -170,7 +176,7 @@ def run(model_params=None):
         config=my_checkpoint_config
     )
     eval_result = classifier.evaluate(
-        input_fn=lambda: eval_input_fn(train_data_path, batch_size=run_params['batch_size']))
+        input_fn=lambda: eval_input_fn(train_data_path, batch_size=run_params['batch_size'], data_type=0))
 
     # No need to use predict since we can get data from hook now
     # # images, expected = get_data_from_path(eval_data_path)
@@ -202,8 +208,7 @@ def run(model_params=None):
     info_dict['learning_rate'] = model_params['learning_rate']
     info_dict['dropout_rate'] = model_params['dropout_rate']
     info_dict['activation'] = model_params['activation']
-    info_dict['cnn_channels'] = model_params['channels'][0]
-    info_dict['fc_channels'] = model_params['channels'][1]
+    info_dict['channels'] = model_params['channels']
     info_dict['loss_weight'] = model_params['loss_weight']
     info_dict['steps'] = global_step
     info_dict['accuracy'] = accuracy
@@ -238,18 +243,16 @@ dim_dropout_rate = Real(low=0, high=0.875, name='dropout_rate')
 dim_activation = Categorical(categories=['0', '1'],
                              name='activation')
 dim_channel = Integer(low=1, high=4, name='channels')
-dim_channel_fc = Integer(low=1, high=2, name='fully_connect_channels')  # Fully conencted
 dim_loss_weight = Real(low=0.8, high=2, name='loss_weight')
 dimensions = [dim_learning_rate,
               dim_dropout_rate,
               dim_activation,
-              dim_channel,
-              dim_channel_fc]
-default_parameters = [1e-3, 0.125, '0', 2, 2]
+              dim_channel]
+default_parameters = [1e-3, 0.125, '0', 2]
 
 
 @use_named_args(dimensions=dimensions)
-def fitness(learning_rate, dropout_rate, activation, channels, fully_connect_channels):
+def fitness(learning_rate, dropout_rate, activation, channels):
     """
     Hyper-parameters:
     learning_rate:     Learning-rate for the optimizer.
@@ -258,13 +261,13 @@ def fitness(learning_rate, dropout_rate, activation, channels, fully_connect_cha
     channels
     """
     # Create the neural network with these hyper-parameters
-    print("Learning_rate, Dropout_rate, Activation, Channels, FC channel = %s, %s, %s, %s, %s" % (
-        learning_rate, dropout_rate, activation, channels, fully_connect_channels))
+    print("Learning_rate, Dropout_rate, Activation, Channels = %s, %s, %s, %s" % (
+        learning_rate, dropout_rate, activation, channels))
 
     # Set result path combine with current time of running
     run_params['result_path'] = run_params['result_path_base'] + "/" + datetime.datetime.now().strftime(
         "%Y%m%d_%H_%M_%S") + "/"
-    channels_full = [channels, fully_connect_channels]
+    channels_full = [channels]
     md_config = {'learning_rate': learning_rate,
                  'dropout_rate': dropout_rate,
                  'activation': activation_dict[activation],
@@ -274,7 +277,7 @@ def fitness(learning_rate, dropout_rate, activation, channels, fully_connect_cha
     accuracy, global_step, result = run(md_config)
     # Save info of hyperparameter search in a specific csv file
     save_file(run_params['summary_file_path'], [accuracy, learning_rate, dropout_rate, activation,
-                                                channels, fully_connect_channels], write_mode='a', one_row=True)
+                                                channels], write_mode='a', one_row=True)
     return -accuracy
 
 
@@ -300,10 +303,10 @@ def run_hyper_parameter_optimize():
             run_params['summary_file_path'] = previous_record_files[-1]
         else:
             save_file(run_params['summary_file_path'], [], field_name=field_name,
-                      write_mode='w')  # Create new summary file
+                      write_mode='w', create_folder=True)  # Create new summary file
             default_param = default_parameters
     else:
-        save_file(run_params['summary_file_path'], [], field_name=field_name, write_mode='w')  # Create new summary file
+        save_file(run_params['summary_file_path'], [], field_name=field_name, write_mode='w', create_folder=True)  # Create new summary file
         default_param = default_parameters
 
     print("Running remaining: %s time" % n_calls)

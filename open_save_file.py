@@ -385,8 +385,9 @@ def read_file(csv_dir, header=False):
 def save_file(csv_dir, all_data, field_name=None, write_mode='w', one_row=False, create_folder=False):
     # Create a folder if not exist
     if create_folder:
-        if not os.path.exists(csv_dir):
-            os.makedirs(csv_dir)
+        direct = os.path.dirname(csv_dir)
+        if not os.path.exists(direct):
+            os.makedirs(direct)
     with open(csv_dir, write_mode) as csvFile:
         # Check if there is fieldname, if so, create first
         if field_name is None:

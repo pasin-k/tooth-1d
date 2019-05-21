@@ -79,6 +79,12 @@ model_configs = {'learning_rate': configs.learning_rate,
                  'channels': configs.channels * [16, 16, 32, 16, 16, 16, 16, 16, 16, 512, 512],
                  }
 
+# Final Parameters:
+# run_params: batch_size, checkpoint_min, early_stop_step, input_path, result_path_base, config_path, steps, comment
+#             result_path(result_path_base + data&time), summary_file_path(doesn't use in run, just a global param)
+
+# model_params: learning_rate, dropout_rate, activation, channels, loss_weight,
+#               result_path(same as in run_params), result_file_name
 
 def get_available_gpus():
     local_device_protos = device_lib.list_local_devices()
@@ -115,7 +121,9 @@ def run(model_params=None):
                 [key, val] = line.split('_')
                 label_hist[key] = int(val)
     total = label_hist['1'] + label_hist['3'] + label_hist['5']
-    model_params['loss_weight'] = [total / label_hist['1'], total / label_hist['3'], total / label_hist['5']]
+
+    model_params['loss_weight'] = [5, 1, 1.8] # Only for BL_361 data: real ratio (22:1:1.8)
+    # model_params['loss_weight'] = [total / label_hist['1'], total / label_hist['3'], total / label_hist['5']]
     print("Getting training data from %s" % train_data_path)
     print("Saved model at %s" % run_params['result_path'])
 
@@ -300,10 +308,10 @@ def run_hyper_parameter_optimize():
             run_params['summary_file_path'] = previous_record_files[-1]
         else:
             save_file(run_params['summary_file_path'], [], field_name=field_name,
-                      write_mode='w')  # Create new summary file
+                      write_mode='w', create_folder=True)  # Create new summary file
             default_param = default_parameters
     else:
-        save_file(run_params['summary_file_path'], [], field_name=field_name, write_mode='w')  # Create new summary file
+        save_file(run_params['summary_file_path'], [], field_name=field_name, write_mode='w', create_folder=True)  # Create new summary file
         default_param = default_parameters
 
     print("Running remaining: %s time" % n_calls)
