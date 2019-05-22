@@ -242,7 +242,7 @@ dim_learning_rate = Real(low=1e-5, high=1e-2, prior='log-uniform', name='learnin
 dim_dropout_rate = Real(low=0, high=0.875, name='dropout_rate')
 dim_activation = Categorical(categories=['0', '1'],
                              name='activation')
-dim_channel = Integer(low=1, high=4, name='channels')
+dim_channel = Integer(low=1, high=3, name='channels')
 dim_loss_weight = Real(low=0.8, high=2, name='loss_weight')
 dimensions = [dim_learning_rate,
               dim_dropout_rate,
@@ -294,25 +294,31 @@ def run_hyper_parameter_optimize():
     for file in glob.glob(run_params['result_path_base'] + '/' + "hyperparameters_result_" + '*'):
         previous_record_files.append(file)
     previous_record_files.sort()
-    if len(previous_record_files) > 1:
+    if len(previous_record_files) > 0:
         prev_data, header = read_file(previous_record_files[-1], header=True)
-        if prev_data[-1][0] != 'end':  # Check if the previous file doesn't end properly
-            n_calls = n_calls - len(prev_data)
-            l_data = prev_data[-1][1:]  # Latest_data
-            default_param = [float(l_data[0]), float(l_data[1]), l_data[2], int(l_data[3]), int(l_data[4])]
-            run_params['summary_file_path'] = previous_record_files[-1]
-        else:
-            save_file(run_params['summary_file_path'], [], field_name=field_name,
-                      write_mode='w', create_folder=True)  # Create new summary file
-            default_param = default_parameters
+        try:
+            if prev_data[-1][0] != 'end':  # Check if the previous file doesn't end properly
+                n_calls = n_calls - len(prev_data)
+                l_data = prev_data[-1][1:]  # Latest_data
+                default_param = [float(l_data[0]), float(l_data[1]), l_data[2], int(l_data[3])]
+                run_params['summary_file_path'] = previous_record_files[-1]
+            else:
+                save_file(run_params['summary_file_path'], [], field_name=field_name,
+                          write_mode='w', create_folder=True)  # Create new summary file
+                default_param = default_parameters
+        except IndexError:
+            save_file(previous_record_files[-1], ['end', 'Error from previous run', datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S")],
+                      write_mode='a', one_row=True)
+            raise ValueError("Previous file doesn't end completely")
     else:
         save_file(run_params['summary_file_path'], [], field_name=field_name, write_mode='w', create_folder=True)  # Create new summary file
         default_param = default_parameters
 
+    print("Saving hyperparameters_result in %s" % run_params['summary_file_path'])
     print("Running remaining: %s time" % n_calls)
     if n_calls < 11:
         print("Hyper parameter optimize ENDED: run enough calls already")
-        save_file(run_params['summary_file_path'], ['end', datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S")],
+        save_file(run_params['summary_file_path'], ['end', 'Completed (faster than expected)', datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S")],
                   write_mode='a', one_row=True)
     else:
         search_result = gp_minimize(func=fitness,
@@ -337,7 +343,7 @@ def run_hyper_parameter_optimize():
                     field_name[5]: i[1][4]}
             new_data.append(data)
 
-        save_file(run_params['summary_file_path'], ['end', datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S")],
+        save_file(run_params['summary_file_path'], ['end', 'Completed', datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S")],
                   write_mode='a', one_row=True)
         # space = search_result.space
         # print("Best result: %s" % space.point_to_dict(search_result.x))
