@@ -125,7 +125,7 @@ def run(model_params=None):
                 label_hist[key] = int(val)
     total = label_hist['1'] + label_hist['3'] + label_hist['5']
     model_params['loss_weight'] = [1, 1, 1] # Custom value
-    #model_params['loss_weight'] = [3, 1, 1.8] # Only for BL_361 data: real ratio (22:1:1.8)
+    # model_params['loss_weight'] = [3, 1, 1.8] # Only for BL_361 data: real ratio (22:1:1.8)
     # model_params['loss_weight'] = [5, 1.43, 1] # Only for MD_361 data: real ratio (43:1.43:1)
     # model_params['loss_weight'] = [total / label_hist['1'], total / label_hist['3'], total / label_hist['5']]
     print("Getting training data from %s" % train_data_path)

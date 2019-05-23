@@ -1,15 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="770e0596-62ef-4176-bd6c-3bded3f7c783" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Playground.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Playground.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/coor_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/coor_model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/coor_tooth.config" beforeDir="false" afterPath="$PROJECT_DIR$/coor_tooth.config" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/coor_train.py" beforeDir="false" afterPath="$PROJECT_DIR$/coor_train.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tooth.config" beforeDir="false" afterPath="$PROJECT_DIR$/tooth.config" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/train.py" beforeDir="false" afterPath="$PROJECT_DIR$/train.py" afterDir="false" />
-    </list>
+    <list default="true" id="770e0596-62ef-4176-bd6c-3bded3f7c783" name="Default Changelist" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -71,8 +63,8 @@
           <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/coor_model.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="41">
-                  <caret line="190" column="53" selection-start-line="190" selection-start-column="53" selection-end-line="190" selection-end-column="53" />
+                <state relative-caret-position="131">
+                  <caret line="196" column="42" lean-forward="true" selection-start-line="196" selection-start-column="42" selection-end-line="196" selection-end-column="42" />
                   <folding>
                     <element signature="e#0#23#0" expanded="true" />
                   </folding>
@@ -247,7 +239,7 @@
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="ToolWindowDocker.ShowToolbar" value="false" />
     <property name="com.intellij.ide.scratch.LRUPopupBuilder$1/New Scratch File" value="Python" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/coor_get_data.py" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="settings.editor.selected.configurable" value="Erlang External Tools" />
   </component>
   <component name="RunDashboard">
@@ -690,7 +682,21 @@
       <option name="project" value="LOCAL" />
       <updated>1558500246861</updated>
     </task>
-    <option name="localTasksCounter" value="43" />
+    <task id="LOCAL-00043" summary="Debug error when last run is not complete and cannot run again unless delete that file">
+      <created>1558597244370</created>
+      <option name="number" value="00043" />
+      <option name="presentableId" value="LOCAL-00043" />
+      <option name="project" value="LOCAL" />
+      <updated>1558597244370</updated>
+    </task>
+    <task id="LOCAL-00044" summary="Should show weight and bias on tensorboard now">
+      <created>1558597277784</created>
+      <option name="number" value="00044" />
+      <option name="presentableId" value="LOCAL-00044" />
+      <option name="project" value="LOCAL" />
+      <updated>1558597277784</updated>
+    </task>
+    <option name="localTasksCounter" value="45" />
     <servers />
   </component>
   <component name="TodoView">
@@ -704,6 +710,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="67" y="145" width="1853" height="1055" extended-state="6" />
+    <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" weight="0.14153005" />
       <window_info id="Debug" order="1" sideWeight="0.4978142" side_tool="true" weight="0.39945355" />
@@ -802,7 +809,8 @@
     <MESSAGE value="Can save array as tfrecord, read as tf record. Not confirmed if can be used to train yet" />
     <MESSAGE value="Optimize parameters in train.py &#10;&#10;Now adapting to coor_train" />
     <MESSAGE value="Debug error when last run is not complete and cannot run again unless delete that file" />
-    <option name="LAST_COMMIT_MESSAGE" value="Debug error when last run is not complete and cannot run again unless delete that file" />
+    <MESSAGE value="Should show weight and bias on tensorboard now" />
+    <option name="LAST_COMMIT_MESSAGE" value="Should show weight and bias on tensorboard now" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$USER_HOME$/anaconda3/envs/ps36/lib/python3.6/site-packages/tensorflow/python/framework/op_def_library.py">
@@ -1062,8 +1070,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/coor_model.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="41">
-          <caret line="190" column="53" selection-start-line="190" selection-start-column="53" selection-end-line="190" selection-end-column="53" />
+        <state relative-caret-position="131">
+          <caret line="196" column="42" lean-forward="true" selection-start-line="196" selection-start-column="42" selection-end-line="196" selection-end-column="42" />
           <folding>
             <element signature="e#0#23#0" expanded="true" />
           </folding>
