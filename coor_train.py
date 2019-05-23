@@ -68,6 +68,8 @@ run_params = {'batch_size': configs.batch_size,
               'steps': configs.steps,
               'comment': configs.comment}
 
+model_num = configs.loss_weight  # Borrowed parameter name 0 -> dense, 1 -> 1dCNN
+
 run_params = check_exist(run_params, batch_size=None,
                          checkpoint_min=10, early_stop_step=5000,
                          input_path=None, result_path_base=None,
@@ -84,7 +86,8 @@ model_configs = {'learning_rate': configs.learning_rate,
 #             result_path(result_path_base + data&time), summary_file_path(doesn't use in run, just a global param)
 
 # model_params: learning_rate, dropout_rate, activation, channels, loss_weight,
-#               result_path(same as in run_params), result_file_name
+#               result_path(same as in run_params), result_file_name,
+#               model_num(Special params) -> Use to determine which model to run (1dCNN or dense)
 
 def get_available_gpus():
     local_device_protos = device_lib.list_local_devices()
@@ -121,7 +124,10 @@ def run(model_params=None):
                 [key, val] = line.split('_')
                 label_hist[key] = int(val)
     total = label_hist['1'] + label_hist['3'] + label_hist['5']
-    model_params['loss_weight'] = [total / label_hist['1'], total / label_hist['3'], total / label_hist['5']]
+    model_params['loss_weight'] = [1, 1, 1] # Custom value
+    #model_params['loss_weight'] = [3, 1, 1.8] # Only for BL_361 data: real ratio (22:1:1.8)
+    # model_params['loss_weight'] = [5, 1.43, 1] # Only for MD_361 data: real ratio (43:1.43:1)
+    # model_params['loss_weight'] = [total / label_hist['1'], total / label_hist['3'], total / label_hist['5']]
     print("Getting training data from %s" % train_data_path)
     print("Saved model at %s" % run_params['result_path'])
 
@@ -145,12 +151,18 @@ def run(model_params=None):
         config=my_checkpoint_config
     )
 
+    if model_num == 0:
+        data_type = 0  # 0 is getting vectorized data, used with Dense model
+    else:
+        data_type = 1  # 1 is getting stacked data, used with 1d CNN model
+
     train_hook = tf.contrib.estimator.stop_if_no_decrease_hook(classifier, "loss", run_params['early_stop_step'])
     train_spec = tf.estimator.TrainSpec(
-        input_fn=lambda: train_input_fn(train_data_path, batch_size=run_params['batch_size'], data_type=0),
+        input_fn=lambda: train_input_fn(train_data_path, batch_size=run_params['batch_size'], data_type=data_type),
         max_steps=run_params['steps'], hooks=[train_hook])
+    # TODO: Evaluate only once? why?
     eval_spec = tf.estimator.EvalSpec(
-        input_fn=lambda: eval_input_fn(eval_data_path, batch_size=run_params['batch_size'], data_type=0), steps=None,
+        input_fn=lambda: eval_input_fn(eval_data_path, batch_size=run_params['batch_size'], data_type=data_type), steps=100,
         start_delay_secs=0, throttle_secs=0)
     # classifier.train(input_fn=lambda: train_input_fn(train_data_path, batch_size=params['batch_size']),
     #     max_steps=params['steps'], hooks=[train_hook])
@@ -267,13 +279,18 @@ def fitness(learning_rate, dropout_rate, activation, channels):
     # Set result path combine with current time of running
     run_params['result_path'] = run_params['result_path_base'] + "/" + datetime.datetime.now().strftime(
         "%Y%m%d_%H_%M_%S") + "/"
-    channels_full = [channels]
+
+    if model_num == 0:
+        channels_full = [channels]
+    else:
+        channels_full = [channels, 2]
     md_config = {'learning_rate': learning_rate,
                  'dropout_rate': dropout_rate,
                  'activation': activation_dict[activation],
                  'channels': channels_full,
                  'result_path': run_params['result_path'],
-                 'result_file_name': 'result.csv', }
+                 'result_file_name': 'result.csv',
+                 'model_num': model_num}
     accuracy, global_step, result = run(md_config)
     # Save info of hyperparameter search in a specific csv file
     save_file(run_params['summary_file_path'], [accuracy, learning_rate, dropout_rate, activation,
@@ -335,12 +352,15 @@ def run_hyper_parameter_optimize():
         new_data = []
 
         for i in searched_parameter:
-            data = {field_name[0]: i[0] * -1,
-                    field_name[1]: i[1][0],
-                    field_name[2]: i[1][1],
-                    field_name[3]: i[1][2],
-                    field_name[4]: i[1][3],
-                    field_name[5]: i[1][4]}
+            data = {field_name[0]: i[0]* -1}
+            for j in range(1, len(field_name)):
+                data[field_name[1]] = i[1][j-1]
+            # data = {field_name[0]: i[0] * -1,
+            #         field_name[1]: i[1][0],
+            #         field_name[2]: i[1][1],
+            #         field_name[3]: i[1][2],
+            #         field_name[4]: i[1][3],
+            #         field_name[5]: i[1][4]}
             new_data.append(data)
 
         save_file(run_params['summary_file_path'], ['end', 'Completed', datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S")],

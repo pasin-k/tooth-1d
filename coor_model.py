@@ -6,9 +6,11 @@ tf.enable_eager_execution()
 import numpy as np
 from custom_hook import EvalResultHook
 
+# In case of needing l2-regularization: https://stackoverflow.com/questions/44232566/add-l2-regularization-when-using-high-level-tf-layers/44238354#44238354
+
 
 # Default stride of 1, padding:same
-def cnn_2d(layer,
+def cnn_1d(layer,
            conv_filter_size,  # [Scalar]
            num_filters,  # [Scalar]
            activation=tf.nn.relu,
@@ -16,7 +18,30 @@ def cnn_2d(layer,
            padding='same',
            name=''):  # Stride of CNN
     # We shall define the weights that will be trained using create_weights function.
-    layer = tf.keras.layers.Conv2D(num_filters, conv_filter_size, strides=stride, padding=padding,
+    layer = tf.keras.layers.Conv1D(num_filters, conv_filter_size, strides=stride, padding=padding,
+                                   activation=activation)(layer)
+
+    # cnn_sum = tf.summary.histogram(name+'_activation',layer)
+    return layer
+
+
+def max_pool_layer_1d(layer, pooling_size, name=None, stride=-1):
+    # Set stride equals to pooling size unless specified
+    if stride == -1:
+        stride = pooling_size
+    return tf.keras.layers.MaxPool1D(pooling_size, stride, padding="same")(layer)
+
+
+# Default stride of 1, padding:same
+def cnn_2d(layer,
+           conv_filter_size,  # [Scalar]
+           num_filters,  # [Scalar]
+           activation=tf.nn.relu,
+           stride=1,
+           padding='valid',
+           name=''):  # Stride of CNN
+    # We shall define the weights that will be trained using create_weights function.
+    layer = tf.keras.layers.Conv1D(num_filters, kernel_size=conv_filter_size, strides=stride, padding=padding,
                                    activation=activation)(layer)
 
     # cnn_sum = tf.summary.histogram(name+'_activation',layer)
@@ -79,58 +104,51 @@ def standard_fc(features, mode, params):
 
 
 # Using max pooling
-def cnn_1d(features, mode, params):
-    # (1) Filter size: 5x5x64
-    conv1 = cnn_2d(features, 5, params['channels'][0] * 16, activation=params['activation'], name="conv1")
-    pool1 = max_pool_layer(conv1, 4, "pool1")
-    # Output: 60x90x64
+def model_cnn_1d(features, mode, params):
+    if len(params['channels']) != 2:
+        raise ValueError("This model need 1 channels input, current input: %s" % params['channels'])
 
-    # (2) Filter size: 3x3x64
-    conv2 = cnn_2d(pool1, 3, params['channels'][0] * 16, activation=params['activation'], name="conv2")
-    pool2 = max_pool_layer(conv2, 2, "pool2")
-    # Output: 30x45x64
+    # Input size:300x8
+    '''
+    This model is based on "A Comparison of 1-D and 2-D Deep Convolutional Neural Networks in ECG Classification"
+    '''
+    # (1) Filter size: 7x32, max pooling of k3 s2
+    print(params)
+    conv1 = cnn_1d(features, 7, params['channels'][0] * 16, activation=params['activation'], name="conv1")
+    pool1 = max_pool_layer_1d(conv1, 3, name="pool1", stride=2)
+    # Output: 294x32 -> 147x32
 
-    # (3.1) Max Pool, then Filter size: 64
-    pool3_1 = max_pool_layer(pool2, 3, "pool3_1", stride=1)  # Special stride to keep same dimension
-    conv3_1 = cnn_2d(pool3_1, 1, params['channels'][0] * 32, activation=params['activation'], name="conv3_1")
-    # Output: 30x45x64
+    # (2) Filter size: 5x64, max pooling of k3 s2
+    conv2 = cnn_1d(pool1, 5, params['channels'][0] * 32, activation=params['activation'], name="conv2")
+    pool2 = max_pool_layer_1d(conv2, 3, "pool2", stride=2)
+    # Output: 143x64 -> 71x64
 
-    # (3.2) Filter size: 1x1x64, then 3x3x64
-    conv3_2 = cnn_2d(pool2, 1, params['channels'][0] * 16, activation=params['activation'], name="conv3_2_1")
-    conv3_2 = cnn_2d(conv3_2, 3, params['channels'][0] * 16, activation=params['activation'], name="conv3_2")
-    # Output: 30x45x64
+    # (3) Filter size: 3x128 (3 times), max pooling of k3 s2
+    conv3 = cnn_1d(pool2, 3, params['channels'][0] * 64, activation=params['activation'], name="conv3_1")
+    conv3 = cnn_1d(conv3, 3, params['channels'][0] * 64, activation=params['activation'], name="conv3_2")
+    conv3 = cnn_1d(conv3, 3, params['channels'][0] * 64, activation=params['activation'], name="conv3_3")
+    pool3 = max_pool_layer_1d(conv3, 3, "pool2", stride=2)
+    # Output: 65x128 -> 32x128 = 4096
 
-    # (3.3) Filter size: 1x1x64, then 5x5x64
-    conv3_3 = cnn_2d(pool2, 1, params['channels'][0] * 16, activation=params['activation'], name="conv3_3_1")
-    conv3_3 = cnn_2d(conv3_3, 3, params['channels'][0] * 16, activation=params['activation'], name="conv3_3_2")
-    conv3_3 = cnn_2d(conv3_3, 3, params['channels'][0] * 16, activation=params['activation'], name="conv3_3_3")
-    # conv3_3 = cnn_2d(conv3_3, 5, 64)  # Might use 2 3x3 CNN instead, look at inception net paper
-    # Output: 30x45x64
+    fc4 = flatten_layer(pool3)
+    fc4 = fc_layer(fc4, params['channels'][1] * 1024, activation=params['activation'], name='fc5')
+    dropout4 = tf.keras.layers.Dropout(rate=params['dropout_rate'])(fc4)
+    # Output: 4096 -> 4096 -> 3
 
-    # (3.4) Filter size: 1x1x256
-    conv3_4 = cnn_2d(pool2, 1, params['channels'][0] * 16, activation=params['activation'], name="conv3_4")
-    # Output: 30x45x64
-
-    concat4 = tf.concat([conv3_1, conv3_2, conv3_3, conv3_4], 3)
-    pool4 = max_pool_layer(concat4, 3, name="pool4")
-    # Output: 10x15x256 = 38400
-
-    fc5 = flatten_layer(pool4)
-    fc5 = fc_layer(fc5, params['channels'][1] * 1024, activation=params['activation'], name='fc5')
+    fc5 = fc_layer(dropout4, params['channels'][1] * 1024, activation=params['activation'], name='fc6')
     dropout5 = tf.keras.layers.Dropout(rate=params['dropout_rate'])(fc5)
 
-    fc6 = fc_layer(dropout5, params['channels'][1] * 1024, activation=params['activation'], name='fc6')
-    dropout6 = tf.keras.layers.Dropout(rate=params['dropout_rate'])(fc6)
-
-    logits = fc_layer(dropout6, 3, activation=tf.nn.tanh, name='predict')
+    logits = fc_layer(dropout5, 3, activation=tf.nn.tanh, name='predict')
     return logits
 
 
 # Define Model
 def my_model(features, labels, mode, params, config):
-    print("Feature:%s" % features)
     # Input: (Batch_size,240,360,4)
-    logits = standard_fc(features, mode, params)
+    if params['model_num'] == 0:
+        logits = standard_fc(features, mode, params)
+    else:
+        logits = model_cnn_1d(features, mode, params)
     # Predict Mode
     predicted_class = tf.argmax(logits, 1)
     if mode == tf.estimator.ModeKeys.PREDICT:
@@ -148,9 +166,6 @@ def my_model(features, labels, mode, params, config):
                          dtype=tf.float32)
     loss_weight = tf.matmul(one_hot_label, weight, transpose_b=True, a_is_sparse=True)
 
-    print("Labels:%s" % labels)
-    print("Logits:%s" % logits)
-    print("Loss weight:%s" % loss_weight)
     loss = tf.losses.sparse_softmax_cross_entropy(labels, logits,
                                                   weights=loss_weight)  # labels is int of class, logits is vector
 
@@ -172,14 +187,18 @@ def my_model(features, labels, mode, params, config):
 
     d_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
     # print(d_vars)
-    summary_name = ["conv1", "conv2", "conv3_1", "conv3_2_1", "conv3_2", "conv3_3_1",
-                    "conv3_3_2", "conv3_3_3", "conv4", "fc5", "fc6", "predict"]
+    if params['model_num'] == 0:
+        summary_name = ["fc1", "fc2", "fc3", "predict"]
+    else:
+        summary_name = ["conv1", "conv2", "conv3_1", "conv3_2", "conv3_3", "fc4",
+                        "fc5", "predict"]
+    print(d_vars)
     if len(summary_name) == int(len(d_vars) / 2):
         for i in range(len(summary_name)):
             tf.summary.histogram(summary_name[i] + "_weights", d_vars[2 * i])
             tf.summary.histogram(summary_name[i] + "_biases", d_vars[2 * i + 1])
     else:
-        print("Warning, expected weight&variable not equals")
+        print("Warning, expected weight&variable not equals: amount of var = %s" % len(d_vars))
         print(d_vars)
 
     summary = tf.summary.histogram("Prediction", predicted_class)
