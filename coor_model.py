@@ -128,6 +128,7 @@ def model_cnn_1d(features, mode, params):
     conv3 = cnn_1d(conv3, 3, params['channels'][0] * 64, activation=params['activation'], name="conv3_2")
     conv3 = cnn_1d(conv3, 3, params['channels'][0] * 64, activation=params['activation'], name="conv3_3")
     pool3 = max_pool_layer_1d(conv3, 3, "pool2", stride=2)
+    print(pool3)
     # Output: 65x128 -> 32x128 = 4096
 
     fc4 = flatten_layer(pool3)
