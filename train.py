@@ -122,8 +122,9 @@ def run(model_params=None):
                 label_hist[key] = int(val)
     total = label_hist['1'] + label_hist['3'] + label_hist['5']
 
+    model_params['loss_weight'] = [1, 1, 1] # Only for BL_361 data: real ratio (22:1:1.8)
     # model_params['loss_weight'] = [5, 1, 1.8] # Only for BL_361 data: real ratio (22:1:1.8)
-    model_params['loss_weight'] = [5, 1.43, 1] # Only for MD_361 data: real ratio (43:1.43:1)
+    # model_params['loss_weight'] = [5, 1.43, 1] # Only for MD_361 data: real ratio (43:1.43:1)
     # model_params['loss_weight'] = [total / label_hist['1'], total / label_hist['3'], total / label_hist['5']]
     print("Getting training data from %s" % train_data_path)
     print("Saved model at %s" % run_params['result_path'])
@@ -342,12 +343,9 @@ def run_hyper_parameter_optimize():
         new_data = []
 
         for i in searched_parameter:
-            data = {field_name[0]: i[0] * -1,
-                    field_name[1]: i[1][0],
-                    field_name[2]: i[1][1],
-                    field_name[3]: i[1][2],
-                    field_name[4]: i[1][3],
-                    field_name[5]: i[1][4]}
+            data = {field_name[0]: i[0] * -1}
+            for j in range(1, len(field_name)):
+                data[field_name[1]] = i[1][j - 1]
             new_data.append(data)
 
         save_file(run_params['summary_file_path'],
