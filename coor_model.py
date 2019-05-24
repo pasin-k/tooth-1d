@@ -100,11 +100,14 @@ def standard_fc(features, mode, params):
     layer3 = fc_layer(dropout2, num_outputs=params['channels'][0]*64, activation=params['activation'])
     dropout3 = tf.keras.layers.Dropout(rate=params['dropout_rate'])(layer3)
     logits = fc_layer(dropout3, 3, activation=tf.sigmoid, name='predict')
+
+    print("Fully conneted layer")
     return logits
 
 
 # Using max pooling
 def model_cnn_1d(features, mode, params):
+    print(features)
     if len(params['channels']) != 2:
         raise ValueError("This model need 1 channels input, current input: %s" % params['channels'])
 
@@ -128,7 +131,7 @@ def model_cnn_1d(features, mode, params):
     conv3 = cnn_1d(conv3, 3, params['channels'][0] * 64, activation=params['activation'], name="conv3_2")
     conv3 = cnn_1d(conv3, 3, params['channels'][0] * 64, activation=params['activation'], name="conv3_3")
     pool3 = max_pool_layer_1d(conv3, 3, "pool2", stride=2)
-    print(pool3)
+    print("Pool: %s"% pool3)
     # Output: 65x128 -> 32x128 = 4096
 
     fc4 = flatten_layer(pool3)
@@ -167,8 +170,8 @@ def my_model(features, labels, mode, params, config):
                          dtype=tf.float32)
     loss_weight = tf.matmul(one_hot_label, weight, transpose_b=True, a_is_sparse=True)
 
-    loss = tf.losses.sparse_softmax_cross_entropy(labels, logits,
-                                                  weights=loss_weight)  # labels is int of class, logits is vector
+    loss = tf.losses.sparse_softmax_cross_entropy(labels, logits,)
+                                                  # weights=loss_weight)  # labels is int of class, logits is vector
 
     accuracy = tf.metrics.accuracy(labels, predicted_class)
 
@@ -193,7 +196,7 @@ def my_model(features, labels, mode, params, config):
     else:
         summary_name = ["conv1", "conv2", "conv3_1", "conv3_2", "conv3_3", "fc4",
                         "fc5", "predict"]
-    print(d_vars)
+
     if len(summary_name) == int(len(d_vars) / 2):
         for i in range(len(summary_name)):
             tf.summary.histogram(summary_name[i] + "_weights", d_vars[2 * i])

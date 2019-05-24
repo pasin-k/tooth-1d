@@ -163,6 +163,7 @@ def customized_incepnet_v2(features, mode, params):
 
 # Based on vgg16
 def simple_cnn(features, mode, params):
+    print(features)
     # Input: 240x360xn
     conv1 = cnn_2d(features, 3, params['channels'][0] * 8, activation=params['activation'], name="conv1")
     conv1 = cnn_2d(conv1, 3, params['channels'][0] * 8, activation=params['activation'], name="conv1")

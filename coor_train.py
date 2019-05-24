@@ -187,8 +187,9 @@ def run(model_params=None):
         model_dir=run_params['result_path'],
         config=my_checkpoint_config
     )
+
     eval_result = classifier.evaluate(
-        input_fn=lambda: eval_input_fn(train_data_path, batch_size=run_params['batch_size'], data_type=0))
+        input_fn=lambda: eval_input_fn(train_data_path, batch_size=run_params['batch_size'], data_type=data_type))
 
     # No need to use predict since we can get data from hook now
     # # images, expected = get_data_from_path(eval_data_path)
