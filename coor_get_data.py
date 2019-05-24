@@ -1,4 +1,5 @@
 import tensorflow as tf
+import os
 import numpy as np
 # Read TFRecord file, return as tf.dataset, specifically used for
 
@@ -64,6 +65,8 @@ def decode_multiple_axis(data_dict):
 
 
 def train_input_fn(data_path, batch_size, data_type):
+    if not os.path.exists(data_path):
+        raise ValueError("Train input file does not exist")
     # data_type=0 -> data is vectorize in to one vector else, stack in different dimension
     dataset = tf.data.TFRecordDataset(data_path)
     dataset = dataset.map(deserialize, num_parallel_calls=7)
@@ -79,6 +82,8 @@ def train_input_fn(data_path, batch_size, data_type):
 
 
 def eval_input_fn(data_path, batch_size,data_type):
+    if not os.path.exists(data_path):
+        raise ValueError("Eval input file does not exist")
     eval_dataset = tf.data.TFRecordDataset(data_path)
     eval_dataset = eval_dataset.map(deserialize)
     if data_type == 0:
@@ -90,6 +95,8 @@ def eval_input_fn(data_path, batch_size,data_type):
 
 
 def get_data_from_path(data_path, data_type):
+    if not os.path.exists(data_path):
+        raise ValueError("Input file does not exist")
     dataset = tf.data.TFRecordDataset(data_path)
     dataset = dataset.map(deserialize)
     if data_type == 0:
