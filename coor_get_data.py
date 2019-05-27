@@ -1,6 +1,7 @@
 import tensorflow as tf
 import os
 import numpy as np
+
 # Read TFRecord file, return as tf.dataset, specifically used for
 
 numdegree = 4
@@ -11,7 +12,7 @@ def deserialize(example):
     feature = {'label': tf.FixedLenFeature([], tf.int64)}
     for i in range(numdegree):
         for j in range(2):
-            feature['img_%s_%s' % (i,j)] = tf.VarLenFeature(tf.float32)
+            feature['img_%s_%s' % (i, j)] = tf.VarLenFeature(tf.float32)
     return tf.parse_single_example(example, feature)
 
 
@@ -22,7 +23,7 @@ def decode_one_axis(data_dict):
     # Stacking the rest
     for i in range(0, numdegree):
         for j in range(2):
-            img = data_dict['img_%s_%s' % (i,j)]
+            img = data_dict['img_%s_%s' % (i, j)]
             img = tf.sparse.to_dense(img)
             # img = tf.reshape(img, [-1])
             # file_cropped = tf.squeeze(tf.image.resize_image_with_crop_or_pad(file_decoded, image_height, image_width))
@@ -31,7 +32,7 @@ def decode_one_axis(data_dict):
     if numdegree != 4:
         raise ValueError("Edit this function as well, this compatible with numdeg=4")
     image_stacked = tf.concat([image_decoded[0], image_decoded[1], image_decoded[2], image_decoded[3],
-                              image_decoded[4], image_decoded[5], image_decoded[6], image_decoded[7]], axis=0)
+                               image_decoded[4], image_decoded[5], image_decoded[6], image_decoded[7]], axis=0)
     image_stacked.set_shape([2400])
     image_stacked = tf.cast(image_stacked, tf.float32)
     label = tf.cast(data_dict['label'], tf.float32)
@@ -47,9 +48,9 @@ def decode_multiple_axis(data_dict):
     # Stacking the rest
     for i in range(0, numdegree):
         for j in range(2):
-            img = data_dict['img_%s_%s' % (i,j)]
+            img = data_dict['img_%s_%s' % (i, j)]
             img = tf.sparse.to_dense(img)
-            img = tf.reshape(img,[300])
+            img = tf.reshape(img, [300])
             # file_cropped = tf.squeeze(tf.image.resize_image_with_crop_or_pad(file_decoded, image_height, image_width))
             image_decoded.append(img)
 
@@ -81,7 +82,7 @@ def train_input_fn(data_path, batch_size, data_type):
     return dataset
 
 
-def eval_input_fn(data_path, batch_size,data_type):
+def eval_input_fn(data_path, batch_size, data_type):
     if not os.path.exists(data_path):
         raise ValueError("Eval input file does not exist")
     eval_dataset = tf.data.TFRecordDataset(data_path)
@@ -122,4 +123,3 @@ def get_data_from_path(data_path, data_type):
             pass
 
     return images, label
-
