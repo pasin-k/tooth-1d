@@ -217,8 +217,11 @@ def my_model(features, labels, mode, params, config):
         }
         return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
 
+    # labels = tf.cast(labels, tf.int64)
+    labels = (labels - 1) / 2
     one_hot_label = tf.one_hot(indices=tf.cast(labels, tf.int32), depth=3)
-    labels = tf.cast((labels - 1) / 2, tf.int64)
+    # labels = tf.cast((labels - 1) / 2, tf.int64)
+    labels = tf.cast(labels, tf.int64)
 
     weight = tf.constant([[params['loss_weight'][0], params['loss_weight'][1], params['loss_weight'][2]]],
                          dtype=tf.float32)

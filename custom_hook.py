@@ -30,3 +30,15 @@ class EvalResultHook(tf.train.SessionRunHook):
                 writer.writerow([label, pred, prob])
                 # print("Label: %s, Prediction: %s" % (label, pred))
 
+
+# Print any variable inside for debugging
+class PrintValueHook(tf.train.SessionRunHook):
+    def __init__(self, value, variable_name):
+        self.value = value
+        self.variable_name = variable_name
+
+    def before_run(self, run_context):
+        return tf.train.SessionRunArgs([self.value, self.variable_name])
+
+    def after_run(self, run_context, run_values):
+        print("Variable %s: %s" % (run_values[1], run_values[0]))

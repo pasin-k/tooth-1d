@@ -4,7 +4,7 @@ import os
 
 tf.enable_eager_execution()
 import numpy as np
-from custom_hook import EvalResultHook
+from custom_hook import EvalResultHook, PrintValueHook
 
 # In case of needing l2-regularization: https://stackoverflow.com/questions/44232566/add-l2-regularization-when-using-high-level-tf-layers/44238354#44238354
 
@@ -162,17 +162,19 @@ def my_model(features, labels, mode, params, config):
             'logits': logits
         }
         return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
-
+    # labels = tf.cast(labels, tf.int64)
+    labels = (labels - 1) / 2
     one_hot_label = tf.one_hot(indices=tf.cast(labels, tf.int32), depth=3)
-    labels = tf.cast((labels - 1) / 2, tf.int64)
+    # labels = tf.cast((labels - 1) / 2, tf.int64)
+    labels = tf.cast(labels, tf.int64)
 
 
     weight = tf.constant([[params['loss_weight'][0], params['loss_weight'][1], params['loss_weight'][2]]],
                          dtype=tf.float32)
     loss_weight = tf.matmul(one_hot_label, weight, transpose_b=True, a_is_sparse=True)
 
-    loss = tf.losses.sparse_softmax_cross_entropy(labels, logits,)
-                                                  # weights=loss_weight)  # labels is int of class, logits is vector
+    loss = tf.losses.sparse_softmax_cross_entropy(labels, logits,
+                                                  weights=loss_weight)  # labels is int of class, logits is vector
 
     accuracy = tf.metrics.accuracy(labels, predicted_class)
 
@@ -219,9 +221,10 @@ def my_model(features, labels, mode, params, config):
         train_op = optimizer.minimize(loss, global_step=steps)
         saver_hook = tf.train.SummarySaverHook(save_steps=1000, summary_op=tf.summary.merge_all(),
                                                output_dir=config.model_dir)
+        variable_hook = PrintValueHook(one_hot_label, "One hot label")
         # model_vars = tf.trainable_variables()
         # slim.model_analyzer.analyze_vars(model_vars, print_info=True)
-        return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op, training_hooks=[saver_hook])
+        return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op, training_hooks=[saver_hook, variable_hook])
 
     # Evaluate Mode
 
