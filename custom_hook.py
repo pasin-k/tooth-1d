@@ -35,10 +35,10 @@ class EvalResultHook(tf.train.SessionRunHook):
 class PrintValueHook(tf.train.SessionRunHook):
     def __init__(self, value, variable_name):
         self.value = value
-        self.variable_name = variable_name
+        self.variable_name = tf.convert_to_tensor(variable_name, dtype=tf.string)
 
     def before_run(self, run_context):
         return tf.train.SessionRunArgs([self.value, self.variable_name])
 
     def after_run(self, run_context, run_values):
-        print("Variable %s: %s" % (run_values[1], run_values[0]))
+        print("Variable %s: %s" % (run_values[0], run_values[1]))

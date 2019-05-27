@@ -220,11 +220,11 @@ def my_model(features, labels, mode, params, config):
         train_op = optimizer.minimize(loss, global_step=steps)
         saver_hook = tf.train.SummarySaverHook(save_steps=1000, summary_op=tf.summary.merge_all(),
                                                output_dir=config.model_dir)
-        variable_hook = PrintValueHook(one_hot_label, "One hot label")
+
         # model_vars = tf.trainable_variables()
         # slim.model_analyzer.analyze_vars(model_vars, print_info=True)
         return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op,
-                                          training_hooks=[saver_hook, variable_hook])
+                                          training_hooks=[saver_hook])
 
     # Evaluate Mode
 
@@ -240,5 +240,6 @@ def my_model(features, labels, mode, params, config):
                                            output_dir=config.model_dir + 'eval')
     csv_name = tf.convert_to_tensor(params['result_path'] + params['result_file_name'], dtype=tf.string)
     eval_hook = EvalResultHook(labels, predicted_class, tf.nn.softmax(logits), csv_name)
+    variable_hook = PrintValueHook(one_hot_label, "One hot label")
     return tf.estimator.EstimatorSpec(mode=mode, eval_metric_ops={'accuracy': accuracy}, loss=loss,
-                                      evaluation_hooks=[saver_hook, eval_hook])
+                                      evaluation_hooks=[saver_hook, eval_hook, variable_hook])
