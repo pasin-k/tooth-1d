@@ -2,7 +2,7 @@ import tensorflow as tf
 import csv
 import os
 
-tf.enable_eager_execution()
+# tf.enable_eager_execution()
 import numpy as np
 from custom_hook import EvalResultHook
 
