@@ -2,9 +2,9 @@ import tensorflow as tf
 import csv
 import os
 
-tf.enable_eager_execution()
-import numpy as np
+# tf.enable_eager_execution()
 from custom_hook import EvalResultHook, PrintValueHook
+
 
 # In case of needing l2-regularization: https://stackoverflow.com/questions/44232566/add-l2-regularization-when-using-high-level-tf-layers/44238354#44238354
 
@@ -94,10 +94,10 @@ def dropout(layer, dropout_rate, training, name):
 def standard_fc(features, mode, params):
     if len(params['channels']) != 1:
         raise ValueError("This model need 1 channels input, current input: %s" % params['channels'])
-    layer1 = fc_layer(features, num_outputs=params['channels'][0]*64, activation=params['activation'])
-    layer2 = fc_layer(layer1, num_outputs=params['channels'][0]*128, activation=params['activation'])
+    layer1 = fc_layer(features, num_outputs=params['channels'][0] * 64, activation=params['activation'])
+    layer2 = fc_layer(layer1, num_outputs=params['channels'][0] * 128, activation=params['activation'])
     dropout2 = tf.keras.layers.Dropout(rate=params['dropout_rate'])(layer2)
-    layer3 = fc_layer(dropout2, num_outputs=params['channels'][0]*64, activation=params['activation'])
+    layer3 = fc_layer(dropout2, num_outputs=params['channels'][0] * 64, activation=params['activation'])
     dropout3 = tf.keras.layers.Dropout(rate=params['dropout_rate'])(layer3)
     logits = fc_layer(dropout3, 3, activation=tf.sigmoid, name='predict')
 
@@ -107,7 +107,7 @@ def standard_fc(features, mode, params):
 
 # Using max pooling
 def model_cnn_1d(features, mode, params):
-    print(features)
+    # print(features)
     if len(params['channels']) != 2:
         raise ValueError("This model need 1 channels input, current input: %s" % params['channels'])
 
@@ -131,7 +131,7 @@ def model_cnn_1d(features, mode, params):
     conv3 = cnn_1d(conv3, 3, params['channels'][0] * 64, activation=params['activation'], name="conv3_2")
     conv3 = cnn_1d(conv3, 3, params['channels'][0] * 64, activation=params['activation'], name="conv3_3")
     pool3 = max_pool_layer_1d(conv3, 3, "pool2", stride=2)
-    print("Pool: %s"% pool3)
+    # print("Pool: %s"% pool3)
     # Output: 65x128 -> 32x128 = 4096
 
     fc4 = flatten_layer(pool3)
@@ -167,7 +167,6 @@ def my_model(features, labels, mode, params, config):
     one_hot_label = tf.one_hot(indices=tf.cast(labels, tf.int32), depth=3)
     # labels = tf.cast((labels - 1) / 2, tf.int64)
     labels = tf.cast(labels, tf.int64)
-
 
     weight = tf.constant([[params['loss_weight'][0], params['loss_weight'][1], params['loss_weight'][2]]],
                          dtype=tf.float32)
@@ -224,7 +223,8 @@ def my_model(features, labels, mode, params, config):
         variable_hook = PrintValueHook(one_hot_label, "One hot label")
         # model_vars = tf.trainable_variables()
         # slim.model_analyzer.analyze_vars(model_vars, print_info=True)
-        return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op, training_hooks=[saver_hook, variable_hook])
+        return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op,
+                                          training_hooks=[saver_hook, variable_hook])
 
     # Evaluate Mode
 
@@ -242,4 +242,3 @@ def my_model(features, labels, mode, params, config):
     eval_hook = EvalResultHook(labels, predicted_class, tf.nn.softmax(logits), csv_name)
     return tf.estimator.EstimatorSpec(mode=mode, eval_metric_ops={'accuracy': accuracy}, loss=loss,
                                       evaluation_hooks=[saver_hook, eval_hook])
-
