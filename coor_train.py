@@ -368,6 +368,7 @@ def run_hyper_parameter_optimize():
                   write_mode='a', one_row=True)
         # space = search_result.space
         # print("Best result: %s" % space.point_to_dict(search_result.x))
+    print("Saving hyperparameters_result in %s" % run_params['summary_file_path'])
 
 
 if __name__ == '__main__':

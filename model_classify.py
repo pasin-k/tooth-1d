@@ -3,8 +3,7 @@ import csv
 import os
 
 # tf.enable_eager_execution()
-import numpy as np
-from custom_hook import EvalResultHook
+from custom_hook import EvalResultHook, PrintValueHook
 
 
 # Default stride of 1, padding:same
@@ -289,5 +288,6 @@ def my_model(features, labels, mode, params, config):
                                            output_dir=config.model_dir + 'eval')
     csv_name = tf.convert_to_tensor(params['result_path'] + params['result_file_name'], dtype=tf.string)
     eval_hook = EvalResultHook(labels, predicted_class, tf.nn.softmax(logits), csv_name)
+    variable_hook = PrintValueHook(one_hot_label, "One hot label")
     return tf.estimator.EstimatorSpec(mode=mode, eval_metric_ops={'accuracy': accuracy}, loss=loss,
-                                      evaluation_hooks=[saver_hook, eval_hook])
+                                      evaluation_hooks=[saver_hook, eval_hook, variable_hook])
