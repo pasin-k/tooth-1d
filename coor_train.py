@@ -81,6 +81,7 @@ model_configs = {'learning_rate': configs.learning_rate,
                  'channels': configs.channels * [16, 16, 32, 16, 16, 16, 16, 16, 16, 512, 512],
                  }
 
+
 # Final Parameters:
 # run_params: batch_size, checkpoint_min, early_stop_step, input_path, result_path_base, config_path, steps, comment
 #             result_path(result_path_base + data&time), summary_file_path(doesn't use in run, just a global param)
@@ -162,7 +163,8 @@ def run(model_params=None):
         max_steps=run_params['steps'], hooks=[train_hook])
     # TODO: Evaluate only once? why?
     eval_spec = tf.estimator.EvalSpec(
-        input_fn=lambda: eval_input_fn(eval_data_path, batch_size=run_params['batch_size'], data_type=data_type), steps=100,
+        input_fn=lambda: eval_input_fn(eval_data_path, batch_size=run_params['batch_size'], data_type=data_type),
+        steps=None,
         start_delay_secs=0, throttle_secs=0)
     # classifier.train(input_fn=lambda: train_input_fn(train_data_path, batch_size=params['batch_size']),
     #     max_steps=params['steps'], hooks=[train_hook])
@@ -251,7 +253,7 @@ def run(model_params=None):
 #                     copy2(run_params['config_path'], run_params['result_path'])
 
 
-dim_learning_rate = Real(low=1e-5, high=1e-2, prior='log-uniform', name='learning_rate')
+dim_learning_rate = Real(low=5e-6, high=5e-3, prior='log-uniform', name='learning_rate')
 dim_dropout_rate = Real(low=0, high=0.875, name='dropout_rate')
 dim_activation = Categorical(categories=['0', '1'],
                              name='activation')
@@ -261,7 +263,7 @@ dimensions = [dim_learning_rate,
               dim_dropout_rate,
               dim_activation,
               dim_channel]
-default_parameters = [1e-3, 0.125, '0', 2]
+default_parameters = [1e-4, 0.01, '1', 3]
 
 
 @use_named_args(dimensions=dimensions)
@@ -300,9 +302,10 @@ def fitness(learning_rate, dropout_rate, activation, channels):
 
 
 def run_hyper_parameter_optimize():
+    current_time = datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S")
     # Name of the summary result from hyperparameter search (This variable is not used in run)
     run_params['summary_file_path'] = run_params['result_path_base'] + '/' + "hyperparameters_result_" \
-                                      + datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S") + ".csv"
+                                      + current_time + ".csv"
     field_name = [i.name for i in dimensions]
     field_name.insert(0, 'accuracy')
 
@@ -320,25 +323,32 @@ def run_hyper_parameter_optimize():
                 l_data = prev_data[-1][1:]  # Latest_data
                 default_param = [float(l_data[0]), float(l_data[1]), l_data[2], int(l_data[3])]
                 run_params['summary_file_path'] = previous_record_files[-1]
+                current_time = previous_record_files[-1].replace('.csv', '').replace("hyperparameters_result_", '')
             else:
                 save_file(run_params['summary_file_path'], [], field_name=field_name,
                           write_mode='w', create_folder=True)  # Create new summary file
                 default_param = default_parameters
         except IndexError:
-            save_file(previous_record_files[-1], ['end', 'Error from previous run', datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S")],
+            save_file(previous_record_files[-1],
+                      ['end', 'Error from previous run', datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S")],
                       write_mode='a', one_row=True)
             raise ValueError("Previous file doesn't end completely")
     else:
-        save_file(run_params['summary_file_path'], [], field_name=field_name, write_mode='w', create_folder=True)  # Create new summary file
+        save_file(run_params['summary_file_path'], [], field_name=field_name, write_mode='w',
+                  create_folder=True)  # Create new summary file
         default_param = default_parameters
 
     print("Saving hyperparameters_result in %s" % run_params['summary_file_path'])
     print("Running remaining: %s time" % n_calls)
     if n_calls < 11:
         print("Hyper parameter optimize ENDED: run enough calls already")
-        save_file(run_params['summary_file_path'], ['end', 'Completed (faster than expected)', datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S")],
+        save_file(run_params['summary_file_path'],
+                  ['end', 'Completed (faster than expected)', datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S")],
                   write_mode='a', one_row=True)
     else:
+        run_params['result_path_base'] = run_params[
+                                             'result_path_base'] + "/" + current_time  # Make all run seperated in a folder
+
         search_result = gp_minimize(func=fitness,
                                     dimensions=dimensions,
                                     acq_func='EI',  # Expected Improvement.
@@ -353,9 +363,9 @@ def run_hyper_parameter_optimize():
         new_data = []
 
         for i in searched_parameter:
-            data = {field_name[0]: i[0]* -1}
+            data = {field_name[0]: i[0] * -1}
             for j in range(1, len(field_name)):
-                data[field_name[1]] = i[1][j-1]
+                data[field_name[1]] = i[1][j - 1]
             # data = {field_name[0]: i[0] * -1,
             #         field_name[1]: i[1][0],
             #         field_name[2]: i[1][1],
@@ -364,7 +374,8 @@ def run_hyper_parameter_optimize():
             #         field_name[5]: i[1][4]}
             new_data.append(data)
 
-        save_file(run_params['summary_file_path'], ['end', 'Completed', datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S")],
+        save_file(run_params['summary_file_path'],
+                  ['end', 'Completed', datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S")],
                   write_mode='a', one_row=True)
         # space = search_result.space
         # print("Best result: %s" % space.point_to_dict(search_result.x))

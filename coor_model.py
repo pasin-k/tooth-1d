@@ -223,8 +223,13 @@ def my_model(features, labels, mode, params, config):
 
         # model_vars = tf.trainable_variables()
         # slim.model_analyzer.analyze_vars(model_vars, print_info=True)
-        return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op,
-                                          training_hooks=[saver_hook])
+        if tf.train.get_global_step() % 5000 == 0:
+            variable_hook = PrintValueHook(tf.nn.softmax(logits), "Training logits")
+            return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op,
+                                              training_hooks=[saver_hook, variable_hook])
+        else:
+            return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op,
+                                              training_hooks=[saver_hook])
 
     # Evaluate Mode
 
@@ -236,10 +241,14 @@ def my_model(features, labels, mode, params, config):
             writer.writeheader()
 
     # Create hooks
-    saver_hook = tf.train.SummarySaverHook(save_steps=10, summary_op=tf.summary.merge_all(),
-                                           output_dir=config.model_dir + 'eval')
+    if params['result_file_name'] == 'train_result.csv':
+        saver_hook = tf.train.SummarySaverHook(save_steps=10, summary_op=tf.summary.merge_all(),
+                                               output_dir=config.model_dir + 'train_final')
+    else:
+        saver_hook = tf.train.SummarySaverHook(save_steps=10, summary_op=tf.summary.merge_all(),
+                                               output_dir=config.model_dir + 'eval')
     csv_name = tf.convert_to_tensor(params['result_path'] + params['result_file_name'], dtype=tf.string)
     eval_hook = EvalResultHook(labels, predicted_class, tf.nn.softmax(logits), csv_name)
-    variable_hook = PrintValueHook(one_hot_label, "One hot label")
+    # variable_hook = PrintValueHook(None, None)
     return tf.estimator.EstimatorSpec(mode=mode, eval_metric_ops={'accuracy': accuracy}, loss=loss,
-                                      evaluation_hooks=[saver_hook, eval_hook, variable_hook])
+                                      evaluation_hooks=[saver_hook, eval_hook])# , variable_hook])

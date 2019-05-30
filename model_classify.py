@@ -162,7 +162,6 @@ def customized_incepnet_v2(features, mode, params):
 
 # Based on vgg16
 def simple_cnn(features, mode, params):
-    print(features)
     # Input: 240x360xn
     conv1 = cnn_2d(features, 3, params['channels'][0] * 8, activation=params['activation'], name="conv1")
     conv1 = cnn_2d(conv1, 3, params['channels'][0] * 8, activation=params['activation'], name="conv1")
@@ -247,8 +246,9 @@ def my_model(features, labels, mode, params, config):
 
     d_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
     # print(d_vars)
-    summary_name = ["conv1", "conv2", "conv3_1", "conv3_2_1", "conv3_2", "conv3_3_1",
-                    "conv3_3_2", "conv3_3_3", "conv4", "fc5", "fc6", "predict"]
+    summary_name = ["conv1", "conv1_2", "conv2_1", "conv2_2", "conv3_1", "conv3_2",
+                    "conv3_3", "conv4_1", "conv4_2", "conv4_3", "conv5_1", "conv5_2", "conv5_3", "fc5", "fc6",
+                    "predict"]
     if len(summary_name) == int(len(d_vars) / 2):
         for i in range(len(summary_name)):
             tf.summary.histogram(summary_name[i] + "_weights", d_vars[2 * i])
@@ -272,7 +272,13 @@ def my_model(features, labels, mode, params, config):
                                                output_dir=config.model_dir)
         # model_vars = tf.trainable_variables()
         # slim.model_analyzer.analyze_vars(model_vars, print_info=True)
-        return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op, training_hooks=[saver_hook])
+        if tf.train.get_global_step() % 10000 == 0:
+            variable_hook = PrintValueHook(loss_weight, "Loss weight")
+
+            return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op,
+                                              training_hooks=[saver_hook, variable_hook])
+        else:
+            return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op, training_hooks=[saver_hook])
 
     # Evaluate Mode
 
@@ -288,6 +294,5 @@ def my_model(features, labels, mode, params, config):
                                            output_dir=config.model_dir + 'eval')
     csv_name = tf.convert_to_tensor(params['result_path'] + params['result_file_name'], dtype=tf.string)
     eval_hook = EvalResultHook(labels, predicted_class, tf.nn.softmax(logits), csv_name)
-    variable_hook = PrintValueHook(one_hot_label, "One hot label")
     return tf.estimator.EstimatorSpec(mode=mode, eval_metric_ops={'accuracy': accuracy}, loss=loss,
-                                      evaluation_hooks=[saver_hook, eval_hook, variable_hook])
+                                      evaluation_hooks=[saver_hook, eval_hook])

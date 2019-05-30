@@ -121,9 +121,8 @@ def run(model_params=None):
                 [key, val] = line.split('_')
                 label_hist[key] = int(val)
     total = label_hist['1'] + label_hist['3'] + label_hist['5']
-
-    # model_params['loss_weight'] = [1, 1, 1] # Only for BL_361 data: real ratio (22:1:1.8)
-    # model_params['loss_weight'] = [5, 1, 1.8] # Only for BL_361 data: real ratio (22:1:1.8)
+    # model_params['loss_weight'] = [1, 1, 1] # Custom value
+    # model_params['loss_weight'] = [3, 1, 1.8] # Only for BL_361 data: real ratio (22:1:1.8)
     # model_params['loss_weight'] = [5, 1.43, 1] # Only for MD_361 data: real ratio (43:1.43:1)
     model_params['loss_weight'] = [total / label_hist['1'], total / label_hist['3'], total / label_hist['5']]
     print("Getting training data from %s" % train_data_path)
@@ -289,9 +288,10 @@ def fitness(learning_rate, dropout_rate, activation, channels, fully_connect_cha
 
 
 def run_hyper_parameter_optimize():
+    current_time = datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S")
     # Name of the summary result from hyperparameter search (This variable is not used in run)
     run_params['summary_file_path'] = run_params['result_path_base'] + '/' + "hyperparameters_result_" \
-                                      + datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S") + ".csv"
+                                      + current_time + ".csv"
     field_name = [i.name for i in dimensions]
     field_name.insert(0, 'accuracy')
 
@@ -301,7 +301,7 @@ def run_hyper_parameter_optimize():
     for file in glob.glob(run_params['result_path_base'] + '/' + "hyperparameters_result_" + '*'):
         previous_record_files.append(file)
     previous_record_files.sort()
-    if len(previous_record_files) > 1:
+    if len(previous_record_files) > 0:
         prev_data, header = read_file(previous_record_files[-1], header=True)
         try:
             if prev_data[-1][0] != 'end':  # Check if the previous file doesn't end properly
@@ -309,16 +309,19 @@ def run_hyper_parameter_optimize():
                 l_data = prev_data[-1][1:]  # Latest_data
                 default_param = [float(l_data[0]), float(l_data[1]), l_data[2], int(l_data[3]), int(l_data[4])]
                 run_params['summary_file_path'] = previous_record_files[-1]
+                current_time = previous_record_files[-1].replace('.csv', '').replace("hyperparameters_result_", '')
             else:
                 save_file(run_params['summary_file_path'], [], field_name=field_name,
                           write_mode='w', create_folder=True)  # Create new summary file
                 default_param = default_parameters
         except IndexError:
-            save_file(previous_record_files[-1], ['end', 'Error from previous run', datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S")],
+            save_file(previous_record_files[-1],
+                      ['end', 'Error from previous run', datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S")],
                       write_mode='a', one_row=True)
             raise ValueError("Previous file doesn't end completely")
     else:
-        save_file(run_params['summary_file_path'], [], field_name=field_name, write_mode='w', create_folder=True)  # Create new summary file
+        save_file(run_params['summary_file_path'], [], field_name=field_name, write_mode='w',
+                  create_folder=True)  # Create new summary file
         default_param = default_parameters
 
     print("Saving hyperparameters_result in %s" % run_params['summary_file_path'])
@@ -329,6 +332,9 @@ def run_hyper_parameter_optimize():
                   ['end', 'Completed (faster than expected)', datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S")],
                   write_mode='a', one_row=True)
     else:
+        run_params['result_path_base'] = run_params[
+                                             'result_path_base'] + "/" + current_time  # Make all run seperated in a folder
+
         search_result = gp_minimize(func=fitness,
                                     dimensions=dimensions,
                                     acq_func='EI',  # Expected Improvement.
@@ -353,6 +359,7 @@ def run_hyper_parameter_optimize():
                   write_mode='a', one_row=True)
         # space = search_result.space
         # print("Best result: %s" % space.point_to_dict(search_result.x))
+    print("Saving hyperparameters_result in %s" % run_params['summary_file_path'])
 
 
 if __name__ == '__main__':
