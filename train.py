@@ -334,7 +334,7 @@ def run_hyper_parameter_optimize():
     else:
         run_params['result_path_base'] = run_params[
                                              'result_path_base'] + "/" + current_time  # Make all run seperated in a folder
-
+        print("Save model in %s" % run_params['result_path_base'])
         search_result = gp_minimize(func=fitness,
                                     dimensions=dimensions,
                                     acq_func='EI',  # Expected Improvement.
