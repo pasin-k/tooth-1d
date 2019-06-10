@@ -66,6 +66,7 @@ run_params = {'batch_size': configs.batch_size,
               'result_path_base': configs.result_path,
               'config_path': os.path.abspath(args.config),
               'steps': configs.steps,
+              'is_workstation': configs.is_workstation,
               'comment': configs.comment}
 
 run_params = check_exist(run_params, batch_size=None,
@@ -85,6 +86,7 @@ model_configs = {'learning_rate': configs.learning_rate,
 
 # model_params: learning_rate, dropout_rate, activation, channels, loss_weight,
 #               result_path(same as in run_params), result_file_name
+
 
 def get_available_gpus():
     local_device_protos = device_lib.list_local_devices()
@@ -301,25 +303,26 @@ def run_hyper_parameter_optimize():
     for file in glob.glob(run_params['result_path_base'] + '/' + "hyperparameters_result_" + '*'):
         previous_record_files.append(file)
     previous_record_files.sort()
-    if len(previous_record_files) > 0:
+    if len(previous_record_files) > 0:  # Check if file has previous result
         prev_data, header = read_file(previous_record_files[-1], header=True)
         try:
-            if prev_data[-1][0] != 'end':  # Check if the previous file doesn't end properly
+            if prev_data[-1][0] != 'end':  # If the run doesn't end completely, continue (on workstation mode)
                 n_calls = n_calls - len(prev_data)
                 l_data = prev_data[-1][1:]  # Latest_data
                 default_param = [float(l_data[0]), float(l_data[1]), l_data[2], int(l_data[3]), int(l_data[4])]
                 run_params['summary_file_path'] = previous_record_files[-1]
-                current_time = previous_record_files[-1].replace('.csv', '').replace("hyperparameters_result_", '')
-            else:
+                current_time = previous_record_files[-1].split("/")[-1].replace('.csv', '').replace("hyperparameters_result_", '')
+                print("Continue from %s", current_time)
+            else:  # If previous file ended correctly, create new file
                 save_file(run_params['summary_file_path'], [], field_name=field_name,
                           write_mode='w', create_folder=True)  # Create new summary file
                 default_param = default_parameters
-        except IndexError:
+        except IndexError:  # If error, stop and end the file, usually occur when the first run is interrupted
             save_file(previous_record_files[-1],
                       ['end', 'Error from previous run', datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S")],
                       write_mode='a', one_row=True)
             raise ValueError("Previous file doesn't end completely")
-    else:
+    else:  # If no file in folder, create new file
         save_file(run_params['summary_file_path'], [], field_name=field_name, write_mode='w',
                   create_folder=True)  # Create new summary file
         default_param = default_parameters
@@ -334,7 +337,6 @@ def run_hyper_parameter_optimize():
     else:
         run_params['result_path_base'] = run_params[
                                              'result_path_base'] + "/" + current_time  # Make all run seperated in a folder
-        print("Save model in %s" % run_params['result_path_base'])
         search_result = gp_minimize(func=fitness,
                                     dimensions=dimensions,
                                     acq_func='EI',  # Expected Improvement.
