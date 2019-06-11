@@ -318,6 +318,8 @@ def run_hyper_parameter_optimize():
     previous_record_files.sort()
     if len(previous_record_files) > 0:  # Check if file has previous result
         prev_data, header = read_file(previous_record_files[-1], header=True)
+        if not prev_data:
+            prev_data = [['']]
         try:
             if prev_data[-1][0] != 'end' and run_params['is_workstation']:  # If the run doesn't end completely, continue (on workstation mode)
                 n_calls = n_calls - len(prev_data)
@@ -386,7 +388,7 @@ def run_hyper_parameter_optimize():
 
 
 if __name__ == '__main__':
-    run_single = False
+    run_single = run_params['is_workstation']
 
     if run_single:
         run_params['result_path'] = run_params['result_path_base'] + '/' + datetime.datetime.now().strftime(
