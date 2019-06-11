@@ -33,12 +33,18 @@ class EvalResultHook(tf.train.SessionRunHook):
 
 # Print any variable inside for debugging
 class PrintValueHook(tf.train.SessionRunHook):
-    def __init__(self, value, variable_name):
+    def __init__(self, value, variable_name, global_step, step_loop=0):
         self.value = value
         self.variable_name = tf.convert_to_tensor(variable_name, dtype=tf.string)
+        self.global_step = global_step
+        self.step_loop = tf.convert_to_tensor(step_loop, dtype=tf.int32)
 
     def before_run(self, run_context):
-        return tf.train.SessionRunArgs([self.value, self.variable_name])
+        return tf.train.SessionRunArgs([self.value, self.variable_name, self.global_step, self.step_loop])
 
     def after_run(self, run_context, run_values):
-        print("Variable %s: %s" % (run_values[0], run_values[1]))
+        if run_values.results[3] == 0:
+            print("Variable %s: %s" % (run_values.results[0], run_values.results[1]))
+        else:
+            if run_values.results[3] % run_values.results[2] == 0:
+                print("Variable %s: %s" % (run_values.results[0], run_values.results[1]))

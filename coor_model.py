@@ -16,10 +16,10 @@ def cnn_1d(layer,
            activation=tf.nn.relu,
            stride=1,
            padding='same',
-           name=''):  # Stride of CNN
+           name='', kernel_regularizer=0):  # Stride of CNN
     # We shall define the weights that will be trained using create_weights function.
     layer = tf.keras.layers.Conv1D(num_filters, conv_filter_size, strides=stride, padding=padding,
-                                   activation=activation)(layer)
+                                   activation=activation, kernel_regularizer=tf.keras.regularizers.l2(kernel_regularizer))(layer)
 
     # cnn_sum = tf.summary.histogram(name+'_activation',layer)
     return layer
@@ -39,10 +39,11 @@ def cnn_2d(layer,
            activation=tf.nn.relu,
            stride=1,
            padding='valid',
-           name=''):  # Stride of CNN
+           name='',
+           kernel_regularizer=0):  # Stride of CNN
     # We shall define the weights that will be trained using create_weights function.
     layer = tf.keras.layers.Conv1D(num_filters, kernel_size=conv_filter_size, strides=stride, padding=padding,
-                                   activation=activation)(layer)
+                                   activation=activation, kernel_regularizer=tf.keras.regularizers.l2(kernel_regularizer))(layer)
 
     # cnn_sum = tf.summary.histogram(name+'_activation',layer)
     return layer
@@ -56,9 +57,10 @@ def flatten_layer(layer):  # Flatten from 2D/3D to 1D (not count batch dimension
 def fc_layer(layer,  #
              num_outputs,
              activation=tf.nn.relu,
-             name=''):
+             name='',
+             kernel_regularizer=0):
     # Let's define trainable weights and biases.
-    layer = tf.keras.layers.Dense(num_outputs, activation=activation)(layer)
+    layer = tf.keras.layers.Dense(num_outputs, activation=activation, kernel_regularizer=tf.keras.regularizers.l2(kernel_regularizer))(layer)
     return layer
 
 
@@ -116,7 +118,7 @@ def model_cnn_1d(features, mode, params):
     This model is based on "A Comparison of 1-D and 2-D Deep Convolutional Neural Networks in ECG Classification"
     '''
     # (1) Filter size: 7x32, max pooling of k3 s2
-    print(params)
+    # print(params)
     conv1 = cnn_1d(features, 7, params['channels'][0] * 16, activation=params['activation'], name="conv1")
     pool1 = max_pool_layer_1d(conv1, 3, name="pool1", stride=2)
     # Output: 294x32 -> 147x32
@@ -175,6 +177,7 @@ def my_model(features, labels, mode, params, config):
     loss = tf.losses.sparse_softmax_cross_entropy(labels, logits,
                                                   weights=loss_weight)  # labels is int of class, logits is vector
 
+    regularization_loss = tf.losses.get_regularization_losses()
     accuracy = tf.metrics.accuracy(labels, predicted_class)
 
     my_accuracy = tf.reduce_mean(tf.cast(tf.equal(labels, predicted_class), dtype=tf.float32))
@@ -222,14 +225,13 @@ def my_model(features, labels, mode, params, config):
                                                output_dir=config.model_dir)
 
         # model_vars = tf.trainable_variables()
-        # slim.model_analyzer.analyze_vars(model_vars, print_info=True)
-        if tf.train.get_global_step() % 5000 == 0:
-            variable_hook = PrintValueHook(tf.nn.softmax(logits), "Training logits")
-            return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op,
-                                              training_hooks=[saver_hook, variable_hook])
-        else:
-            return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op,
-                                              training_hooks=[saver_hook])
+        train_hooks = []
+        print_variable_hook = PrintValueHook(tf.nn.softmax(logits), "Training logits", tf.train.get_global_step(), 1000)
+        print_loss_hook = PrintValueHook(regularization_loss, "Regularization loss", tf.train.get_global_step(), 1000)
+        train_hooks.append(print_variable_hook)
+        train_hooks.append(print_loss_hook)
+        return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op,
+                                          training_hooks=[saver_hook, train_hooks])
 
     # Evaluate Mode
 
@@ -241,6 +243,7 @@ def my_model(features, labels, mode, params, config):
             writer.writeheader()
 
     # Create hooks
+    eval_hooks = []
     if params['result_file_name'] == 'train_result.csv':
         saver_hook = tf.train.SummarySaverHook(save_steps=10, summary_op=tf.summary.merge_all(),
                                                output_dir=config.model_dir + 'train_final')
@@ -248,7 +251,8 @@ def my_model(features, labels, mode, params, config):
         saver_hook = tf.train.SummarySaverHook(save_steps=10, summary_op=tf.summary.merge_all(),
                                                output_dir=config.model_dir + 'eval')
     csv_name = tf.convert_to_tensor(params['result_path'] + params['result_file_name'], dtype=tf.string)
-    eval_hook = EvalResultHook(labels, predicted_class, tf.nn.softmax(logits), csv_name)
-    # variable_hook = PrintValueHook(None, None)
+    print_result_hook = EvalResultHook(labels, predicted_class, tf.nn.softmax(logits), csv_name)
+    eval_hooks.append(saver_hook)
+    eval_hooks.append(print_result_hook)
     return tf.estimator.EstimatorSpec(mode=mode, eval_metric_ops={'accuracy': accuracy}, loss=loss,
-                                      evaluation_hooks=[saver_hook, eval_hook])# , variable_hook])
+                                      evaluation_hooks=eval_hooks)

@@ -264,9 +264,9 @@ dimensions = [dim_learning_rate,
               dim_dropout_rate,
               dim_activation,
               dim_channel]
-default_parameters = [1e-4, 0.01, '1', 3]
+default_parameters = [configs.learning_rate, configs.dropout_rate, configs.activation, configs.channels]
 
-
+# TODO: Do more point?, Normalize value? Regularization?
 @use_named_args(dimensions=dimensions)
 def fitness(learning_rate, dropout_rate, activation, channels):
     """
