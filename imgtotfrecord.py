@@ -179,7 +179,7 @@ if __name__ == '__main__':
     # configs['label_data'] = "Taper_Sum"
     configs['label_type'] = "median"
 
-    label_datas = ["Taper_Sum", "BL", "MD", "Occ_Sum"]  # Too lazy to do all of these one at a time
+    label_datas = ["Taper_Sum", "BL", "MD", "Occ_Sum", "Occ_L", "Occ_F", "Occ_B"]  # Too lazy to do all of these one at a time
 
     for label_data_index in label_datas:
         configs['label_data'] = label_data_index

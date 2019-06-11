@@ -228,10 +228,11 @@ def my_model(features, labels, mode, params, config):
         train_hooks = []
         print_variable_hook = PrintValueHook(tf.nn.softmax(logits), "Training logits", tf.train.get_global_step(), 1000)
         print_loss_hook = PrintValueHook(regularization_loss, "Regularization loss", tf.train.get_global_step(), 1000)
+        train_hooks.append(saver_hook)
         train_hooks.append(print_variable_hook)
         train_hooks.append(print_loss_hook)
         return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op,
-                                          training_hooks=[saver_hook, train_hooks])
+                                          training_hooks=train_hooks)
 
     # Evaluate Mode
 
