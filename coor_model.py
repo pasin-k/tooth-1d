@@ -16,7 +16,7 @@ def cnn_1d(layer,
            activation=tf.nn.relu,
            stride=1,
            padding='same',
-           name='', kernel_regularizer=0):  # Stride of CNN
+           name='', kernel_regularizer=0.0):  # Stride of CNN
     # We shall define the weights that will be trained using create_weights function.
     layer = tf.keras.layers.Conv1D(num_filters, conv_filter_size, strides=stride, padding=padding,
                                    activation=activation, kernel_regularizer=tf.keras.regularizers.l2(kernel_regularizer))(layer)
@@ -40,7 +40,7 @@ def cnn_2d(layer,
            stride=1,
            padding='valid',
            name='',
-           kernel_regularizer=0):  # Stride of CNN
+           kernel_regularizer=0.0):  # Stride of CNN
     # We shall define the weights that will be trained using create_weights function.
     layer = tf.keras.layers.Conv1D(num_filters, kernel_size=conv_filter_size, strides=stride, padding=padding,
                                    activation=activation, kernel_regularizer=tf.keras.regularizers.l2(kernel_regularizer))(layer)
@@ -58,7 +58,7 @@ def fc_layer(layer,  #
              num_outputs,
              activation=tf.nn.relu,
              name='',
-             kernel_regularizer=0):
+             kernel_regularizer=0.0):
     # Let's define trainable weights and biases.
     layer = tf.keras.layers.Dense(num_outputs, activation=activation, kernel_regularizer=tf.keras.regularizers.l2(kernel_regularizer))(layer)
     return layer
@@ -119,32 +119,32 @@ def model_cnn_1d(features, mode, params):
     '''
     # (1) Filter size: 7x32, max pooling of k3 s2
     # print(params)
-    conv1 = cnn_1d(features, 7, params['channels'][0] * 16, activation=params['activation'], name="conv1")
+    conv1 = cnn_1d(features, 7, params['channels'][0] * 16, activation=params['activation'], name="conv1", kernel_regularizer=0.01)
     pool1 = max_pool_layer_1d(conv1, 3, name="pool1", stride=2)
     # Output: 294x32 -> 147x32
 
     # (2) Filter size: 5x64, max pooling of k3 s2
-    conv2 = cnn_1d(pool1, 5, params['channels'][0] * 32, activation=params['activation'], name="conv2")
+    conv2 = cnn_1d(pool1, 5, params['channels'][0] * 32, activation=params['activation'], name="conv2", kernel_regularizer=0.01)
     pool2 = max_pool_layer_1d(conv2, 3, "pool2", stride=2)
     # Output: 143x64 -> 71x64
 
     # (3) Filter size: 3x128 (3 times), max pooling of k3 s2
-    conv3 = cnn_1d(pool2, 3, params['channels'][0] * 64, activation=params['activation'], name="conv3_1")
-    conv3 = cnn_1d(conv3, 3, params['channels'][0] * 64, activation=params['activation'], name="conv3_2")
-    conv3 = cnn_1d(conv3, 3, params['channels'][0] * 64, activation=params['activation'], name="conv3_3")
+    conv3 = cnn_1d(pool2, 3, params['channels'][0] * 64, activation=params['activation'], name="conv3_1", kernel_regularizer=0.01)
+    conv3 = cnn_1d(conv3, 3, params['channels'][0] * 64, activation=params['activation'], name="conv3_2", kernel_regularizer=0.01)
+    conv3 = cnn_1d(conv3, 3, params['channels'][0] * 64, activation=params['activation'], name="conv3_3", kernel_regularizer=0.01)
     pool3 = max_pool_layer_1d(conv3, 3, "pool2", stride=2)
     # print("Pool: %s"% pool3)
     # Output: 65x128 -> 32x128 = 4096
 
     fc4 = flatten_layer(pool3)
-    fc4 = fc_layer(fc4, params['channels'][1] * 1024, activation=params['activation'], name='fc5')
+    fc4 = fc_layer(fc4, params['channels'][1] * 1024, activation=params['activation'], name='fc5', kernel_regularizer=0.01)
     dropout4 = tf.keras.layers.Dropout(rate=params['dropout_rate'])(fc4)
     # Output: 4096 -> 4096 -> 3
 
-    fc5 = fc_layer(dropout4, params['channels'][1] * 1024, activation=params['activation'], name='fc6')
+    fc5 = fc_layer(dropout4, params['channels'][1] * 1024, activation=params['activation'], name='fc6', kernel_regularizer=0.01)
     dropout5 = tf.keras.layers.Dropout(rate=params['dropout_rate'])(fc5)
 
-    logits = fc_layer(dropout5, 3, activation=tf.nn.tanh, name='predict')
+    logits = fc_layer(dropout5, 3, activation=tf.nn.tanh, name='predict', kernel_regularizer=0.01)
     return logits
 
 
@@ -226,8 +226,8 @@ def my_model(features, labels, mode, params, config):
 
         # model_vars = tf.trainable_variables()
         train_hooks = []
-        print_variable_hook = PrintValueHook(tf.nn.softmax(logits), "Training logits", tf.train.get_global_step(), 1000)
-        print_loss_hook = PrintValueHook(regularization_loss, "Regularization loss", tf.train.get_global_step(), 1000)
+        print_variable_hook = PrintValueHook(tf.nn.softmax(logits), "Training logits", tf.train.get_global_step(), 5000)
+        print_loss_hook = PrintValueHook(regularization_loss, "Regularization loss", tf.train.get_global_step(), 5000)
         train_hooks.append(saver_hook)
         train_hooks.append(print_variable_hook)
         train_hooks.append(print_loss_hook)

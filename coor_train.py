@@ -234,7 +234,7 @@ def run(model_params=None):
             writer.writerow([key, val])
 
     return accuracy, global_step, predict_result
-
+# TODO: run without weighted loss
 
 # # Run with multiple parameters (Grid-search)
 # def run_multiple_params(model_config):
@@ -393,8 +393,9 @@ if __name__ == '__main__':
     if run_single:
         run_params['result_path'] = run_params['result_path_base'] + '/' + datetime.datetime.now().strftime(
             "%Y%m%d_%H_%M_%S") + '/'
-        model_configs['result_path'] = run_params['result_path_new']
-        model_configs['result_file_name'] = 'result.csv',
+        model_configs['result_file_name'] = 'result.csv'
+        model_configs['result_path'] = run_params['result_path']
+
         run(model_configs)
     else:
         run_hyper_parameter_optimize()

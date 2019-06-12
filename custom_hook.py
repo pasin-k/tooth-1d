@@ -43,8 +43,8 @@ class PrintValueHook(tf.train.SessionRunHook):
         return tf.train.SessionRunArgs([self.value, self.variable_name, self.global_step, self.step_loop])
 
     def after_run(self, run_context, run_values):
-        if run_values.results[3] == 0:
+        if run_values.results[2] == 0:
             print("Variable %s: %s" % (run_values.results[1], run_values.results[0]))
         else:
-            if run_values.results[3] % run_values.results[2] == 0:
+            if run_values.results[2] % run_values.results[3] == 0:
                 print("Variable %s: %s" % (run_values.results[1], run_values.results[0]))
