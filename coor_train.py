@@ -80,8 +80,8 @@ model_configs = {'learning_rate': configs.learning_rate,
                  'dropout_rate': configs.dropout_rate,
                  'activation': activation_dict[configs.activation],
                  'channels': configs.channels * [16, 16, 32, 16, 16, 16, 16, 16, 16, 512, 512],
+                 'model_num': model_num,
                  }
-
 
 # Final Parameters:
 # run_params: batch_size, checkpoint_min, early_stop_step, input_path, result_path_base, config_path, steps, comment
@@ -105,7 +105,7 @@ def run(model_params=None):
     # Check if all values exist
     model_params = check_exist(model_params, learning_rate=None,
                                dropout_rate=None, activation=None,
-                               channels=None, result_path=None)
+                               channels=None, result_path=None, model_num=None)
     # Note on some model_params:    loss_weight is calculated inside
     #                               channels (in CNN case) is [CNN channels, Dense channels]
 
