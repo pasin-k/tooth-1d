@@ -76,10 +76,15 @@ run_params = check_exist(run_params, batch_size=None,
                          input_path=None, result_path_base=None,
                          steps=None, config_path=None)
 
+if model_num == 0:
+    channels_full = [configs.channels]
+else:
+    channels_full = [configs.channels, 2]
+
 model_configs = {'learning_rate': configs.learning_rate,
                  'dropout_rate': configs.dropout_rate,
                  'activation': activation_dict[configs.activation],
-                 'channels': configs.channels * [16, 16, 32, 16, 16, 16, 16, 16, 16, 512, 512],
+                 'channels': channels_full,
                  'model_num': model_num,
                  }
 

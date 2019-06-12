@@ -94,8 +94,10 @@ def dropout(layer, dropout_rate, training, name):
 
 # Using average pooling
 def standard_fc(features, mode, params):
-    if len(params['channels']) != 1:
-        raise ValueError("This model need 1 channels input, current input: %s" % params['channels'])
+    require_channel = 1
+    if len(params['channels']) != require_channel:
+        raise ValueError("This model need %s channels input, current input: %s" % (require_channel, params['channels']))
+
     layer1 = fc_layer(features, num_outputs=params['channels'][0] * 64, activation=params['activation'])
     layer2 = fc_layer(layer1, num_outputs=params['channels'][0] * 128, activation=params['activation'])
     dropout2 = tf.keras.layers.Dropout(rate=params['dropout_rate'])(layer2)
@@ -110,8 +112,9 @@ def standard_fc(features, mode, params):
 # Using max pooling
 def model_cnn_1d(features, mode, params):
     # print(features)
-    if len(params['channels']) != 2:
-        raise ValueError("This model need 1 channels input, current input: %s" % params['channels'])
+    require_channel = 2
+    if len(params['channels']) != require_channel:
+        raise ValueError("This model need %s channels input, current input: %s" % (require_channel, params['channels']))
 
     # Input size:300x8
     '''
