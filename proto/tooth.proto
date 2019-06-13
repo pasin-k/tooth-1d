@@ -32,7 +32,7 @@ message TrainConfig{
 
     optional uint32 channels = 10;
 
-    optional float loss_weight = 11;
+    optional float model_type = 11;
 
     optional string comment = 12;
 

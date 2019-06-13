@@ -69,7 +69,7 @@ run_params = {'batch_size': configs.batch_size,
               'is_workstation': configs.is_workstation,
               'comment': configs.comment}
 
-model_num = configs.loss_weight  # Borrowed parameter name 0 -> dense, 1 -> 1dCNN
+model_num = configs.model_type  # Borrowed parameter name 0 -> dense, 1 -> 1dCNN
 
 run_params = check_exist(run_params, batch_size=None,
                          checkpoint_min=10, early_stop_step=5000,
@@ -87,6 +87,7 @@ model_configs = {'learning_rate': configs.learning_rate,
                  'channels': channels_full,
                  'model_num': model_num,
                  }
+
 
 # Final Parameters:
 # run_params: batch_size, checkpoint_min, early_stop_step, input_path, result_path_base, config_path, steps, comment
@@ -239,6 +240,8 @@ def run(model_params=None):
             writer.writerow([key, val])
 
     return accuracy, global_step, predict_result
+
+
 # TODO: run without weighted loss
 
 # # Run with multiple parameters (Grid-search)
@@ -270,6 +273,7 @@ dimensions = [dim_learning_rate,
               dim_activation,
               dim_channel]
 default_parameters = [configs.learning_rate, configs.dropout_rate, configs.activation, configs.channels]
+
 
 # TODO: Do more point?, Normalize value? Regularization?
 @use_named_args(dimensions=dimensions)
@@ -326,12 +330,14 @@ def run_hyper_parameter_optimize():
         if not prev_data:
             prev_data = [['']]
         try:
-            if prev_data[-1][0] != 'end' and run_params['is_workstation']:  # If the run doesn't end completely, continue (on workstation mode)
+            if prev_data[-1][0] != 'end' and run_params[
+                'is_workstation']:  # If the run doesn't end completely, continue (on workstation mode)
                 n_calls = n_calls - len(prev_data)
                 l_data = prev_data[-1][1:]  # Latest_data
                 default_param = [float(l_data[0]), float(l_data[1]), l_data[2], int(l_data[3])]
                 run_params['summary_file_path'] = previous_record_files[-1]
-                current_time = previous_record_files[-1].split("/")[-1].replace('.csv', '').replace("hyperparameters_result_", '')
+                current_time = previous_record_files[-1].split("/")[-1].replace('.csv', '').replace(
+                    "hyperparameters_result_", '')
                 print("Continue from %s" % current_time)
             else:  # If previous file ended correctly or not workstation, create new file
                 save_file(run_params['summary_file_path'], [], field_name=field_name,
