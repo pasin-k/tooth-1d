@@ -20,7 +20,7 @@ def cnn_1d(layer,
     # We shall define the weights that will be trained using create_weights function.
     layer = tf.keras.layers.Conv1D(num_filters, conv_filter_size, strides=stride, padding=padding,
                                    activation=activation,
-                                   kernel_regularizer=tf.keras.regularizers.l1(kernel_regularizer))(layer)
+                                   kernel_regularizer=tf.keras.regularizers.l2(kernel_regularizer))(layer)
 
     # cnn_sum = tf.summary.histogram(name+'_activation',layer)
     return layer
@@ -45,7 +45,7 @@ def cnn_2d(layer,
     # We shall define the weights that will be trained using create_weights function.
     layer = tf.keras.layers.Conv1D(num_filters, kernel_size=conv_filter_size, strides=stride, padding=padding,
                                    activation=activation,
-                                   kernel_regularizer=tf.keras.regularizers.l1(kernel_regularizer))(layer)
+                                   kernel_regularizer=tf.keras.regularizers.l2(kernel_regularizer))(layer)
 
     # cnn_sum = tf.summary.histogram(name+'_activation',layer)
     return layer
@@ -63,7 +63,7 @@ def fc_layer(layer,  #
              kernel_regularizer=0.0):
     # Let's define trainable weights and biases.
     layer = tf.keras.layers.Dense(num_outputs, activation=activation,
-                                  kernel_regularizer=tf.keras.regularizers.l1(kernel_regularizer))(layer)
+                                  kernel_regularizer=tf.keras.regularizers.l2(kernel_regularizer))(layer)
     return layer
 
 
@@ -248,7 +248,7 @@ def my_model(features, labels, mode, params, config):
                                           training_hooks=train_hooks)
 
     # Evaluate Mode
-
+    print("Evaluation Mode")
     # Create result(.csv) file, if not exist
     if not os.path.isfile(params['result_path']):
         with open(params['result_path'] + params['result_file_name'], "w") as csvfile:
