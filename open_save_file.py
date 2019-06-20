@@ -201,7 +201,7 @@ def save_plot(coor_list, out_directory, file_header_name, image_name, augment_nu
     print("Finished plotting for %d images with %d rotations at %s" % (len(coor_list), len(degree), out_directory))
 
 
-def split_train_test(grouped_address, example_grouped_address, tfrecord_name, configs):
+def split_train_test(grouped_address, example_grouped_address, tfrecord_name, configs, label_count):
     # Split into train and test set
     train_address = []
     eval_address = []
@@ -251,10 +251,52 @@ def split_train_test(grouped_address, example_grouped_address, tfrecord_name, co
         print("imgtotfrecord: amount of training is not correct, might want to check")
     train_address.extend(grouped_address[0:train_amount])
     eval_address.extend(grouped_address[train_amount:])
+
+    # Save names of files of train address
+    file_name = "./data/tfrecord/%s/%s_%s_%s.txt" % (
+        tfrecord_name, tfrecord_name, configs['label_data'], configs['label_type'])
+    with open(file_name, 'w') as filehandle:
+        # Header with 'eval'
+        filehandle.write('distribution\n')
+        for score, freq in label_count.items():
+            filehandle.write('%s_%s\n' % (score, freq))
+
+        # Header with 'train'
+        filehandle.write('train\n')
+        for listitem in train_address:
+            # For each filename, select 0 degree angle and remove _0.png
+            # if listitem[0][0].count('.') != 1:
+            #     raise KeyError("train_address has string '.' more than once in name, please check")
+            # new_list_item = listitem[0][0].split('.')[0]
+            new_list_item = listitem[0][0]
+            filehandle.write('%s\n' % new_list_item)
+
+        # Header with 'eval'
+        filehandle.write('eval\n')
+        for listitem in eval_address:
+            # For each filename, select 0 degree angle and remove _0.png
+            # if listitem[0][0].count('.') != 1:
+            #     raise KeyError("eval_address has string '.' more than once in name, please check")
+            # new_list_item = listitem[0][0].split('.')[0]
+            new_list_item = listitem[0][0]
+            filehandle.write('%s\n' % new_list_item)
+    '''
+    # Save names of files of eval address
+    file_name = './data/' + tfrecord_name + '_eval_address.txt'
+    with open(file_name, 'w') as filehandle:
+        for listitem in eval_address:
+            new_list_item = listitem[0][0].replace('_0.png', '')
+            filehandle.write('%s\n' % new_list_item)
+    '''
     return train_address, eval_address
 
 
 def split_kfold(grouped_address, k_num):
+    """
+    :param grouped_address:     List, all data ready to be shuffled
+    :param k_num:               Int, number of k-fold
+    :return:                    List of Train, Eval data
+    """
     kfold = KFold(k_num, shuffle=True)
     train_address = []
     eval_address = []
@@ -282,18 +324,12 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
     :param double_data:     Boolean, if true will do flip data augmentation
     :param k_cross:         Boolean, if true will use K-fold cross validation, else
     :param k_num:           Integer, parameter for KFold
-    :return:
+    :return:                Train, Eval: Tuple of list[image address, label]. Also save some txt file
     """
     numdeg = configs['numdeg']
 
     # Get image address, or image data
     image_address, _ = get_file_name(folder_name=dataset_folder, file_name=None)
-    # Convert name to data (only if request output to be value, not file name)
-    if get_data:
-        image_address_temp = []
-        for addr in image_address:
-            image_address_temp.append(np.load(addr))
-        image_address = image_address_temp
 
     # Get label and label name[Not used right now]
     if csv_dir is None:
@@ -329,13 +365,23 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
             '# of images and labels is not compatible: %d images, %d labels. Expected # of images to be 4 times of label' % (
                 len(image_address), len(labels)))
 
+    # Create list of file names used in split_train_test (To remember which one is train/eval)
+    if not k_cross:
+        example_grouped_address = []
+        for i in range(len(labels)):
+            example_grouped_address.append(image_address[i * numdeg].split('.')[0])  # Only 0 degree
+
+    # Convert name to data (only if request output to be value, not file name)
+    if get_data:
+        image_address_temp = []
+        for addr in image_address:
+            image_address_temp.append(np.load(addr))
+        image_address = image_address_temp
+
     # Group up 4 images and label together first, shuffle
     grouped_address = []
-    example_grouped_address = []  # A 0 degree filename used when adding more example
     for i in range(len(labels)):
         grouped_address.append([image_address[i * numdeg:(i + 1) * numdeg], labels[i]])  # All degrees
-        example_grouped_address.append(image_address[i * numdeg].split('.')[0])  # Only 0 degree
-
     # Zip, shuffle, unzip
     z = list(zip(grouped_address, example_grouped_address))
     shuffle(z)
@@ -344,7 +390,8 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
     if k_cross:
         pass
     else:
-        train_address, eval_address = split_train_test(grouped_address, example_grouped_address, tfrecord_name, configs)
+        train_address, eval_address = split_train_test(grouped_address, example_grouped_address,
+                                                       tfrecord_name, configs, label_count)
 
     grouped_train_address = tuple(
         [list(e) for e in zip(*train_address)])  # Convert to tuple of list[image address, label]
@@ -355,40 +402,6 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
     # print(grouped_eval_address)
     print("Train files: %d, Evaluate Files: %d" % (len(grouped_train_address[0]), len(grouped_eval_address[0])))
 
-    # Save names of files of train address
-    file_name = "./data/tfrecord/%s/%s_%s_%s.txt" % (
-        tfrecord_name, tfrecord_name, configs['label_data'], configs['label_type'])
-    with open(file_name, 'w') as filehandle:
-        # Header with 'eval'
-        filehandle.write('distribution\n')
-        for score, freq in label_count.items():
-            filehandle.write('%s_%s\n' % (score, freq))
-
-        # Header with 'train'
-        filehandle.write('train\n')
-        for listitem in train_address:
-            # For each filename, select 0 degree angle and remove _0.png
-            if listitem[0][0].count('.') != 1:
-                raise KeyError("train_address has string '.' more than once in name, please check")
-            new_list_item = listitem[0][0].split('.')[0]
-            filehandle.write('%s\n' % new_list_item)
-
-        # Header with 'eval'
-        filehandle.write('eval\n')
-        for listitem in eval_address:
-            # For each filename, select 0 degree angle and remove _0.png
-            if listitem[0][0].count('.') != 1:
-                raise KeyError("eval_address has string '.' more than once in name, please check")
-            new_list_item = listitem[0][0].split('.')[0]
-            filehandle.write('%s\n' % new_list_item)
-    '''
-    # Save names of files of eval address
-    file_name = './data/' + tfrecord_name + '_eval_address.txt'
-    with open(file_name, 'w') as filehandle:
-        for listitem in eval_address:
-            new_list_item = listitem[0][0].replace('_0.png', '')
-            filehandle.write('%s\n' % new_list_item)
-    '''
     return grouped_train_address, grouped_eval_address
 
 
