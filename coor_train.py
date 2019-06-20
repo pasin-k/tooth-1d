@@ -242,8 +242,6 @@ def run(model_params=None):
     return accuracy, global_step, predict_result
 
 
-# TODO: run without weighted loss
-
 # # Run with multiple parameters (Grid-search)
 # def run_multiple_params(model_config):
 #     for lr in model_config['learning_rate_list']:
@@ -330,8 +328,8 @@ def run_hyper_parameter_optimize():
         if not prev_data:
             prev_data = [['']]
         try:
-            if prev_data[-1][0] != 'end' and run_params[
-                'is_workstation']:  # If the run doesn't end completely, continue (on workstation mode)
+            # If the run doesn't end completely, continue (on workstation mode)
+            if prev_data[-1][0] != 'end' and run_params['is_workstation']:
                 n_calls = n_calls - len(prev_data)
                 l_data = prev_data[-1][1:]  # Latest_data
                 default_param = [float(l_data[0]), float(l_data[1]), l_data[2], int(l_data[3])]
@@ -363,8 +361,8 @@ def run_hyper_parameter_optimize():
                   ['end', 'Completed (faster than expected)', datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S")],
                   write_mode='a', one_row=True)
     else:
-        run_params['result_path_base'] = run_params[
-                                             'result_path_base'] + "/" + current_time  # Make all run seperated in a folder
+        # Make all run seperated in a folder
+        run_params['result_path_base'] = run_params['result_path_base'] + "/" + current_time
         search_result = gp_minimize(func=fitness,
                                     dimensions=dimensions,
                                     acq_func='EI',  # Expected Improvement.

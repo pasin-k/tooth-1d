@@ -161,6 +161,42 @@ def model_cnn_1d(features, mode, params):
     return logits
 
 
+def softmax_focal_loss(labels_l, logits_l, gamma=2., alpha=4.):
+    """Focal loss for multi-classification
+    https://www.dlology.com/blog/multi-class-classification-with-focal-loss-for-imbalanced-datasets/
+    FL(p_t)=-alpha(1-p_t)^{gamma}ln(p_t)
+    gradient is d(Fl)/d(p_t) not d(Fl)/d(x) as described in paper
+    d(Fl)/d(p_t) * [p_t(1-p_t)] = d(Fl)/d(x)
+    Focal Loss for Dense Object Detection
+    https://arxiv.org/abs/1708.02002
+
+    Arguments:
+        labels_l {tensor} -- ground truth labels_l, shape of [batch_size, num_class] <- Integer of class
+        logits_l {tensor} -- model's output, shape of [batch_size, num_class] <- Before softmax
+
+    Keyword Arguments:
+        gamma {float} -- (default: {2.0})
+        alpha {float} -- (default: {4.0})
+
+    Returns:
+        [tensor] -- loss.
+    """
+
+    gamma = float(gamma)
+
+    epsilon = 1e-32
+    labels_l = tf.one_hot(indices=tf.cast(labels_l, tf.int32), depth=3)
+    logits_l = tf.cast(logits_l, tf.float32)
+
+    logits_l = tf.nn.softmax(logits_l)
+    logits_l = tf.add(logits_l, epsilon)  # Add epsilon so log is valid
+    ce = tf.multiply(labels_l, -tf.log(logits_l))  # Cross entropy, shape of [batch_size, num_class]
+    fl_weight = tf.multiply(labels_l, tf.pow(tf.subtract(1., logits_l), gamma))  # This is focal loss part
+    fl = tf.multiply(alpha, tf.multiply(fl_weight, ce))  # Add alpha weight here
+    reduced_fl = tf.reduce_max(fl, axis=1)
+    return tf.reduce_mean(reduced_fl)
+
+
 # Define Model
 def my_model(features, labels, mode, params, config):
     # Input: (Batch_size,240,360,4)
@@ -177,20 +213,19 @@ def my_model(features, labels, mode, params, config):
             'logits': logits
         }
         return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
-    # labels = tf.cast(labels, tf.int64)
     labels = (labels - 1) / 2
     one_hot_label = tf.one_hot(indices=tf.cast(labels, tf.int32), depth=3)
-    # labels = tf.cast((labels - 1) / 2, tf.int64)
     labels = tf.cast(labels, tf.int64)
 
     weight = tf.constant([[params['loss_weight'][0], params['loss_weight'][1], params['loss_weight'][2]]],
                          dtype=tf.float32)
     loss_weight = tf.matmul(one_hot_label, weight, transpose_b=True, a_is_sparse=True)
 
-    loss = tf.losses.sparse_softmax_cross_entropy(labels, logits,
-                                                  weights=loss_weight)  # labels is int of class, logits is vector
+    loss = softmax_focal_loss(labels, logits, gamma=0., alpha=loss_weight)  # labels is int of class, logits is vector
 
-    regularization_loss = tf.losses.get_regularization_losses()
+    # loss = tf.losses.sparse_softmax_cross_entropy(labels, logits,
+    #                                               weights=loss_weight)  # labels is int of class, logits is vector
+
     accuracy = tf.metrics.accuracy(labels, predicted_class)
 
     my_accuracy = tf.reduce_mean(tf.cast(tf.equal(labels, predicted_class), dtype=tf.float32))
@@ -240,10 +275,8 @@ def my_model(features, labels, mode, params, config):
         # model_vars = tf.trainable_variables()
         train_hooks = []
         print_variable_hook = PrintValueHook(tf.nn.softmax(logits), "Training logits", tf.train.get_global_step(), 5000)
-        print_loss_hook = PrintValueHook(regularization_loss, "Regularization loss", tf.train.get_global_step(), 5000)
         train_hooks.append(saver_hook)
         train_hooks.append(print_variable_hook)
-        train_hooks.append(print_loss_hook)
         return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op,
                                           training_hooks=train_hooks)
 
