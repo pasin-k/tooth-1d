@@ -126,26 +126,34 @@ def read_coordinate(file_name, label):
     return file_values
 
 
-# tfrecord_name : Name of .tfrecord file to be created
-# dataset_folder : Folder of the data (Not include label)
-# csv_dir : Folder of label data (If not specified, will use the default directory)
 def coordinate_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None):
+    """
+    tfrecord_name   : Name of .tfrecord output file
+    dataset_folder  : Folder of the input data  (Not include label)
+    csv_dir         : Folder of label data (If not specified, will use the default directory)
+    """
     # Create new directory if not created, get all info and zip to tfrecord
     tfrecord_dir = os.path.join("./data/tfrecord", tfrecord_name)
     if not os.path.exists(tfrecord_dir):
         os.makedirs(tfrecord_dir)
 
     # Get data from dataset_folder
-    grouped_train_address, grouped_eval_address = get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_data=True)
+    grouped_train_address, grouped_eval_address = get_input_and_label(tfrecord_name, dataset_folder,
+                                                                      csv_dir, configs, get_data=True)
 
     tfrecord_train_name = os.path.join(tfrecord_dir, "%s_%s_%s_train.tfrecords" % (
         tfrecord_name, configs['label_data'], configs['label_type']))
     tfrecord_eval_name = os.path.join(tfrecord_dir, "%s_%s_%s_eval.tfrecords" % (
         tfrecord_name, configs['label_data'], configs['label_type']))
 
+    coordinate_length = len(grouped_train_address[0][0][0])
+    degree = len(grouped_train_address[0][0])
+
     with tf.python_io.TFRecordWriter(tfrecord_train_name) as writer:
         for train_data in grouped_train_address:
-            feature = {'label': _int64_feature(train_data[1])}
+            feature = {'label': _int64_feature(train_data[1]),
+                       'degree': _int64_feature(degree),
+                       'length':  _int64_feature(coordinate_length)}
             for i in range(numdeg):
                 for j in range(2):
                     val = train_data[0][i][:,j].reshape(-1)
@@ -156,7 +164,9 @@ def coordinate_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None):
 
     with tf.python_io.TFRecordWriter(tfrecord_eval_name) as writer:
         for train_data in grouped_eval_address:
-            feature = {'label': _int64_feature(train_data[1])}
+            feature = {'label': _int64_feature(train_data[1]),
+                       'degree': _int64_feature(degree),
+                       'length':  _int64_feature(coordinate_length)}
             for i in range(numdeg):
                 for j in range(2):
                     val = train_data[0][i][:, j].reshape(-1)

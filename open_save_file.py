@@ -7,6 +7,7 @@ import csv
 import numpy as np
 import matplotlib as mpl
 import collections
+from sklearn.model_selection import KFold
 
 mpl.use('TkAgg')
 import matplotlib.pyplot as plt
@@ -200,58 +201,12 @@ def save_plot(coor_list, out_directory, file_header_name, image_name, augment_nu
     print("Finished plotting for %d images with %d rotations at %s" % (len(coor_list), len(degree), out_directory))
 
 
-# get_data is true will return info instead of file name
-# This function is used in imgtotfrecord
-def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_data=False):
-    numdeg = configs['numdeg']
-    image_address, _ = get_file_name(folder_name=dataset_folder, file_name=None)
-    if csv_dir is None:
-        labels, label_name = get_label(configs['label_data'], configs['label_type'], double_data=True,
-                                       one_hotted=False, normalized=False)
-    else:
-        labels, label_name = get_label(configs['label_data'], configs['label_type'], double_data=True,
-                                       one_hotted=False, normalized=False, file_dir=csv_dir)
-
-    label_count = collections.Counter(labels)
-    # Check list of name that has error, remove it from label
-    error_file_names = []
-    with open(dataset_folder + '/error_file.txt', 'r') as filehandle:
-        for line in filehandle:
-            # remove linebreak which is the last character of the string
-            current_name = line[:-1]
-            # add item to the list
-            error_file_names.append(current_name)
-    for name in error_file_names:
-        try:
-            index = label_name.index(name)
-            label_name.pop(index)
-            labels.pop(index * 2)
-            labels.pop(index * 2)  # Do it again if we double the data
-        except ValueError:
-            pass
-
-    if len(image_address) / len(labels) != numdeg:
-        print(image_address)
-        raise Exception(
-            '# of images and labels is not compatible: %d images, %d labels. Expected # of images to be 4 times of label' % (
-                len(image_address), len(labels)))
-
-    # Group up 4 images and label together first, shuffle
-    grouped_address = []
-    example_grouped_address = []  # A 0 degree filename used when adding more example
-    for i in range(len(labels)):
-        grouped_address.append([image_address[i * numdeg:(i + 1) * numdeg], labels[i]])  # All degrees
-        example_grouped_address.append(image_address[i * numdeg].split('.')[0])  # Only 0 degree
-
-    # Zip, shuffle, unzip
-    z = list(zip(grouped_address, example_grouped_address))
-    shuffle(z)
-    grouped_address[:], example_grouped_address[:] = zip(*z)
-    train_amount = int(configs['train_eval_ratio'] * len(grouped_address))  # Calculate amount of training data
-
+def split_train_test(grouped_address, example_grouped_address, tfrecord_name, configs):
+    # Split into train and test set
     train_address = []
     eval_address = []
-    eval_score_list = []  # Use for prediction since cannot read file directly from tfrecord
+
+    train_amount = int(configs['train_eval_ratio'] * len(grouped_address))  # Calculate amount of training data
 
     # Open file and read the content in a list
     file_name = "./data/tfrecord/%s/%s_%s_%s.txt" % (
@@ -282,7 +237,6 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
                 for i, name in enumerate(example_grouped_address):
                     if line in name:
                         eval_address.append(grouped_address[i])
-                        eval_score_list.append(grouped_address[i][1])
                         grouped_address.remove(grouped_address[i])
                         example_grouped_address.remove(example_grouped_address[i])
                         break
@@ -290,7 +244,6 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
         print("Use %s train examples, %s eval examples from previous tfrecords as training" % (
             len(train_address), len(eval_address)))
 
-    # print("Example grouped address: %s" % example_grouped_address)
     # Split training and test (Split 80:20)
     train_amount = train_amount - len(train_address)
     if train_amount < 0:
@@ -298,23 +251,100 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
         print("imgtotfrecord: amount of training is not correct, might want to check")
     train_address.extend(grouped_address[0:train_amount])
     eval_address.extend(grouped_address[train_amount:])
+    return train_address, eval_address
 
+
+def split_kfold(grouped_address, k_num):
+    kfold = KFold(k_num, shuffle=True)
+    train_address = []
+    eval_address = []
+    for train_indices, test_indices in kfold.split(grouped_address):
+        train_address_fold = []
+        test_address_fold = []
+        for train_indice in train_indices:
+            train_address_fold.append(grouped_address[train_indice])
+        for test_indice in test_indices:
+            test_address_fold.append(grouped_address[test_indice])
+        train_address.append(train_address_fold)
+        eval_address.append(test_address_fold)
+    return train_address, eval_address
+
+
+def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_data=False,
+                        double_data=True, k_cross=False, k_num=5):
+    """
+    This function is used in imgtotfrecord
+    :param tfrecord_name:   String, Name of tfrecord output file
+    :param dataset_folder:  String, Folder directory of input data [Assume only data is in this folder]
+    :param csv_dir:         String, directory of label file (.csv). Can be None and use default directory
+    :param configs:         Dictionary, containing numdeg, train_eval_ratio, labels_data, labels_type
+    :param get_data:        Boolean, if true will return raw data instead of file name
+    :param double_data:     Boolean, if true will do flip data augmentation
+    :param k_cross:         Boolean, if true will use K-fold cross validation, else
+    :param k_num:           Integer, parameter for KFold
+    :return:
+    """
+    numdeg = configs['numdeg']
+
+    # Get image address, or image data
+    image_address, _ = get_file_name(folder_name=dataset_folder, file_name=None)
     # Convert name to data (only if request output to be value, not file name)
-    train_data = []
-    eval_data = []
     if get_data:
-        for addr in train_address:
-            label = addr[1]
-            img = []
-            for i in range(numdeg):
-                img.append(np.load(addr[0][i]))
-            train_data.append([img, label])
-        for addr in eval_address:
-            label = addr[1]
-            img = []
-            for i in range(numdeg):
-                img.append(np.load(addr[0][i]))
-            eval_data.append([img, label])
+        image_address_temp = []
+        for addr in image_address:
+            image_address_temp.append(np.load(addr))
+        image_address = image_address_temp
+
+    # Get label and label name[Not used right now]
+    if csv_dir is None:
+        labels, label_name = get_label(configs['label_data'], configs['label_type'], double_data=double_data,
+                                       one_hotted=False, normalized=False)
+    else:
+        labels, label_name = get_label(configs['label_data'], configs['label_type'], double_data=double_data,
+                                       one_hotted=False, normalized=False, file_dir=csv_dir)
+
+    label_count = collections.Counter(labels)  # Use for frequency count
+
+    # Check list of name that has error (from preprocessing.py), remove it from label
+    error_file_names = []
+    with open(dataset_folder + '/error_file.txt', 'r') as filehandle:
+        for line in filehandle:
+            # remove linebreak which is the last character of the string
+            current_name = line[:-1]
+            # add item to the list
+            error_file_names.append(current_name)
+    for name in error_file_names:
+        try:
+            index = label_name.index(name)
+            label_name.pop(index)
+            labels.pop(index * 2)
+            if double_data:
+                labels.pop(index * 2)  # Do it again if we double the data
+        except ValueError:
+            pass
+
+    if len(image_address) / len(labels) != numdeg:
+        print(image_address)
+        raise Exception(
+            '# of images and labels is not compatible: %d images, %d labels. Expected # of images to be 4 times of label' % (
+                len(image_address), len(labels)))
+
+    # Group up 4 images and label together first, shuffle
+    grouped_address = []
+    example_grouped_address = []  # A 0 degree filename used when adding more example
+    for i in range(len(labels)):
+        grouped_address.append([image_address[i * numdeg:(i + 1) * numdeg], labels[i]])  # All degrees
+        example_grouped_address.append(image_address[i * numdeg].split('.')[0])  # Only 0 degree
+
+    # Zip, shuffle, unzip
+    z = list(zip(grouped_address, example_grouped_address))
+    shuffle(z)
+    grouped_address[:], example_grouped_address[:] = zip(*z)
+
+    if k_cross:
+        pass
+    else:
+        train_address, eval_address = split_train_test(grouped_address, example_grouped_address, tfrecord_name, configs)
 
     grouped_train_address = tuple(
         [list(e) for e in zip(*train_address)])  # Convert to tuple of list[image address, label]
@@ -359,9 +389,7 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
             new_list_item = listitem[0][0].replace('_0.png', '')
             filehandle.write('%s\n' % new_list_item)
     '''
-    if get_data:
-        return train_data, eval_data
-    return grouped_train_address, grouped_eval_address  # , eval_score_list
+    return grouped_train_address, grouped_eval_address
 
 
 def read_file(csv_dir, header=False):
