@@ -140,6 +140,8 @@ def save_coordinate(coor_list, out_directory, file_header_name, image_name, augm
         raise ValueError("save_plot: number of image(%s) is not equal to number of image_name(%s)"
                          % (len(coor_list), len(image_name)))
     out_directory = os.path.abspath(out_directory)
+    if not os.path.exists(out_directory):
+        os.makedirs(out_directory)
     if len(degree) != len(coor_list[0]):
         print("# of Degree expected: %d" % len(degree))
         print("# of Degree found: %d" % len(coor_list[0]))
@@ -150,7 +152,7 @@ def save_coordinate(coor_list, out_directory, file_header_name, image_name, augm
             coor = coor_list[corr_index][deg_index]
             print(np.shape(coor))
             # Name with some additional data
-            fullname = "%s_%s_%s_%d.csv" % (file_header_name, image_name[corr_index], augment_number, degree[deg_index])
+            fullname = "%s_%s_%s_%d.npy" % (file_header_name, image_name[corr_index], augment_number, degree[deg_index])
             output_name = os.path.join(out_directory, fullname)
             np.savetxt(output_name, coor, delimiter = ',')
             # np.save(output_name, coor)
@@ -178,14 +180,14 @@ def save_stl_point(stl_points, stl_points_augmented, label_name, error_file_name
 
 if __name__ == '__main__':
     # Output 'points' as list[list[numpy]] (example_data, degrees, points)
-    save_img = False
+    save_img = True
     save_coor = True
     is_fix_amount = True
-    fix_amount = 300  # After get the movement, it will be reduced to 300
+    fix_amount = 450  # After get the movement, it will be reduced to 300
 
     # data_type, stat_type will not be used unless you want to look at lbl value
     points, points_aug, lbl, lbl_name, err_name, deg = get_cross_section(data_type="BL", stat_type="median")
-    if fix_amount:
+    if is_fix_amount:
         print("Adjusting number of coordinates...")
         for p_index in range(len(points)):
             for d_index in range(len(degree)):
@@ -193,9 +195,9 @@ if __name__ == '__main__':
                 points_aug[p_index][d_index] = fix_amount_of_point(points_aug[p_index][d_index], fix_amount)
     if save_img:
         print("Start saving images...")
-        save_image(points, points_aug, lbl_name, err_name, image_dir = "./data/cross_section")
+        save_image(points, points_aug, lbl_name, err_name, image_dir = "./data/cross_section_450")
 
     if save_coor:
         print("Start saving coordinates...")
-        save_stl_point(points, points_aug, lbl_name, err_name, file_dir = "./data/coordinate_debug_2")
+        save_stl_point(points, points_aug, lbl_name, err_name, file_dir = "./data/coordinate_450")
     print("pre_processing.py: done")
