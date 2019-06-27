@@ -5,27 +5,30 @@ import numpy as np
 # Read TFRecord file, return as tf.dataset, specifically used for
 
 numdegree = 4
-
-
 # Import tfrecord to dataset
 def deserialize(example):
-    feature = {'label': tf.FixedLenFeature([], tf.int64)}
-    for i in range(numdegree):
+    feature = {'label': tf.FixedLenFeature([], tf.int64),
+               'degree': tf.FixedLenFeature([], tf.int64),
+               'length': tf.FixedLenFeature([], tf.int64)}
+
+    for i in range(4):
         for j in range(2):
             feature['img_%s_%s' % (i, j)] = tf.VarLenFeature(tf.float32)
+
     return tf.parse_single_example(example, feature)
 
 
 def decode_one_axis(data_dict):
     # Create initial image, then stacking it
     image_decoded = []
-
+    degree = tf.cast(data_dict['degree'], tf.int32)
+    length = tf.cast(data_dict['length'], tf.int32)
     # Stacking the rest
-    for i in range(0, numdegree):
+    for i in range(numdegree):
         for j in range(2):
             img = data_dict['img_%s_%s' % (i, j)]
             img = tf.sparse.to_dense(img)
-            # img = tf.reshape(img, [-1])
+            img = tf.reshape(img, [data_dict['length']])
             # file_cropped = tf.squeeze(tf.image.resize_image_with_crop_or_pad(file_decoded, image_height, image_width))
             image_decoded.append(img)
 
@@ -33,7 +36,7 @@ def decode_one_axis(data_dict):
         raise ValueError("Edit this function as well, this compatible with numdeg=4")
     image_stacked = tf.concat([image_decoded[0], image_decoded[1], image_decoded[2], image_decoded[3],
                                image_decoded[4], image_decoded[5], image_decoded[6], image_decoded[7]], axis=0)
-    image_stacked.set_shape([2400])
+    # image_stacked.set_shape([tf.multiply(tf.convert_to_tensor(numdegree),length)])
     image_stacked = tf.cast(image_stacked, tf.float32)
     label = tf.cast(data_dict['label'], tf.float32)
     # output = (image_stacked, label)
@@ -44,13 +47,15 @@ def decode_one_axis(data_dict):
 def decode_multiple_axis(data_dict):
     # Create initial image, then stacking it
     image_decoded = []
-
+    degree = tf.cast(data_dict['degree'], tf.int32)
+    length = tf.cast(data_dict['length'], tf.int32)
     # Stacking the rest
-    for i in range(0, numdegree):
+    for i in range(numdegree):
         for j in range(2):
             img = data_dict['img_%s_%s' % (i, j)]
             img = tf.sparse.to_dense(img)
-            img = tf.reshape(img, [300])
+            img = tf.reshape(img, [data_dict['length']])
+            # img = tf.reshape(img, [300])
             # file_cropped = tf.squeeze(tf.image.resize_image_with_crop_or_pad(file_decoded, image_height, image_width))
             image_decoded.append(img)
 
@@ -60,6 +65,8 @@ def decode_multiple_axis(data_dict):
                               image_decoded[4], image_decoded[5], image_decoded[6], image_decoded[7]], axis=1)
     image_stacked = tf.cast(image_stacked, tf.float32)
     label = tf.cast(data_dict['label'], tf.float32)
+    degree = tf.cast(data_dict['degree'], tf.int32)
+    length = tf.cast(data_dict['length'], tf.int32)
     # output = (image_stacked, label)
     # return {'images': image_stacked, 'label': label}  # Output is [Channel, Height, Width]
     return image_stacked, label
@@ -95,7 +102,7 @@ def eval_input_fn(data_path, batch_size, data_type):
     return eval_dataset
 
 
-def get_data_from_path(data_path, data_type):
+def get_data_from_path(data_path, data_type = 0):
     if not os.path.exists(data_path):
         raise ValueError("Input file does not exist")
     dataset = tf.data.TFRecordDataset(data_path)
