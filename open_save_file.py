@@ -203,8 +203,9 @@ def save_plot(coor_list, out_directory, file_header_name, image_name, augment_nu
 
 def split_train_test(grouped_address, example_grouped_address, tfrecord_name, configs, label_count):
     # Split into train and test set
-    train_address = []
-    eval_address = []
+    data_index = list(range(len(example_grouped_address)))
+    train_index = []
+    eval_index = []
 
     train_amount = int(configs['train_eval_ratio'] * len(grouped_address))  # Calculate amount of training data
 
@@ -219,38 +220,45 @@ def split_train_test(grouped_address, example_grouped_address, tfrecord_name, co
             print(filehandle[0])
             raise KeyError("File does not have correct format, need 'train' and 'eval' keyword within file")
         for line in filehandle[1:]:
-            if is_training == 0:
+            if is_training == 0:  # Distribution state
                 if line == 'train':
                     is_training = 1
-            elif is_training == 1:
+            elif is_training == 1: # Training state
                 if line == 'eval':
                     is_training = 2
                 else:
-                    # check if it exist in grouped exist, if found, put in train_address
-                    for i, name in enumerate(example_grouped_address):
-                        if line in name:
-                            train_address.append(grouped_address[i])
-                            grouped_address.remove(grouped_address[i])
-                            example_grouped_address.remove(example_grouped_address[i])
-                            break
-            else:
-                for i, name in enumerate(example_grouped_address):
-                    if line in name:
-                        eval_address.append(grouped_address[i])
-                        grouped_address.remove(grouped_address[i])
-                        example_grouped_address.remove(example_grouped_address[i])
-                        break
-
+                    try:
+                        index = example_grouped_address.index(line)
+                        train_index.append(index)
+                        data_index.pop(index)
+                    except ValueError:
+                        pass
+            else: # Eval state
+                try:
+                    index = example_grouped_address.index(line)
+                    eval_index.append(index)
+                    data_index.pop(index)
+                except ValueError:
+                    pass
         print("Use %s train examples, %s eval examples from previous tfrecords as training" % (
-            len(train_address), len(eval_address)))
+            len(train_index), len(eval_index)))
 
     # Split training and test (Split 80:20)
-    train_amount = train_amount - len(train_address)
+    train_amount = train_amount - len(train_index)
     if train_amount < 0:
         train_amount = 0
         print("imgtotfrecord: amount of training is not correct, might want to check")
-    train_address.extend(grouped_address[0:train_amount])
-    eval_address.extend(grouped_address[train_amount:])
+
+    train_index.extend(data_index[0:train_amount])
+    eval_index.extend(data_index[train_amount:])
+
+    train_data = [grouped_address[i] for i in train_index]
+    eval_data = [grouped_address[i] for i in eval_index]
+    train_address = [example_grouped_address[i] for i in train_index]
+    eval_address = [example_grouped_address[i] for i in eval_index]
+
+    print(len(train_address))
+    print((train_address[0]))
 
     # Save names of files of train address
     file_name = "./data/tfrecord/%s/%s_%s_%s.txt" % (
@@ -268,8 +276,7 @@ def split_train_test(grouped_address, example_grouped_address, tfrecord_name, co
             # if listitem[0][0].count('.') != 1:
             #     raise KeyError("train_address has string '.' more than once in name, please check")
             # new_list_item = listitem[0][0].split('.')[0]
-            new_list_item = listitem[0][0]
-            filehandle.write('%s\n' % new_list_item)
+            filehandle.write('%s\n' % listitem)
 
         # Header with 'eval'
         filehandle.write('eval\n')
@@ -278,8 +285,7 @@ def split_train_test(grouped_address, example_grouped_address, tfrecord_name, co
             # if listitem[0][0].count('.') != 1:
             #     raise KeyError("eval_address has string '.' more than once in name, please check")
             # new_list_item = listitem[0][0].split('.')[0]
-            new_list_item = listitem[0][0]
-            filehandle.write('%s\n' % new_list_item)
+            filehandle.write('%s\n' % listitem)
     '''
     # Save names of files of eval address
     file_name = './data/' + tfrecord_name + '_eval_address.txt'
@@ -288,7 +294,7 @@ def split_train_test(grouped_address, example_grouped_address, tfrecord_name, co
             new_list_item = listitem[0][0].replace('_0.png', '')
             filehandle.write('%s\n' % new_list_item)
     '''
-    return train_address, eval_address
+    return train_data, eval_data
 
 
 def split_kfold(grouped_address, k_num):
@@ -297,7 +303,7 @@ def split_kfold(grouped_address, k_num):
     :param k_num:               Int, number of k-fold
     :return:                    List of Train, Eval data
     """
-    kfold = KFold(k_num, shuffle=True)
+    kfold = KFold(k_num, shuffle=True,random_state=0)
     train_address = []
     eval_address = []
     for train_indices, test_indices in kfold.split(grouped_address):
@@ -375,34 +381,53 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
     if get_data:
         image_address_temp = []
         for addr in image_address:
-            image_address_temp.append(np.load(addr))
+            image_address_temp.append(np.loadtxt(addr, delimiter=','))
         image_address = image_address_temp
 
     # Group up 4 images and label together first, shuffle
     grouped_address = []
     for i in range(len(labels)):
         grouped_address.append([image_address[i * numdeg:(i + 1) * numdeg], labels[i]])  # All degrees
-    # Zip, shuffle, unzip
-    z = list(zip(grouped_address, example_grouped_address))
-    shuffle(z)
-    grouped_address[:], example_grouped_address[:] = zip(*z)
+    if not k_cross:
+        # Zip, shuffle, unzip
+        z = list(zip(grouped_address, example_grouped_address))
+        shuffle(z)
+        grouped_address[:], example_grouped_address[:] = zip(*z)
+    else:
+        shuffle(grouped_address)
 
-    if k_cross:
-        pass
+    if k_cross:  # If k_cross mode, output will be list
+        train_address_temp, eval_address_temp = split_kfold(grouped_address, k_num)
+        train_address = []
+        eval_address = []
+        for i in range(k_num):
+            single_train_address = train_address_temp[i]
+            single_eval_address = eval_address_temp[i]
+            if not get_data:  # Put in special format for writing tfrecord (pipeline)
+                single_train_address = tuple(
+                    [list(e) for e in zip(*single_train_address)])  # Convert to tuple of list[image address, label]
+
+                single_eval_address = tuple(
+                    [list(e) for e in zip(*single_eval_address)])  # Convert to tuple of list[image address, label]
+                print("Train files: %d, Evaluate Files: %d" % (len(single_train_address[0]), len(single_eval_address[0])))
+            else:
+                print("Train files: %d, Evaluate Files: %d" % (len(single_train_address), len(single_eval_address)))
+            train_address.append(single_train_address)
+            eval_address.append((single_eval_address))
     else:
         train_address, eval_address = split_train_test(grouped_address, example_grouped_address,
                                                        tfrecord_name, configs, label_count)
+        if not get_data:  # Put in special format for writing tfrecord (pipeline)
+            train_address = tuple(
+                [list(e) for e in zip(*train_address)])  # Convert to tuple of list[image address, label]
 
-    grouped_train_address = tuple(
-        [list(e) for e in zip(*train_address)])  # Convert to tuple of list[image address, label]
+            eval_address = tuple(
+                [list(e) for e in zip(*eval_address)])  # Convert to tuple of list[image address, label]
+            print("Train files: %d, Evaluate Files: %d" % (len(train_address[0]), len(eval_address[0])))
+        else:
+            print("Train files: %d, Evaluate Files: %d" % (len(train_address), len(train_address)))
 
-    grouped_eval_address = tuple(
-        [list(e) for e in zip(*eval_address)])  # Convert to tuple of list[image address, label]
-
-    # print(grouped_eval_address)
-    print("Train files: %d, Evaluate Files: %d" % (len(grouped_train_address[0]), len(grouped_eval_address[0])))
-
-    return grouped_train_address, grouped_eval_address
+    return train_address, train_address
 
 
 def read_file(csv_dir, header=False):

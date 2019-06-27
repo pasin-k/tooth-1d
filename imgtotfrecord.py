@@ -1,7 +1,7 @@
 import tensorflow as tf
 import numpy as np
 import os
-from open_save_file import get_input_and_label
+from open_save_file import get_input_and_label, save_file
 
 numdeg = 4  # Number of images on each example
 
@@ -126,7 +126,7 @@ def read_coordinate(file_name, label):
     return file_values
 
 
-def coordinate_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None):
+def coordinate_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None, k_fold=False, k_num=5):
     """
     tfrecord_name   : Name of .tfrecord output file
     dataset_folder  : Folder of the input data  (Not include label)
@@ -139,44 +139,59 @@ def coordinate_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None):
 
     # Get data from dataset_folder
     grouped_train_address, grouped_eval_address = get_input_and_label(tfrecord_name, dataset_folder,
-                                                                      csv_dir, configs, get_data=True)
+                                                                      csv_dir, configs, get_data=True,
+                                                                      k_cross=k_fold, k_num=k_num)
 
-    tfrecord_train_name = os.path.join(tfrecord_dir, "%s_%s_%s_train.tfrecords" % (
-        tfrecord_name, configs['label_data'], configs['label_type']))
-    tfrecord_eval_name = os.path.join(tfrecord_dir, "%s_%s_%s_eval.tfrecords" % (
-        tfrecord_name, configs['label_data'], configs['label_type']))
+    if not k_fold:
+        k_num = 1
+        grouped_train_address = [grouped_train_address]
+        grouped_eval_address = [grouped_eval_address]
+    for i in range(k_num):
+        train_address = grouped_train_address[i]
+        eval_address = grouped_eval_address[i]
+        score = []
+        for j in range(len(train_address)):
+            score.append(train_address[j][1])
 
-    coordinate_length = len(grouped_train_address[0][0][0])
-    degree = len(grouped_train_address[0][0])
+        save_file(os.path.join(tfrecord_dir, "%s_%s_%s_%s_score.csv" % (
+            tfrecord_name, configs['label_data'], configs['label_type'], i)), score,one_row=True)
+        tfrecord_train_name = os.path.join(tfrecord_dir, "%s_%s_%s_%s_train.tfrecords" % (
+            tfrecord_name, configs['label_data'], configs['label_type'], i))
+        tfrecord_eval_name = os.path.join(tfrecord_dir, "%s_%s_%s_%s_eval.tfrecords" % (
+            tfrecord_name, configs['label_data'], configs['label_type'], i))
 
-    with tf.python_io.TFRecordWriter(tfrecord_train_name) as writer:
-        for train_data in grouped_train_address:
-            feature = {'label': _int64_feature(train_data[1]),
-                       'degree': _int64_feature(degree),
-                       'length':  _int64_feature(coordinate_length)}
-            for i in range(numdeg):
-                for j in range(2):
-                    val = train_data[0][i][:,j].reshape(-1)
-                    feature['img_%s_%s' % (i,j)] =tf.train.Feature(float_list=tf.train.FloatList(value=val))
-            example = tf.train.Example(features=tf.train.Features(feature=feature))
-            # Write TFrecord file
-            writer.write(example.SerializeToString())
+        coordinate_length = len(train_address[0][0][0])
+        degree = len(train_address[0][0])
 
-    with tf.python_io.TFRecordWriter(tfrecord_eval_name) as writer:
-        for train_data in grouped_eval_address:
-            feature = {'label': _int64_feature(train_data[1]),
-                       'degree': _int64_feature(degree),
-                       'length':  _int64_feature(coordinate_length)}
-            for i in range(numdeg):
-                for j in range(2):
-                    val = train_data[0][i][:, j].reshape(-1)
-                    feature['img_%s_%s' % (i, j)] = tf.train.Feature(float_list=tf.train.FloatList(value=val))
-            example = tf.train.Example(features=tf.train.Features(feature=feature))
-            # print(example)
+        with tf.python_io.TFRecordWriter(tfrecord_train_name) as writer:
+            for train_data in train_address:
+                # print(train_data)
+                feature = {'label': _int64_feature(train_data[1]),
+                           'degree': _int64_feature(degree),
+                           'length':  _int64_feature(coordinate_length)}
+                for i in range(numdeg):
+                    for j in range(2):
+                        val = train_data[0][i][:,j].reshape(-1)
+                        feature['img_%s_%s' % (i,j)] =tf.train.Feature(float_list=tf.train.FloatList(value=val))
+                example = tf.train.Example(features=tf.train.Features(feature=feature))
+                # Write TFrecord file
+                writer.write(example.SerializeToString())
 
-            # Write TFrecord file
-            writer.write(example.SerializeToString())
-    print("TFrecords created: %s, %s" % (tfrecord_train_name, tfrecord_eval_name))
+        with tf.python_io.TFRecordWriter(tfrecord_eval_name) as writer:
+            for train_data in eval_address:
+                feature = {'label': _int64_feature(train_data[1]),
+                           'degree': _int64_feature(degree),
+                           'length':  _int64_feature(coordinate_length)}
+                for i in range(numdeg):
+                    for j in range(2):
+                        val = train_data[0][i][:, j].reshape(-1)
+                        feature['img_%s_%s' % (i, j)] = tf.train.Feature(float_list=tf.train.FloatList(value=val))
+                example = tf.train.Example(features=tf.train.Features(feature=feature))
+                # print(example)
+
+                # Write TFrecord file
+                writer.write(example.SerializeToString())
+        print("TFrecords created: %s, %s" % (tfrecord_train_name, tfrecord_eval_name))
 
 
 if __name__ == '__main__':
@@ -189,7 +204,8 @@ if __name__ == '__main__':
     # configs['label_data'] = "Taper_Sum"
     configs['label_type'] = "median"
 
-    label_datas = ["Taper_Sum", "BL", "MD", "Occ_Sum", "Occ_L", "Occ_F", "Occ_B"]  # Too lazy to do all of these one at a time
+    # label_datas = ["Taper_Sum", "BL", "MD", "Occ_Sum", "Occ_L", "Occ_F", "Occ_B"]  # Too lazy to do all of these one at a time
+    label_datas = ["BL"]  # For debug
 
     for label_data_index in label_datas:
         configs['label_data'] = label_data_index
@@ -204,5 +220,6 @@ if __name__ == '__main__':
         if get_image:
             image_to_tfrecord(tfrecord_name="preparation_361", dataset_folder="./data/cross_section")
         else:
-            coordinate_to_tfrecord(tfrecord_name="preparation_coor_300_test", dataset_folder="./data/coordinate_300_point")
-    print("Complete")
+            coordinate_to_tfrecord(tfrecord_name="preparation_coor_300_kfold",
+                                   dataset_folder="./data/coordinate_300_point", k_fold = True)
+        print("Complete")
