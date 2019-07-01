@@ -38,6 +38,8 @@ message TrainConfig{
 
     optional bool is_workstation = 13;
 
+    optional bool is_kfold = 14;
+
 }
 
 // Number of channels in each layer

@@ -69,6 +69,8 @@ run_params = {'batch_size': configs.batch_size,
               'is_workstation': configs.is_workstation,
               'comment': configs.comment}
 
+kfold = configs.is_kfold
+
 model_num = configs.model_type  # Borrowed parameter name 0 -> dense, 1 -> 1dCNN
 
 run_params = check_exist(run_params, batch_size=None,
@@ -399,7 +401,19 @@ def run_hyper_parameter_optimize():
     return best_accuracy
 
 
-def run_hyper_parameter_optimize_kfold(k_num = 5):
+def run_kfold(k_num=5):
+    input_path = os.path.splitext(run_params['input_path'])[0]
+    result_path_base = run_params['result_path_base']
+    all_accuracy = []
+    for i in range(k_num):
+        run_params['input_path'] = input_path + ("_%s.tfrecords" % i)
+        run_params['result_path_base'] = result_path_base + ("/%s" % i)
+        accuracy, _, _ = run()
+        all_accuracy.append(accuracy)
+    print(all_accuracy)
+
+
+def run_hyper_parameter_optimize_kfold(k_num=5):
     input_path = os.path.splitext(run_params['input_path'])[0]
     result_path_base = run_params['result_path_base']
     all_accuracy = []
@@ -413,15 +427,16 @@ def run_hyper_parameter_optimize_kfold(k_num = 5):
 
 if __name__ == '__main__':
     run_single = run_params['is_workstation']
-    kfold = True
 
     if run_single:
         run_params['result_path'] = run_params['result_path_base'] + '/' + datetime.datetime.now().strftime(
             "%Y%m%d_%H_%M_%S") + '/'
         model_configs['result_file_name'] = 'result.csv'
         model_configs['result_path'] = run_params['result_path']
-
-        run(model_configs)
+        if kfold:
+            run_kfold(kfold)
+        else:
+            run(model_configs)
     else:
         if kfold:
             run_hyper_parameter_optimize_kfold()

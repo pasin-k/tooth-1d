@@ -48,13 +48,15 @@ def decode_multiple_axis(data_dict):
     # Create initial image, then stacking it
     image_decoded = []
     degree = tf.cast(data_dict['degree'], tf.int32)
-    length = tf.cast(data_dict['length'], tf.int32)
+    # length = tf.cast(data_dict['length'], tf.int32)
+    length = data_dict['length']
     # Stacking the rest
     for i in range(numdegree):
         for j in range(2):
             img = data_dict['img_%s_%s' % (i, j)]
             img = tf.sparse.to_dense(img)
-            img = tf.reshape(img, [299])
+            # img = tf.reshape(img, [299])
+            img = tf.reshape(img, [length])
             # img = tf.reshape(img, [data_dict['length']])
             # file_cropped = tf.squeeze(tf.image.resize_image_with_crop_or_pad(file_decoded, image_height, image_width))
             image_decoded.append(img)
@@ -65,8 +67,6 @@ def decode_multiple_axis(data_dict):
                               image_decoded[4], image_decoded[5], image_decoded[6], image_decoded[7]], axis=1)
     image_stacked = tf.cast(image_stacked, tf.float32)
     label = tf.cast(data_dict['label'], tf.float32)
-    degree = tf.cast(data_dict['degree'], tf.int32)
-    length = tf.cast(data_dict['length'], tf.int32)
     # output = (image_stacked, label)
     # return {'images': image_stacked, 'label': label}  # Output is [Channel, Height, Width]
     return image_stacked, label
