@@ -2,13 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="770e0596-62ef-4176-bd6c-3bded3f7c783" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/coor_get_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/coor_get_data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/coor_tooth.config" beforeDir="false" afterPath="$PROJECT_DIR$/coor_tooth.config" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/coor_tooth_workspace.config" beforeDir="false" afterPath="$PROJECT_DIR$/coor_tooth_workspace.config" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/coor_train.py" beforeDir="false" afterPath="$PROJECT_DIR$/coor_train.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/proto/tooth.proto" beforeDir="false" afterPath="$PROJECT_DIR$/proto/tooth.proto" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tooth.config" beforeDir="false" afterPath="$PROJECT_DIR$/tooth.config" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tooth_workspace.config" beforeDir="false" afterPath="$PROJECT_DIR$/tooth_workspace.config" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Playground.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Playground.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/plot_focal_loss.py" beforeDir="false" afterPath="$PROJECT_DIR$/plot_focal_loss.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -35,7 +31,7 @@
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/coor_model.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="212">
+                <state relative-caret-position="-103">
                   <caret line="151" selection-start-line="151" selection-end-line="151" />
                   <folding>
                     <element signature="e#0#23#0" expanded="true" />
@@ -60,8 +56,8 @@
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/open_save_file.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="246">
-                  <caret line="403" column="83" selection-start-line="403" selection-start-column="83" selection-end-line="403" selection-end-column="83" />
+                <state relative-caret-position="126">
+                  <caret line="395" column="29" lean-forward="true" selection-start-line="395" selection-start-column="29" selection-end-line="395" selection-end-column="29" />
                   <folding>
                     <element signature="e#13#22#0" expanded="true" />
                   </folding>
@@ -70,10 +66,22 @@
             </entry>
           </file>
           <file pinned="false" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/plot_focal_loss.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="322">
+                  <caret line="92" column="2" lean-forward="true" selection-start-line="92" selection-start-column="2" selection-end-line="92" selection-end-column="2" />
+                  <folding>
+                    <element signature="e#0#18#0" expanded="true" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/coor_train.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="312">
-                  <caret line="71" column="24" selection-start-line="71" selection-start-column="24" selection-end-line="71" selection-end-column="24" />
+                <state relative-caret-position="231">
+                  <caret line="105" lean-forward="true" selection-start-line="105" selection-end-line="105" />
                   <folding>
                     <element signature="e#0#23#0" expanded="true" />
                   </folding>
@@ -124,8 +132,8 @@
           <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/coor_tooth_workspace.config">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="405">
-                  <caret line="27" column="14" selection-start-line="27" selection-start-column="14" selection-end-line="27" selection-end-column="14" />
+                <state relative-caret-position="360">
+                  <caret line="24" column="31" selection-start-line="24" selection-start-column="31" selection-end-line="24" selection-end-column="31" />
                 </state>
               </provider>
             </entry>
@@ -147,7 +155,6 @@
       <find>warning</find>
       <find>result_file_name</find>
       <find>test</find>
-      <find>model_params</find>
       <find>params</find>
       <find>print</find>
       <find>dropout_rate</find>
@@ -173,6 +180,7 @@
       <find>input_path</find>
       <find>.txt</find>
       <find>result</find>
+      <find>model_params</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -207,7 +215,6 @@
         <option value="$APPLICATION_CONFIG_DIR$/scratches/scratch_11.py" />
         <option value="$PROJECT_DIR$/custom_hook.py" />
         <option value="$APPLICATION_CONFIG_DIR$/scratches/scratch_12.py" />
-        <option value="$PROJECT_DIR$/plot_focal_loss.py" />
         <option value="$PROJECT_DIR$/coor_model.py" />
         <option value="$APPLICATION_CONFIG_DIR$/scratches/scratch_13.py" />
         <option value="$PROJECT_DIR$/get_input.py" />
@@ -224,6 +231,7 @@
         <option value="$PROJECT_DIR$/tooth_workspace.config" />
         <option value="$PROJECT_DIR$/coor_tooth_workspace.config" />
         <option value="$PROJECT_DIR$/coor_train.py" />
+        <option value="$PROJECT_DIR$/plot_focal_loss.py" />
       </list>
     </option>
   </component>
@@ -243,7 +251,7 @@
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="ToolWindowDocker.ShowToolbar" value="false" />
     <property name="com.intellij.ide.scratch.LRUPopupBuilder$1/New Scratch File" value="Python" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/coor_train.py" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/plot_focal_loss.py" />
     <property name="settings.editor.selected.configurable" value="Erlang External Tools" />
   </component>
   <component name="RecentsManager">
@@ -263,7 +271,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.coor_train">
+  <component name="RunManager" selected="Python.plot_focal_loss">
     <configuration name="coor_get_data" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="my2DCNN" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -327,6 +335,27 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="plot_focal_loss" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="my2DCNN" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/plot_focal_loss.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="pre_processing" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="my2DCNN" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -348,41 +377,20 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="scratch_16" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="my2DCNN" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$APPLICATION_CONFIG_DIR$/scratches" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$APPLICATION_CONFIG_DIR$/scratches/scratch_16.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <list>
       <item itemvalue="Python.imgtotfrecord" />
-      <item itemvalue="Python.scratch_16" />
       <item itemvalue="Python.pre_processing" />
       <item itemvalue="Python.coor_train" />
       <item itemvalue="Python.coor_get_data" />
+      <item itemvalue="Python.plot_focal_loss" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.plot_focal_loss" />
         <item itemvalue="Python.coor_train" />
         <item itemvalue="Python.imgtotfrecord" />
         <item itemvalue="Python.coor_get_data" />
         <item itemvalue="Python.pre_processing" />
-        <item itemvalue="Python.scratch_16" />
       </list>
     </recent_temporary>
   </component>
@@ -396,27 +404,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1554715602048</updated>
-    </task>
-    <task id="LOCAL-00027" summary="Fix stl-&gt;image to be 240x360 pixel (fixed)">
-      <created>1556120443179</created>
-      <option name="number" value="00027" />
-      <option name="presentableId" value="LOCAL-00027" />
-      <option name="project" value="LOCAL" />
-      <updated>1556120443179</updated>
-    </task>
-    <task id="LOCAL-00028" summary="Fix stl-&gt;image to be 240x360 pixel (fixed)">
-      <created>1556121009365</created>
-      <option name="number" value="00028" />
-      <option name="presentableId" value="LOCAL-00028" />
-      <option name="project" value="LOCAL" />
-      <updated>1556121009365</updated>
-    </task>
-    <task id="LOCAL-00029" summary="Fix stl-&gt;image to be 240x360 pixel (fixed)">
-      <created>1556262930107</created>
-      <option name="number" value="00029" />
-      <option name="presentableId" value="LOCAL-00029" />
-      <option name="project" value="LOCAL" />
-      <updated>1556262930107</updated>
     </task>
     <task id="LOCAL-00030" summary="Create new type of model (Simple CNN)&#10;Hyperparameter optimize now work with optimization">
       <created>1556269011012</created>
@@ -740,7 +727,28 @@
       <option name="project" value="LOCAL" />
       <updated>1561960706279</updated>
     </task>
-    <option name="localTasksCounter" value="76" />
+    <task id="LOCAL-00076" summary="Implemented K fold cross validate (For one run and optimize run)">
+      <created>1561969357676</created>
+      <option name="number" value="00076" />
+      <option name="presentableId" value="LOCAL-00076" />
+      <option name="project" value="LOCAL" />
+      <updated>1561969357676</updated>
+    </task>
+    <task id="LOCAL-00077" summary="Implemented K fold cross validate (For one run and optimize run)">
+      <created>1561969482621</created>
+      <option name="number" value="00077" />
+      <option name="presentableId" value="LOCAL-00077" />
+      <option name="project" value="LOCAL" />
+      <updated>1561969482621</updated>
+    </task>
+    <task id="LOCAL-00078" summary="Implemented K fold cross validate (For one run and optimize run)">
+      <created>1561978291714</created>
+      <option name="number" value="00078" />
+      <option name="presentableId" value="LOCAL-00078" />
+      <option name="project" value="LOCAL" />
+      <updated>1561978291714</updated>
+    </task>
+    <option name="localTasksCounter" value="79" />
     <servers />
   </component>
   <component name="TodoView" selected-index="4">
@@ -837,7 +845,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Fixing median label problem" />
     <MESSAGE value="Debugging regression" />
     <MESSAGE value="Stable classification, using hook instead of prediction" />
     <MESSAGE value="Improve check_exist function, now more compact.&#10;Also add fully connect parameter" />
@@ -862,7 +869,8 @@
     <MESSAGE value="KFold implemented" />
     <MESSAGE value="Debug saving coordinate as npy instead of csv" />
     <MESSAGE value="Implemented K fold cross validate" />
-    <option name="LAST_COMMIT_MESSAGE" value="Implemented K fold cross validate" />
+    <MESSAGE value="Implemented K fold cross validate (For one run and optimize run)" />
+    <option name="LAST_COMMIT_MESSAGE" value="Implemented K fold cross validate (For one run and optimize run)" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$USER_HOME$/anaconda3/envs/ps36/lib/python3.6/site-packages/tensorflow/python/framework/op_def_library.py">
@@ -1016,15 +1024,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/plot_focal_loss.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <folding>
-            <element signature="e#20#38#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$APPLICATION_CONFIG_DIR$/scratches/scratch_12.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-645">
@@ -1136,37 +1135,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/open_save_file.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="246">
-          <caret line="403" column="83" selection-start-line="403" selection-start-column="83" selection-end-line="403" selection-end-column="83" />
-          <folding>
-            <element signature="e#13#22#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/coor_model.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="212">
-          <caret line="151" selection-start-line="151" selection-end-line="151" />
-          <folding>
-            <element signature="e#0#23#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/coor_get_data.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="525">
-          <caret line="58" column="41" selection-start-line="58" selection-start-column="35" selection-end-line="58" selection-end-column="41" />
-          <folding>
-            <element signature="e#0#23#0" expanded="true" />
-            <element signature="e#582#1819#0" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/proto/tooth.proto">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="465">
@@ -1197,17 +1165,58 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/coor_tooth_workspace.config">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="405">
-          <caret line="27" column="14" selection-start-line="27" selection-start-column="14" selection-end-line="27" selection-end-column="14" />
+        <state relative-caret-position="360">
+          <caret line="24" column="31" selection-start-line="24" selection-start-column="31" selection-end-line="24" selection-end-column="31" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/coor_train.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="312">
-          <caret line="71" column="24" selection-start-line="71" selection-start-column="24" selection-end-line="71" selection-end-column="24" />
+        <state relative-caret-position="231">
+          <caret line="105" lean-forward="true" selection-start-line="105" selection-end-line="105" />
           <folding>
             <element signature="e#0#23#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/coor_get_data.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="525">
+          <caret line="58" column="41" selection-start-line="58" selection-start-column="35" selection-end-line="58" selection-end-column="41" />
+          <folding>
+            <element signature="e#0#23#0" expanded="true" />
+            <element signature="e#582#1819#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/coor_model.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-103">
+          <caret line="151" selection-start-line="151" selection-end-line="151" />
+          <folding>
+            <element signature="e#0#23#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/open_save_file.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="126">
+          <caret line="395" column="29" lean-forward="true" selection-start-line="395" selection-start-column="29" selection-end-line="395" selection-end-column="29" />
+          <folding>
+            <element signature="e#13#22#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/plot_focal_loss.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="322">
+          <caret line="92" column="2" lean-forward="true" selection-start-line="92" selection-start-column="2" selection-end-line="92" selection-end-column="2" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
           </folding>
         </state>
       </provider>

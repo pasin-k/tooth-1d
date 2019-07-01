@@ -90,14 +90,15 @@ plt.plot(x, y, color='skyblue', label='Cross Entropy')
 plt.plot(x, y2, color='olive', label='gamma = 1')
 plt.plot(x, y3, color='green', label='gamma = 2')
 plt.plot(x, y4, color='red', label='gamma = 5')
+plt.legend(loc=2, prop={'size': 6})
 # naming the x axis
-plt.xlabel('Probability')
+plt.xlabel('Probability', fontsize=40)
 plt.xlim(0, 1)
 # naming the y axis
-plt.ylabel('Loss')
+plt.ylabel('Loss', fontsize=40)
 plt.ylim(0, 5)
 # giving a title to my graph
-plt.title('Focal Loss')
+plt.title('Focal Loss', fontsize=40)
 plt.legend()
 # function to show the plot
 # plt.show()
