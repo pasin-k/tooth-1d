@@ -355,6 +355,7 @@ def run_hyper_parameter_optimize():
 
     print("Saving hyperparameters_result in %s" % run_params['summary_file_path'])
     print("Running remaining: %s time" % n_calls)
+    best_accuracy = 0
     if n_calls < 11:
         print("Hyper parameter optimize ENDED: run enough calls already")
         save_file(run_params['summary_file_path'],
@@ -375,8 +376,9 @@ def run_hyper_parameter_optimize():
         print("All hyper-parameter searched: %s" % searched_parameter)
 
         new_data = []
-
         for i in searched_parameter:
+            if i[0] > best_accuracy:
+                best_accuracy = i[0]
             data = {field_name[0]: i[0] * -1}
             for j in range(1, len(field_name)):
                 data[field_name[1]] = i[1][j - 1]
@@ -394,10 +396,24 @@ def run_hyper_parameter_optimize():
         # space = search_result.space
         # print("Best result: %s" % space.point_to_dict(search_result.x))
     print("Saving hyperparameters_result in %s" % run_params['summary_file_path'])
+    return best_accuracy
+
+
+def run_hyper_parameter_optimize_kfold(k_num = 5):
+    input_path = os.path.splitext(run_params['input_path'])[0]
+    result_path_base = run_params['result_path_base']
+    all_accuracy = []
+    for i in range(k_num):
+        run_params['input_path'] = input_path + ("_%s.tfrecords" % i)
+        run_params['result_path_base'] = result_path_base + ("/%s" % i)
+        accuracy = run_hyper_parameter_optimize()
+        all_accuracy.append(accuracy)
+    print(all_accuracy)
 
 
 if __name__ == '__main__':
     run_single = run_params['is_workstation']
+    kfold = True
 
     if run_single:
         run_params['result_path'] = run_params['result_path_base'] + '/' + datetime.datetime.now().strftime(
@@ -407,5 +423,8 @@ if __name__ == '__main__':
 
         run(model_configs)
     else:
-        run_hyper_parameter_optimize()
+        if kfold:
+            run_hyper_parameter_optimize_kfold()
+        else:
+            run_hyper_parameter_optimize()
     print("train.py completed")

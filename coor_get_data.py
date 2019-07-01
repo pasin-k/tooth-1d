@@ -54,8 +54,8 @@ def decode_multiple_axis(data_dict):
         for j in range(2):
             img = data_dict['img_%s_%s' % (i, j)]
             img = tf.sparse.to_dense(img)
-            img = tf.reshape(img, [data_dict['length']])
-            # img = tf.reshape(img, [300])
+            img = tf.reshape(img, [299])
+            # img = tf.reshape(img, [data_dict['length']])
             # file_cropped = tf.squeeze(tf.image.resize_image_with_crop_or_pad(file_decoded, image_height, image_width))
             image_decoded.append(img)
 

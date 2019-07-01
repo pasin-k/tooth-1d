@@ -53,7 +53,7 @@ def fix_amount_of_point(stl_points, coor_amount):
             distance_index = np.argsort(distance)
             add_index = distance_index[-1]  # Choose max distance as the index to add coordinate
             new_point = (stl_points[add_index, :] + stl_points[add_index + 1, :]) / 2
-            stl_points = np.insert(stl_points, add_index+1, new_point, axis=0)
+            stl_points = np.insert(stl_points, add_index + 1, new_point, axis=0)
     return stl_points
 
 
@@ -107,7 +107,7 @@ def get_cross_section(data_type, stat_type):
     return stl_points, stl_points_augmented, label, label_name, error_file_names, degree
 
 
-def save_image(stl_points, stl_points_augmented, label_name, error_file_names, image_dir = "./data/cross_section"):
+def save_image(stl_points, stl_points_augmented, label_name, error_file_names, image_dir="./data/cross_section"):
     # Save data as png image
     png_name = "PreparationScan"
     save_plot(stl_points, image_dir, png_name, label_name, 0, degree)
@@ -154,13 +154,14 @@ def save_coordinate(coor_list, out_directory, file_header_name, image_name, augm
             # Name with some additional data
             fullname = "%s_%s_%s_%d.npy" % (file_header_name, image_name[corr_index], augment_number, degree[deg_index])
             output_name = os.path.join(out_directory, fullname)
-            np.savetxt(output_name, coor, delimiter = ',')
+            np.savetxt(output_name, coor, delimiter=',')
             # np.save(output_name, coor)
             # np.savetxt(output_name.replace(".npy",".txt"), coor)
-    print("Finished saving coordinates: %d files with %d rotations at dir: %s" % (len(coor_list), len(degree), out_directory))
+    print("Finished saving coordinates: %d files with %d rotations at dir: %s" % (
+    len(coor_list), len(degree), out_directory))
 
 
-def save_stl_point(stl_points, stl_points_augmented, label_name, error_file_names, file_dir = "./data/coordinates"):
+def save_stl_point(stl_points, stl_points_augmented, label_name, error_file_names, file_dir="./data/coordinates"):
     # This convert coordinates into vector between each coordinate
     stl_points = stl_point_to_movement(stl_points)
     stl_points_augmented = stl_point_to_movement(stl_points_augmented)
@@ -195,9 +196,9 @@ if __name__ == '__main__':
                 points_aug[p_index][d_index] = fix_amount_of_point(points_aug[p_index][d_index], fix_amount)
     if save_img:
         print("Start saving images...")
-        save_image(points, points_aug, lbl_name, err_name, image_dir = "./data/cross_section_450")
+        save_image(points, points_aug, lbl_name, err_name, image_dir="./data/cross_section_450")
 
     if save_coor:
         print("Start saving coordinates...")
-        save_stl_point(points, points_aug, lbl_name, err_name, file_dir = "./data/coordinate_450")
+        save_stl_point(points, points_aug, lbl_name, err_name, file_dir="./data/coordinate_450")
     print("pre_processing.py: done")

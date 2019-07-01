@@ -174,6 +174,8 @@ def save_plot(coor_list, out_directory, file_header_name, image_name, augment_nu
         raise ValueError("save_plot: number of image(%s) is not equal to number of image_name(%s)"
                          % (len(coor_list), len(image_name)))
     out_directory = os.path.abspath(out_directory)
+    if not os.path.exists(out_directory):
+        os.makedirs(out_directory)
     if len(degree) != len(coor_list[0]):
         print("# of Degree expected: %d" % len(degree))
         print("# of Degree found: %d" % len(coor_list[0]))
@@ -264,7 +266,7 @@ def split_train_test(grouped_address, example_grouped_address, tfrecord_name, co
     file_name = "./data/tfrecord/%s/%s_%s_%s.txt" % (
         tfrecord_name, tfrecord_name, configs['label_data'], configs['label_type'])
     with open(file_name, 'w') as filehandle:
-        # Header with 'eval'
+        # Header with 'distibution'
         filehandle.write('distribution\n')
         for score, freq in label_count.items():
             filehandle.write('%s_%s\n' % (score, freq))
@@ -315,6 +317,7 @@ def split_kfold(grouped_address, k_num):
             test_address_fold.append(grouped_address[test_indice])
         train_address.append(train_address_fold)
         eval_address.append(test_address_fold)
+
     return train_address, eval_address
 
 
@@ -384,6 +387,7 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
             image_address_temp.append(np.loadtxt(addr, delimiter=','))
         image_address = image_address_temp
 
+
     # Group up 4 images and label together first, shuffle
     grouped_address = []
     for i in range(len(labels)):
@@ -414,6 +418,17 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
                 print("Train files: %d, Evaluate Files: %d" % (len(single_train_address), len(single_eval_address)))
             train_address.append(single_train_address)
             eval_address.append((single_eval_address))
+
+            # Save names of files of train address
+            file_name = "./data/tfrecord/%s/%s_%s_%s_%s.txt" % (
+                tfrecord_name, tfrecord_name, configs['label_data'], configs['label_type'], i)
+            with open(file_name, 'w') as filehandle:
+                # Header with 'distibution'
+                filehandle.write('distribution\n')
+                for score, freq in label_count.items():
+                    filehandle.write('%s_%s\n' % (score, freq))
+                filehandle.write('train\n')
+                filehandle.write('eval\n')
     else:
         train_address, eval_address = split_train_test(grouped_address, example_grouped_address,
                                                        tfrecord_name, configs, label_count)
