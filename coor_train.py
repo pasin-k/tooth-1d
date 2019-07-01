@@ -401,14 +401,14 @@ def run_hyper_parameter_optimize():
     return best_accuracy
 
 
-def run_kfold(k_num=5):
+def run_kfold(model_params, k_num=5):
     input_path = os.path.splitext(run_params['input_path'])[0]
     result_path_base = run_params['result_path_base']
     all_accuracy = []
     for i in range(k_num):
         run_params['input_path'] = input_path + ("_%s.tfrecords" % i)
         run_params['result_path_base'] = result_path_base + ("/%s" % i)
-        accuracy, _, _ = run()
+        accuracy, _, _ = run(model_params)
         all_accuracy.append(accuracy)
     print(all_accuracy)
 
@@ -434,7 +434,7 @@ if __name__ == '__main__':
         model_configs['result_file_name'] = 'result.csv'
         model_configs['result_path'] = run_params['result_path']
         if kfold:
-            run_kfold(kfold)
+            run_kfold(model_configs, kfold)
         else:
             run(model_configs)
     else:
