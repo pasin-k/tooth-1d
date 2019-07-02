@@ -52,59 +52,75 @@ def load_image(addr):
 '''
 
 
-def image_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None):
+def image_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None, k_fold=False, k_num=5):
+    """
+    tfrecord_name   : Name of .tfrecord output file
+    dataset_folder  : Folder of the input data  (Not include label)
+    csv_dir         : Folder of label data (If not specified, will use the default directory)
+    save 4 files: train.tfrecord, eval.tfrecord, .txt (Save from another file)
+    """
     # Create new directory if not created, get all info and zip to tfrecord
     tfrecord_dir = os.path.join("./data/tfrecord", tfrecord_name)
     if not os.path.exists(tfrecord_dir):
         os.makedirs(tfrecord_dir)
 
     # Get file name from dataset_folder
-    grouped_train_address, grouped_eval_address = get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs)
-    # Start writing train dataset
-    train_dataset = tf.data.Dataset.from_tensor_slices(grouped_train_address)
-    train_dataset = train_dataset.map(read_image)  # Read file address, and get info as string
+    grouped_train_address, grouped_eval_address = get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs,
+                                                                      get_data=False, k_cross=k_fold, k_num=k_num)
 
-    it = train_dataset.make_one_shot_iterator()
+    if not k_fold:
+        k_num = 1
+        grouped_train_address = [grouped_train_address]
+        grouped_eval_address = [grouped_eval_address]
+    for i in range(k_num):
+        train_address = grouped_train_address[i]
+        eval_address = grouped_eval_address[i]
 
-    elem = it.get_next()
+        # Start writing train dataset
+        train_dataset = tf.data.Dataset.from_tensor_slices(train_address)
+        train_dataset = train_dataset.map(read_image)  # Read file address, and get info as string
 
-    tfrecord_train_name = os.path.join(tfrecord_dir, "%s_%s_%s_train.tfrecords" % (
-        tfrecord_name, configs['label_data'], configs['label_type']))
-    tfrecord_eval_name = os.path.join(tfrecord_dir, "%s_%s_%s_eval.tfrecords" % (
-        tfrecord_name, configs['label_data'], configs['label_type']))
-    # eval_score_name = os.path.join("./data/tfrecord", "%s_%s_%s_score.npy" % (
-    #     tfrecord_name, configs['label_data'], configs['label_type']))
-    # np.save(eval_score_name, np.asarray(eval_score))
+        it = train_dataset.make_one_shot_iterator()
 
-    with tf.Session() as sess:
-        writer = tf.python_io.TFRecordWriter(tfrecord_train_name)
-        while True:
-            try:
-                elem_result = serialize_image(sess.run(elem))
+        elem = it.get_next()
 
-                writer.write(elem_result)
-            except tf.errors.OutOfRangeError:
-                break
-        writer.close()
+        tfrecord_train_name = os.path.join(tfrecord_dir, "%s_%s_%s_%s_train.tfrecords" % (
+            tfrecord_name, configs['label_data'], configs['label_type'], i))
+        tfrecord_eval_name = os.path.join(tfrecord_dir, "%s_%s_%s_%s_eval.tfrecords" % (
+            tfrecord_name, configs['label_data'], configs['label_type'], i))
+        # eval_score_name = os.path.join("./data/tfrecord", "%s_%s_%s_score.npy" % (
+        #     tfrecord_name, configs['label_data'], configs['label_type']))
+        # np.save(eval_score_name, np.asarray(eval_score))
 
-    eval_dataset = tf.data.Dataset.from_tensor_slices(grouped_eval_address)
-    eval_dataset = eval_dataset.map(read_image)
+        with tf.Session() as sess:
+            writer = tf.python_io.TFRecordWriter(tfrecord_train_name)
+            while True:
+                try:
+                    elem_result = serialize_image(sess.run(elem))
 
-    it = eval_dataset.make_one_shot_iterator()
+                    writer.write(elem_result)
+                except tf.errors.OutOfRangeError:
+                    break
+            writer.close()
 
-    elem = it.get_next()
+        eval_dataset = tf.data.Dataset.from_tensor_slices(eval_address)
+        eval_dataset = eval_dataset.map(read_image)
 
-    with tf.Session() as sess:
-        writer = tf.python_io.TFRecordWriter(tfrecord_eval_name)
-        while True:
-            try:
-                elem_result = serialize_image(sess.run(elem))
-                # print(elem_result)
-                writer.write(elem_result)
-            except tf.errors.OutOfRangeError:
-                break
-        writer.close()
-    print("TFrecords created: %s, %s" % (tfrecord_train_name, tfrecord_eval_name))
+        it = eval_dataset.make_one_shot_iterator()
+
+        elem = it.get_next()
+
+        with tf.Session() as sess:
+            writer = tf.python_io.TFRecordWriter(tfrecord_eval_name)
+            while True:
+                try:
+                    elem_result = serialize_image(sess.run(elem))
+                    # print(elem_result)
+                    writer.write(elem_result)
+                except tf.errors.OutOfRangeError:
+                    break
+            writer.close()
+        print("TFrecords created: %s, %s" % (tfrecord_train_name, tfrecord_eval_name))
 
 
 # Run images from pre_processing.py into tfrecords
@@ -129,6 +145,7 @@ def coordinate_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None, k_fold=F
     tfrecord_name   : Name of .tfrecord output file
     dataset_folder  : Folder of the input data  (Not include label)
     csv_dir         : Folder of label data (If not specified, will use the default directory)
+    save 4 files: train.tfrecord, eval.tfrecord, .txt (Save from another file)
     """
     # Create new directory if not created, get all info and zip to tfrecord
     tfrecord_dir = os.path.join("./data/tfrecord", tfrecord_name)
@@ -137,8 +154,8 @@ def coordinate_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None, k_fold=F
 
     # Get data from dataset_folder
     grouped_train_address, grouped_eval_address = get_input_and_label(tfrecord_name, dataset_folder,
-                                                                      csv_dir, configs, get_data=True,
-                                                                      k_cross=k_fold, k_num=k_num)
+                                                                                    csv_dir, configs, get_data=True,
+                                                                                    k_cross=k_fold, k_num=k_num)
 
     if not k_fold:
         k_num = 1
@@ -147,12 +164,12 @@ def coordinate_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None, k_fold=F
     for i in range(k_num):
         train_address = grouped_train_address[i]
         eval_address = grouped_eval_address[i]
-        score = []
-        for j in range(len(train_address)):
-            score.append(train_address[j][1])
+        # score = []
+        # for j in range(len(train_address)):
+        #     score.append(train_address[j][1])
 
-        save_file(os.path.join(tfrecord_dir, "%s_%s_%s_%s_score.csv" % (
-            tfrecord_name, configs['label_data'], configs['label_type'], i)), score, one_row=True)
+        # save_file(os.path.join(tfrecord_dir, "%s_%s_%s_%s_score.csv" % (  # Save loss weight file
+        #     tfrecord_name, configs['label_data'], configs['label_type'], i)), class_weight, one_row=True)
         tfrecord_train_name = os.path.join(tfrecord_dir, "%s_%s_%s_%s_train.tfrecords" % (
             tfrecord_name, configs['label_data'], configs['label_type'], i))
         tfrecord_eval_name = os.path.join(tfrecord_dir, "%s_%s_%s_%s_eval.tfrecords" % (
@@ -193,7 +210,7 @@ def coordinate_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None, k_fold=F
 
 
 if __name__ == '__main__':
-    get_image = False
+    get_image = True
     # Select type of label to use
     label_data = ["Occ_Sum", "Taper_Sum", "Occ_L", "Occ_F", "Occ_B", "BL", "MD", "Taper_Sum"]
     label_type = ["average", "median"]
@@ -217,8 +234,8 @@ if __name__ == '__main__':
         # Directory of image
 
         if get_image:
-            image_to_tfrecord(tfrecord_name="preparation_361", dataset_folder="./data/cross_section")
+            image_to_tfrecord(tfrecord_name="preparation_img_test", dataset_folder="./data/cross_section", k_fold=True)
         else:
-            coordinate_to_tfrecord(tfrecord_name="preparation_coor_450_kfold",
+            coordinate_to_tfrecord(tfrecord_name="preparation_img_450_test",
                                    dataset_folder="./data/coordinate_450", k_fold=True)
         print("Complete")

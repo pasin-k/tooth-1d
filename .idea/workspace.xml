@@ -3,6 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="770e0596-62ef-4176-bd6c-3bded3f7c783" name="Default Changelist" comment="Debug eval tfrecord as train">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/imgtotfrecord.py" beforeDir="false" afterPath="$PROJECT_DIR$/imgtotfrecord.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/open_save_file.py" beforeDir="false" afterPath="$PROJECT_DIR$/open_save_file.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -30,7 +31,7 @@
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/coor_model.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="472">
+                <state relative-caret-position="4260">
                   <caret line="284" column="19" selection-start-line="284" selection-start-column="13" selection-end-line="284" selection-end-column="19" />
                   <folding>
                     <element signature="e#0#23#0" expanded="true" />
@@ -42,19 +43,10 @@
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/coor_get_data.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state>
-                  <caret column="23" lean-forward="true" selection-start-column="23" selection-end-column="23" />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file pinned="false" current-in-tab="true">
-            <entry file="file://$PROJECT_DIR$/open_save_file.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="202">
-                  <caret line="310" column="47" selection-start-line="310" selection-start-column="47" selection-end-line="310" selection-end-column="47" />
+                <state relative-caret-position="-660">
+                  <caret line="7" column="17" selection-start-line="7" selection-start-column="17" selection-end-line="7" selection-end-column="17" />
                   <folding>
-                    <element signature="e#13#22#0" expanded="true" />
+                    <element signature="e#0#23#0" expanded="true" />
                   </folding>
                 </state>
               </provider>
@@ -63,8 +55,32 @@
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/coor_train.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="1072">
-                  <caret line="396" column="70" selection-start-line="396" selection-start-column="70" selection-end-line="396" selection-end-column="70" />
+                <state relative-caret-position="397">
+                  <caret line="135" column="63" selection-start-line="135" selection-start-column="63" selection-end-line="135" selection-end-column="63" />
+                  <folding>
+                    <element signature="e#0#23#0" expanded="true" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/open_save_file.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="757">
+                  <caret line="436" column="38" selection-start-line="436" selection-start-column="38" selection-end-line="436" selection-end-column="38" />
+                  <folding>
+                    <element signature="e#13#22#0" expanded="true" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/imgtotfrecord.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="277">
+                  <caret line="67" column="47" selection-start-line="67" selection-start-column="47" selection-end-line="67" selection-end-column="47" />
                   <folding>
                     <element signature="e#0#23#0" expanded="true" />
                   </folding>
@@ -112,11 +128,23 @@
               </provider>
             </entry>
           </file>
-          <file pinned="false" current-in-tab="true">
+          <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/coor_tooth_workspace.config">
               <provider selected="true" editor-type-id="text-editor">
                 <state relative-caret-position="255">
                   <caret line="17" column="15" selection-start-line="17" selection-start-column="15" selection-end-line="17" selection-end-column="15" />
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/imgtotfrecord.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="261">
+                  <caret line="155" column="47" selection-start-line="155" selection-start-column="47" selection-end-line="155" selection-end-column="47" />
+                  <folding>
+                    <element signature="e#0#23#0" expanded="true" />
+                  </folding>
                 </state>
               </provider>
             </entry>
@@ -134,9 +162,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>test</find>
-      <find>params</find>
-      <find>print</find>
       <find>dropout_rate</find>
       <find>result_path_new</find>
       <find>run_params['result</find>
@@ -146,24 +171,27 @@
       <find>continu</find>
       <find>logits</find>
       <find>eval_score_list</find>
-      <find>configs</find>
       <find>y_pred</find>
       <find>dataset_folder</find>
       <find>swish</find>
       <find>get_file</find>
       <find>data_type</find>
       <find>single_train_address</find>
-      <find>grouped_eval_address</find>
       <find>numdeg</find>
       <find>numdegree</find>
       <find>input_path</find>
-      <find>.txt</find>
       <find>model_params</find>
-      <find>result</find>
       <find>eval_data_path</find>
       <find>result_path_base</find>
       <find>score</find>
+      <find>result</find>
       <find>single_eval_address</find>
+      <find>.csv</find>
+      <find>image_address</find>
+      <find>.txt</find>
+      <find>distribution</find>
+      <find>grouped_eval_address</find>
+      <find>configs</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -211,9 +239,9 @@
         <option value="$PROJECT_DIR$/pre_processing.py" />
         <option value="$PROJECT_DIR$/coor_tooth.config" />
         <option value="$PROJECT_DIR$/coor_tooth_workspace.config" />
-        <option value="$PROJECT_DIR$/imgtotfrecord.py" />
         <option value="$PROJECT_DIR$/coor_get_data.py" />
         <option value="$PROJECT_DIR$/coor_train.py" />
+        <option value="$PROJECT_DIR$/imgtotfrecord.py" />
         <option value="$PROJECT_DIR$/open_save_file.py" />
       </list>
     </option>
@@ -237,7 +265,7 @@
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="ToolWindowDocker.ShowToolbar" value="false" />
     <property name="com.intellij.ide.scratch.LRUPopupBuilder$1/New Scratch File" value="Python" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/pre_processing.py" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/imgtotfrecord.py" />
     <property name="settings.editor.selected.configurable" value="Erlang External Tools" />
   </component>
   <component name="RecentsManager">
@@ -390,20 +418,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1554715602048</updated>
-    </task>
-    <task id="LOCAL-00036" summary="Can save array as tfrecord, read as tf record. Not confirmed if can be used to train yet">
-      <created>1557592023171</created>
-      <option name="number" value="00036" />
-      <option name="presentableId" value="LOCAL-00036" />
-      <option name="project" value="LOCAL" />
-      <updated>1557592023171</updated>
-    </task>
-    <task id="LOCAL-00037" summary="Optimize parameters in train.py &#10;&#10;Now adapting to coor_train">
-      <created>1558337324079</created>
-      <option name="number" value="00037" />
-      <option name="presentableId" value="LOCAL-00037" />
-      <option name="project" value="LOCAL" />
-      <updated>1558337324079</updated>
     </task>
     <task id="LOCAL-00038" summary="Optimize parameters in train.py &#10;&#10;Now adapting to coor_train">
       <created>1558337334558</created>
@@ -734,7 +748,21 @@
       <option name="project" value="LOCAL" />
       <updated>1562064094895</updated>
     </task>
-    <option name="localTasksCounter" value="85" />
+    <task id="LOCAL-00085" summary="Debug eval tfrecord as train">
+      <created>1562068783964</created>
+      <option name="number" value="00085" />
+      <option name="presentableId" value="LOCAL-00085" />
+      <option name="project" value="LOCAL" />
+      <updated>1562068783964</updated>
+    </task>
+    <task id="LOCAL-00086" summary="Debug eval tfrecord as train">
+      <created>1562070003910</created>
+      <option name="number" value="00086" />
+      <option name="presentableId" value="LOCAL-00086" />
+      <option name="project" value="LOCAL" />
+      <updated>1562070003910</updated>
+    </task>
+    <option name="localTasksCounter" value="87" />
     <servers />
   </component>
   <component name="TodoView" selected-index="4">
@@ -748,7 +776,6 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="67" y="145" width="1853" height="1055" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" weight="0.14153005" />
       <window_info id="Debug" order="1" sideWeight="0.4978142" side_tool="true" weight="0.39945355" />
@@ -1132,16 +1159,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/coor_model.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="472">
-          <caret line="284" column="19" selection-start-line="284" selection-start-column="13" selection-end-line="284" selection-end-column="19" />
-          <folding>
-            <element signature="e#0#23#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/coor_tooth.config">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="135">
@@ -1156,26 +1173,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/imgtotfrecord.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="667">
-          <caret line="138" column="57" selection-start-line="138" selection-start-column="50" selection-end-line="138" selection-end-column="69" />
-          <folding>
-            <element signature="e#0#23#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/coor_train.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1072">
-          <caret line="396" column="70" selection-start-line="396" selection-start-column="70" selection-end-line="396" selection-end-column="70" />
-          <folding>
-            <element signature="e#0#23#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/pre_processing.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="472">
@@ -1186,19 +1183,52 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/coor_model.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="4260">
+          <caret line="284" column="19" selection-start-line="284" selection-start-column="13" selection-end-line="284" selection-end-column="19" />
+          <folding>
+            <element signature="e#0#23#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/coor_get_data.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="23" lean-forward="true" selection-start-column="23" selection-end-column="23" />
+        <state relative-caret-position="-660">
+          <caret line="7" column="17" selection-start-line="7" selection-start-column="17" selection-end-line="7" selection-end-column="17" />
+          <folding>
+            <element signature="e#0#23#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/coor_train.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="397">
+          <caret line="135" column="63" selection-start-line="135" selection-start-column="63" selection-end-line="135" selection-end-column="63" />
+          <folding>
+            <element signature="e#0#23#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/open_save_file.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="202">
-          <caret line="310" column="47" selection-start-line="310" selection-start-column="47" selection-end-line="310" selection-end-column="47" />
+        <state relative-caret-position="757">
+          <caret line="436" column="38" selection-start-line="436" selection-start-column="38" selection-end-line="436" selection-end-column="38" />
           <folding>
             <element signature="e#13#22#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/imgtotfrecord.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="277">
+          <caret line="67" column="47" selection-start-line="67" selection-start-column="47" selection-end-line="67" selection-end-column="47" />
+          <folding>
+            <element signature="e#0#23#0" expanded="true" />
           </folding>
         </state>
       </provider>

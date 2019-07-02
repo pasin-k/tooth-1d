@@ -7,7 +7,8 @@ import csv
 import numpy as np
 import matplotlib as mpl
 import collections
-from sklearn.model_selection import KFold
+from sklearn.model_selection import KFold, StratifiedKFold
+from sklearn.utils.class_weight import compute_class_weight
 
 mpl.use('TkAgg')
 import matplotlib.pyplot as plt
@@ -203,7 +204,7 @@ def save_plot(coor_list, out_directory, file_header_name, image_name, augment_nu
     print("Finished plotting for %d images with %d rotations at %s" % (len(coor_list), len(degree), out_directory))
 
 
-def split_train_test(grouped_address, example_grouped_address, tfrecord_name, configs, label_count):
+def split_train_test(grouped_address, example_grouped_address, tfrecord_name, configs, class_weight):
     # Split into train and test set
     data_index = list(range(len(example_grouped_address)))
     train_index = []
@@ -259,65 +260,52 @@ def split_train_test(grouped_address, example_grouped_address, tfrecord_name, co
     train_address = [example_grouped_address[i] for i in train_index]
     eval_address = [example_grouped_address[i] for i in eval_index]
 
-    print(len(train_address))
-    print((train_address[0]))
-
     # Save names of files of train address
     file_name = "./data/tfrecord/%s/%s_%s_%s.txt" % (
         tfrecord_name, tfrecord_name, configs['label_data'], configs['label_type'])
     with open(file_name, 'w') as filehandle:
         # Header with 'distibution'
         filehandle.write('distribution\n')
-        for score, freq in label_count.items():
-            filehandle.write('%s_%s\n' % (score, freq))
+        for listitem in class_weight:
+            filehandle.write('%s\n' % listitem)
 
         # Header with 'train'
         filehandle.write('train\n')
         for listitem in train_address:
-            # For each filename, select 0 degree angle and remove _0.png
-            # if listitem[0][0].count('.') != 1:
-            #     raise KeyError("train_address has string '.' more than once in name, please check")
-            # new_list_item = listitem[0][0].split('.')[0]
             filehandle.write('%s\n' % listitem)
 
         # Header with 'eval'
         filehandle.write('eval\n')
         for listitem in eval_address:
-            # For each filename, select 0 degree angle and remove _0.png
-            # if listitem[0][0].count('.') != 1:
-            #     raise KeyError("eval_address has string '.' more than once in name, please check")
-            # new_list_item = listitem[0][0].split('.')[0]
             filehandle.write('%s\n' % listitem)
-    '''
-    # Save names of files of eval address
-    file_name = './data/' + tfrecord_name + '_eval_address.txt'
-    with open(file_name, 'w') as filehandle:
-        for listitem in eval_address:
-            new_list_item = listitem[0][0].replace('_0.png', '')
-            filehandle.write('%s\n' % new_list_item)
-    '''
+
     return train_data, eval_data
 
 
 def split_kfold(grouped_address, k_num):
     """
-    :param grouped_address:     List, all data ready to be shuffled
+    Split data into multiple set using KFold algorithm
+    :param grouped_address:     List, all data ready to be shuffled [[X1,y1],[X2,y2],...]
     :param k_num:               Int, number of k-fold
     :return:                    List of Train, Eval data
     """
-    kfold = KFold(k_num, shuffle=True,random_state=0)
+    # kfold = KFold(k_num, shuffle=True,random_state=0)
+    kfold = StratifiedKFold(k_num, shuffle=True,random_state=0)
+    data, label = [list(e) for e in zip(*grouped_address)]
     train_address = []
     eval_address = []
-    for train_indices, test_indices in kfold.split(grouped_address):
+    # for train_indices, test_indices in kfold.split(grouped_address):
+    for train_indices, test_indices in kfold.split(data, label):
         train_address_fold = []
         test_address_fold = []
         for train_indice in train_indices:
-            train_address_fold.append(grouped_address[train_indice])
+            # train_address_fold.append(grouped_address[train_indice])
+            train_address_fold.append([data[train_indice], label[train_indice]])
         for test_indice in test_indices:
-            test_address_fold.append(grouped_address[test_indice])
+            # test_address_fold.append(grouped_address[test_indice])
+            test_address_fold.append([data[test_indice], label[test_indice]])
         train_address.append(train_address_fold)
         eval_address.append(test_address_fold)
-
     return train_address, eval_address
 
 
@@ -334,6 +322,7 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
     :param k_cross:         Boolean, if true will use K-fold cross validation, else
     :param k_num:           Integer, parameter for KFold
     :return:                Train, Eval: Tuple of list[image address, label]. Also save some txt file
+                            loss_weight: numpy array use for loss weight
     """
     numdeg = configs['numdeg']
 
@@ -387,7 +376,6 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
             image_address_temp.append(np.loadtxt(addr, delimiter=','))
         image_address = image_address_temp
 
-
     # Group up 4 images and label together first, shuffle
     grouped_address = []
     for i in range(len(labels)):
@@ -399,6 +387,10 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
         grouped_address[:], example_grouped_address[:] = zip(*z)
     else:
         shuffle(grouped_address)
+
+    # Calculate loss weight
+    _, label = [list(e) for e in zip(*grouped_address)]
+    class_weight = compute_class_weight('balanced', np.unique(label), label)
 
     if k_cross:  # If k_cross mode, output will be list
         train_address_temp, eval_address_temp = split_kfold(grouped_address, k_num)
@@ -425,13 +417,13 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
             with open(file_name, 'w') as filehandle:
                 # Header with 'distibution'
                 filehandle.write('distribution\n')
-                for score, freq in label_count.items():
-                    filehandle.write('%s_%s\n' % (score, freq))
+                for listitem in class_weight:
+                    filehandle.write('%s\n' % listitem)
                 filehandle.write('train\n')
                 filehandle.write('eval\n')
     else:
         train_address, eval_address = split_train_test(grouped_address, example_grouped_address,
-                                                       tfrecord_name, configs, label_count)
+                                                       tfrecord_name, configs, class_weight)
         if not get_data:  # Put in special format for writing tfrecord (pipeline)
             train_address = tuple(
                 [list(e) for e in zip(*train_address)])  # Convert to tuple of list[image address, label]
