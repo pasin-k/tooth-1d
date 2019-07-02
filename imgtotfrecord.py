@@ -220,5 +220,5 @@ if __name__ == '__main__':
             image_to_tfrecord(tfrecord_name="preparation_361", dataset_folder="./data/cross_section")
         else:
             coordinate_to_tfrecord(tfrecord_name="preparation_coor_450_kfold",
-                                   dataset_folder="./data/coordinate_450_point", k_fold=True)
+                                   dataset_folder="./data/coordinate_450", k_fold=True)
         print("Complete")
