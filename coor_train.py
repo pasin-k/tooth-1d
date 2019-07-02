@@ -428,8 +428,7 @@ if __name__ == '__main__':
     run_single = run_params['is_workstation']
 
     if run_single:
-        run_params['result_path'] = run_params['result_path_base'] + '/' + datetime.datetime.now().strftime(
-            "%Y%m%d_%H_%M_%S") + '/'
+        run_params['result_path'] = run_params['result_path_base'] + '/'
         model_configs['result_file_name'] = 'result.csv'
         model_configs['result_path'] = run_params['result_path']
         if kfold:
