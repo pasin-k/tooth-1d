@@ -401,11 +401,12 @@ def run_hyper_parameter_optimize():
 
 def run_kfold(model_params, k_num=5):
     input_path = os.path.splitext(run_params['input_path'])[0]
-    result_path_base = run_params['result_path_base']
+    result_path = run_params['result_path']
     all_accuracy = []
     for i in range(k_num):
         run_params['input_path'] = input_path + ("_%s.tfrecords" % i)
-        run_params['result_path_base'] = result_path_base + ("/%s" % i)
+        run_params['result_path'] = result_path + ("/%s" % i)
+        model_configs['result_path'] = run_params['result_path']
         accuracy, _, _ = run(model_params)
         all_accuracy.append(accuracy)
     print(all_accuracy)

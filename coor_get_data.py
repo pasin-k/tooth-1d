@@ -5,7 +5,7 @@ import numpy as np
 # Read TFRecord file, return as tf.dataset, specifically used for
 
 numdegree = 4
-data_length = 449
+data_length = 299
 # Import tfrecord to dataset
 def deserialize(example):
     feature = {'label': tf.FixedLenFeature([], tf.int64),
