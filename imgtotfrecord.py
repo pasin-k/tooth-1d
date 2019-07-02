@@ -210,7 +210,7 @@ def coordinate_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None, k_fold=F
 
 
 if __name__ == '__main__':
-    get_image = True
+    get_image = False
     # Select type of label to use
     label_data = ["Occ_Sum", "Taper_Sum", "Occ_L", "Occ_F", "Occ_B", "BL", "MD", "Taper_Sum"]
     label_type = ["average", "median"]
@@ -236,6 +236,6 @@ if __name__ == '__main__':
         if get_image:
             image_to_tfrecord(tfrecord_name="preparation_img_test", dataset_folder="./data/cross_section", k_fold=True)
         else:
-            coordinate_to_tfrecord(tfrecord_name="preparation_img_450_test",
-                                   dataset_folder="./data/coordinate_450", k_fold=True)
+            coordinate_to_tfrecord(tfrecord_name="preparation_coor_300_new",
+                                   dataset_folder="./data/coordinate_300", k_fold=False)
         print("Complete")

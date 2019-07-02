@@ -121,7 +121,7 @@ def run(model_params=None):
     train_data_path = run_params['input_path'].replace('.tfrecords', '') + '_train.tfrecords'
     eval_data_path = run_params['input_path'].replace('.tfrecords', '') + '_eval.tfrecords'
     info_path = run_params['input_path'].replace('.tfrecords', '.txt')
-    label_hist = dict()
+    loss_weight = []
     with open(info_path) as f:
         filehandle = f.read().splitlines()
         if not (filehandle[0] == 'distribution'):
@@ -131,10 +131,9 @@ def run(model_params=None):
             if line == 'train':
                 break
             else:
-                [key, val] = line.split('_')
-                label_hist[key] = int(val)
-    total = label_hist['1'] + label_hist['3'] + label_hist['5']
-    model_params['loss_weight'] = [total / label_hist['1'], total / label_hist['3'], total / label_hist['5']]
+                loss_weight.append(line)
+    assert len(loss_weight) == 3 % "Label does not have 3 unique value"
+    model_params['loss_weight'] = loss_weight
     print("Getting training data from %s" % train_data_path)
     print("Saved model at %s" % run_params['result_path'])
 
@@ -402,12 +401,19 @@ def run_hyper_parameter_optimize():
 def run_kfold(model_params, k_num=5):
     input_path = os.path.splitext(run_params['input_path'])[0]
     result_path = run_params['result_path']
+    kfold_path = run_params['result_path'] + "kfold.csv"
+    if os.path.exists(kfold_path):
+        data = read_file(kfold_path)
+        current_run = len(data)
+    else:
+        current_run = 0
     all_accuracy = []
-    for i in range(k_num):
+    for i in range(current_run, k_num):
         run_params['input_path'] = input_path + ("_%s.tfrecords" % i)
         run_params['result_path'] = result_path + ("/%s" % i)
         model_configs['result_path'] = run_params['result_path']
         accuracy, _, _ = run(model_params)
+        save_file(kfold_path, ["%s_%s" % i, accuracy], write_mode='a')
         all_accuracy.append(accuracy)
     print(all_accuracy)
 
