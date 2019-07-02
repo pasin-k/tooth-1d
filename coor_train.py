@@ -131,8 +131,8 @@ def run(model_params=None):
             if line == 'train':
                 break
             else:
-                loss_weight.append(line)
-    assert len(loss_weight) == 3 % "Label does not have 3 unique value"
+                loss_weight.append(float(line))
+    assert len(loss_weight) == 3, "Label does not have 3 unique value"
     model_params['loss_weight'] = loss_weight
     print("Getting training data from %s" % train_data_path)
     print("Saved model at %s" % run_params['result_path'])
