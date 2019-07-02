@@ -417,7 +417,7 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
             else:
                 print("Train files: %d, Evaluate Files: %d" % (len(single_train_address), len(single_eval_address)))
             train_address.append(single_train_address)
-            eval_address.append((single_eval_address))
+            eval_address.append(single_eval_address)
 
             # Save names of files of train address
             file_name = "./data/tfrecord/%s/%s_%s_%s_%s.txt" % (
@@ -442,7 +442,7 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
         else:
             print("Train files: %d, Evaluate Files: %d" % (len(train_address), len(train_address)))
 
-    return train_address, train_address
+    return train_address, eval_address
 
 
 def read_file(csv_dir, header=False):

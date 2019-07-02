@@ -182,9 +182,9 @@ def save_stl_point(stl_points, stl_points_augmented, label_name, error_file_name
 if __name__ == '__main__':
     # Output 'points' as list[list[numpy]] (example_data, degrees, points)
     save_img = True
-    save_coor = True
+    save_coor = False
     is_fix_amount = True
-    fix_amount = 450  # After get the movement, it will be reduced to 300
+    fix_amount = 100  # After get the movement, it will be reduced to 300
 
     # data_type, stat_type will not be used unless you want to look at lbl value
     points, points_aug, lbl, lbl_name, err_name, deg = get_cross_section(data_type="BL", stat_type="median")
@@ -196,9 +196,10 @@ if __name__ == '__main__':
                 points_aug[p_index][d_index] = fix_amount_of_point(points_aug[p_index][d_index], fix_amount)
     if save_img:
         print("Start saving images...")
-        save_image(points, points_aug, lbl_name, err_name, image_dir="./data/cross_section_450")
+        save_image(points, points_aug, lbl_name, err_name, image_dir="./data/cross_section_100")
 
     if save_coor:
+        fix_amount = fix_amount + 1  # Compensate for the missing data
         print("Start saving coordinates...")
-        save_stl_point(points, points_aug, lbl_name, err_name, file_dir="./data/coordinate_450")
+        save_stl_point(points, points_aug, lbl_name, err_name, file_dir="./data/coordinate_100")
     print("pre_processing.py: done")

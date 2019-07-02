@@ -58,7 +58,7 @@ def image_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None):
     if not os.path.exists(tfrecord_dir):
         os.makedirs(tfrecord_dir)
 
-    #Get file name from dataset_folder
+    # Get file name from dataset_folder
     grouped_train_address, grouped_eval_address = get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs)
     # Start writing train dataset
     train_dataset = tf.data.Dataset.from_tensor_slices(grouped_train_address)
@@ -67,8 +67,6 @@ def image_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None):
     it = train_dataset.make_one_shot_iterator()
 
     elem = it.get_next()
-
-
 
     tfrecord_train_name = os.path.join(tfrecord_dir, "%s_%s_%s_train.tfrecords" % (
         tfrecord_name, configs['label_data'], configs['label_type']))
@@ -122,7 +120,7 @@ def serialize_coordinate(example):
 def read_coordinate(file_name, label):
     file_values = {'label': label}
     for i in range(numdeg):
-        file_values['img' + str(i)] = (file_name[i]*10000).tostring()
+        file_values['img' + str(i)] = (file_name[i] * 10000).tostring()
     return file_values
 
 
@@ -154,7 +152,7 @@ def coordinate_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None, k_fold=F
             score.append(train_address[j][1])
 
         save_file(os.path.join(tfrecord_dir, "%s_%s_%s_%s_score.csv" % (
-            tfrecord_name, configs['label_data'], configs['label_type'], i)), score,one_row=True)
+            tfrecord_name, configs['label_data'], configs['label_type'], i)), score, one_row=True)
         tfrecord_train_name = os.path.join(tfrecord_dir, "%s_%s_%s_%s_train.tfrecords" % (
             tfrecord_name, configs['label_data'], configs['label_type'], i))
         tfrecord_eval_name = os.path.join(tfrecord_dir, "%s_%s_%s_%s_eval.tfrecords" % (
@@ -168,11 +166,11 @@ def coordinate_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None, k_fold=F
                 # print(train_data)
                 feature = {'label': _int64_feature(train_data[1]),
                            'degree': _int64_feature(degree),
-                           'length':  _int64_feature(coordinate_length)}
+                           'length': _int64_feature(coordinate_length)}
                 for i in range(numdeg):
                     for j in range(2):
-                        val = train_data[0][i][:,j].reshape(-1)
-                        feature['img_%s_%s' % (i,j)] =tf.train.Feature(float_list=tf.train.FloatList(value=val))
+                        val = train_data[0][i][:, j].reshape(-1)
+                        feature['img_%s_%s' % (i, j)] = tf.train.Feature(float_list=tf.train.FloatList(value=val))
                 example = tf.train.Example(features=tf.train.Features(feature=feature))
                 # Write TFrecord file
                 writer.write(example.SerializeToString())
@@ -181,7 +179,7 @@ def coordinate_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None, k_fold=F
             for train_data in eval_address:
                 feature = {'label': _int64_feature(train_data[1]),
                            'degree': _int64_feature(degree),
-                           'length':  _int64_feature(coordinate_length)}
+                           'length': _int64_feature(coordinate_length)}
                 for i in range(numdeg):
                     for j in range(2):
                         val = train_data[0][i][:, j].reshape(-1)
@@ -204,7 +202,8 @@ if __name__ == '__main__':
     # configs['label_data'] = "Taper_Sum"
     configs['label_type'] = "median"
 
-    label_datas = ["Taper_Sum", "BL", "MD", "Occ_Sum", "Occ_L", "Occ_F", "Occ_B"]  # Too lazy to do all of these one at a time
+    label_datas = ["Taper_Sum", "BL", "MD", "Occ_Sum", "Occ_L", "Occ_F",
+                   "Occ_B"]  # Too lazy to do all of these one at a time
     # label_datas = ["BL"]  # For debug
 
     for label_data_index in label_datas:
@@ -220,6 +219,6 @@ if __name__ == '__main__':
         if get_image:
             image_to_tfrecord(tfrecord_name="preparation_361", dataset_folder="./data/cross_section")
         else:
-            coordinate_to_tfrecord(tfrecord_name="preparation_coor_300_kfold",
-                                   dataset_folder="./data/coordinate_300_point", k_fold = True)
+            coordinate_to_tfrecord(tfrecord_name="preparation_coor_450_kfold",
+                                   dataset_folder="./data/coordinate_450_point", k_fold=True)
         print("Complete")
