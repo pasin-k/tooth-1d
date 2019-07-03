@@ -413,7 +413,7 @@ def run_kfold(model_params, k_num=5):
         run_params['result_path'] = result_path + ("/%s" % i)
         model_configs['result_path'] = run_params['result_path']
         accuracy, _, _ = run(model_params)
-        save_file(kfold_path, ["%s_%s" % i, accuracy], write_mode='a')
+        save_file(kfold_path, ["%s_%s" % (i, accuracy)], write_mode='a')
         all_accuracy.append(accuracy)
     print(all_accuracy)
 

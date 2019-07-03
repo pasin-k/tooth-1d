@@ -4,7 +4,6 @@
     <list default="true" id="770e0596-62ef-4176-bd6c-3bded3f7c783" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/coor_train.py" beforeDir="false" afterPath="$PROJECT_DIR$/coor_train.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/imgtotfrecord.py" beforeDir="false" afterPath="$PROJECT_DIR$/imgtotfrecord.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -55,8 +54,8 @@
           <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/coor_train.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="302">
-                  <caret line="400" column="37" lean-forward="true" selection-start-line="400" selection-start-column="37" selection-end-line="400" selection-end-column="37" />
+                <state relative-caret-position="482">
+                  <caret line="415" column="54" selection-start-line="415" selection-start-column="54" selection-end-line="415" selection-end-column="54" />
                   <folding>
                     <element signature="e#0#23#0" expanded="true" />
                   </folding>
@@ -429,20 +428,6 @@
       <option name="presentableId" value="Default" />
       <updated>1554715602048</updated>
     </task>
-    <task id="LOCAL-00039" summary="Optimize parameters in train.py &#10;&#10;Now adapting to coor_train">
-      <created>1558438295535</created>
-      <option name="number" value="00039" />
-      <option name="presentableId" value="LOCAL-00039" />
-      <option name="project" value="LOCAL" />
-      <updated>1558438295535</updated>
-    </task>
-    <task id="LOCAL-00040" summary="Optimize parameters in train.py &#10;&#10;Now adapting to coor_train">
-      <created>1558438489828</created>
-      <option name="number" value="00040" />
-      <option name="presentableId" value="LOCAL-00040" />
-      <option name="project" value="LOCAL" />
-      <updated>1558438489828</updated>
-    </task>
     <task id="LOCAL-00041" summary="Optimize parameters in train.py &#10;&#10;Now adapting to coor_train">
       <created>1558439012460</created>
       <option name="number" value="00041" />
@@ -772,7 +757,21 @@
       <option name="project" value="LOCAL" />
       <updated>1562071783293</updated>
     </task>
-    <option name="localTasksCounter" value="88" />
+    <task id="LOCAL-00088" summary="Print loss weight instead of histrogram to the txt file">
+      <created>1562073351107</created>
+      <option name="number" value="00088" />
+      <option name="presentableId" value="LOCAL-00088" />
+      <option name="project" value="LOCAL" />
+      <updated>1562073351107</updated>
+    </task>
+    <task id="LOCAL-00089" summary="Print loss weight instead of histrogram to the txt file">
+      <created>1562074082897</created>
+      <option name="number" value="00089" />
+      <option name="presentableId" value="LOCAL-00089" />
+      <option name="project" value="LOCAL" />
+      <updated>1562074082897</updated>
+    </task>
+    <option name="localTasksCounter" value="90" />
     <servers />
   </component>
   <component name="TodoView" selected-index="4">
@@ -869,7 +868,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Improve check_exist function, now more compact.&#10;Also add fully connect parameter" />
     <MESSAGE value="Fix stl-&gt;image to be 240x360 pixel (fixed)" />
     <MESSAGE value="Create new type of model (Simple CNN)&#10;Hyperparameter optimize now work with optimization" />
     <MESSAGE value="Now save final result of training data as csv file" />
@@ -894,7 +892,8 @@
     <MESSAGE value="Implemented K fold cross validate (For one run and optimize run)" />
     <MESSAGE value="Debug eval tfrecord as train" />
     <MESSAGE value="Kfold also works on image. Print loss weight instead of histrogram to the txt file" />
-    <option name="LAST_COMMIT_MESSAGE" value="Kfold also works on image. Print loss weight instead of histrogram to the txt file" />
+    <MESSAGE value="Print loss weight instead of histrogram to the txt file" />
+    <option name="LAST_COMMIT_MESSAGE" value="Print loss weight instead of histrogram to the txt file" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$USER_HOME$/anaconda3/envs/ps36/lib/python3.6/site-packages/tensorflow/python/framework/op_def_library.py">
@@ -1236,8 +1235,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/coor_train.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="302">
-          <caret line="400" column="37" lean-forward="true" selection-start-line="400" selection-start-column="37" selection-end-line="400" selection-end-column="37" />
+        <state relative-caret-position="482">
+          <caret line="415" column="54" selection-start-line="415" selection-start-column="54" selection-end-line="415" selection-end-column="54" />
           <folding>
             <element signature="e#0#23#0" expanded="true" />
           </folding>
