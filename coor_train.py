@@ -410,7 +410,7 @@ def run_kfold(model_params, k_num=5):
     all_accuracy = []
     for i in range(current_run, k_num):
         run_params['input_path'] = input_path + ("_%s.tfrecords" % i)
-        run_params['result_path'] = result_path + ("/%s" % i)
+        run_params['result_path'] = result_path + ("/%s/" % i)
         model_configs['result_path'] = run_params['result_path']
         accuracy, _, _ = run(model_params)
         save_file(kfold_path, ["%s_%s" % (i, accuracy)], write_mode='a')
@@ -438,10 +438,12 @@ if __name__ == '__main__':
         model_configs['result_file_name'] = 'result.csv'
         model_configs['result_path'] = run_params['result_path']
         if kfold:
-            run_kfold(model_configs, kfold)
+            run_kfold(model_configs)
         else:
+            print("wrong")
             run(model_configs)
     else:
+        print("Wrong")
         if kfold:
             run_hyper_parameter_optimize_kfold()
         else:
