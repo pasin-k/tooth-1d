@@ -2,8 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="770e0596-62ef-4176-bd6c-3bded3f7c783" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Playground.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Playground.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/coor_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/coor_model.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/coor_train.py" beforeDir="false" afterPath="$PROJECT_DIR$/coor_train.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/open_save_file.py" beforeDir="false" afterPath="$PROJECT_DIR$/open_save_file.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pre_processing.py" beforeDir="false" afterPath="$PROJECT_DIR$/pre_processing.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stlSlicer.py" beforeDir="false" afterPath="$PROJECT_DIR$/stlSlicer.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -30,8 +34,8 @@
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/coor_model.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="4260">
-                  <caret line="284" column="19" selection-start-line="284" selection-start-column="13" selection-end-line="284" selection-end-column="19" />
+                <state relative-caret-position="172">
+                  <caret line="219" selection-start-line="219" selection-end-line="221" selection-end-column="38" />
                   <folding>
                     <element signature="e#0#23#0" expanded="true" />
                   </folding>
@@ -51,11 +55,32 @@
               </provider>
             </entry>
           </file>
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$APPLICATION_CONFIG_DIR$/scratches/scratch_18.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="135">
+                  <caret line="9" lean-forward="true" selection-start-line="9" selection-end-line="9" />
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/stlSlicer.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="22">
+                  <caret line="20" column="82" selection-start-line="20" selection-start-column="78" selection-end-line="20" selection-end-column="82" />
+                  <folding>
+                    <element signature="e#0#18#0" expanded="true" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
           <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/coor_train.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="482">
-                  <caret line="415" column="54" selection-start-line="415" selection-start-column="54" selection-end-line="415" selection-end-column="54" />
+                <state relative-caret-position="-3339">
+                  <caret line="172" column="46" lean-forward="true" selection-start-line="172" selection-start-column="46" selection-end-line="172" selection-end-column="46" />
                   <folding>
                     <element signature="e#0#23#0" expanded="true" />
                   </folding>
@@ -70,6 +95,18 @@
                   <caret line="239" column="87" selection-start-line="239" selection-start-column="87" selection-end-line="239" selection-end-column="87" />
                   <folding>
                     <element signature="e#0#23#0" expanded="true" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/pre_processing.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="270">
+                  <caret line="135" column="7" lean-forward="true" selection-start-line="135" selection-start-column="4" selection-end-line="135" selection-end-column="13" />
+                  <folding>
+                    <element signature="e#165#176#0" expanded="true" />
                   </folding>
                 </state>
               </provider>
@@ -91,8 +128,8 @@
           <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/open_save_file.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="40">
-                  <caret line="439" column="4" selection-start-line="439" selection-start-column="4" selection-end-line="439" selection-end-column="4" />
+                <state relative-caret-position="457">
+                  <caret line="207" column="41" selection-start-line="207" selection-start-column="40" selection-end-line="207" selection-end-column="41" />
                   <folding>
                     <element signature="e#13#22#0" expanded="true" />
                   </folding>
@@ -161,20 +198,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>result_path_new</find>
-      <find>run_params['result</find>
-      <find>model_num</find>
-      <find>activation</find>
-      <find>loss</find>
-      <find>continu</find>
-      <find>logits</find>
-      <find>eval_score_list</find>
-      <find>y_pred</find>
-      <find>dataset_folder</find>
-      <find>swish</find>
-      <find>get_file</find>
-      <find>data_type</find>
-      <find>single_train_address</find>
       <find>numdeg</find>
       <find>numdegree</find>
       <find>input_path</find>
@@ -182,7 +205,6 @@
       <find>eval_data_path</find>
       <find>result_path_base</find>
       <find>score</find>
-      <find>result</find>
       <find>single_eval_address</find>
       <find>.csv</find>
       <find>image_address</find>
@@ -190,7 +212,22 @@
       <find>distribution</find>
       <find>configs</find>
       <find>train_address</find>
+      <find>reAr</find>
+      <find>image_name</find>
+      <find>dataname</find>
+      <find>points</find>
+      <find>get_cross_section</find>
+      <find>Degree</find>
+      <find>P</find>
+      <find>rearrange</find>
+      <find>mpl</find>
+      <find>folder_name</find>
+      <find>getSlicer</find>
       <find>grouped_eval_address</find>
+      <find>Zplane</find>
+      <find>datatype</find>
+      <find>degree</find>
+      <find>result</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -225,7 +262,6 @@
         <option value="$APPLICATION_CONFIG_DIR$/scratches/scratch_11.py" />
         <option value="$PROJECT_DIR$/custom_hook.py" />
         <option value="$APPLICATION_CONFIG_DIR$/scratches/scratch_12.py" />
-        <option value="$PROJECT_DIR$/coor_model.py" />
         <option value="$APPLICATION_CONFIG_DIR$/scratches/scratch_13.py" />
         <option value="$PROJECT_DIR$/get_input.py" />
         <option value="$APPLICATION_CONFIG_DIR$/scratches/scratch_14.py" />
@@ -235,19 +271,23 @@
         <option value="$PROJECT_DIR$/tooth.config" />
         <option value="$PROJECT_DIR$/tooth_workspace.config" />
         <option value="$PROJECT_DIR$/plot_focal_loss.py" />
-        <option value="$PROJECT_DIR$/pre_processing.py" />
         <option value="$PROJECT_DIR$/coor_tooth.config" />
         <option value="$PROJECT_DIR$/coor_tooth_workspace.config" />
         <option value="$PROJECT_DIR$/coor_get_data.py" />
-        <option value="$PROJECT_DIR$/open_save_file.py" />
         <option value="$PROJECT_DIR$/imgtotfrecord.py" />
+        <option value="$APPLICATION_CONFIG_DIR$/scratches/scratch_17.py" />
+        <option value="$PROJECT_DIR$/open_save_file.py" />
+        <option value="$APPLICATION_CONFIG_DIR$/scratches/scratch_18.py" />
+        <option value="$PROJECT_DIR$/stlSlicer.py" />
+        <option value="$PROJECT_DIR$/pre_processing.py" />
         <option value="$PROJECT_DIR$/coor_train.py" />
+        <option value="$PROJECT_DIR$/coor_model.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="226" />
-    <option name="y" value="107" />
+    <option name="x" value="107" />
+    <option name="y" value="147" />
     <option name="width" value="1813" />
     <option name="height" value="789" />
   </component>
@@ -274,7 +314,7 @@
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="ToolWindowDocker.ShowToolbar" value="false" />
     <property name="com.intellij.ide.scratch.LRUPopupBuilder$1/New Scratch File" value="Python" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/imgtotfrecord.py" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/stlSlicer.py" />
     <property name="settings.editor.selected.configurable" value="Erlang External Tools" />
   </component>
   <component name="RecentsManager">
@@ -294,28 +334,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.imgtotfrecord">
-    <configuration name="coor_get_data" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="my2DCNN" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/coor_get_data.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
+  <component name="RunManager" selected="Python.coor_train">
     <configuration name="coor_train" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="my2DCNN" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -358,27 +377,6 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="plot_focal_loss" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="my2DCNN" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/plot_focal_loss.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <configuration name="pre_processing" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="my2DCNN" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -400,20 +398,62 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="scratch_17" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="my2DCNN" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$APPLICATION_CONFIG_DIR$/scratches" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$APPLICATION_CONFIG_DIR$/scratches/scratch_17.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="scratch_18" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="my2DCNN" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$APPLICATION_CONFIG_DIR$/scratches" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$APPLICATION_CONFIG_DIR$/scratches/scratch_18.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <list>
       <item itemvalue="Python.imgtotfrecord" />
       <item itemvalue="Python.pre_processing" />
       <item itemvalue="Python.coor_train" />
-      <item itemvalue="Python.coor_get_data" />
-      <item itemvalue="Python.plot_focal_loss" />
+      <item itemvalue="Python.scratch_17" />
+      <item itemvalue="Python.scratch_18" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.imgtotfrecord" />
         <item itemvalue="Python.coor_train" />
+        <item itemvalue="Python.scratch_18" />
+        <item itemvalue="Python.scratch_17" />
+        <item itemvalue="Python.imgtotfrecord" />
         <item itemvalue="Python.pre_processing" />
-        <item itemvalue="Python.plot_focal_loss" />
-        <item itemvalue="Python.coor_get_data" />
       </list>
     </recent_temporary>
   </component>
@@ -427,13 +467,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1554715602048</updated>
-    </task>
-    <task id="LOCAL-00041" summary="Optimize parameters in train.py &#10;&#10;Now adapting to coor_train">
-      <created>1558439012460</created>
-      <option name="number" value="00041" />
-      <option name="presentableId" value="LOCAL-00041" />
-      <option name="project" value="LOCAL" />
-      <updated>1558439012460</updated>
     </task>
     <task id="LOCAL-00042" summary="Debug error when last run is not complete and cannot run again unless delete that file">
       <created>1558500246861</created>
@@ -771,7 +804,14 @@
       <option name="project" value="LOCAL" />
       <updated>1562074082897</updated>
     </task>
-    <option name="localTasksCounter" value="90" />
+    <task id="LOCAL-00090" summary="Print loss weight instead of histrogram to the txt file">
+      <created>1562119407054</created>
+      <option name="number" value="00090" />
+      <option name="presentableId" value="LOCAL-00090" />
+      <option name="project" value="LOCAL" />
+      <updated>1562119407054</updated>
+    </task>
+    <option name="localTasksCounter" value="91" />
     <servers />
   </component>
   <component name="TodoView" selected-index="4">
@@ -1176,23 +1216,24 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/pre_processing.py">
+    <entry file="file://$PROJECT_DIR$/coor_tooth.config">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="472">
-          <caret line="201" column="70" selection-start-line="201" selection-start-column="70" selection-end-line="201" selection-end-column="70" />
-          <folding>
-            <element signature="e#165#176#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="135">
+          <caret line="9" column="61" selection-start-line="9" selection-start-column="61" selection-end-line="9" selection-end-column="61" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/coor_model.py">
+    <entry file="file://$APPLICATION_CONFIG_DIR$/scratches/scratch_17.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="4260">
-          <caret line="284" column="19" selection-start-line="284" selection-start-column="13" selection-end-line="284" selection-end-column="19" />
-          <folding>
-            <element signature="e#0#23#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="420">
+          <caret line="28" column="107" selection-start-line="28" selection-start-column="107" selection-end-line="28" selection-end-column="107" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$APPLICATION_CONFIG_DIR$/scratches/scratch_18.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="135">
+          <caret line="9" lean-forward="true" selection-start-line="9" selection-end-line="9" />
         </state>
       </provider>
     </entry>
@@ -1202,23 +1243,6 @@
           <caret line="7" column="17" selection-start-line="7" selection-start-column="17" selection-end-line="7" selection-end-column="17" />
           <folding>
             <element signature="e#0#23#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/coor_tooth.config">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="135">
-          <caret line="9" column="61" selection-start-line="9" selection-start-column="61" selection-end-line="9" selection-end-column="61" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/open_save_file.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="40">
-          <caret line="439" column="4" selection-start-line="439" selection-start-column="4" selection-end-line="439" selection-end-column="4" />
-          <folding>
-            <element signature="e#13#22#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1233,10 +1257,50 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/stlSlicer.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="22">
+          <caret line="20" column="82" selection-start-line="20" selection-start-column="78" selection-end-line="20" selection-end-column="82" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pre_processing.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="270">
+          <caret line="135" column="7" lean-forward="true" selection-start-line="135" selection-start-column="4" selection-end-line="135" selection-end-column="13" />
+          <folding>
+            <element signature="e#165#176#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/open_save_file.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="457">
+          <caret line="207" column="41" selection-start-line="207" selection-start-column="40" selection-end-line="207" selection-end-column="41" />
+          <folding>
+            <element signature="e#13#22#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/coor_model.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="172">
+          <caret line="219" selection-start-line="219" selection-end-line="221" selection-end-column="38" />
+          <folding>
+            <element signature="e#0#23#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/coor_train.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="482">
-          <caret line="415" column="54" selection-start-line="415" selection-start-column="54" selection-end-line="415" selection-end-column="54" />
+        <state relative-caret-position="-3339">
+          <caret line="172" column="46" lean-forward="true" selection-start-line="172" selection-start-column="46" selection-end-line="172" selection-end-column="46" />
           <folding>
             <element signature="e#0#23#0" expanded="true" />
           </folding>

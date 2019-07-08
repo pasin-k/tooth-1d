@@ -5,6 +5,7 @@ import numpy as np
 # Read TFRecord file, return as tf.dataset, specifically used for
 
 numdegree = 4
+# TODO: use input from tfrecord instead
 data_length = 449
 # Import tfrecord to dataset
 def deserialize(example):
