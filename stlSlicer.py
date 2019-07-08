@@ -2,9 +2,9 @@ import numpy as np
 # import stl
 from stl import mesh
 import sys
-import matplotlib as mpl
-
-mpl.use('TkAgg')  # Use this so we can use matplotlib
+# import matplotlib as mpl
+#
+# mpl.use('TkAgg')  # Use this so we can use matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure
 
@@ -18,77 +18,80 @@ v = '1.8.1'
 print("stlSlicer.py version: " + str(v))
 
 
-# Get list of coordinates from the slice np.array(X,2) from 'a single stl file'; X is varies
-# Input:    stlfilename -> String, Folder name
-#           Zplane      -> Scalar value, Selected plane,
-#           Degree      -> List of rotation degree
-#           augment     -> Boolean, If true, will rotate 180 degree
-#           reAr        -> Boolean, Rearrange coordinate from bottom left to right
-#           axis        -> Axis of rotation (0 = X,1 = Y,2 = Z) (Default at 1, based from preliminary result)
-# Output:   List of numpy array of coordinates, each element in layer list represent each degree rotated
-def getSlicer(stl_file_name, Zplane, Degree, augment, reAr=True, axis=1):
+def getSlicer(stl_file_name, Zplane, degree, augment=None, is_rearrange=True, axis=1):
+    """
+    Get list of np.array(X,2) coordinates from the slice  from a .stl file; X is varies
+    :param stl_file_name:   String, Folder name
+    :param Zplane:          Scalar value, selected plane
+    :param degree:          List of degree of cross-section you want
+    :param augment:         List of rotation degree to increase datasize
+    :param is_rearrange:       Boolean, Rearrange coordinate from bottom left to right
+    :param axis:            Axis of rotation (0 = X,1 = Y,2 = Z) (Default at 1, based from preliminary result)
+    :return: reP_all:       List of list of numpy array with size of [len(augment),len(degree),[N,2])
+    """
     # Import data and change to np array of N * 9 dimension
     # print(stl_file_name)
     prep_mesh = mesh.Mesh.from_file(stl_file_name)
 
     # Tmain is list of all triangles
     # Tmains = np.concatenate((prep_mesh.v0, prep_mesh.v1, prep_mesh.v2), axis=1).tolist()  # list of N * 9 dimension
-    Tmain = np.concatenate((prep_mesh.v0, prep_mesh.v1, prep_mesh.v2), axis=1)  # numpy array of N * 9 dimension
-    if augment:
-        Tmain = augmented(Tmain)
-    reP = list()  # Output
-    # vtOne = np.zeros([3])  # vertex #1
-    # vtTwo1 = np.zeros([3])  # vertex #2
-    # vtTwo2 = np.zeros([3])  # vertex #3
-    for d in Degree:
-        P = np.empty([0, 3])  # Unarranged coordinates
-        T = rotatestl(Tmain, axis, d).tolist()  # Default as Z-axis
-        i = 1  # Special index added as a third column which will be used in 'rearrange' function
-        while len(T) != 0:
-            t = np.array(T.pop(0))  # Select some element from t
-            Zcoor = np.array((t[2], t[5], t[8]))
-            if (not ((Zcoor[0] < Zplane and Zcoor[1] < Zplane and Zcoor[
-                2] < Zplane) or  # Check if triangle is in the selected plane
-                     (Zcoor[0] > Zplane and Zcoor[1] > Zplane and Zcoor[2] > Zplane))):
-                idxUp = np.argwhere(Zcoor > Zplane)  # Index of vertex ABOVE plane
-                idxDown = np.argwhere(Zcoor < Zplane)  # Index of vertex BELOW plane
-                if np.size(idxUp) == 1:  # If this true, one point is above plane
-                    vtOne = t[idxUp[0][0] * 3:idxUp[0][0] * 3 + 3]
-                    vtTwo1 = t[idxDown[0][0] * 3:idxDown[0][0] * 3 + 3]
-                    vtTwo2 = t[idxDown[1][0] * 3:idxDown[1][0] * 3 + 3]
-                else:  # If this true, one point is below plane
-                    vtOne = t[idxDown[0][0] * 3:idxDown[0][0] * 3 + 3]
-                    vtTwo1 = t[idxUp[0][0] * 3:idxUp[0][0] * 3 + 3]
-                    vtTwo2 = t[idxUp[1][0] * 3:idxUp[1][0] * 3 + 3]
+    Tmain_temp = np.concatenate((prep_mesh.v0, prep_mesh.v1, prep_mesh.v2), axis=1)  # numpy array of N * 9 dimension
+    if augment is not None:
+        Tmain_all = []
+        for a in augment:
+            Tmain_all.append(rotatestl(Tmain_temp, axis, a))
+    else:
+        Tmain_all = [Tmain_temp]
 
-                # vtOne is vertex coordinate (3D) that is alone separate by plane (above or below alone)
-                # vtTwo1/vtTwo2 is vertex coordinate (3D) that is together after separate by plane
-                # l1,l2 is cross-section coordinate (2D) combined as 2x2 matrix
-                # The one with lower x coordinate with be the first row
-                l1 = slicecoor(Zplane, vtOne, vtTwo1, i)
-                l2 = slicecoor(Zplane, vtOne, vtTwo2, i)
-                l = np.array([l1, l2])  # This is [2,3] size numpy array of two coordinates that intersect Z plane
-                P = np.concatenate((P, l), axis=0)  # Accumulate all intersections
-                i = i + 1
-        if reAr:
-            # print("%s_%s_%s" % (stl_file_name, d, augment))
-            newP = rearrange(P)
-            if newP is None:
-                print("getSlicer: %s has problem getting cross-section. Possible hole appeared in model" % stl_file_name)
-                return None
+    reP_all = []
+    for Tmain in Tmain_all:
+        reP = list()  # Output
+        # vtOne = np.zeros([3])  # vertex #1
+        # vtTwo1 = np.zeros([3])  # vertex #2
+        # vtTwo2 = np.zeros([3])  # vertex #3
+        for d in degree:
+            P = np.empty([0, 3])  # Unarranged coordinates
+            T = rotatestl(Tmain, axis, d).tolist()  # Default as Z-axis
+            i = 1  # Special index added as a third column which will be used in 'rearrange' function
+            while len(T) != 0:
+                t = np.array(T.pop(0))  # Select some element from t
+                Zcoor = np.array((t[2], t[5], t[8]))
+                if (not ((Zcoor[0] < Zplane and Zcoor[1] < Zplane and Zcoor[
+                    2] < Zplane) or  # Check if triangle is in the selected plane
+                         (Zcoor[0] > Zplane and Zcoor[1] > Zplane and Zcoor[2] > Zplane))):
+                    idxUp = np.argwhere(Zcoor > Zplane)  # Index of vertex ABOVE plane
+                    idxDown = np.argwhere(Zcoor < Zplane)  # Index of vertex BELOW plane
+                    if np.size(idxUp) == 1:  # If this true, one point is above plane
+                        vtOne = t[idxUp[0][0] * 3:idxUp[0][0] * 3 + 3]
+                        vtTwo1 = t[idxDown[0][0] * 3:idxDown[0][0] * 3 + 3]
+                        vtTwo2 = t[idxDown[1][0] * 3:idxDown[1][0] * 3 + 3]
+                    else:  # If this true, one point is below plane
+                        vtOne = t[idxDown[0][0] * 3:idxDown[0][0] * 3 + 3]
+                        vtTwo1 = t[idxUp[0][0] * 3:idxUp[0][0] * 3 + 3]
+                        vtTwo2 = t[idxUp[1][0] * 3:idxUp[1][0] * 3 + 3]
+
+                    # vtOne is vertex coordinate (3D) that is alone separate by plane (above or below alone)
+                    # vtTwo1/vtTwo2 is vertex coordinate (3D) that is together after separate by plane
+                    # l1,l2 is cross-section coordinate (2D) combined as 2x2 matrix
+                    # The one with lower x coordinate with be the first row
+                    l1 = slicecoor(Zplane, vtOne, vtTwo1, i)
+                    l2 = slicecoor(Zplane, vtOne, vtTwo2, i)
+                    l = np.array([l1, l2])  # This is [2,3] size numpy array of two coordinates that intersect Z plane
+                    P = np.concatenate((P, l), axis=0)  # Accumulate all intersections
+                    i = i + 1
+            if is_rearrange:
+                # print("%s_%s_%s" % (stl_file_name, d, augment))
+                newP = rearrange(P)
+                if newP is None:
+                    print("getSlicer: %s has problem getting cross-section. Possible hole appeared in model" % stl_file_name)
+                    reP = None
+                    break
+                else:
+                    reP.append(newP)
             else:
-                reP.append(newP)
-        else:
-            reP.append(P)
-    return reP
-
-
-# Double amount by doing augmentations by rotating 180 degree
-# Input:    T   ->  Numpy array of triangles coordinate ([N,9] Matrix)
-# Output:   Taug->  Augmented triangles ([2*N,9] Matrix)
-def augmented(T):
-    Taug = rotatestl(T, 1, 180)
-    return Taug
+                reP.append(P)
+        reP_all.append(reP)
+    return reP_all
 
 
 # Rotate the stl data (expect np.array(N*9)), and return multiple rotated data on 'axis' (0,1,2) with 'degree' rotated

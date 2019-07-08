@@ -15,7 +15,7 @@ v = '1.2.0'
 # 1.2: Now save image with their own name
 print("pre_processing.py version: " + str(v))
 
-degree = list([0, 45, 90, 135])
+degree = [0, 45, 90, 135]
 numdeg = len(degree)
 
 
@@ -57,11 +57,26 @@ def fix_amount_of_point(stl_points, coor_amount):
     return stl_points
 
 
-# Get stl file and label, convert to stl_file <-- This is the main function
-def get_cross_section(data_type, stat_type):
+def get_cross_section(data_type, stat_type, folder_name='../global_data/stl_data', file_name="PreparationScan.stl",
+                      csv_dir = '../global_data/Ground Truth Score_new.csv'):
+    """
+    Get coordinates of stl file and label
+    :param data_type:   String, Type of label e.g. [Taper/Occ]
+    :param stat_type:   String, Label measurement e.g [Average/Median]
+    :param folder_name: String, folder directory of stl file
+    :param csv_dir:     String, file directory of label (csv file)
+    :param file_name:   String, filename can be None
+    :return:
+    stl_points_all          List of all point (np array)
+    label_all               List of label
+    label_name_all          List of label name (id)
+    error_file_names_all    List of label name that has error
+    degree                  List of degree on each example
+    augment_config          List of degree of augmentations
+    """
     # Get data and transformed to cross-section image
-    name_dir, image_name = get_file_name(folder_name='../global_data/stl_data', file_name="PreparationScan.stl")
-    label, label_name = get_label(data_type, stat_type, double_data=True, one_hotted=False, normalized=False)
+    name_dir, image_name = get_file_name(folder_name=folder_name, file_name=file_name)
+    label, label_name = get_label(data_type, stat_type, double_data=False, one_hotted=False, normalized=False, file_dir=csv_dir)
     # Number of data should be the same as number of label
     if image_name != label_name:
         print(image_name)
@@ -70,41 +85,49 @@ def get_cross_section(data_type, stat_type):
         raise Exception("ERROR, image and label not similar: %d images, %d labels. Possible missing files: %s"
                         % (len(image_name), (len(label_name)), diff))
 
-    augment_config = list([False, True])  # Original data once, Augmented once
-    # Prepare two set of list, one for data, another for augmented data
-    stl_points = list()
-    stl_points_augmented = list()
-    error_file_names = list()  # Names of file that cannot get cross-section image
+    augment_config = [0, 5, 10, 15, 20, 25, 30, 35, 40]
+    # To verify number of coordinates
     min_point = 1000
     max_point = 0
+
+    stl_points_all = []
+    label_all = []
+    label_name_all = []
+    error_file_names_all = []
     for i in range(len(name_dir)):
-        for augment in augment_config:
-            points = getSlicer(name_dir[i], 0, degree, augment, axis=1)
-            if points is None:  # If the output has error, remove label of that file
+        # Prepare two set of list, one for data, another for augmented data
+        label_temp = label
+        label_name_temp = label_name
+        points_all = getSlicer(name_dir[i], 0, degree, augment=augment_config, axis=1)
+        stl_points = []
+        error_file_names = []  # Names of file that cannot get cross-section image
+
+        for point in points_all:
+
+            if point is None:  # If the output has error, remove label of that file
                 error_file_names.append(image_name[i])
-                index = label_name.index(image_name[i])
-                label_name.pop(index)
-                label.pop(index * 2)
-                label.pop(index * 2)  # Do it again if we double the data
+                index = label_name_temp.index(image_name[i])
+                label_name_temp.pop(index)
+                label_temp.pop(index)
                 break
             else:
-                if len(points[0]) > max_point:
-                    max_point = len(points[0])
-                if len(points[0]) < min_point:
-                    min_point = len(points[0])
-                if augment:
-                    stl_points_augmented.append(points)
-                else:
-                    stl_points.append(points)
+                stl_points.append(point)
+                if len(point[0]) > max_point:
+                    max_point = len(point[0])
+                if len(point[0]) < min_point:
+                    min_point = len(point[0])
+
+        stl_points_all.append(stl_points)
+        label_all.append(label_temp)
+        label_name_all.append(label_name_temp)
+        error_file_names_all.append(error_file_names)
 
     # The output is list(examples) of list(degrees) of numpy array (N*2 coordinates)
-    print("Finished with %d examples, %d augmented examples" % (len(stl_points), len(stl_points_augmented)))
-    print("Number of score received (bugged file removed): %d (Originally: %d)" % (len(label), len(label) / 2))
+    for label_name in label_name_all:
+        print("Finished with %d examples" % (len(label_name)))
 
-    print("Max point: %s, min  point: %s" % (max_point, min_point))
-    # augment_num = int(len(label)/len(label_name))
-    # label_name_aug = [val for val in label_name for _ in range(augment_num)]
-    return stl_points, stl_points_augmented, label, label_name, error_file_names, degree
+    print("Max amount of coordinates: %s, min  coordinates: %s" % (max_point, min_point))
+    return stl_points_all, label_all, label_name_all, error_file_names_all, degree, augment_config
 
 
 def save_image(stl_points, stl_points_augmented, label_name, error_file_names, image_dir="./data/cross_section"):
@@ -158,7 +181,7 @@ def save_coordinate(coor_list, out_directory, file_header_name, image_name, augm
             # np.save(output_name, coor)
             # np.savetxt(output_name.replace(".npy",".txt"), coor)
     print("Finished saving coordinates: %d files with %d rotations at dir: %s" % (
-    len(coor_list), len(degree), out_directory))
+        len(coor_list), len(degree), out_directory))
 
 
 def save_stl_point(stl_points, stl_points_augmented, label_name, error_file_names, file_dir="./data/coordinates"):
@@ -187,19 +210,22 @@ if __name__ == '__main__':
     fix_amount = 100  # After get the movement, it will be reduced to 300
 
     # data_type, stat_type will not be used unless you want to look at lbl value
-    points, points_aug, lbl, lbl_name, err_name, deg = get_cross_section(data_type="BL", stat_type="median")
+    points_all, lbl_all, lbl_name_all, err_name_all, deg, aug = get_cross_section(data_type="BL", stat_type="median")
     if is_fix_amount:
-        print("Adjusting number of coordinates...")
-        for p_index in range(len(points)):
-            for d_index in range(len(degree)):
-                points[p_index][d_index] = fix_amount_of_point(points[p_index][d_index], fix_amount)
-                points_aug[p_index][d_index] = fix_amount_of_point(points_aug[p_index][d_index], fix_amount)
+        for i in len(lbl_all):
+            points = points_all[i]
+            print("Adjusting number of coordinates...")
+            for p_index in range(len(points)):
+                for d_index in range(len(degree)):
+                    points[p_index][d_index] = fix_amount_of_point(points[p_index][d_index], fix_amount)
+            points_all[i] = points
+
     if save_img:
         print("Start saving images...")
-        save_image(points, points_aug, lbl_name, err_name, image_dir="./data/cross_section_100")
+        save_image(points_all, lbl_name_all, err_name_all, image_dir="./data/cross_section_100")
 
     if save_coor:
         fix_amount = fix_amount + 1  # Compensate for the missing data
         print("Start saving coordinates...")
-        save_stl_point(points, points_aug, lbl_name, err_name, file_dir="./data/coordinate_100")
+        save_stl_point(points_all, lbl_name_all, err_name_all, file_dir="./data/coordinate_100")
     print("pre_processing.py: done")

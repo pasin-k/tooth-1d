@@ -2,8 +2,6 @@
 import os
 # import glob
 import csv
-# %matplotlib inline
-# import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib as mpl
 import collections
@@ -18,7 +16,7 @@ from random import shuffle
 
 v = '2.3.1'  # Add getFilename function, get absolute path now
 # 1.8 Works with pycharm
-# 1.9 Edit Name of dataname and datatype
+# 1.9 Edit Name of dataname and stattype
 # 2.1 Add One_hot encoding
 # 2.2 Add normalize option
 # 2.3 Add new version of get_file_name
@@ -27,11 +25,14 @@ v = '2.3.1'  # Add getFilename function, get absolute path now
 print("ImportData2D.py version: " + str(v))
 
 
-# Get sorted List of filenames: search for all file within folder with specific file name
-# If not required specific file name, type None
-# folder_dir is used for checking missing files
-# We specifically ignore 'error_file.txt'
 def get_file_name(folder_name='../global_data/', file_name='PreparationScan.stl'):
+    """
+    Get sorted List of filenames: search for all file within folder with specific file name, ignore specific filename
+    :param folder_name:     Folder direcory to search
+    :param file_name:       Retrieve only filename specified, can be None
+    :return: file_dir       List of full directory of each file
+             folder_dir     List of number of folder (Use for specific format to identify data label)
+    """
     print("get_file_name: Import from %s, searching for file name with %s" % (os.path.abspath(folder_name), file_name))
     file_dir = list()
     folder_dir = list()
@@ -73,12 +74,19 @@ def readjust_median_label(label, avg_data):
     return label
 
 
-# double: Duplicate score twice for augmentation
-# one_hotted: False-> Output will be continuous, True-> Output will be vector with 1 on the correct score
-# normalized: True will give result as maximum of 1, False will give raw value
-# output labels_name is only for checking missing files
-def get_label(dataname, datatype, double_data=True, one_hotted=False, normalized=False,
+def get_label(dataname, stattype, double_data=True, one_hotted=False, normalized=False,
               file_dir='../global_data/Ground Truth Score_new.csv'):
+    """
+    Get label of Ground Truth Score.csv file
+    :param dataname:    String, Type of label e.g. [Taper/Occ]
+    :param stattype:    String, Label measurement e.g [Average/Median]
+    :param double_data: Boolean, Double amount of data of label, for augmentation
+    :param one_hotted:  Boolean, Return output as one-hot data
+    :param normalized:  Boolean, Normalize output to 0-1 (Not applied for one hot)
+    :param file_dir:    Directory of csv file
+    :return: labels     List of score of requested dat
+             label_name List of score name, used to identify order of data
+    """
     label_name = {"Occ_B": 0, "Occ_F": 3, "Occ_L": 6, "Occ_Sum": 9,
                   "BL": 12, "MD": 15, "Taper_Sum": 18}
     label_max_score = {"Occ_B": 5, "Occ_F": 5, "Occ_L": 5, "Occ_Sum": 15,
@@ -92,14 +100,14 @@ def get_label(dataname, datatype, double_data=True, one_hotted=False, normalized
             "Wrong dataname, Type as %s, Valid name: (\"Occ_B\",\"Occ_F\",\"Occ_L\","
             "\"Occ_sum\",\"BL\",\"MD\",\"Taper_Sum\")" % dataname)
     try:
-        if one_hotted & (datatype == 1):
-            datatype = 2
+        if one_hotted & (stattype == 1):
+            stattype = 2
             print("Note: One-hot mode only supported median")
         label_column = data_column
         avg_column = data_column + 1
-        data_column = data_column + stat_type[datatype]  # Shift the interested column by one or two, depends on type
+        data_column = data_column + stat_type[stattype]  # Shift the interested column by one or two, depends on type
     except:
-        raise Exception("Wrong datatype, Type as %s, Valid name: (\"average\",\"median\")" % datatype)
+        raise Exception("Wrong stattype, Type as %s, Valid name: (\"average\",\"median\")" % stattype)
 
     max_score = label_max_score[dataname]
     labels_name = []
@@ -126,7 +134,7 @@ def get_label(dataname, datatype, double_data=True, one_hotted=False, normalized
                     avg_data.append(float(avg_val))
 
     # If consider median data on anything except Taper_Sum/Occ_sum and does not normalized
-    if (datatype is "median" and (not normalized) and dataname is not "Occ_Sum" and dataname is not "Taper_Sum"):
+    if (stattype is "median" and (not normalized) and dataname is not "Occ_Sum" and dataname is not "Taper_Sum"):
         labels_data = readjust_median_label(labels_data, avg_data)
 
     # Sort data by name

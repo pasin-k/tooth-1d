@@ -168,9 +168,9 @@ def run(model_params=None):
         max_steps=run_params['steps'], hooks=[train_hook])
     # TODO: Evaluate only once? why?
     eval_spec = tf.estimator.EvalSpec(
-        input_fn=lambda: eval_input_fn(eval_data_path, batch_size=run_params['batch_size'], data_type=data_type),
-        steps=None,
-        start_delay_secs=0, throttle_secs=0)
+        input_fn=lambda: eval_input_fn(eval_data_path, batch_size=run_params['batch_size'], data_type=data_type),)
+        # steps=None,
+        # start_delay_secs=0, throttle_secs=0)
     # classifier.train(input_fn=lambda: train_input_fn(train_data_path, batch_size=params['batch_size']),
     #     max_steps=params['steps'], hooks=[train_hook])
     # eval_result = classifier.evaluate(input_fn=lambda: eval_input_fn(eval_data_path, batch_size=32))
