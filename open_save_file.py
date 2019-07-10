@@ -169,47 +169,54 @@ def get_label(dataname, stattype, double_data=True, one_hotted=False, normalized
         return labels_data, labels_name
 
 
-# Plot the list of coordinates and save it as PNG image
-# Input     coor_list        -> List of {List of numpy coordinates <- get from stlSlicer}
-#           out_directory    -> String, Directory to save output
-#           file_header_name -> String, header of name of the file, follow by image_num
-#           image_num        -> List of name of the image
-#           augment_number   -> Since augmentation has same image_number, we use this to differentiate
-#           degree           -> List of angles used in, add the angle in file name as well
-#           file_type        -> [Optional], such as png,jpeg,...
-# Output    none             -> Only save as output outside
 def save_plot(coor_list, out_directory, file_header_name, image_name, augment_number, degree, file_type="png"):
-    if len(coor_list) != len(image_name):
-        raise ValueError("save_plot: number of image(%s) is not equal to number of image_name(%s)"
-                         % (len(coor_list), len(image_name)))
+    """
+    Plot the list of coordinates and save it as PNG image
+    :param coor_list:           List of numpy coordinates <- get from stlSlicer
+    :param out_directory:       String, Directory to save output
+    :param file_header_name:    String, header of name of the file, follow by image_num
+    :param image_name:          List of name of the image
+    :param augment_number:      Since augmentation has same image_number, we use this to differentiate
+    :param degree:              List of angles used in, add the angle in file name as well
+    :param file_type:           [Optional], such as png,jpeg,...
+    :return:                    Save as output outside
+    """
+    # if len(coor_list) != len(image_name):
+    #     raise ValueError("save_plot: number of image(%s) is not equal to number of image_name(%s)"
+    #                      % (len(coor_list), len(image_name)))
+    if len(coor_list) != len(degree):
+        raise ValueError("Number of degree is not equal to %s, found %s", (len(degree), len(coor_list)))
     out_directory = os.path.abspath(out_directory)
     if not os.path.exists(out_directory):
         os.makedirs(out_directory)
-    if len(degree) != len(coor_list[0]):
-        print("# of Degree expected: %d" % len(degree))
-        print("# of Degree found: %d" % len(coor_list[0]))
-        raise Exception('Number of degree specified is not equals to coordinate ')
+    # if len(degree) != len(coor_list[0]):
+    #     print("# of Degree expected: %d" % len(degree))
+    #     print("# of Degree found: %d" % len(coor_list[0]))
+    #     raise Exception('Number of degree specified is not equals to coordinate ')
 
-    fig = plt.figure(figsize=(6, 4))
+    fig = plt.figure()
 
-    for i in range(len(coor_list)):
-        for d in range(len(degree)):
-            coor = coor_list[i][d]
-            # plt.plot(coor[:, 0], coor[:, 1], color='black', linewidth=1)
-            # plt.axis('off')
-            # Name with some additional data
-            fullname = "%s_%s_%s_%d.%s" % (file_header_name, image_name[i], augment_number, degree[d], file_type)
-            output_name = os.path.join(out_directory, fullname)
+    for d in range(len(degree)):
+        coor = coor_list[d]
+        # plt.plot(coor[:, 0], coor[:, 1], color='black', linewidth=1)
+        # plt.axis('off')
+        # Name with some additional data
+        fullname = "%s_%s_%d.%s" % (file_header_name, image_name, degree[d], file_type)
+        # fullname = "%s_%s_%s_%d.%s" % (file_header_name, image_name, augment_number, degree[d], file_type)
+        output_name = os.path.join(out_directory, fullname)
 
-            # plt.savefig(output_name, bbox_inches='tight')
-            # plt.clf()
+        # plt.savefig(output_name, bbox_inches='tight')
+        # plt.clf()
 
-            ax = fig.add_subplot(111)
-            ax.plot(coor[:, 0], coor[:, 1], color='black', linewidth=1)
-            ax.axis('off')
-            fig.savefig(output_name, dpi=60)
-            fig.clf()
-    print("Finished plotting for %d images with %d rotations at %s" % (len(coor_list), len(degree), out_directory))
+        ax = fig.add_subplot(111)
+        ax.plot(coor[:, 0], coor[:, 1], color='black', linewidth=1)
+        ax.set_xlim(-5,5)
+        ax.set_ylim(-5,5)
+        ax.axis('off')
+        fig.savefig(output_name, dpi=60, bbox_inches='tight')
+        fig.clf()
+        plt.close()
+    # print("Finished plotting for %d images with %d rotations at %s" % (len(coor_list), len(degree), out_directory))
 
 
 def split_train_test(grouped_address, example_grouped_address, tfrecord_name, configs, class_weight):

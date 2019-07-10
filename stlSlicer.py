@@ -144,7 +144,7 @@ def rotatestl(T, axis, deg):
 # Output    rePoint -> Numpy size N*2, rearranged
 def rearrange(P):
     P = np.round(P, 8)
-    np.set_printoptions(threshold=np.nan)
+    np.set_printoptions(threshold=np.inf)
     ind = np.lexsort((P[:, 1], P[:, 0]))
     P = P[ind]  # Sort coordinate from left to right
     # P = P[P[:, 0].argsort()]

@@ -6,7 +6,9 @@ import numpy as np
 
 numdegree = 4
 # TODO: use input from tfrecord instead
-data_length = 449
+data_length = 299
+
+
 # Import tfrecord to dataset
 def deserialize(example):
     feature = {'label': tf.FixedLenFeature([], tf.int64),
@@ -24,13 +26,15 @@ def decode_one_axis(data_dict):
     # Create initial image, then stacking it for dense model
     image_decoded = []
     degree = tf.cast(data_dict['degree'], tf.int32)
-    length = tf.cast(data_dict['length'], tf.int32)
+    length = data_dict['length']
+    #length = tf.cast(data_dict['length'], tf.int32)
     # Stacking the rest
     for i in range(numdegree):
         for j in range(2):
             img = data_dict['img_%s_%s' % (i, j)]
             img = tf.sparse.to_dense(img)
-            img = tf.reshape(img, [data_length])
+            img = tf.reshape(img, [length])
+            # img = tf.reshape(img, [data_length])
             # file_cropped = tf.squeeze(tf.image.resize_image_with_crop_or_pad(file_decoded, image_height, image_width))
             image_decoded.append(img)
 
@@ -52,13 +56,16 @@ def decode_multiple_axis(data_dict):
     degree = tf.cast(data_dict['degree'], tf.int32)
     # length = tf.cast(data_dict['length'], tf.int32)
     length = data_dict['length']
+    print("debug0")
+    print(length)
     # Stacking the rest
     for i in range(numdegree):
         for j in range(2):
             img = data_dict['img_%s_%s' % (i, j)]
             img = tf.sparse.to_dense(img)
             # img = tf.reshape(img, [299])
-            img = tf.reshape(img, [data_length])
+            img = tf.reshape(img, [length])
+            print(img)
             # img = tf.reshape(img, [data_dict['length']])
             # file_cropped = tf.squeeze(tf.image.resize_image_with_crop_or_pad(file_decoded, image_height, image_width))
             image_decoded.append(img)
