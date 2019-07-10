@@ -440,10 +440,8 @@ if __name__ == '__main__':
         if kfold:
             run_kfold(model_configs)
         else:
-            print("wrong")
             run(model_configs)
     else:
-        print("Wrong")
         if kfold:
             run_hyper_parameter_optimize_kfold()
         else:
