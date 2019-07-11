@@ -74,13 +74,13 @@ def readjust_median_label(label, avg_data):
     return label
 
 
-def get_label(dataname, stattype, double_data=True, one_hotted=False, normalized=False,
+def get_label(dataname, stattype, double_data=False, one_hotted=False, normalized=False,
               file_dir='../global_data/Ground Truth Score_new.csv'):
     """
     Get label of Ground Truth Score.csv file
     :param dataname:    String, Type of label e.g. [Taper/Occ]
     :param stattype:    String, Label measurement e.g [Average/Median]
-    :param double_data: Boolean, Double amount of data of label, for augmentation
+    :param double_data: Boolean, Double amount of data of label, for augmentation **Not using anymore
     :param one_hotted:  Boolean, Return output as one-hot data
     :param normalized:  Boolean, Normalize output to 0-1 (Not applied for one hot)
     :param file_dir:    Directory of csv file
@@ -169,10 +169,10 @@ def get_label(dataname, stattype, double_data=True, one_hotted=False, normalized
         return labels_data, labels_name
 
 
-def save_plot(coor_list, out_directory, file_header_name, image_name, augment_number, degree, file_type="png"):
+def save_plot(coor_list, out_directory, file_header_name, image_name, degree, file_type="png"):
     """
     Plot the list of coordinates and save it as PNG image
-    :param coor_list:           List of numpy coordinates <- get from stlSlicer
+    :param coor_list:           List of numpy coordinates <- get from stlSlicer should have 4 cross section
     :param out_directory:       String, Directory to save output
     :param file_header_name:    String, header of name of the file, follow by image_num
     :param image_name:          List of name of the image
@@ -325,7 +325,7 @@ def split_kfold(grouped_address, k_num):
 
 
 def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_data=False,
-                        double_data=True, k_cross=False, k_num=5):
+                        double_data=False, k_cross=False, k_num=5):
     """
     This function is used in imgtotfrecord
     :param tfrecord_name:   String, Name of tfrecord output file
@@ -352,7 +352,7 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
         labels, label_name = get_label(configs['label_data'], configs['label_type'], double_data=double_data,
                                        one_hotted=False, normalized=False, file_dir=csv_dir)
 
-    label_count = collections.Counter(labels)  # Use for frequency count
+    # label_count = collections.Counter(labels)  # Use for frequency count
 
     # Check list of name that has error (from preprocessing.py), remove it from label
     error_file_names = []
@@ -366,9 +366,9 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
         try:
             index = label_name.index(name)
             label_name.pop(index)
-            labels.pop(index * 2)
-            if double_data:
-                labels.pop(index * 2)  # Do it again if we double the data
+            # labels.pop(index * 2)
+            # if double_data:
+            #     labels.pop(index * 2)  # Do it again if we double the data
         except ValueError:
             pass
 
@@ -470,26 +470,48 @@ def read_file(csv_dir, header=False):
 
 
 # one_row = true means that all data will be written in one row
-def save_file(csv_dir, all_data, field_name=None, write_mode='w', one_row=False, create_folder=False):
+def save_file(csv_dir, all_data, field_name=None, write_mode='w', data_format=None, create_folder=True):
+    """
+    Save file to .csv
+    :param csv_dir:         String, Directory + file name of csv (End with .csv)
+    :param all_data:        Data to save
+    :param field_name:      List of field name if needed
+    :param write_mode:      String, 'w' or 'a'
+    :param data_format:     String, depending on data format: {"dict_list", "double_list"}
+    :param create_folder:   Boolean, will create folder if not exist
+    :return:
+    """
     # Create a folder if not exist
     if create_folder:
         direct = os.path.dirname(csv_dir)
         if not os.path.exists(direct):
             os.makedirs(direct)
-    with open(csv_dir, write_mode) as csvFile:
-        # Check if there is fieldname, if so, create first
+    if data_format == "dict_list":  # Data format: {'a':[a1, a2], 'b':[b1,b2]} -> Size of all list must be the same
         if field_name is None:
-            writer = csv.writer(csvFile)
-        else:
+            raise ValueError("Need filed name")
+        with open(csv_dir, write_mode) as csvFile:
             writer = csv.DictWriter(csvFile, fieldnames=field_name)
             writer.writeheader()
-        # If one_row is true -> use when data is list of one row, want to write in single row
-        # else it will be split in to multiple row
-        if not one_row:
+            for i in range(len(all_data[field_name[0]])):
+                temp_data = dict()
+                for key in field_name:
+                    temp_data[key] = all_data[key][i]
+                writer.writerow(temp_data)
+
+    elif data_format == "double_list": # Data format: [[a1,a2],[b1,b2,b3]]
+        with open(csv_dir, write_mode) as csvFile:
+            writer = csv.writer(csvFile)
             for data in all_data:
-                writer.writerow([data])
-        else:
+                writer.writerow(data)  # May need to add [data] in some case
+    elif data_format == "one_row":
+        with open(csv_dir, write_mode) as csvFile:
+            writer = csv.writer(csvFile)
             writer.writerow(all_data)
+    else:
+        with open(csv_dir, write_mode) as csvFile:
+            writer = csv.writer(csvFile)
+            for data in all_data:
+                writer.writerow([data])  # May need to add [data] in some case
 
 
 # Below are unused stl-to-voxel functions

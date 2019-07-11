@@ -40,6 +40,10 @@ message TrainConfig{
 
     optional bool is_kfold = 14;
 
+    optional uint32 data_length = 15;
+
+    optional uint32 date_degree = 16;
+
 }
 
 // Number of channels in each layer
