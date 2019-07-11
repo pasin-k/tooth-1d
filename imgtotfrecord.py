@@ -1,12 +1,11 @@
 import tensorflow as tf
 import numpy as np
 import os
-from open_save_file import get_input_and_label, save_file
+from open_save_file import get_input_and_label, read_file, save_file
 
 numdeg = 4  # Number of images on each example
 
-configs = {'numdeg': numdeg,
-           'train_eval_ratio': 0.8,
+configs = {'train_eval_ratio': 0.8,
            'label_data': "Taper_Sum",
            'label_type': "median"
            }
@@ -64,6 +63,11 @@ def image_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None, k_fold=False,
     if not os.path.exists(tfrecord_dir):
         os.makedirs(tfrecord_dir)
 
+    # Get amount of degree and augmentation
+    config_data = read_file(os.path.join(dataset_folder, "config.txt"))
+    configs['numdeg'] = config_data[0]
+    configs['num_augment'] = config_data[1]
+
     # Get file name from dataset_folder
     grouped_train_address, grouped_eval_address = get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs,
                                                                       get_data=False, k_cross=k_fold, k_num=k_num)
@@ -88,9 +92,6 @@ def image_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None, k_fold=False,
             tfrecord_name, configs['label_data'], configs['label_type'], i))
         tfrecord_eval_name = os.path.join(tfrecord_dir, "%s_%s_%s_%s_eval.tfrecords" % (
             tfrecord_name, configs['label_data'], configs['label_type'], i))
-        # eval_score_name = os.path.join("./data/tfrecord", "%s_%s_%s_score.npy" % (
-        #     tfrecord_name, configs['label_data'], configs['label_type']))
-        # np.save(eval_score_name, np.asarray(eval_score))
 
         with tf.Session() as sess:
             writer = tf.python_io.TFRecordWriter(tfrecord_train_name)
@@ -152,10 +153,15 @@ def coordinate_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None, k_fold=F
     if not os.path.exists(tfrecord_dir):
         os.makedirs(tfrecord_dir)
 
+    # Get amount of degree and augmentation
+    config_data = read_file(os.path.join(dataset_folder, "config.txt"))
+    configs['numdeg'] = int(config_data[0][0])      #  Get data from config.txt
+    configs['num_augment'] = int(config_data[1][0])
+
     # Get data from dataset_folder
     grouped_train_address, grouped_eval_address = get_input_and_label(tfrecord_name, dataset_folder,
-                                                                                    csv_dir, configs, get_data=True,
-                                                                                    k_cross=k_fold, k_num=k_num)
+                                                                      csv_dir, configs, get_data=True,
+                                                                      k_cross=k_fold, k_num=k_num)
 
     if not k_fold:
         k_num = 1
@@ -164,12 +170,6 @@ def coordinate_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None, k_fold=F
     for i in range(k_num):
         train_address = grouped_train_address[i]
         eval_address = grouped_eval_address[i]
-        # score = []
-        # for j in range(len(train_address)):
-        #     score.append(train_address[j][1])
-
-        # save_file(os.path.join(tfrecord_dir, "%s_%s_%s_%s_score.csv" % (  # Save loss weight file
-        #     tfrecord_name, configs['label_data'], configs['label_type'], i)), class_weight, one_row=True)
         tfrecord_train_name = os.path.join(tfrecord_dir, "%s_%s_%s_%s_train.tfrecords" % (
             tfrecord_name, configs['label_data'], configs['label_type'], i))
         tfrecord_eval_name = os.path.join(tfrecord_dir, "%s_%s_%s_%s_eval.tfrecords" % (
@@ -213,8 +213,7 @@ if __name__ == '__main__':
     get_image = False
     # Select type of label to use
     label_data = ["Occ_Sum", "Taper_Sum", "Occ_L", "Occ_F", "Occ_B", "BL", "MD", "Taper_Sum"]
-    label_type = ["average", "median"]
-    configs['numdeg'] = 4
+    label_type = ["median"]
     configs['train_eval_ratio'] = 0.8
     # configs['label_data'] = "Taper_Sum"
     configs['label_type'] = "median"
@@ -236,6 +235,6 @@ if __name__ == '__main__':
         if get_image:
             image_to_tfrecord(tfrecord_name="preparation_img_test", dataset_folder="./data/cross_section", k_fold=True)
         else:
-            coordinate_to_tfrecord(tfrecord_name="preparation_coor_300_new",
-                                   dataset_folder="./data/coordinate_300", k_fold=False)
+            coordinate_to_tfrecord(tfrecord_name="preparation_coor_debug_new",
+                                   dataset_folder="./data/coordinate_debug_new", k_fold=False)
         print("Complete")

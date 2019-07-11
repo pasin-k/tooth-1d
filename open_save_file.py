@@ -25,21 +25,25 @@ v = '2.3.1'  # Add getFilename function, get absolute path now
 print("ImportData2D.py version: " + str(v))
 
 
-def get_file_name(folder_name='../global_data/', file_name='PreparationScan.stl'):
+def get_file_name(folder_name='../global_data/', file_name='PreparationScan.stl', exception_file = None):
     """
     Get sorted List of filenames: search for all file within folder with specific file name, ignore specific filename
     :param folder_name:     Folder direcory to search
     :param file_name:       Retrieve only filename specified, can be None
+    :param exception_file:  List, file name to be excluded
     :return: file_dir       List of full directory of each file
              folder_dir     List of number of folder (Use for specific format to identify data label)
     """
     print("get_file_name: Import from %s, searching for file name with %s" % (os.path.abspath(folder_name), file_name))
+    if exception_file is None:
+        exception_file = []
+
     file_dir = list()
     folder_dir = list()
     for root, dirs, files in os.walk(folder_name):
         for filename in files:
             if file_name is None:  # Add everything if no file_name specified
-                if filename == 'error_file.txt':
+                if filename in exception_file:
                     pass
                 else:
                     file_dir.append(os.path.abspath(os.path.join(root, filename)))
@@ -241,7 +245,7 @@ def split_train_test(grouped_address, example_grouped_address, tfrecord_name, co
             if is_training == 0:  # Distribution state
                 if line == 'train':
                     is_training = 1
-            elif is_training == 1: # Training state
+            elif is_training == 1:  # Training state
                 if line == 'eval':
                     is_training = 2
                 else:
@@ -342,41 +346,43 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
     numdeg = configs['numdeg']
 
     # Get image address, or image data
-    image_address, _ = get_file_name(folder_name=dataset_folder, file_name=None)
+    image_address, _ = get_file_name(folder_name=dataset_folder, file_name=None, exception_file=["config.txt", "error_file.txt", "score.csv"])
 
-    # Get label and label name[Not used right now]
-    if csv_dir is None:
-        labels, label_name = get_label(configs['label_data'], configs['label_type'], double_data=double_data,
-                                       one_hotted=False, normalized=False)
-    else:
-        labels, label_name = get_label(configs['label_data'], configs['label_type'], double_data=double_data,
-                                       one_hotted=False, normalized=False, file_dir=csv_dir)
+    labels, _ = read_score(os.path.join(dataset_folder,"score.csv"), data_type=configs['label_data']+"_"+configs['label_type'])
+
+    # # Get label and label name[Not used right now]
+    # if csv_dir is None:
+    #     labels, label_name = get_label(configs['label_data'], configs['label_type'], double_data=double_data,
+    #                                    one_hotted=False, normalized=False)
+    # else:
+    #     labels, label_name = get_label(configs['label_data'], configs['label_type'], double_data=double_data,
+    #                                    one_hotted=False, normalized=False, file_dir=csv_dir)
 
     # label_count = collections.Counter(labels)  # Use for frequency count
 
-    # Check list of name that has error (from preprocessing.py), remove it from label
-    error_file_names = []
-    with open(dataset_folder + '/error_file.txt', 'r') as filehandle:
-        for line in filehandle:
-            # remove linebreak which is the last character of the string
-            current_name = line[:-1]
-            # add item to the list
-            error_file_names.append(current_name)
-    for name in error_file_names:
-        try:
-            index = label_name.index(name)
-            label_name.pop(index)
-            # labels.pop(index * 2)
-            # if double_data:
-            #     labels.pop(index * 2)  # Do it again if we double the data
-        except ValueError:
-            pass
+    # # Check list of name that has error (from preprocessing.py), remove it from label
+    # error_file_names = []
+    # with open(dataset_folder + '/error_file.txt', 'r') as filehandle:
+    #     for line in filehandle:
+    #         # remove linebreak which is the last character of the string
+    #         current_name = line[:-1]
+    #         # add item to the list
+    #         error_file_names.append(current_name)
+    # for name in error_file_names:
+    #     try:
+    #         index = label_name.index(name)
+    #         label_name.pop(index)
+    #         # labels.pop(index * 2)
+    #         # if double_data:
+    #         #     labels.pop(index * 2)  # Do it again if we double the data
+    #     except ValueError:
+    #         pass
 
     if len(image_address) / len(labels) != numdeg:
         print(image_address)
         raise Exception(
-            '# of images and labels is not compatible: %d images, %d labels. Expected # of images to be 4 times of label' % (
-                len(image_address), len(labels)))
+            '# of images and labels is not compatible: %d images, %d labels. Expected # of images to be %s times of label' % (
+                len(image_address), len(labels), numdeg))
 
     # Create list of file names used in split_train_test (To remember which one is train/eval)
     if not k_cross:
@@ -453,6 +459,13 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
 
 
 def read_file(csv_dir, header=False):
+    """
+    Read csv file
+    :param csv_dir: String, directory of file
+    :param header:  Boolean, true will read first row as header
+    :return: data:          List of data on each row
+             header_name:   List of header name
+    """
     header_name = []
     data = []
     with open(csv_dir) as csvFile:
@@ -467,6 +480,33 @@ def read_file(csv_dir, header=False):
         return data
     else:
         return data, header_name
+
+
+def read_score(csv_dir, data_type):
+    """
+    Extension to read_file, specifically used to read csv file made from pre_processing.py
+    :param csv_dir:
+    :param data_type:
+    :return:
+    """
+    data = []
+    data_name = []
+    with open(csv_dir) as csvFile:
+        readCSV = csv.reader(csvFile, delimiter=',')
+        is_header = True
+        for row in readCSV:
+            if is_header:
+                header_name = (row)
+                data_index = header_name.index(data_type)  # Find index of data
+                is_header = False
+            else:
+                data_name.append(row[0])  # Assume name is first column
+                data.append(int(row[data_index]))
+    return data, data_name
+
+
+
+    return data, header_name
 
 
 # one_row = true means that all data will be written in one row
@@ -498,12 +538,12 @@ def save_file(csv_dir, all_data, field_name=None, write_mode='w', data_format=No
                     temp_data[key] = all_data[key][i]
                 writer.writerow(temp_data)
 
-    elif data_format == "double_list": # Data format: [[a1,a2],[b1,b2,b3]]
+    elif data_format == "double_list":  # Data format: [[a1,a2],[b1,b2,b3]]
         with open(csv_dir, write_mode) as csvFile:
             writer = csv.writer(csvFile)
             for data in all_data:
                 writer.writerow(data)  # May need to add [data] in some case
-    elif data_format == "one_row":
+    elif data_format == "one_row":  # Data format: [a1,a2,a3]
         with open(csv_dir, write_mode) as csvFile:
             writer = csv.writer(csvFile)
             writer.writerow(all_data)
