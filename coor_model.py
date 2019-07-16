@@ -224,9 +224,10 @@ def my_model(features, labels, mode, params, config):
     one_hot_label = tf.one_hot(indices=tf.cast(labels, tf.int32), depth=3)
     labels = tf.cast(labels, tf.int64)
 
-    # for i in range(len(params['loss_weight'])):
-    #     if params['loss_weight'][i]:
-    #         # TODO: Clamp max weight
+    clamp_val = 5  # Max value cannot be more than 5 times of min
+    if max(params['loss_weight']) / min(params['loss_weight']) > clamp_val:
+        params['loss_weight'][params['loss_weight'].index(max(params['loss_weight']))] = clamp_val * min(
+            params['loss_weight'])
     weight = tf.constant([[params['loss_weight'][0], params['loss_weight'][1], params['loss_weight'][2]]],
                          dtype=tf.float32)
     loss_weight = tf.matmul(one_hot_label, weight, transpose_b=True, a_is_sparse=True)
