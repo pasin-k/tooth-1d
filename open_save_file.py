@@ -91,18 +91,21 @@ def get_label(dataname, stattype, double_data=False, one_hotted=False, normalize
     :return: labels     List of score of requested dat
              label_name List of score name, used to identify order of data
     """
-    label_name = {"Occ_B": 0, "Occ_F": 3, "Occ_L": 6, "Occ_Sum": 9,
-                  "BL": 12, "MD": 15, "Taper_Sum": 18}
+    label_name_key = ["Occ_B", "Occ_F", "Occ_L", "Occ_Sum", "BL", "MD", "Taper_Sum", "Integrity", "Width", "Surface", "Sharpness"]
+    label_name = dict()
+    for i, key in enumerate(label_name_key):
+        label_name[key] = 3*i
+    # label_name = {"Occ_B": 0, "Occ_F": 3, "Occ_L": 6, "Occ_Sum": 9,
+    #               "BL": 12, "MD": 15, "Taper_Sum": 18}
     label_max_score = {"Occ_B": 5, "Occ_F": 5, "Occ_L": 5, "Occ_Sum": 15,
-                       "BL": 5, "MD": 5, "Taper_Sum": 10}
+                       "BL": 5, "MD": 5, "Taper_Sum": 10, "Integrity": 5, "Width": 5, "Surface": 5, "Sharpness": 5}
     stat_type = {"average": 1, "median": 2}
 
     try:
         data_column = label_name[dataname]
     except:
         raise Exception(
-            "Wrong dataname, Type as %s, Valid name: (\"Occ_B\",\"Occ_F\",\"Occ_L\","
-            "\"Occ_sum\",\"BL\",\"MD\",\"Taper_Sum\")" % dataname)
+            "Wrong dataname, Type as %s, Valid name: %s" % (dataname, label_name_key))
     try:
         if one_hotted & (stattype == 1):
             stattype = 2
@@ -505,10 +508,6 @@ def read_score(csv_dir, data_type):
     return data, data_name
 
 
-
-    return data, header_name
-
-
 # one_row = true means that all data will be written in one row
 def save_file(csv_dir, all_data, field_name=None, write_mode='w', data_format=None, create_folder=True):
     """
@@ -537,7 +536,12 @@ def save_file(csv_dir, all_data, field_name=None, write_mode='w', data_format=No
                 for key in field_name:
                     temp_data[key] = all_data[key][i]
                 writer.writerow(temp_data)
-
+    elif data_format == "header_only":
+        if field_name is None:
+            raise ValueError("Need filed name")
+        with open(csv_dir, write_mode) as csvFile:
+            writer = csv.DictWriter(csvFile, fieldnames=field_name)
+            writer.writeheader()
     elif data_format == "double_list":  # Data format: [[a1,a2],[b1,b2,b3]]
         with open(csv_dir, write_mode) as csvFile:
             writer = csv.writer(csvFile)

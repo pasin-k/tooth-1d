@@ -82,7 +82,7 @@ def get_cross_section(data_type, stat_type, augment_config=[0], folder_name='../
     error_file_names_all    List of label name that has error
     """
     # Get data and transformed to cross-section image
-    data_type = ["Occ_Sum", "Taper_Sum", "Occ_L", "Occ_F", "Occ_B", "BL", "MD", "Taper_Sum"]
+    data_type = ["Occ_B", "Occ_F", "Occ_L", "Occ_Sum", "BL", "MD", "Taper_Sum", "Integrity", "Width", "Surface", "Sharpness"]
     stat_type = ["median"]
 
     name_dir, image_name = get_file_name(folder_name=folder_name, file_name=file_name)

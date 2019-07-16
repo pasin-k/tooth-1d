@@ -25,15 +25,14 @@ def deserialize(example):
 def decode_one_axis(data_dict):
     # Create initial image, then stacking it for dense model
     image_decoded = []
-    degree = tf.cast(data_dict['degree'], tf.int32)
-    length = data_dict['length']
-    #length = tf.cast(data_dict['length'], tf.int32)
+    # degree = tf.cast(data_dict['degree'], tf.int32)
+    # length = tf.cast(data_dict['length'], tf.int32)
     # Stacking the rest
     for i in range(numdegree):
         for j in range(2):
             img = data_dict['img_%s_%s' % (i, j)]
             img = tf.sparse.to_dense(img)
-            img = tf.reshape(img, [length])
+            img = tf.reshape(img, [data_length])
             # img = tf.reshape(img, [data_length])
             # file_cropped = tf.squeeze(tf.image.resize_image_with_crop_or_pad(file_decoded, image_height, image_width))
             image_decoded.append(img)
@@ -64,7 +63,7 @@ def decode_multiple_axis(data_dict):
             img = data_dict['img_%s_%s' % (i, j)]
             img = tf.sparse.to_dense(img)
             # img = tf.reshape(img, [299])
-            img = tf.reshape(img, [length])
+            img = tf.reshape(img, [data_length])
             print(img)
             # img = tf.reshape(img, [data_dict['length']])
             # file_cropped = tf.squeeze(tf.image.resize_image_with_crop_or_pad(file_decoded, image_height, image_width))
@@ -81,7 +80,9 @@ def decode_multiple_axis(data_dict):
     return image_stacked, label
 
 
-def train_input_fn(data_path, batch_size, data_type):
+def train_input_fn(data_path, batch_size, data_type, configs):
+    numdegree = configs['data_degree']
+    data_length = configs['data_length']
     if not os.path.exists(data_path):
         raise ValueError("Train input file does not exist")
     # data_type=0 -> data is vectorize in to one vector else, stack in different dimension
@@ -98,7 +99,9 @@ def train_input_fn(data_path, batch_size, data_type):
     return dataset
 
 
-def eval_input_fn(data_path, batch_size, data_type):
+def eval_input_fn(data_path, batch_size, data_type, configs):
+    numdegree = configs['data_degree']
+    data_length = configs['data_length']
     if not os.path.exists(data_path):
         raise ValueError("Eval input file does not exist")
     eval_dataset = tf.data.TFRecordDataset(data_path)

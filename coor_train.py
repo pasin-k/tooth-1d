@@ -88,6 +88,8 @@ model_configs = {'learning_rate': configs.learning_rate,
                  'activation': activation_dict[configs.activation],
                  'channels': channels_full,
                  'model_num': model_num,
+                 'data_degree': configs.data_degree,
+                 'data_length': configs.data_length
                  }
 
 
@@ -164,13 +166,13 @@ def run(model_params=None):
 
     train_hook = tf.contrib.estimator.stop_if_no_decrease_hook(classifier, "loss", run_params['early_stop_step'])
     train_spec = tf.estimator.TrainSpec(
-        input_fn=lambda: train_input_fn(train_data_path, batch_size=run_params['batch_size'], data_type=data_type),
+        input_fn=lambda: train_input_fn(train_data_path, batch_size=run_params['batch_size'], data_type=data_type, configs=model_params),
         max_steps=run_params['steps'], hooks=[train_hook])
     # TODO: Evaluate only once? why?
     eval_spec = tf.estimator.EvalSpec(
-        input_fn=lambda: eval_input_fn(eval_data_path, batch_size=run_params['batch_size'], data_type=data_type),)
-        # steps=None,
-        # start_delay_secs=0, throttle_secs=0)
+        input_fn=lambda: eval_input_fn(eval_data_path, batch_size=run_params['batch_size'], data_type=data_type, configs=model_params), )
+    # steps=None,
+    # start_delay_secs=0, throttle_secs=0)
     # classifier.train(input_fn=lambda: train_input_fn(train_data_path, batch_size=params['batch_size']),
     #     max_steps=params['steps'], hooks=[train_hook])
     # eval_result = classifier.evaluate(input_fn=lambda: eval_input_fn(eval_data_path, batch_size=32))
@@ -196,7 +198,7 @@ def run(model_params=None):
     )
 
     eval_result = classifier.evaluate(
-        input_fn=lambda: eval_input_fn(train_data_path, batch_size=run_params['batch_size'], data_type=data_type))
+        input_fn=lambda: eval_input_fn(train_data_path, batch_size=run_params['batch_size'], data_type=data_type, configs=model_params))
 
     model_params['result_file_name'] = 'result.csv'
     # No need to use predict since we can get data from hook now
@@ -300,19 +302,22 @@ def fitness(learning_rate, dropout_rate, activation, channels):
                  'channels': channels_full,
                  'result_path': run_params['result_path'],
                  'result_file_name': 'result.csv',
-                 'model_num': model_num}
+                 'model_num': model_num,
+                 'data_degree': configs.data_degree,
+                 'data_length': configs.data_length
+                 }
     accuracy, global_step, result = run(md_config)
     # Save info of hyperparameter search in a specific csv file
     save_file(run_params['summary_file_path'], [accuracy, learning_rate, dropout_rate, activation,
-                                                channels], write_mode='a', one_row=True)
+                                                channels], write_mode='a', data_format="one_row")
     return -accuracy
 
 
 def run_hyper_parameter_optimize():
     current_time = datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S")
     # Name of the summary result from hyperparameter search (This variable is not used in run)
-    run_params['summary_file_path'] = run_params['result_path_base'] + '/' + "hyperparameters_result_" \
-                                      + current_time + ".csv"
+    run_params['summary_file_path'] = run_params[
+                                          'result_path_base'] + '/' + "hyperparameters_result_" + current_time + ".csv"
     field_name = [i.name for i in dimensions]
     field_name.insert(0, 'accuracy')
 
@@ -338,13 +343,13 @@ def run_hyper_parameter_optimize():
                 print("Continue from %s" % current_time)
             else:  # If previous file ended correctly or not workstation, create new file
                 save_file(run_params['summary_file_path'], [], field_name=field_name,
-                          write_mode='w', create_folder=True)  # Create new summary file
+                          write_mode='w', create_folder=True, data_format="header_only")  # Create new summary file
                 default_param = default_parameters
                 print("Creating new runs")
         except IndexError:  # If error, stop and end the file, usually occur when the first run is interrupted
             save_file(previous_record_files[-1],
                       ['end', 'Error from previous run', datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S")],
-                      write_mode='a', one_row=True)
+                      write_mode='a', data_format="one_row")
             raise ValueError("Previous file doesn't end completely")
     else:  # If no file in folder, create new file
         save_file(run_params['summary_file_path'], [], field_name=field_name, write_mode='w',
@@ -359,7 +364,7 @@ def run_hyper_parameter_optimize():
         print("Hyper parameter optimize ENDED: run enough calls already")
         save_file(run_params['summary_file_path'],
                   ['end', 'Completed (faster than expected)', datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S")],
-                  write_mode='a', one_row=True)
+                  write_mode='a', data_format="one_row")
     else:
         # Make all run seperated in a folder
         run_params['result_path_base'] = run_params['result_path_base'] + "/" + current_time
@@ -391,7 +396,7 @@ def run_hyper_parameter_optimize():
 
         save_file(run_params['summary_file_path'],
                   ['end', 'Completed', datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S")],
-                  write_mode='a', one_row=True)
+                  write_mode='a', data_format="one_row")
         # space = search_result.space
         # print("Best result: %s" % space.point_to_dict(search_result.x))
     print("Saving hyperparameters_result in %s" % run_params['summary_file_path'])
