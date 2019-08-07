@@ -217,7 +217,7 @@ if __name__ == '__main__':
     configs['train_eval_ratio'] = 0.8
     # configs['label_data'] = "Taper_Sum"
     configs['label_type'] = "median"
-
+    k_fold = True
     label_datas = ["Taper_Sum", "BL", "MD", "Occ_Sum", "Occ_L", "Occ_F",
                    "Occ_B"]  # Too lazy to do all of these one at a time
     # label_datas = ["BL"]  # For debug
@@ -233,8 +233,9 @@ if __name__ == '__main__':
         # Directory of image
 
         if get_image:
-            image_to_tfrecord(tfrecord_name="preparation_img_test", dataset_folder="./data/cross_section", k_fold=True)
+            image_to_tfrecord(tfrecord_name="preparation_img_test", dataset_folder="./data/cross_section",
+                              k_fold=k_fold)
         else:
             coordinate_to_tfrecord(tfrecord_name="preparation_coor_debug_new",
-                                   dataset_folder="./data/coordinate_debug_new", k_fold=False)
+                                   dataset_folder="./data/coordinate_debug_new", k_fold=k_fold)
         print("Complete")

@@ -25,7 +25,7 @@ v = '2.3.1'  # Add getFilename function, get absolute path now
 print("ImportData2D.py version: " + str(v))
 
 
-def get_file_name(folder_name='../global_data/', file_name='PreparationScan.stl', exception_file = None):
+def get_file_name(folder_name='../global_data/', file_name='PreparationScan.stl', exception_file=None):
     """
     Get sorted List of filenames: search for all file within folder with specific file name, ignore specific filename
     :param folder_name:     Folder direcory to search
@@ -91,10 +91,11 @@ def get_label(dataname, stattype, double_data=False, one_hotted=False, normalize
     :return: labels     List of score of requested dat
              label_name List of score name, used to identify order of data
     """
-    label_name_key = ["Occ_B", "Occ_F", "Occ_L", "Occ_Sum", "BL", "MD", "Taper_Sum", "Integrity", "Width", "Surface", "Sharpness"]
+    label_name_key = ["Occ_B", "Occ_F", "Occ_L", "Occ_Sum", "BL", "MD", "Taper_Sum", "Integrity", "Width", "Surface",
+                      "Sharpness"]
     label_name = dict()
     for i, key in enumerate(label_name_key):
-        label_name[key] = 3*i
+        label_name[key] = 3 * i
     # label_name = {"Occ_B": 0, "Occ_F": 3, "Occ_L": 6, "Occ_Sum": 9,
     #               "BL": 12, "MD": 15, "Taper_Sum": 18}
     label_max_score = {"Occ_B": 5, "Occ_F": 5, "Occ_L": 5, "Occ_Sum": 15,
@@ -128,17 +129,20 @@ def get_label(dataname, stattype, double_data=False, one_hotted=False, normalize
             if header:
                 header = False
             else:
-                if row[data_column] != '':
-                    label = row[label_column]
-                    val = row[data_column]
-                    avg_val = row[avg_column]
-                    if one_hotted or (not normalized):  # Don't normalize if output is one hot encoding
-                        normalized_value = int(val)  # Turn string to int
-                    else:
-                        normalized_value = float(val) / max_score  # Turn string to float
-                    labels_name.append(label)
-                    labels_data.append(normalized_value)
-                    avg_data.append(float(avg_val))
+                try:
+                    if row[data_column] != '':
+                        label = row[label_column]
+                        val = row[data_column]
+                        avg_val = row[avg_column]
+                        if one_hotted or (not normalized):  # Don't normalize if output is one hot encoding
+                            normalized_value = int(val)  # Turn string to int
+                        else:
+                            normalized_value = float(val) / max_score  # Turn string to float
+                        labels_name.append(label)
+                        labels_data.append(normalized_value)
+                        avg_data.append(float(avg_val))
+                except IndexError:
+                    print("Data incomplete, no data of %s, or missing label in csv file" % file_dir)
 
     # If consider median data on anything except Taper_Sum/Occ_sum and does not normalized
     if (stattype is "median" and (not normalized) and dataname is not "Occ_Sum" and dataname is not "Taper_Sum"):
@@ -212,17 +216,29 @@ def save_plot(coor_list, out_directory, file_header_name, image_name, degree, fi
         # fullname = "%s_%s_%s_%d.%s" % (file_header_name, image_name, augment_number, degree[d], file_type)
         output_name = os.path.join(out_directory, fullname)
 
-        # plt.savefig(output_name, bbox_inches='tight')
-        # plt.clf()
+        dpi = 120
+        img_size = 800
+        fig = plt.figure(figsize=(img_size / dpi, img_size / dpi), dpi=dpi)
+        ax = fig.gca()
+        ax.set_autoscale_on(False)
+        min_x, max_x, min_y, max_y = -5, 5, -5, 5
+        if min(coor[:, 0]) < min_x or max(coor[:, 0]) > max_x:
+            raise ValueError("X-coordinate is beyond limit axis (%s,%s)" % (min_x, max_x))
+        if min(coor[:, 1]) < min_y or max(coor[:, 1]) > max_y:
+            raise ValueError("Y-coordinate is beyond limit axis (%s,%s)" % (min_y, max_y))
+        ax.plot(coor[:, 0], coor[:, 1], linewidth=1.0)
+        ax.axis([min_x, max_x, min_y, max_y])
 
-        ax = fig.add_subplot(111)
-        ax.plot(coor[:, 0], coor[:, 1], color='black', linewidth=1)
-        ax.set_xlim(-5,5)
-        ax.set_ylim(-5,5)
-        ax.axis('off')
-        fig.savefig(output_name, dpi=60, bbox_inches='tight')
-        fig.clf()
-        plt.close()
+        ax.axes.get_xaxis().set_visible(False)
+        ax.axes.get_yaxis().set_visible(False)
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        ax.spines['bottom'].set_visible(False)
+        ax.spines['left'].set_visible(False)
+
+        fig.savefig(output_name, bbox_inches='tight')
+        plt.close('all')
+
     # print("Finished plotting for %d images with %d rotations at %s" % (len(coor_list), len(degree), out_directory))
 
 
@@ -258,7 +274,7 @@ def split_train_test(grouped_address, example_grouped_address, tfrecord_name, co
                         data_index.pop(index)
                     except ValueError:
                         pass
-            else: # Eval state
+            else:  # Eval state
                 try:
                     index = example_grouped_address.index(line)
                     eval_index.append(index)
@@ -312,7 +328,7 @@ def split_kfold(grouped_address, k_num):
     :return:                    List of Train, Eval data
     """
     # kfold = KFold(k_num, shuffle=True,random_state=0)
-    kfold = StratifiedKFold(k_num, shuffle=True,random_state=0)
+    kfold = StratifiedKFold(k_num, shuffle=True, random_state=0)
     data, label = [list(e) for e in zip(*grouped_address)]
     train_address = []
     eval_address = []
@@ -349,9 +365,11 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
     numdeg = configs['numdeg']
 
     # Get image address, or image data
-    image_address, _ = get_file_name(folder_name=dataset_folder, file_name=None, exception_file=["config.txt", "error_file.txt", "score.csv"])
+    image_address, _ = get_file_name(folder_name=dataset_folder, file_name=None,
+                                     exception_file=["config.txt", "error_file.txt", "score.csv"])
 
-    labels, _ = read_score(os.path.join(dataset_folder,"score.csv"), data_type=configs['label_data']+"_"+configs['label_type'])
+    labels, _ = read_score(os.path.join(dataset_folder, "score.csv"),
+                           data_type=configs['label_data'] + "_" + configs['label_type'])
 
     # # Get label and label name[Not used right now]
     # if csv_dir is None:
@@ -429,7 +447,8 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
 
                 single_eval_address = tuple(
                     [list(e) for e in zip(*single_eval_address)])  # Convert to tuple of list[image address, label]
-                print("Train files: %d, Evaluate Files: %d" % (len(single_train_address[0]), len(single_eval_address[0])))
+                print(
+                    "Train files: %d, Evaluate Files: %d" % (len(single_train_address[0]), len(single_eval_address[0])))
             else:
                 print("Train files: %d, Evaluate Files: %d" % (len(single_train_address), len(single_eval_address)))
             train_address.append(single_train_address)

@@ -25,7 +25,7 @@ def getSlicer(stl_file_name, Zplane, degree, augment=None, is_rearrange=True, ax
     :param Zplane:          Scalar value, selected plane
     :param degree:          List of degree of cross-section you want
     :param augment:         List of rotation degree to increase datasize
-    :param is_rearrange:       Boolean, Rearrange coordinate from bottom left to right
+    :param is_rearrange:    Boolean, Rearrange coordinate from bottom left to right
     :param axis:            Axis of rotation (0 = X,1 = Y,2 = Z) (Default at 1, based from preliminary result)
     :return: reP_all:       List of list of numpy array with size of [len(augment),len(degree),[N,2])
     """

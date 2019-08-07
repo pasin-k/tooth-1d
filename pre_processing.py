@@ -238,16 +238,16 @@ def save_stl_point(stl_points, label_name, error_file_names, file_dir="./data/co
 if __name__ == '__main__':
     # Output 'points' as list[list[numpy]] (example_data, degrees, points)
     save_img = True
-    save_coor = True
-    is_fix_amount = True
+    save_coor = False
+    is_fix_amount = False
     fix_amount = 300  # After get the movement, it will be reduced to 300
 
     # data_type, stat_type will not be used unless you want to look at lbl value
     points_all, lbl_all, lbl_name_all, err_name_all, header = get_cross_section(data_type="BL",
-                                                                                     stat_type="median",
-                                                                                     augment_config=augment_config, )
-                                                                                    # folder_name='../global_data/stl_data_debug',
-                                                                                    # csv_dir='../global_data/Ground Truth Score_debug.csv')
+                                                                                stat_type="median",
+                                                                                augment_config=augment_config, )
+    # folder_name='../global_data/stl_data_debug',
+    # csv_dir='../global_data/Ground Truth Score_debug.csv')
     if is_fix_amount:
         fix_amount = fix_amount + 1  # Compensate for the missing data
         print("Adjusting number of coordinates... Takes a long time")
@@ -258,7 +258,7 @@ if __name__ == '__main__':
 
     if save_img:
         print("Start saving images...")
-        image_dir = "./data/cross_section_new"
+        image_dir = "./data/cross_section"
         save_image(points_all, lbl_name_all, err_name_all, image_dir=image_dir)
         save_file(os.path.join(image_dir, "score.csv"), lbl_all, data_format="dict_list", field_name=header)
 
