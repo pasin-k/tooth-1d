@@ -11,21 +11,10 @@ from sklearn.utils.class_weight import compute_class_weight
 mpl.use('TkAgg')
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure
-
 from random import shuffle
 
-v = '2.3.1'  # Add getFilename function, get absolute path now
-# 1.8 Works with pycharm
-# 1.9 Edit Name of dataname and stattype
-# 2.1 Add One_hot encoding
-# 2.2 Add normalize option
-# 2.3 Add new version of get_file_name
-# Add double label for augmentation
-# Note in case of directly using from jupyter, change data/ to ../data
-print("ImportData2D.py version: " + str(v))
 
-
-def get_file_name(folder_name='../global_data/', file_name='PreparationScan.stl', exception_file=None):
+def get_file_name(folder_name='../global_data/', file_name=None, exception_file=None):
     """
     Get sorted List of filenames: search for all file within folder with specific file name, ignore specific filename
     :param folder_name:     Folder direcory to search
@@ -38,6 +27,8 @@ def get_file_name(folder_name='../global_data/', file_name='PreparationScan.stl'
     if exception_file is None:
         exception_file = []
 
+    if file_name is None:
+        file_name = 'PreparationScan.stl'
     file_dir = list()
     folder_dir = list()
     for root, dirs, files in os.walk(folder_name):
@@ -145,7 +136,7 @@ def get_label(dataname, stattype, double_data=False, one_hotted=False, normalize
                     print("Data incomplete, no data of %s, or missing label in csv file" % file_dir)
 
     # If consider median data on anything except Taper_Sum/Occ_sum and does not normalized
-    if (stattype is "median" and (not normalized) and dataname is not "Occ_Sum" and dataname is not "Taper_Sum"):
+    if stattype is "median" and (not normalized) and dataname is not "Occ_Sum" and dataname is not "Taper_Sum":
         labels_data = readjust_median_label(labels_data, avg_data)
 
     # Sort data by name
@@ -187,7 +178,6 @@ def save_plot(coor_list, out_directory, file_header_name, image_name, degree, fi
     :param out_directory:       String, Directory to save output
     :param file_header_name:    String, header of name of the file, follow by image_num
     :param image_name:          List of name of the image
-    :param augment_number:      Since augmentation has same image_number, we use this to differentiate
     :param degree:              List of angles used in, add the angle in file name as well
     :param file_type:           [Optional], such as png,jpeg,...
     :return:                    Save as output outside
@@ -200,10 +190,6 @@ def save_plot(coor_list, out_directory, file_header_name, image_name, degree, fi
     out_directory = os.path.abspath(out_directory)
     if not os.path.exists(out_directory):
         os.makedirs(out_directory)
-    # if len(degree) != len(coor_list[0]):
-    #     print("# of Degree expected: %d" % len(degree))
-    #     print("# of Degree found: %d" % len(coor_list[0]))
-    #     raise Exception('Number of degree specified is not equals to coordinate ')
 
     fig = plt.figure()
 
@@ -221,10 +207,19 @@ def save_plot(coor_list, out_directory, file_header_name, image_name, degree, fi
         fig = plt.figure(figsize=(img_size / dpi, img_size / dpi), dpi=dpi)
         ax = fig.gca()
         ax.set_autoscale_on(False)
-        min_x, max_x, min_y, max_y = -5, 5, -5, 5
+        min_x, max_x, min_y, max_y = -5, 5, -6, 5
         if min(coor[:, 0]) < min_x or max(coor[:, 0]) > max_x:
+            ax.plot(coor[:, 0], coor[:, 1], linewidth=1.0)
+            ax.axis([min_x - 1, max_x + 1, min_y, max_y])
+            fig.savefig(os.path.join(out_directory, "bugged"), bbox_inches='tight')
+            print("Bugged at %s" % output_name)
             raise ValueError("X-coordinate is beyond limit axis (%s,%s)" % (min_x, max_x))
+
         if min(coor[:, 1]) < min_y or max(coor[:, 1]) > max_y:
+            ax.plot(coor[:, 0], coor[:, 1], linewidth=1.0)
+            ax.axis([min_x, max_x, min_y - 1, max_y + 1])
+            fig.savefig(os.path.join(out_directory, "bugged"), bbox_inches='tight')
+            print("Bugged at %s" % output_name)
             raise ValueError("Y-coordinate is beyond limit axis (%s,%s)" % (min_y, max_y))
         ax.plot(coor[:, 0], coor[:, 1], linewidth=1.0)
         ax.axis([min_x, max_x, min_y, max_y])
@@ -337,10 +332,8 @@ def split_kfold(grouped_address, k_num):
         train_address_fold = []
         test_address_fold = []
         for train_indice in train_indices:
-            # train_address_fold.append(grouped_address[train_indice])
             train_address_fold.append([data[train_indice], label[train_indice]])
         for test_indice in test_indices:
-            # test_address_fold.append(grouped_address[test_indice])
             test_address_fold.append([data[test_indice], label[test_indice]])
         train_address.append(train_address_fold)
         eval_address.append(test_address_fold)
@@ -381,28 +374,11 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
 
     # label_count = collections.Counter(labels)  # Use for frequency count
 
-    # # Check list of name that has error (from preprocessing.py), remove it from label
-    # error_file_names = []
-    # with open(dataset_folder + '/error_file.txt', 'r') as filehandle:
-    #     for line in filehandle:
-    #         # remove linebreak which is the last character of the string
-    #         current_name = line[:-1]
-    #         # add item to the list
-    #         error_file_names.append(current_name)
-    # for name in error_file_names:
-    #     try:
-    #         index = label_name.index(name)
-    #         label_name.pop(index)
-    #         # labels.pop(index * 2)
-    #         # if double_data:
-    #         #     labels.pop(index * 2)  # Do it again if we double the data
-    #     except ValueError:
-    #         pass
-
     if len(image_address) / len(labels) != numdeg:
         print(image_address)
         raise Exception(
-            '# of images and labels is not compatible: %d images, %d labels. Expected # of images to be %s times of label' % (
+            '# of images and labels is not compatible: %d images, %d labels. '
+            'Expected # of images to be %s times of label' % (
                 len(image_address), len(labels), numdeg))
 
     # Create list of file names used in split_train_test (To remember which one is train/eval)
