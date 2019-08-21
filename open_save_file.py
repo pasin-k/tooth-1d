@@ -202,12 +202,12 @@ def save_plot(coor_list, out_directory, file_header_name, image_name, degree, fi
         # fullname = "%s_%s_%s_%d.%s" % (file_header_name, image_name, augment_number, degree[d], file_type)
         output_name = os.path.join(out_directory, fullname)
 
-        dpi = 120
+        dpi = 100
         img_size = 800
         fig = plt.figure(figsize=(img_size / dpi, img_size / dpi), dpi=dpi)
         ax = fig.gca()
         ax.set_autoscale_on(False)
-        min_x, max_x, min_y, max_y = -5, 5, -6, 5
+        min_x, max_x, min_y, max_y = -5, 5, -6, 6
         if min(coor[:, 0]) < min_x or max(coor[:, 0]) > max_x:
             ax.plot(coor[:, 0], coor[:, 1], linewidth=1.0)
             ax.axis([min_x - 1, max_x + 1, min_y, max_y])
@@ -221,7 +221,7 @@ def save_plot(coor_list, out_directory, file_header_name, image_name, degree, fi
             fig.savefig(os.path.join(out_directory, "bugged"), bbox_inches='tight')
             print("Bugged at %s" % output_name)
             raise ValueError("Y-coordinate is beyond limit axis (%s,%s)" % (min_y, max_y))
-        ax.plot(coor[:, 0], coor[:, 1], linewidth=1.0)
+        ax.plot(coor[:, 0], coor[:, 1], 'k', linewidth=1.0)
         ax.axis([min_x, max_x, min_y, max_y])
 
         ax.axes.get_xaxis().set_visible(False)
