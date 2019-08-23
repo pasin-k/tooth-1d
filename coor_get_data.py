@@ -4,9 +4,9 @@ import numpy as np
 
 # Read TFRecord file, return as tf.dataset, specifically used for
 
-numdegree = 4
+numdegree = None
 # TODO: use input from tfrecord instead
-data_length = 299
+data_length = None
 
 
 # Import tfrecord to dataset
@@ -71,8 +71,9 @@ def decode_multiple_axis(data_dict):
 
     if numdegree != 4:
         raise ValueError("Edit this function as well, this compatible with numdeg=4")
-    image_stacked = tf.stack([image_decoded[0], image_decoded[1], image_decoded[2], image_decoded[3],
-                              image_decoded[4], image_decoded[5], image_decoded[6], image_decoded[7]], axis=1)
+    # image_stacked = tf.stack([image_decoded[0], image_decoded[1], image_decoded[2], image_decoded[3],
+    #                           image_decoded[4], image_decoded[5], image_decoded[6], image_decoded[7]], axis=1)
+    image_stacked = tf.stack([image_decoded[0], image_decoded[4]], axis=1)
     image_stacked = tf.cast(image_stacked, tf.float32)
     label = tf.cast(data_dict['label'], tf.float32)
     # output = (image_stacked, label)
@@ -81,6 +82,7 @@ def decode_multiple_axis(data_dict):
 
 
 def train_input_fn(data_path, batch_size, data_type, configs):
+    global numdegree, data_length
     numdegree = configs['data_degree']
     data_length = configs['data_length']
     if not os.path.exists(data_path):
@@ -100,6 +102,7 @@ def train_input_fn(data_path, batch_size, data_type, configs):
 
 
 def eval_input_fn(data_path, batch_size, data_type, configs):
+    global numdegree, data_length
     numdegree = configs['data_degree']
     data_length = configs['data_length']
     if not os.path.exists(data_path):

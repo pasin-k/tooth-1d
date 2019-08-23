@@ -212,7 +212,8 @@ def coordinate_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None, k_fold=F
 if __name__ == '__main__':
     get_image = False
     # Select type of label to use
-    label_data = ["Occ_Sum", "Taper_Sum", "Occ_L", "Occ_F", "Occ_B", "BL", "MD", "Taper_Sum"]
+    label_data = ["Occ_B_median", "Occ_F_median", "Occ_L_median", "BL_median", "MD_median", "Integrity_median",
+                  "Width_median", "Surface_median", "Sharpness_median"]
     label_type = ["median"]
     configs['train_eval_ratio'] = 0.8
     # configs['label_data'] = "Taper_Sum"

@@ -16,7 +16,7 @@ v = '1.2.0'
 # 1.2: Now save image with their own name
 print("pre_processing.py version: " + str(v))
 
-augment_config = [0, 5, 10, 15, 20, 25, 30, 35, 40]
+augment_config = [0]
 degree = [0, 45, 90, 135]
 numdeg = len(degree)
 
@@ -206,8 +206,8 @@ def save_coordinate(coor_list, out_directory, file_header_name, image_name, degr
         fullname = "%s_%s_%d.npy" % (file_header_name, image_name, degree[deg_index])
         # fullname = "%s_%s_%s_%d.npy" % (file_header_name, image_name, augment_number, degree[deg_index])
         output_name = os.path.join(out_directory, fullname)
-        np.savetxt(output_name, coor, delimiter=',')
-        # np.save(output_name, coor)
+        # np.savetxt(output_name, coor, delimiter=',')
+        np.save(output_name, coor)
         # np.savetxt(output_name.replace(".npy",".txt"), coor)
     # print("Finished saving coordinates: %d files with %d rotations at dir: %s" % (
     #     len(coor_list), len(degree), out_directory))
@@ -237,9 +237,9 @@ def save_stl_point(stl_points, label_name, error_file_names, file_dir="./data/co
 
 if __name__ == '__main__':
     # Output 'points' as list[list[numpy]] (example_data, degrees, points)
-    save_img = True
-    save_coor = False
-    is_fix_amount = False
+    save_img = False
+    save_coor = True
+    is_fix_amount = True
     fix_amount = 300  # After get the movement, it will be reduced to 300
 
     # data_type, stat_type will not be used unless you want to look at lbl value
@@ -258,13 +258,13 @@ if __name__ == '__main__':
 
     if save_img:
         print("Start saving images...")
-        image_dir = "./data/cross_section"
+        image_dir = "./data/cross_section_evaluate"
         save_image(points_all, lbl_name_all, err_name_all, image_dir=image_dir)
         save_file(os.path.join(image_dir, "score.csv"), lbl_all, data_format="dict_list", field_name=header)
 
     if save_coor:
         print("Start saving coordinates...")
-        file_dir = "./data/coordinate_new"
+        file_dir = "./data/coordinate_newer"
         save_stl_point(points_all, lbl_name_all, err_name_all, file_dir=file_dir)
         save_file(os.path.join(file_dir, "score.csv"), lbl_all, data_format="dict_list", field_name=header)
     print("pre_processing.py: done")

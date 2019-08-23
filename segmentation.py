@@ -2,8 +2,7 @@ import os
 import numpy as np
 from stl import mesh
 import sys
-% matplotlib
-inline
+
 import matplotlib
 
 matplotlib.use('Agg')
