@@ -171,7 +171,7 @@ def get_label(dataname, stattype, double_data=False, one_hotted=False, normalize
         return labels_data, labels_name
 
 
-def save_plot(coor_list, out_directory, file_header_name, image_name, degree, file_type="png"):
+def save_plot(coor_list, out_directory, file_header_name, image_name, degree, file_type="png", show_axis=False):
     """
     Plot the list of coordinates and save it as PNG image
     :param coor_list:           List of numpy coordinates <- get from stlSlicer should have 4 cross section
@@ -180,6 +180,7 @@ def save_plot(coor_list, out_directory, file_header_name, image_name, degree, fi
     :param image_name:          List of name of the image
     :param degree:              List of angles used in, add the angle in file name as well
     :param file_type:           [Optional], such as png,jpeg,...
+    :param show_axis:           [Optional], if true, will show axis
     :return:                    Save as output outside
     """
     # if len(coor_list) != len(image_name):
@@ -224,12 +225,13 @@ def save_plot(coor_list, out_directory, file_header_name, image_name, degree, fi
         ax.plot(coor[:, 0], coor[:, 1], 'k', linewidth=1.0)
         ax.axis([min_x, max_x, min_y, max_y])
 
-        # ax.axes.get_xaxis().set_visible(False)
-        # ax.axes.get_yaxis().set_visible(False)
-        # ax.spines['top'].set_visible(False)
-        # ax.spines['right'].set_visible(False)
-        # ax.spines['bottom'].set_visible(False)
-        # ax.spines['left'].set_visible(False)
+        if not show_axis:
+            ax.axes.get_xaxis().set_visible(False)
+            ax.axes.get_yaxis().set_visible(False)
+            ax.spines['top'].set_visible(False)
+            ax.spines['right'].set_visible(False)
+            ax.spines['bottom'].set_visible(False)
+            ax.spines['left'].set_visible(False)
 
         fig.savefig(output_name, bbox_inches='tight')
         plt.close('all')
@@ -541,7 +543,7 @@ def save_file(csv_dir, all_data, field_name=None, write_mode='w', data_format=No
             os.makedirs(direct)
     if data_format == "dict_list":  # Data format: {'a':[a1, a2], 'b':[b1,b2]} -> Size of all list must be the same
         if field_name is None:
-            raise ValueError("Need filed name")
+            raise ValueError("Need field_name ")
         with open(csv_dir, write_mode) as csvFile:
             writer = csv.DictWriter(csvFile, fieldnames=field_name)
             writer.writeheader()
