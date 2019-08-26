@@ -179,10 +179,11 @@ def coordinate_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None, k_fold=F
     grouped_train_data, grouped_eval_data = get_input_and_label(tfrecord_name, dataset_folder,
                                                                       csv_dir, configs, get_data=True,
                                                                       k_cross=k_fold, k_num=k_num)
-    print(len(grouped_eval_data))
-    for d in grouped_eval_data:
-        print(np.shape(d[0][0]))
-    raise ValueError("debug")
+    # Use this to debug if number of point in varying
+    # print(len(grouped_eval_data))
+    # for d in grouped_eval_data:
+    #     print(np.shape(d[0][0]))
+    # raise ValueError("debug")
 
     if not k_fold:
         k_num = 1

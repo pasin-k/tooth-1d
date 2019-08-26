@@ -245,8 +245,8 @@ def save_stl_point(stl_points, label_name, error_file_names, file_dir="./data/co
 if __name__ == '__main__':
     # Output 'points' as list[list[numpy]] (example_data, degrees, points)
     save_img = True
-    save_coor = True
-    is_fix_amount = True
+    save_coor = False
+    is_fix_amount = False
     fix_amount = 300  # After get the movement, it will be reduced to 300
 
     # data_type, stat_type will not be used unless you want to look at lbl value

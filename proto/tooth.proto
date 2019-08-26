@@ -44,6 +44,8 @@ message TrainConfig{
 
     optional uint32 data_degree = 16;
 
+    optional string label_type = 17;
+
 }
 
 // Number of channels in each layer

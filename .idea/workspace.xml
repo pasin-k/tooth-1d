@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="770e0596-62ef-4176-bd6c-3bded3f7c783" name="Default Changelist" comment="">
+    <list default="true" id="770e0596-62ef-4176-bd6c-3bded3f7c783" name="Default Changelist" comment="Add fix amount of point and create error,config file">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/coor_get_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/coor_get_data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/coor_tooth.config" beforeDir="false" afterPath="$PROJECT_DIR$/coor_tooth.config" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/coor_train.py" beforeDir="false" afterPath="$PROJECT_DIR$/coor_train.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/imgtotfrecord.py" beforeDir="false" afterPath="$PROJECT_DIR$/imgtotfrecord.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/open_save_file.py" beforeDir="false" afterPath="$PROJECT_DIR$/open_save_file.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pre_processing.py" beforeDir="false" afterPath="$PROJECT_DIR$/pre_processing.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/proto/tooth.proto" beforeDir="false" afterPath="$PROJECT_DIR$/proto/tooth.proto" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/segmentation.py" beforeDir="false" afterPath="$PROJECT_DIR$/segmentation.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -39,7 +41,7 @@
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="ToolWindowDocker.ShowToolbar" value="false" />
     <property name="com.intellij.ide.scratch.LRUPopupBuilder$1/New Scratch File" value="Python&#10;TEXT" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/proto/tooth.proto" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PythonContentEntriesConfigurable" />
   </component>
   <component name="PyDebuggerOptionsProvider">
@@ -179,9 +181,9 @@
     <recent_temporary>
       <list>
         <item itemvalue="Python.segmentation" />
+        <item itemvalue="Python.pre_processing" />
         <item itemvalue="Python.imgtotfrecord" />
         <item itemvalue="Python.scratch_28" />
-        <item itemvalue="Python.pre_processing" />
         <item itemvalue="Python.scratch_27" />
       </list>
     </recent_temporary>
@@ -196,27 +198,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1554715602048</updated>
-    </task>
-    <task id="LOCAL-00058" summary="Debug hyperparameter search">
-      <created>1560144643896</created>
-      <option name="number" value="00058" />
-      <option name="presentableId" value="LOCAL-00058" />
-      <option name="project" value="LOCAL" />
-      <updated>1560144643896</updated>
-    </task>
-    <task id="LOCAL-00059" summary="Debug hyperparameter search">
-      <created>1560148114051</created>
-      <option name="number" value="00059" />
-      <option name="presentableId" value="LOCAL-00059" />
-      <option name="project" value="LOCAL" />
-      <updated>1560148114051</updated>
-    </task>
-    <task id="LOCAL-00060" summary="Improve hooks &amp; Add l2 loss">
-      <created>1560233052893</created>
-      <option name="number" value="00060" />
-      <option name="presentableId" value="LOCAL-00060" />
-      <option name="project" value="LOCAL" />
-      <updated>1560233052893</updated>
     </task>
     <task id="LOCAL-00061" summary="Improve hooks &amp; Add l2 loss">
       <created>1560243008120</created>
@@ -540,17 +521,29 @@
       <option name="project" value="LOCAL" />
       <updated>1566561105193</updated>
     </task>
-    <option name="localTasksCounter" value="107" />
+    <task id="LOCAL-00107" summary="Now receive name from tfrecord">
+      <created>1566800959859</created>
+      <option name="number" value="00107" />
+      <option name="presentableId" value="LOCAL-00107" />
+      <option name="project" value="LOCAL" />
+      <updated>1566800959860</updated>
+    </task>
+    <task id="LOCAL-00108" summary="Now all label in tfrecord, edit helper function">
+      <created>1566801057902</created>
+      <option name="number" value="00108" />
+      <option name="presentableId" value="LOCAL-00108" />
+      <option name="project" value="LOCAL" />
+      <updated>1566801057902</updated>
+    </task>
+    <task id="LOCAL-00109" summary="Add fix amount of point and create error,config file">
+      <created>1566801090917</created>
+      <option name="number" value="00109" />
+      <option name="presentableId" value="LOCAL-00109" />
+      <option name="project" value="LOCAL" />
+      <updated>1566801090917</updated>
+    </task>
+    <option name="localTasksCounter" value="110" />
     <servers />
-  </component>
-  <component name="TodoView" selected-index="4">
-    <todo-panel id="selected-file">
-      <is-autoscroll-to-source value="true" />
-    </todo-panel>
-    <todo-panel id="all">
-      <are-packages-shown value="true" />
-      <is-autoscroll-to-source value="true" />
-    </todo-panel>
   </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">
@@ -580,9 +573,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Debug hyperparameter search" />
-    <MESSAGE value="Improve hooks &amp; Add l2 loss" />
-    <MESSAGE value="Fixed bug for single run" />
     <MESSAGE value="Improving img to tfrecord and adding k-fold" />
     <MESSAGE value="Focal Loss implemented" />
     <MESSAGE value="Cleaning code, implementing KFold" />
@@ -605,7 +595,10 @@
     <MESSAGE value="First Commit" />
     <MESSAGE value="Commit" />
     <MESSAGE value="Code Optimization, trying to combine all score in one tfrecord" />
-    <option name="LAST_COMMIT_MESSAGE" value="Code Optimization, trying to combine all score in one tfrecord" />
+    <MESSAGE value="Now receive name from tfrecord" />
+    <MESSAGE value="Now all label in tfrecord, edit helper function" />
+    <MESSAGE value="Add fix amount of point and create error,config file" />
+    <option name="LAST_COMMIT_MESSAGE" value="Add fix amount of point and create error,config file" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
 </project>

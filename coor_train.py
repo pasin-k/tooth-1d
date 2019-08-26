@@ -89,17 +89,10 @@ model_configs = {'learning_rate': configs.learning_rate,
                  'channels': channels_full,
                  'model_num': model_num,
                  'data_degree': configs.data_degree,
-                 'data_length': configs.data_length
+                 'data_length': configs.data_length,
+                 'label_type': configs.label_type,
                  }
 
-
-# Final Parameters:
-# run_params: batch_size, checkpoint_min, early_stop_step, input_path, result_path_base, config_path, steps, comment
-#             result_path(result_path_base + data&time), summary_file_path(doesn't use in run, just a global param)
-
-# model_params: learning_rate, dropout_rate, activation, channels, loss_weight,
-#               result_path(same as in run_params), result_file_name,
-#               model_num(Special params) -> Use to determine which model to run (1dCNN or dense)
 
 def get_available_gpus():
     local_device_protos = device_lib.list_local_devices()
@@ -115,7 +108,8 @@ def run(model_params=None):
     # Check if all values exist
     model_params = check_exist(model_params, learning_rate=None,
                                dropout_rate=None, activation=None,
-                               channels=None, result_path=None, model_num=None)
+                               channels=None, result_path=None, model_num=None,
+                               date_degree=None, date_length=None, label_type=None)
     # Note on some model_params:    loss_weight is calculated inside
     #                               channels (in CNN case) is [CNN channels, Dense channels]
 
@@ -304,7 +298,8 @@ def fitness(learning_rate, dropout_rate, activation, channels):
                  'result_file_name': 'result.csv',
                  'model_num': model_num,
                  'data_degree': configs.data_degree,
-                 'data_length': configs.data_length
+                 'data_length': configs.data_length,
+                 'label_type': configs.label_type,
                  }
     accuracy, global_step, result = run(md_config)
     # Save info of hyperparameter search in a specific csv file
