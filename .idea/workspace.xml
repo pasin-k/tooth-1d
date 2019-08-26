@@ -2,13 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="770e0596-62ef-4176-bd6c-3bded3f7c783" name="Default Changelist" comment="Add fix amount of point and create error,config file">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/coor_tooth.config" beforeDir="false" afterPath="$PROJECT_DIR$/coor_tooth.config" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/coor_train.py" beforeDir="false" afterPath="$PROJECT_DIR$/coor_train.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/imgtotfrecord.py" beforeDir="false" afterPath="$PROJECT_DIR$/imgtotfrecord.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/open_save_file.py" beforeDir="false" afterPath="$PROJECT_DIR$/open_save_file.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pre_processing.py" beforeDir="false" afterPath="$PROJECT_DIR$/pre_processing.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/proto/tooth.proto" beforeDir="false" afterPath="$PROJECT_DIR$/proto/tooth.proto" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/segmentation.py" beforeDir="false" afterPath="$PROJECT_DIR$/segmentation.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -198,20 +191,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1554715602048</updated>
-    </task>
-    <task id="LOCAL-00061" summary="Improve hooks &amp; Add l2 loss">
-      <created>1560243008120</created>
-      <option name="number" value="00061" />
-      <option name="presentableId" value="LOCAL-00061" />
-      <option name="project" value="LOCAL" />
-      <updated>1560243008120</updated>
-    </task>
-    <task id="LOCAL-00062" summary="Improve hooks &amp; Add l2 loss">
-      <created>1560244604867</created>
-      <option name="number" value="00062" />
-      <option name="presentableId" value="LOCAL-00062" />
-      <option name="project" value="LOCAL" />
-      <updated>1560244604867</updated>
     </task>
     <task id="LOCAL-00063" summary="Fixed bug for single run">
       <created>1560327179104</created>
@@ -542,7 +521,21 @@
       <option name="project" value="LOCAL" />
       <updated>1566801090917</updated>
     </task>
-    <option name="localTasksCounter" value="110" />
+    <task id="LOCAL-00110" summary="New config parameters: label_type">
+      <created>1566825268047</created>
+      <option name="number" value="00110" />
+      <option name="presentableId" value="LOCAL-00110" />
+      <option name="project" value="LOCAL" />
+      <updated>1566825268047</updated>
+    </task>
+    <task id="LOCAL-00111" summary="Has parameter to show axis">
+      <created>1566825304913</created>
+      <option name="number" value="00111" />
+      <option name="presentableId" value="LOCAL-00111" />
+      <option name="project" value="LOCAL" />
+      <updated>1566825304913</updated>
+    </task>
+    <option name="localTasksCounter" value="112" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -573,8 +566,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Improving img to tfrecord and adding k-fold" />
-    <MESSAGE value="Focal Loss implemented" />
     <MESSAGE value="Cleaning code, implementing KFold" />
     <MESSAGE value="tfrecord now contain data size" />
     <MESSAGE value="KFold implemented" />
@@ -598,7 +589,9 @@
     <MESSAGE value="Now receive name from tfrecord" />
     <MESSAGE value="Now all label in tfrecord, edit helper function" />
     <MESSAGE value="Add fix amount of point and create error,config file" />
-    <option name="LAST_COMMIT_MESSAGE" value="Add fix amount of point and create error,config file" />
+    <MESSAGE value="New config parameters: label_type" />
+    <MESSAGE value="Has parameter to show axis" />
+    <option name="LAST_COMMIT_MESSAGE" value="Has parameter to show axis" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
 </project>
