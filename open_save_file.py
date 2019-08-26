@@ -244,10 +244,11 @@ def split_train_test(grouped_address, example_grouped_address, tfrecord_name, co
     eval_index = []
 
     train_amount = int(configs['train_eval_ratio'] * len(grouped_address))  # Calculate amount of training data
-
     # Open file and read the content in a list
-    file_name = "./data/tfrecord/%s/%s_%s_%s.txt" % (
-        tfrecord_name, tfrecord_name, configs['label_data'], configs['label_type'])
+    # file_name = "./data/tfrecord/%s/%s_%s_%s.txt" % (
+    #     tfrecord_name, tfrecord_name, configs['label_data'], configs['label_type'])
+    file_name = "./data/tfrecord/%s/%s.txt" % (
+        tfrecord_name, tfrecord_name)
     if os.path.isfile(file_name):  # Check if file exist
         with open(file_name) as f:
             filehandle = f.read().splitlines()
@@ -294,13 +295,16 @@ def split_train_test(grouped_address, example_grouped_address, tfrecord_name, co
     eval_address = [example_grouped_address[i] for i in eval_index]
 
     # Save names of files of train address
-    file_name = "./data/tfrecord/%s/%s_%s_%s.txt" % (
-        tfrecord_name, tfrecord_name, configs['label_data'], configs['label_type'])
+    file_name = "./data/tfrecord/%s/%s.txt" % (
+        tfrecord_name, tfrecord_name)
+    # file_name = "./data/tfrecord/%s/%s_%s_%s.txt" % (
+    #     tfrecord_name, tfrecord_name, configs['label_data'], configs['label_type'])
     with open(file_name, 'w') as filehandle:
         # Header with 'distibution'
         filehandle.write('distribution\n')
-        for listitem in class_weight:
-            filehandle.write('%s\n' % listitem)
+        # TODO: Implement class weight for all label
+        # for listitem in class_weight:
+        #     filehandle.write('%s\n' % listitem)
 
         # Header with 'train'
         filehandle.write('train\n')
@@ -328,7 +332,8 @@ def split_kfold(grouped_address, k_num):
     train_address = []
     eval_address = []
     # for train_indices, test_indices in kfold.split(grouped_address):
-    for train_indices, test_indices in kfold.split(data, label):
+    new_label = [i["BL_median"] for i in label]  # TODO: Best way to split data?
+    for train_indices, test_indices in kfold.split(data, new_label):
         train_address_fold = []
         test_address_fold = []
         for train_indice in train_indices:
@@ -347,7 +352,7 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
     :param tfrecord_name:   String, Name of tfrecord output file
     :param dataset_folder:  String, Folder directory of input data [Assume only data is in this folder]
     :param csv_dir:         String, directory of label file (.csv). Can be None and use default directory
-    :param configs:         Dictionary, containing numdeg, train_eval_ratio, labels_data, labels_type
+    :param configs:         Dictionary, containing numdeg, train_eval_ratio, data_type
     :param get_data:        Boolean, if true will return raw data instead of file name
     :param double_data:     Boolean, if true will do flip data augmentation
     :param k_cross:         Boolean, if true will use K-fold cross validation, else
@@ -362,7 +367,7 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
                                      exception_file=["config.txt", "error_file.txt", "score.csv"])
 
     labels, _ = read_score(os.path.join(dataset_folder, "score.csv"),
-                           data_type=configs['label_data'] + "_" + configs['label_type'])
+                           data_type=configs['data_type'])
 
     # # Get label and label name[Not used right now]
     # if csv_dir is None:
@@ -371,8 +376,6 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
     # else:
     #     labels, label_name = get_label(configs['label_data'], configs['label_type'], double_data=double_data,
     #                                    one_hotted=False, normalized=False, file_dir=csv_dir)
-
-    # label_count = collections.Counter(labels)  # Use for frequency count
 
     if len(image_address) / len(labels) != numdeg:
         print(image_address)
@@ -391,7 +394,8 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
     if get_data:
         image_address_temp = []
         for addr in image_address:
-            image_address_temp.append(np.loadtxt(addr, delimiter=','))
+            # image_address_temp.append(np.loadtxt(addr, delimiter=','))
+            image_address_temp.append(np.load(addr))
         image_address = image_address_temp
 
     # Group up 4 images and label together first, shuffle
@@ -408,7 +412,8 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
 
     # Calculate loss weight
     _, label = [list(e) for e in zip(*grouped_address)]
-    class_weight = compute_class_weight('balanced', np.unique(label), label)
+    # class_weight = compute_class_weight('balanced', np.unique(label), label)
+    class_weight = None
 
     if k_cross:  # If k_cross mode, output will be list
         train_address_temp, eval_address_temp = split_kfold(grouped_address, k_num)
@@ -431,13 +436,16 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
             eval_address.append(single_eval_address)
 
             # Save names of files of train address
-            file_name = "./data/tfrecord/%s/%s_%s_%s_%s.txt" % (
-                tfrecord_name, tfrecord_name, configs['label_data'], configs['label_type'], i)
+            # file_name = "./data/tfrecord/%s/%s_%s_%s_%s.txt" % (
+            #     tfrecord_name, tfrecord_name, configs['label_data'], configs['label_type'], i)
+            file_name = "./data/tfrecord/%s/%s_%s.txt" % (
+                tfrecord_name, tfrecord_name, i)
             with open(file_name, 'w') as filehandle:
                 # Header with 'distibution'
                 filehandle.write('distribution\n')
-                for listitem in class_weight:
-                    filehandle.write('%s\n' % listitem)
+                # TODO: Implement class weight with all label in a file
+                # for listitem in class_weight:
+                #     filehandle.write('%s\n' % listitem)
                 filehandle.write('train\n')
                 filehandle.write('eval\n')
     else:
@@ -451,124 +459,7 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
                 [list(e) for e in zip(*eval_address)])  # Convert to tuple of list[image address, label]
             print("Train files: %d, Evaluate Files: %d" % (len(train_address[0]), len(eval_address[0])))
         else:
-            print("Train files: %d, Evaluate Files: %d" % (len(train_address), len(train_address)))
-
-    return train_address, eval_address
-
-
-# Similar function as above but get all file instead
-def get_input_and_all_label(tfrecord_name, dataset_folder, csv_dir, configs, get_data=False,
-                            double_data=False, k_cross=False, k_num=5):
-    """
-    This function is used in imgtotfrecord
-    :param tfrecord_name:   String, Name of tfrecord output file
-    :param dataset_folder:  String, Folder directory of input data [Assume only data is in this folder]
-    :param csv_dir:         String, directory of label file (.csv). Can be None and use default directory
-    :param configs:         Dictionary, containing numdeg, train_eval_ratio, labels_data, labels_type
-    :param get_data:        Boolean, if true will return raw data instead of file name
-    :param double_data:     Boolean, if true will do flip data augmentation
-    :param k_cross:         Boolean, if true will use K-fold cross validation, else
-    :param k_num:           Integer, parameter for KFold
-    :return:                Train, Eval: Tuple of list[image address, label]. Also save some txt file
-                            loss_weight: numpy array use for loss weight
-    """
-    numdeg = configs['numdeg']
-
-    # Get image address, or image data
-    image_address, _ = get_file_name(folder_name=dataset_folder, file_name=None,
-                                     exception_file=["config.txt", "error_file.txt", "score.csv"])
-
-    labels, _ = read_score(os.path.join(dataset_folder, "score.csv"),
-                           data_type=configs['label_data'] + "_" + configs['label_type'])
-
-    # # Get label and label name[Not used right now]
-    # if csv_dir is None:
-    #     labels, label_name = get_label(configs['label_data'], configs['label_type'], double_data=double_data,
-    #                                    one_hotted=False, normalized=False)
-    # else:
-    #     labels, label_name = get_label(configs['label_data'], configs['label_type'], double_data=double_data,
-    #                                    one_hotted=False, normalized=False, file_dir=csv_dir)
-
-    # label_count = collections.Counter(labels)  # Use for frequency count
-
-    if len(image_address) / len(labels) != numdeg:
-        print(image_address)
-        raise Exception(
-            '# of images and labels is not compatible: %d images, %d labels. '
-            'Expected # of images to be %s times of label' % (
-                len(image_address), len(labels), numdeg))
-
-    # Create list of file names used in split_train_test (To remember which one is train/eval)
-    if not k_cross:
-        example_grouped_address = []
-        for i in range(len(labels)):
-            example_grouped_address.append(image_address[i * numdeg].split('.')[0])  # Only 0 degree
-
-    # Convert name to data (only if request output to be value, not file name)
-    if get_data:
-        image_address_temp = []
-        for addr in image_address:
-            image_address_temp.append(np.loadtxt(addr, delimiter=','))
-        image_address = image_address_temp
-
-    # Group up 4 images and label together first, shuffle
-    grouped_address = []
-    for i in range(len(labels)):
-        grouped_address.append([image_address[i * numdeg:(i + 1) * numdeg], labels[i]])  # All degrees
-    if not k_cross:
-        # Zip, shuffle, unzip
-        z = list(zip(grouped_address, example_grouped_address))
-        shuffle(z)
-        grouped_address[:], example_grouped_address[:] = zip(*z)
-    else:
-        shuffle(grouped_address)
-
-    # Calculate loss weight
-    _, label = [list(e) for e in zip(*grouped_address)]
-    class_weight = compute_class_weight('balanced', np.unique(label), label)
-
-    if k_cross:  # If k_cross mode, output will be list
-        train_address_temp, eval_address_temp = split_kfold(grouped_address, k_num)
-        train_address = []
-        eval_address = []
-        for i in range(k_num):
-            single_train_address = train_address_temp[i]
-            single_eval_address = eval_address_temp[i]
-            if not get_data:  # Put in special format for writing tfrecord (pipeline)
-                single_train_address = tuple(
-                    [list(e) for e in zip(*single_train_address)])  # Convert to tuple of list[image address, label]
-
-                single_eval_address = tuple(
-                    [list(e) for e in zip(*single_eval_address)])  # Convert to tuple of list[image address, label]
-                print(
-                    "Train files: %d, Evaluate Files: %d" % (len(single_train_address[0]), len(single_eval_address[0])))
-            else:
-                print("Train files: %d, Evaluate Files: %d" % (len(single_train_address), len(single_eval_address)))
-            train_address.append(single_train_address)
-            eval_address.append(single_eval_address)
-
-            # Save names of files of train address
-            file_name = "./data/tfrecord/%s/%s_%s_%s_%s.txt" % (
-                tfrecord_name, tfrecord_name, configs['label_data'], configs['label_type'], i)
-            with open(file_name, 'w') as filehandle:
-                # Header with 'distibution'
-                filehandle.write('distribution\n')
-                for listitem in class_weight:
-                    filehandle.write('%s\n' % listitem)
-                filehandle.write('train\n')
-                filehandle.write('eval\n')
-    else:
-        train_address, eval_address = split_train_test(grouped_address, example_grouped_address,
-                                                       tfrecord_name, configs, class_weight)
-        if not get_data:  # Put in special format for writing tfrecord (pipeline)
-            train_address = tuple(
-                [list(e) for e in zip(*train_address)])  # Convert to tuple of list[image address, label]
-
-            eval_address = tuple(
-                [list(e) for e in zip(*eval_address)])  # Convert to tuple of list[image address, label]
-            print("Train files: %d, Evaluate Files: %d" % (len(train_address[0]), len(eval_address[0])))
-        else:
-            print("Train files: %d, Evaluate Files: %d" % (len(train_address), len(train_address)))
+            print("Train files: %d, Evaluate Files: %d" % (len(train_address), len(eval_address)))
 
     return train_address, eval_address
 
@@ -601,9 +492,13 @@ def read_score(csv_dir, data_type):
     """
     Extension to read_file, specifically used to read csv file made from pre_processing.py
     :param csv_dir:
-    :param data_type:
+    :param data_type: List of data type to fetch
     :return:
     """
+    # Prevent case that input is not list
+    if not type(data_type) is list:
+        data_type = [data_type]
+
     data = []
     data_name = []
     with open(csv_dir) as csvFile:
@@ -611,12 +506,19 @@ def read_score(csv_dir, data_type):
         is_header = True
         for row in readCSV:
             if is_header:
-                header_name = (row)
-                data_index = header_name.index(data_type)  # Find index of data
+                header_name = row
+                data_index = [header_name.index(i) for i in data_type]  # If ValueError, data_type is not in csv header
+                # data_index = header_name.index(data_type)  # Find index of data
                 is_header = False
             else:
                 data_name.append(row[0])  # Assume name is first column
-                data.append(int(row[data_index]))
+                data_dict = {}
+                for index in data_index:
+                    if header_name[index] == "name":
+                        data_dict[header_name[index]] = row[index]
+                    else:
+                        data_dict[header_name[index]] = int(row[index])
+                data.append(data_dict)
     return data, data_name
 
 

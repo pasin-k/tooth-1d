@@ -16,7 +16,7 @@ v = '1.2.0'
 # 1.2: Now save image with their own name
 print("pre_processing.py version: " + str(v))
 
-augment_config = [0]
+augment_config = [0, -1, -2, -3, 1, 2, 3]
 degree = [0, 45, 90, 135]
 numdeg = len(degree)
 
@@ -61,6 +61,7 @@ def fix_amount_of_point(stl_points, coor_amount):
             add_index = distance_index[-1]  # Choose max distance as the index to add coordinate
             new_point = (stl_points[add_index, :] + stl_points[add_index + 1, :]) / 2
             stl_points = np.insert(stl_points, add_index + 1, new_point, axis=0)
+    # print(np.shape(stl_points))
     return stl_points
 
 
@@ -120,15 +121,19 @@ def get_cross_section(data_type, stat_type, augment_config=[0], folder_name='../
         error_file_names = []  # Names of file that cannot get cross-section image
 
         for index, point in enumerate(points_all):
-
+            augment_val = augment_config[index]
+            if augment_val < 0:
+                augment_val = "n" + str(abs(augment_val))
+            else:
+                augment_val = str(abs(augment_val))
             if point is None:  # If the output has error, remove label of that file
-                error_file_names.append(image_name[i] + "_" + str(augment_config[index]))
+                error_file_names.append(image_name[i] + "_" + augment_val)
                 # index = label_name_temp.index(image_name[i])
                 # label_name_temp.pop(index)
                 # label_temp.pop(index)
             else:
                 stl_points.append(point)
-                label_name_temp.append(image_name[i] + "_" + str(augment_config[index]))
+                label_name_temp.append(image_name[i] + "_" + augment_val)
                 if len(point[0]) > max_point:
                     max_point = len(point[0])
                 if len(point[0]) < min_point:
@@ -162,6 +167,8 @@ def save_image(stl_points, label_name, error_file_names, image_dir="./data/cross
     for j in range(len(label_name)):
         save_plot(stl_points[j], image_dir, png_name, label_name[j], degree)
         # Save names which has defect on it, use when convert to tfrecord
+        if j % 50 == 0:
+            print("Saved %s out of %s" % (j, len(label_name)))
     with open(image_dir + '/error_file.txt', 'a') as filehandle:
         for listitem in error_file_names:
             filehandle.write('%s\n' % listitem)
@@ -237,7 +244,7 @@ def save_stl_point(stl_points, label_name, error_file_names, file_dir="./data/co
 
 if __name__ == '__main__':
     # Output 'points' as list[list[numpy]] (example_data, degrees, points)
-    save_img = False
+    save_img = True
     save_coor = True
     is_fix_amount = True
     fix_amount = 300  # After get the movement, it will be reduced to 300
@@ -246,19 +253,21 @@ if __name__ == '__main__':
     points_all, lbl_all, lbl_name_all, err_name_all, header = get_cross_section(data_type="BL",
                                                                                 stat_type="median",
                                                                                 augment_config=augment_config, )
+    # folder_name="/home/pasin/Documents/Link_to_Tooth/Tooth/Model/global_data/stl_data_debug",
+    # csv_dir="/home/pasin/Documents/Link_to_Tooth/Tooth/Model/global_data/Ground Truth Score_debug.csv")
     # folder_name='../global_data/stl_data_debug',
     # csv_dir='../global_data/Ground Truth Score_debug.csv')
     if is_fix_amount:
         fix_amount = fix_amount + 1  # Compensate for the missing data
         print("Adjusting number of coordinates... Takes a long time")
-        for i in range(len(lbl_all)):
+        for i in range(len(points_all)):
             for d_index in range(len(degree)):
                 points_all[i][d_index] = fix_amount_of_point(points_all[i][d_index], fix_amount)
-            print("Done %s out of %s" % (i + 1, len(lbl_all)))
+            print("Done %s out of %s" % (i + 1, len(points_all)))
 
     if save_img:
         print("Start saving images...")
-        image_dir = "./data/cross_section_evaluate"
+        image_dir = "./data/cross_section_newer"
         save_image(points_all, lbl_name_all, err_name_all, image_dir=image_dir)
         save_file(os.path.join(image_dir, "score.csv"), lbl_all, data_format="dict_list", field_name=header)
 
