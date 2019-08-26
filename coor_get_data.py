@@ -5,15 +5,16 @@ import numpy as np
 # Read TFRecord file, return as tf.dataset, specifically used for
 
 numdegree = None
-# TODO: use input from tfrecord instead
 data_length = None
+label_type_global = None
 
 
 # Import tfrecord to dataset
 def deserialize(example):
-    feature = {'label': tf.FixedLenFeature([], tf.int64),
+    feature = {label_type_global: tf.FixedLenFeature([], tf.int64),
                'degree': tf.FixedLenFeature([], tf.int64),
-               'length': tf.FixedLenFeature([], tf.int64)}
+               'length': tf.FixedLenFeature([], tf.int64),
+               "name": tf.FixedLenFeature([], tf.string)}  # Becareful if tfrecord doesn't have name
 
     for i in range(4):
         for j in range(2):
@@ -23,10 +24,9 @@ def deserialize(example):
 
 
 def decode_one_axis(data_dict):
+    global label_type_global
     # Create initial image, then stacking it for dense model
     image_decoded = []
-    # degree = tf.cast(data_dict['degree'], tf.int32)
-    # length = tf.cast(data_dict['length'], tf.int32)
     # Stacking the rest
     for i in range(numdegree):
         for j in range(2):
@@ -43,20 +43,15 @@ def decode_one_axis(data_dict):
                                image_decoded[4], image_decoded[5], image_decoded[6], image_decoded[7]], axis=0)
     # image_stacked.set_shape([tf.multiply(tf.convert_to_tensor(numdegree),length)])
     image_stacked = tf.cast(image_stacked, tf.float32)
-    label = tf.cast(data_dict['label'], tf.float32)
-    # output = (image_stacked, label)
-    # return {'images': image_stacked, 'label': label}  # Output is [Channel, Height, Width]
+    label = tf.cast(data_dict[label_type_global], tf.float32)
+    name = tf.cast(data_dict['name'], tf.string)  # Used for referencing
     return image_stacked, label
 
 
 def decode_multiple_axis(data_dict):
+    global label_type_global
     # Create initial image, then stacking it for 1dCNN model
     image_decoded = []
-    degree = tf.cast(data_dict['degree'], tf.int32)
-    # length = tf.cast(data_dict['length'], tf.int32)
-    length = data_dict['length']
-    print("debug0")
-    print(length)
     # Stacking the rest
     for i in range(numdegree):
         for j in range(2):
@@ -75,16 +70,17 @@ def decode_multiple_axis(data_dict):
     #                           image_decoded[4], image_decoded[5], image_decoded[6], image_decoded[7]], axis=1)
     image_stacked = tf.stack([image_decoded[0], image_decoded[4]], axis=1)
     image_stacked = tf.cast(image_stacked, tf.float32)
-    label = tf.cast(data_dict['label'], tf.float32)
-    # output = (image_stacked, label)
-    # return {'images': image_stacked, 'label': label}  # Output is [Channel, Height, Width]
+    # label = tf.cast(data_dict['label'], tf.float32)
+    label = tf.cast(data_dict[label_type_global], tf.float32)
+    name = tf.cast(data_dict['name'], tf.string)
     return image_stacked, label
 
 
 def train_input_fn(data_path, batch_size, data_type, configs):
-    global numdegree, data_length
+    global numdegree, data_length, label_type_global
     numdegree = configs['data_degree']
     data_length = configs['data_length']
+    label_type_global = configs['label_type']
     if not os.path.exists(data_path):
         raise ValueError("Train input file does not exist")
     # data_type=0 -> data is vectorize in to one vector else, stack in different dimension
@@ -102,9 +98,10 @@ def train_input_fn(data_path, batch_size, data_type, configs):
 
 
 def eval_input_fn(data_path, batch_size, data_type, configs):
-    global numdegree, data_length
+    global numdegree, data_length, label_type_global
     numdegree = configs['data_degree']
     data_length = configs['data_length']
+    label_type_global = configs['label_type']
     if not os.path.exists(data_path):
         raise ValueError("Eval input file does not exist")
     eval_dataset = tf.data.TFRecordDataset(data_path)
@@ -117,7 +114,13 @@ def eval_input_fn(data_path, batch_size, data_type, configs):
     return eval_dataset
 
 
-def get_data_from_path(data_path, data_type = 0):
+def get_data_from_path(data_path, label_type, data_type=0):
+    global numdegree, data_length, label_type_global
+    label_data = ["name", "Occ_B_median", "Occ_F_median", "Occ_L_median", "BL_median", "MD_median", "Integrity_median",
+                  "Width_median", "Surface_median", "Sharpness_median"]
+    numdegree = 4
+    data_length = 300
+    label_type_global = label_type
     if not os.path.exists(data_path):
         raise ValueError("Input file does not exist")
     dataset = tf.data.TFRecordDataset(data_path)
@@ -131,9 +134,9 @@ def get_data_from_path(data_path, data_type = 0):
     next_image_data = iterator.get_next()
     images = []
     label = []
+    name = []
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
-
         try:
             # Keep extracting data till TFRecord is exhausted
             while True:
@@ -141,6 +144,7 @@ def get_data_from_path(data_path, data_type = 0):
                 # print(data)
                 images.append(data[0])
                 label.append(data[1])
+                # name.append(data[2])  # For referenncing
         except tf.errors.OutOfRangeError:
             pass
 

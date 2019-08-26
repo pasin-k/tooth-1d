@@ -4,7 +4,6 @@
     <list default="true" id="770e0596-62ef-4176-bd6c-3bded3f7c783" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/coor_get_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/coor_get_data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/coor_tooth.config" beforeDir="false" afterPath="$PROJECT_DIR$/coor_tooth.config" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/imgtotfrecord.py" beforeDir="false" afterPath="$PROJECT_DIR$/imgtotfrecord.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/open_save_file.py" beforeDir="false" afterPath="$PROJECT_DIR$/open_save_file.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pre_processing.py" beforeDir="false" afterPath="$PROJECT_DIR$/pre_processing.py" afterDir="false" />
@@ -64,8 +63,8 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.pre_processing">
-    <configuration name="coor_train" type="PythonConfigurationType" factoryName="Python" temporary="true">
+  <component name="RunManager" selected="Python.segmentation">
+    <configuration name="imgtotfrecord" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="my2DCNN" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -77,28 +76,7 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/coor_train.py" />
-      <option name="PARAMETERS" value="coor_tooth.config" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="open_save_file" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="my2DCNN" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/open_save_file.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/imgtotfrecord.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -149,6 +127,27 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="scratch_28" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="my2DCNN" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$APPLICATION_CONFIG_DIR$/scratches" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$APPLICATION_CONFIG_DIR$/scratches/scratch_28.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="segmentation" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="my2DCNN" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -156,9 +155,9 @@
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="$USER_HOME$/anaconda3/envs/ps36/bin/python" />
+      <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="false" />
+      <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/segmentation.py" />
@@ -172,18 +171,18 @@
     </configuration>
     <list>
       <item itemvalue="Python.pre_processing" />
-      <item itemvalue="Python.segmentation" />
-      <item itemvalue="Python.open_save_file" />
-      <item itemvalue="Python.coor_train" />
       <item itemvalue="Python.scratch_27" />
+      <item itemvalue="Python.scratch_28" />
+      <item itemvalue="Python.imgtotfrecord" />
+      <item itemvalue="Python.segmentation" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.segmentation" />
+        <item itemvalue="Python.imgtotfrecord" />
+        <item itemvalue="Python.scratch_28" />
         <item itemvalue="Python.pre_processing" />
         <item itemvalue="Python.scratch_27" />
-        <item itemvalue="Python.coor_train" />
-        <item itemvalue="Python.segmentation" />
-        <item itemvalue="Python.open_save_file" />
       </list>
     </recent_temporary>
   </component>
@@ -197,13 +196,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1554715602048</updated>
-    </task>
-    <task id="LOCAL-00057" summary="Debug hyperparameter search">
-      <created>1560144579279</created>
-      <option name="number" value="00057" />
-      <option name="presentableId" value="LOCAL-00057" />
-      <option name="project" value="LOCAL" />
-      <updated>1560144579279</updated>
     </task>
     <task id="LOCAL-00058" summary="Debug hyperparameter search">
       <created>1560144643896</created>
@@ -541,7 +533,14 @@
       <option name="project" value="LOCAL" />
       <updated>1566373268133</updated>
     </task>
-    <option name="localTasksCounter" value="106" />
+    <task id="LOCAL-00106" summary="Code Optimization, trying to combine all score in one tfrecord">
+      <created>1566561105193</created>
+      <option name="number" value="00106" />
+      <option name="presentableId" value="LOCAL-00106" />
+      <option name="project" value="LOCAL" />
+      <updated>1566561105193</updated>
+    </task>
+    <option name="localTasksCounter" value="107" />
     <servers />
   </component>
   <component name="TodoView" selected-index="4">
@@ -581,7 +580,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Now save one run in single folder" />
     <MESSAGE value="Debug hyperparameter search" />
     <MESSAGE value="Improve hooks &amp; Add l2 loss" />
     <MESSAGE value="Fixed bug for single run" />
@@ -606,7 +604,8 @@
     <MESSAGE value="point cloud function" />
     <MESSAGE value="First Commit" />
     <MESSAGE value="Commit" />
-    <option name="LAST_COMMIT_MESSAGE" value="Commit" />
+    <MESSAGE value="Code Optimization, trying to combine all score in one tfrecord" />
+    <option name="LAST_COMMIT_MESSAGE" value="Code Optimization, trying to combine all score in one tfrecord" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
 </project>
