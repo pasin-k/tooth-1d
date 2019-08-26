@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure
 from stlSlicer import getSlicer
 from open_save_file import get_file_name
+from pre_processing import fix_amount_of_point
 
 # TODO; Check if all file is created
 
@@ -132,7 +133,8 @@ def get_segment(points, mode=None, margin=0, file_name=None):
 
 
 def get_segment_multiple(name, margin=0,
-                         base_dir="/home/pasin/Documents/Google_Drive/Aa_TIT_LAB_Comp/Library/Tooth/Tooth/Model/my2DCNN/data/segment_2"):
+                         base_dir="/home/pasin/Documents/Google_Drive/Aa_TIT_LAB_Comp/Library/Tooth/Tooth/Model/my2DCNN/data/segment_2",
+                         point_only=False, fix_point=None):
     """
     Get a segments of cross section from multiple files
     :param points: ndarray of N*2
@@ -144,6 +146,7 @@ def get_segment_multiple(name, margin=0,
     name_dir = name_dir[160:]
     image_name = image_name[160:]
     cnt = 0
+    error_file_names_all = []
     for n_name, im_name in zip(name_dir, image_name):
         cnt += 1
         points_all = getSlicer(n_name, 0, degree, augment=augment_config, axis=1)
@@ -195,100 +198,152 @@ def get_segment_multiple(name, margin=0,
                     #     np.save(file=save_path + '1dfigs/' + directory[1] + '_' + str(cross_sections[ind]), arr=FigureCoords)
 
                     # Plotting
-                    dpi = 100
-                    img_size = 800
-                    fig = plt.figure(figsize=(img_size / dpi, img_size / dpi), dpi=dpi)
-                    ax = fig.gca()
-                    min_x, max_x, min_y, max_y = -5, 5, -6, 6
-                    ax.axis([min_x, max_x, min_y, max_y])
-                    ax.set_autoscale_on(False)  # allows us to define scale
-                    # plot lines for viewing
-                    x1 = range(-5, 5)
-                    yleft = np.full((10,), points[top_left_index, :][1])
-                    yright = np.full((10,), points[top_right_index, :][1])
-                    ybottom_left_margin = np.full((10,), points[x_min_index, :][1] - margin)
-                    ybottom_right_margin = np.full((10,), points[x_max_index, :][1] - margin)
-                    ybottom_left = np.full((10,), points[x_min_index, :][1])
-                    ybottom_right = np.full((10,), points[x_max_index, :][1])
+                    if point_only:
+                        # Left
+                        # If there is margin, choose points slightly below x_min_index
+                        if margin > 0:
+                            segmented_points = points[0:top_left_index + 1, :]
+                            segmented_points = segmented_points[
+                                segmented_points[:, 1] > points[x_min_index, 1] - margin]
+                        else:
+                            segmented_points = points[x_min_index:top_left_index + 1, :]
+                        if fix_point is not None:
+                            segmented_points = fix_amount_of_point(segmented_points, fix_point)
 
-                    # Display entire tooth
-                    segmented_points = points
-                    x = points[:, 0]
-                    y = points[:, 1]
+                        np.save(base_dir + "/left_point/" + file_name_point, segmented_points)
 
-                    ax.plot(x, y, linewidth=1.0)
-                    ax.plot(x1, yleft, '-c')
-                    ax.plot(x1, yright, '-r')
-                    ax.plot(x1, ybottom_left_margin, '-py')
-                    ax.plot(x1, ybottom_left, '-y')
-                    ax.plot(x1, ybottom_right_margin, '-pb')
-                    ax.plot(x1, ybottom_right, '-b')
+                        # Right
+                        if margin > 0:
+                            segmented_points = points[top_right_index:, :]
+                            segmented_points = segmented_points[
+                                segmented_points[:, 1] > points[x_max_index, 1] - margin]
+                        else:
+                            segmented_points = points[top_right_index:x_max_index + 1, :]
 
-                    fig.savefig(base_dir + "/full/" + file_name, bbox_inches='tight')
-                    plt.close()
+                        if fix_point is not None:
+                            segmented_points = fix_amount_of_point(segmented_points, fix_point)
+                        np.save(base_dir + "/right_point/" + file_name_point, segmented_points)
 
-                    ax.relim()
-                    ax.autoscale()
-
-                    # Left
-                    # If there is margin, choose points slightly below x_min_index
-                    if margin > 0:
-                        segmented_points = points[0:top_left_index + 1, :]
-                        segmented_points = segmented_points[segmented_points[:, 1] > points[x_min_index, 1] - margin]
+                        # Top
+                        segmented_points = points[top_left_index:top_right_index + 1, :]
+                        if fix_point is not None:
+                            segmented_points = fix_amount_of_point(segmented_points, fix_point)
+                        np.save(base_dir + "/top_point/" + file_name_point, segmented_points)
                     else:
-                        segmented_points = points[x_min_index:top_left_index + 1, :]
-                    x = segmented_points[:, 0]
-                    y = segmented_points[:, 1]
+                        dpi = 100
+                        img_size = 800
+                        fig = plt.figure(figsize=(img_size / dpi, img_size / dpi), dpi=dpi)
+                        ax = fig.gca()
+                        min_x, max_x, min_y, max_y = -5, 5, -6, 6
+                        ax.axis([min_x, max_x, min_y, max_y])
+                        ax.set_autoscale_on(False)  # allows us to define scale
+                        # plot lines for viewing
+                        x1 = range(-5, 5)
+                        yleft = np.full((10,), points[top_left_index, :][1])
+                        yright = np.full((10,), points[top_right_index, :][1])
+                        ybottom_left_margin = np.full((10,), points[x_min_index, :][1] - margin)
+                        ybottom_right_margin = np.full((10,), points[x_max_index, :][1] - margin)
+                        ybottom_left = np.full((10,), points[x_min_index, :][1])
+                        ybottom_right = np.full((10,), points[x_max_index, :][1])
 
-                    ax.plot(x, y, linewidth=1.0)
-                    ax.plot(x1, yleft, '-c')
-                    ax.plot(x1, yright, '-r')
-                    ax.plot(x1, ybottom_left_margin, '-py')
-                    ax.plot(x1, ybottom_left, '-y')
+                        # Display entire tooth
+                        segmented_points = points
+                        x = points[:, 0]
+                        y = points[:, 1]
 
-                    fig.savefig(base_dir + "/left/" + file_name, bbox_inches='tight')
-                    np.save(base_dir + "/left_point/" + file_name_point, segmented_points)
-                    plt.close()
+                        ax.plot(x, y, linewidth=1.0)
+                        ax.plot(x1, yleft, '-c')
+                        ax.plot(x1, yright, '-r')
+                        ax.plot(x1, ybottom_left_margin, '-py')
+                        ax.plot(x1, ybottom_left, '-y')
+                        ax.plot(x1, ybottom_right_margin, '-pb')
+                        ax.plot(x1, ybottom_right, '-b')
 
-                    # Right
-                    if margin > 0:
-                        segmented_points = points[top_right_index:, :]
-                        segmented_points = segmented_points[segmented_points[:, 1] > points[x_max_index, 1] - margin]
-                    else:
-                        segmented_points = points[top_right_index:x_max_index + 1, :]
-                    x = segmented_points[:, 0]
-                    y = segmented_points[:, 1]
+                        fig.savefig(base_dir + "/full/" + file_name, bbox_inches='tight')
+                        plt.close()
 
-                    ax.plot(x, y, linewidth=1.0)
-                    ax.plot(x1, yleft, '-c')
-                    ax.plot(x1, yright, '-r')
-                    ax.plot(x1, ybottom_right_margin, '-pb')
-                    ax.plot(x1, ybottom_right, '-b')
+                        ax.relim()
+                        ax.autoscale()
 
-                    fig.savefig(base_dir + "/right/" + file_name, bbox_inches='tight')
-                    np.save(base_dir + "/right_point/" + file_name_point, segmented_points)
-                    plt.close()
+                        # Left
+                        # If there is margin, choose points slightly below x_min_index
+                        if margin > 0:
+                            segmented_points = points[0:top_left_index + 1, :]
+                            segmented_points = segmented_points[
+                                segmented_points[:, 1] > points[x_min_index, 1] - margin]
+                        else:
+                            segmented_points = points[x_min_index:top_left_index + 1, :]
+                        x = segmented_points[:, 0]
+                        y = segmented_points[:, 1]
 
-                    # Top
-                    segmented_points = points[top_left_index:top_right_index + 1, :]
-                    x = segmented_points[:, 0]
-                    y = segmented_points[:, 1]
+                        ax.plot(x, y, linewidth=1.0)
+                        ax.plot(x1, yleft, '-c')
+                        ax.plot(x1, yright, '-r')
+                        ax.plot(x1, ybottom_left_margin, '-py')
+                        ax.plot(x1, ybottom_left, '-y')
 
-                    ax.plot(x, y, linewidth=1.0)
-                    ax.plot(x1, yleft, '-c')
-                    ax.plot(x1, yright, '-r')
-                    ax.plot(x1, ybottom_left_margin, '-py')
-                    ax.plot(x1, ybottom_left, '-y')
+                        fig.savefig(base_dir + "/left/" + file_name, bbox_inches='tight')
+                        np.save(base_dir + "/left_point/" + file_name_point, segmented_points)
+                        if fix_point is not None:
+                            segmented_points = fix_amount_of_point(segmented_points, fix_point)
+                        plt.close()
 
-                    fig.savefig(base_dir + "/top/" + file_name, bbox_inches='tight')
-                    np.save(base_dir + "/top_point/" + file_name_point, segmented_points)
-                    plt.close()
+                        # Right
+                        if margin > 0:
+                            segmented_points = points[top_right_index:, :]
+                            segmented_points = segmented_points[
+                                segmented_points[:, 1] > points[x_max_index, 1] - margin]
+                        else:
+                            segmented_points = points[top_right_index:x_max_index + 1, :]
+                        x = segmented_points[:, 0]
+                        y = segmented_points[:, 1]
+
+                        ax.plot(x, y, linewidth=1.0)
+                        ax.plot(x1, yleft, '-c')
+                        ax.plot(x1, yright, '-r')
+                        ax.plot(x1, ybottom_right_margin, '-pb')
+                        ax.plot(x1, ybottom_right, '-b')
+
+                        fig.savefig(base_dir + "/right/" + file_name, bbox_inches='tight')
+                        np.save(base_dir + "/right_point/" + file_name_point, segmented_points)
+                        if fix_point is not None:
+                            segmented_points = fix_amount_of_point(segmented_points, fix_point)
+                        plt.close()
+
+                        # Top
+                        segmented_points = points[top_left_index:top_right_index + 1, :]
+                        x = segmented_points[:, 0]
+                        y = segmented_points[:, 1]
+
+                        ax.plot(x, y, linewidth=1.0)
+                        ax.plot(x1, yleft, '-c')
+                        ax.plot(x1, yright, '-r')
+                        ax.plot(x1, ybottom_left_margin, '-py')
+                        ax.plot(x1, ybottom_left, '-y')
+
+                        fig.savefig(base_dir + "/top/" + file_name, bbox_inches='tight')
+                        np.save(base_dir + "/top_point/" + file_name_point, segmented_points)
+                        if fix_point is not None:
+                            segmented_points = fix_amount_of_point(segmented_points, fix_point)
+                        plt.close()
             # plt.close()
-        if cnt % 10 == 0:
+        error_file_names_all.append(error_file_names)
+        if cnt % 50 == 0:
             print("Progress: %s, current image: %s" % (cnt, im_name))
-
+    save_dir = [base_dir + "/left/", base_dir + "/left_point/", base_dir + "/right/",
+                base_dir + "/right_point/", base_dir + "/top/", base_dir + "/top_point/"]
+    for s in save_dir:
+        open(s + "error_file.txt", 'w').close()
+        open(s + "config.txt", 'w').close()
+        with open(s + "error_file.txt", 'w') as filehandle:
+            for listitem in error_file_names_all:
+                filehandle.write('%s\n' % listitem)
+        with open(s + "config.txt", 'w') as filehandle:
+            filehandle.write('%s\n' % len(degree))
+            filehandle.write('%s\n' % len(augment_config))
 
 if __name__ == '__main__':
-    #NOTE: Run on jupyter notebook
+    # NOTE: Run on jupyter notebook
     get_segment_multiple(name='../global_data/stl_data', margin=0,
-                         base_dir="/home/pasin/Documents/Google_Drive/Aa_TIT_LAB_Comp/Library/Tooth/Tooth/Model/my2DCNN/data/segment_2")
+                         base_dir="/home/pasin/Documents/Google_Drive/Aa_TIT_LAB_Comp/Library/Tooth/Tooth/Model/my2DCNN/data/segment_2",
+                         point_only=True, fix_point=50)
