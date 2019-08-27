@@ -68,7 +68,7 @@ def decode_multiple_axis(data_dict):
         raise ValueError("Edit this function as well, this compatible with numdeg=4")
     # image_stacked = tf.stack([image_decoded[0], image_decoded[1], image_decoded[2], image_decoded[3],
     #                           image_decoded[4], image_decoded[5], image_decoded[6], image_decoded[7]], axis=1)
-    image_stacked = tf.stack([image_decoded[0], image_decoded[4]], axis=1)
+    image_stacked = tf.stack([image_decoded[0], image_decoded[4]], axis=1)  # Only one axis
     image_stacked = tf.cast(image_stacked, tf.float32)
     # label = tf.cast(data_dict['label'], tf.float32)
     label = tf.cast(data_dict[label_type_global], tf.float32)
@@ -78,6 +78,7 @@ def decode_multiple_axis(data_dict):
 
 def train_input_fn(data_path, batch_size, data_type, configs):
     global numdegree, data_length, label_type_global
+    print("Fetching label type: %s" % label_type_global)
     numdegree = configs['data_degree']
     data_length = configs['data_length']
     label_type_global = configs['label_type']

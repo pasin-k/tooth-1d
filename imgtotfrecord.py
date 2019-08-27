@@ -268,8 +268,8 @@ if __name__ == '__main__':
     else:
         # coordinate_to_tfrecord(tfrecord_name="preparation_coor_newer",
         #                        dataset_folder="./data/coordinate_newer", k_fold=k_fold)
-        coordinate_to_tfrecord(tfrecord_name="left_segment",
-                               dataset_folder="./data/segment_2/left_point", k_fold=k_fold)
+        coordinate_to_tfrecord(tfrecord_name="top_segment",
+                               dataset_folder="./data/segment_2/top_point", k_fold=k_fold)
     print("Complete")
 
     # for label_data_index in label_datas:

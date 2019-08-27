@@ -249,7 +249,7 @@ def split_train_test(grouped_address, example_grouped_address, tfrecord_name, co
     # Open file and read the content in a list
     # file_name = "./data/tfrecord/%s/%s_%s_%s.txt" % (
     #     tfrecord_name, tfrecord_name, configs['label_data'], configs['label_type'])
-    file_name = "./data/tfrecord/%s/%s.txt" % (
+    file_name = "./data/tfrecord/%s/%s_0.txt" % (
         tfrecord_name, tfrecord_name)
     if os.path.isfile(file_name):  # Check if file exist
         with open(file_name) as f:
@@ -297,16 +297,15 @@ def split_train_test(grouped_address, example_grouped_address, tfrecord_name, co
     eval_address = [example_grouped_address[i] for i in eval_index]
 
     # Save names of files of train address
-    file_name = "./data/tfrecord/%s/%s.txt" % (
+    file_name = "./data/tfrecord/%s/%s_0.txt" % (
         tfrecord_name, tfrecord_name)
     # file_name = "./data/tfrecord/%s/%s_%s_%s.txt" % (
     #     tfrecord_name, tfrecord_name, configs['label_data'], configs['label_type'])
     with open(file_name, 'w') as filehandle:
         # Header with 'distibution'
         filehandle.write('distribution\n')
-        # TODO: Implement class weight for all label
-        # for listitem in class_weight:
-        #     filehandle.write('%s\n' % listitem)
+        for listitem in class_weight:
+            filehandle.write('%s\n' % listitem)
 
         # Header with 'train'
         filehandle.write('train\n')
@@ -414,8 +413,11 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
 
     # Calculate loss weight
     _, label = [list(e) for e in zip(*grouped_address)]
-    # class_weight = compute_class_weight('balanced', np.unique(label), label)
-    class_weight = None
+
+    score = [i['Sharpness_median'] for i in label]  # TODO: Currently use sharpness to split score, and weight
+
+    class_weight = compute_class_weight('balanced', np.unique(score), score)
+    # class_weight = None
 
     if k_cross:  # If k_cross mode, output will be list
         train_address_temp, eval_address_temp = split_kfold(grouped_address, k_num)
@@ -445,9 +447,8 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
             with open(file_name, 'w') as filehandle:
                 # Header with 'distibution'
                 filehandle.write('distribution\n')
-                # TODO: Implement class weight with all label in a file
-                # for listitem in class_weight:
-                #     filehandle.write('%s\n' % listitem)
+                for listitem in class_weight:
+                    filehandle.write('%s\n' % listitem)
                 filehandle.write('train\n')
                 filehandle.write('eval\n')
     else:

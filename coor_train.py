@@ -109,7 +109,7 @@ def run(model_params=None):
     model_params = check_exist(model_params, learning_rate=None,
                                dropout_rate=None, activation=None,
                                channels=None, result_path=None, model_num=None,
-                               date_degree=None, date_length=None, label_type=None)
+                               data_degree=None, data_length=None, label_type=None)
     # Note on some model_params:    loss_weight is calculated inside
     #                               channels (in CNN case) is [CNN channels, Dense channels]
 
@@ -118,6 +118,7 @@ def run(model_params=None):
     eval_data_path = run_params['input_path'].replace('.tfrecords', '') + '_eval.tfrecords'
     info_path = run_params['input_path'].replace('.tfrecords', '.txt')
     loss_weight = []
+
     with open(info_path) as f:
         filehandle = f.read().splitlines()
         if not (filehandle[0] == 'distribution'):
@@ -128,7 +129,7 @@ def run(model_params=None):
                 break
             else:
                 loss_weight.append(float(line))
-    assert len(loss_weight) == 3, "Label does not have 3 unique value"
+    assert len(loss_weight) == 3, "Label does not have 3 unique value, found %s" % len(loss_weight)
     model_params['loss_weight'] = loss_weight
     print("Getting training data from %s" % train_data_path)
     print("Saved model at %s" % run_params['result_path'])
@@ -301,6 +302,7 @@ def fitness(learning_rate, dropout_rate, activation, channels):
                  'data_length': configs.data_length,
                  'label_type': configs.label_type,
                  }
+
     accuracy, global_step, result = run(md_config)
     # Save info of hyperparameter search in a specific csv file
     save_file(run_params['summary_file_path'], [accuracy, learning_rate, dropout_rate, activation,
@@ -440,10 +442,12 @@ if __name__ == '__main__':
         if kfold:
             run_kfold(model_configs)
         else:
+            run_params['input_path'] = run_params['input_path'].split(".tfrecords")[0] + "_0.tfrecords"
             run(model_configs)
     else:
         if kfold:
             run_hyper_parameter_optimize_kfold()
         else:
+            run_params['input_path'] = run_params['input_path'].split(".tfrecords")[0] + "_0.tfrecords"
             run_hyper_parameter_optimize()
     print("train.py completed")
