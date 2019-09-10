@@ -177,10 +177,9 @@ def coordinate_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None, k_fold=F
 
     # Get data from dataset_folder
     grouped_train_data, grouped_eval_data = get_input_and_label(tfrecord_name, dataset_folder,
-                                                                csv_dir, configs, get_data=False,
+                                                                csv_dir, configs, get_data=True,
                                                                 k_cross=k_fold, k_num=k_num)
-    print(grouped_train_data)
-    raise ValueError("Debugf")
+
     # Use this to debug if number of point in varying
     # print(len(grouped_eval_data))
     # for d in grouped_eval_data:
@@ -268,10 +267,10 @@ if __name__ == '__main__':
         image_to_tfrecord(tfrecord_name="preparation_img_test", dataset_folder="./data/cross_section",
                           k_fold=k_fold)
     else:
-        # coordinate_to_tfrecord(tfrecord_name="preparation_coor_newer",
+        # coordinate_to_tfrecord(tfrecord_name="preparation_coor_augment_new",
         #                        dataset_folder="./data/coordinate_newer", k_fold=k_fold)
-        coordinate_to_tfrecord(tfrecord_name="coordinate_debug_augment",
-                               dataset_folder="./data/coordinate_debug_newer", k_fold=k_fold)
+        coordinate_to_tfrecord(tfrecord_name="right_augment_new",
+                               dataset_folder="./data/segment_2/right_point", k_fold=k_fold)
     print("Complete")
 
     # for label_data_index in label_datas:

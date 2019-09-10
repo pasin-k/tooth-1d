@@ -325,29 +325,36 @@ def run_hyper_parameter_optimize():
         previous_record_files.append(file)
     previous_record_files.sort()
     if len(previous_record_files) > 0:  # Check if file has previous result
-        prev_data, header = read_file(previous_record_files[-1], header=True)
-        if not prev_data:
-            prev_data = [['']]
-        try:
-            # If the run doesn't end completely, continue (on workstation mode)
-            if prev_data[-1][0] != 'end' and run_params['is_workstation']:
-                n_calls = n_calls - len(prev_data)
-                l_data = prev_data[-1][1:]  # Latest_data
-                default_param = [float(l_data[0]), float(l_data[1]), l_data[2], int(l_data[3])]
-                run_params['summary_file_path'] = previous_record_files[-1]
-                current_time = previous_record_files[-1].split("/")[-1].replace('.csv', '').replace(
-                    "hyperparameters_result_", '')
-                print("Continue from %s" % current_time)
-            else:  # If previous file ended correctly or not workstation, create new file
-                save_file(run_params['summary_file_path'], [], field_name=field_name,
-                          write_mode='w', create_folder=True, data_format="header_only")  # Create new summary file
-                default_param = default_parameters
-                print("Creating new runs")
-        except IndexError:  # If error, stop and end the file, usually occur when the first run is interrupted
-            save_file(previous_record_files[-1],
-                      ['end', 'Error from previous run', datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S")],
-                      write_mode='a', data_format="one_row")
-            raise ValueError("Previous file doesn't end completely")
+        if not os.stat(previous_record_files[-1]).st_size == 0:
+            prev_data, header = read_file(previous_record_files[-1], header=True)
+            if not prev_data:
+                prev_data = [['']]
+            try:
+                # If the run doesn't end completely, continue (on workstation mode)
+                if prev_data[-1][0] != 'end' and run_params['is_workstation']:
+                    n_calls = n_calls - len(prev_data)
+                    l_data = prev_data[-1][1:]  # Latest_data
+                    default_param = [float(l_data[0]), float(l_data[1]), l_data[2], int(l_data[3])]
+                    run_params['summary_file_path'] = previous_record_files[-1]
+                    current_time = previous_record_files[-1].split("/")[-1].replace('.csv', '').replace(
+                        "hyperparameters_result_", '')
+                    print("Continue from %s" % current_time)
+                else:  # If previous file ended correctly or not workstation, create new file
+                    save_file(run_params['summary_file_path'], [], field_name=field_name,
+                              write_mode='w', create_folder=True, data_format="header_only")  # Create new summary file
+                    default_param = default_parameters
+                    print("Creating new runs")
+            except IndexError:  # If error, stop and end the file, usually occur when the first run is interrupted
+                save_file(previous_record_files[-1],
+                          ['end', 'Error from previous run', datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S")],
+                          write_mode='a', data_format="one_row")
+                raise ValueError("Previous file doesn't end completely")
+        else:
+            os.remove(previous_record_files[-1])  # Delete empty file
+            save_file(run_params['summary_file_path'], [], field_name=field_name, write_mode='w',
+                      create_folder=True)  # Create new summary file
+            default_param = default_parameters
+            print("Creating new runs")
     else:  # If no file in folder, create new file
         save_file(run_params['summary_file_path'], [], field_name=field_name, write_mode='w',
                   create_folder=True)  # Create new summary file

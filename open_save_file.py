@@ -270,7 +270,7 @@ def split_train_test(grouped_address, example_grouped_address, tfrecord_name, co
                         index = example_grouped_address.index(line)
                         train_index.append(index)
                         data_index.pop(index)
-                    except ValueError:
+                    except (ValueError, IndexError) as e:
                         pass
             else:  # Eval state
                 try:
@@ -411,11 +411,11 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
         for g_add, ex_g_add in zip(grouped_address, example_grouped_address):
             if os.path.basename(ex_g_add).split('_')[1] in temp_name:
                 temp_address[temp_name[os.path.basename(ex_g_add).split('_')[1]]].append(g_add)
-                temp_example_address[temp_name[os.path.basename(ex_g_add).split('_')[1]]].append(g_add)
+                temp_example_address[temp_name[os.path.basename(ex_g_add).split('_')[1]]].append(ex_g_add)
             else:
                 temp_name[os.path.basename(ex_g_add).split('_')[1]] = len(temp_address)
                 temp_address.append([g_add])
-                temp_example_address.append([g_add])
+                temp_example_address.append([ex_g_add])
 
         # Zip, shuffle, unzip
         z = list(zip(temp_address, temp_example_address))
