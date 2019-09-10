@@ -328,7 +328,7 @@ def split_kfold(grouped_address, k_num):
     :return:                    List of Train, Eval data
     """
     # kfold = KFold(k_num, shuffle=True,random_state=0)
-    kfold = StratifiedKFold(k_num, shuffle=True, random_state=0)
+    kfold = StratifiedKFold(k_num, shuffle=False, random_state=0)
     data, label = [list(e) for e in zip(*grouped_address)]
     train_address = []
     eval_address = []
@@ -378,7 +378,7 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
     #     labels, label_name = get_label(configs['label_data'], configs['label_type'], double_data=double_data,
     #                                    one_hotted=False, normalized=False, file_dir=csv_dir)
 
-    if len(image_address) / len(labels) != numdeg:
+    if len(image_address) / len(labels) != numdeg or len(image_address) == 0:
         print(image_address)
         raise Exception(
             '# of images and labels is not compatible: %d images, %d labels. '
@@ -404,12 +404,44 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
     for i in range(len(labels)):
         grouped_address.append([image_address[i * numdeg:(i + 1) * numdeg], labels[i]])  # All degrees
     if not k_cross:
+        # Packing data
+        temp_address = []  # New temporary address packs augmented data together
+        temp_example_address = []
+        temp_name = {}
+        for g_add, ex_g_add in zip(grouped_address, example_grouped_address):
+            if os.path.basename(ex_g_add).split('_')[1] in temp_name:
+                temp_address[temp_name[os.path.basename(ex_g_add).split('_')[1]]].append(g_add)
+                temp_example_address[temp_name[os.path.basename(ex_g_add).split('_')[1]]].append(g_add)
+            else:
+                temp_name[os.path.basename(ex_g_add).split('_')[1]] = len(temp_address)
+                temp_address.append([g_add])
+                temp_example_address.append([g_add])
+
         # Zip, shuffle, unzip
-        z = list(zip(grouped_address, example_grouped_address))
+        z = list(zip(temp_address, temp_example_address))
+        # z = list(zip(grouped_address, example_grouped_address))
         shuffle(z)
-        grouped_address[:], example_grouped_address[:] = zip(*z)
+        temp_address[:], temp_example_address[:] = zip(*z)
+        # grouped_address[:], example_grouped_address[:] = zip(*z)
+
+        # Unpack data
+        grouped_address = [item for sublist in temp_address for item in sublist]
+        example_grouped_address = [item for sublist in temp_example_address for item in sublist]
+
     else:
+        # Pack data
+        temp_address = []  # New temporary address packs augmented data together
+        temp_name = {}
+        for g_add, ex_g_add in zip(grouped_address, example_grouped_address):
+            if os.path.basename(ex_g_add).split('_')[1] in temp_name:
+                temp_address[temp_name[os.path.basename(ex_g_add).split('_')[1]]].append(g_add)
+            else:
+                temp_name[os.path.basename(ex_g_add).split('_')[1]] = len(temp_address)
+                temp_address.append([g_add])
         shuffle(grouped_address)
+        # shuffle(grouped_address)
+        # Unpack data
+        grouped_address = [item for sublist in temp_address for item in sublist]
 
     # Calculate loss weight
     _, label = [list(e) for e in zip(*grouped_address)]

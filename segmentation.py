@@ -134,7 +134,8 @@ def get_segment(points, mode=None, margin=0, file_name=None):
 
 def get_segment_multiple(name, margin=0,
                          base_dir="/home/pasin/Documents/Google_Drive/Aa_TIT_LAB_Comp/Library/Tooth/Tooth/Model/my2DCNN/data/segment_2",
-                         point_only=False, fix_point=None, csv_dir='../global_data/Ground Truth Score_new.csv'):
+                         point_only=False, fix_point=None,
+                         csv_dir='../global_data/Ground Truth Score_new.csv'):
     """
     Get a segments of cross section from multiple files, used to train
     :param points: ndarray of N*2
@@ -317,6 +318,9 @@ def get_segment_multiple(name, margin=0,
                         x = segmented_points[:, 0]
                         y = segmented_points[:, 1]
 
+                        ax.axis([min_x, max_x, min_y, max_y])
+                        ax.set_autoscale_on(False)  # allows us to define scale
+
                         ax.plot(x, y, linewidth=1.0)
                         ax.plot(x1, yleft, '-c')
                         # ax.plot(x1, yright, '-r')
@@ -339,7 +343,8 @@ def get_segment_multiple(name, margin=0,
                             segmented_points = points[top_right_index:x_max_index + 1, :]
                         x = segmented_points[:, 0]
                         y = segmented_points[:, 1]
-
+                        ax.axis([min_x, max_x, min_y, max_y])
+                        ax.set_autoscale_on(False)  # allows us to define scale
                         ax.plot(x, y, linewidth=1.0)
                         # ax.plot(x1, yleft, '-c')
                         ax.plot(x1, yright, '-r')
@@ -357,7 +362,8 @@ def get_segment_multiple(name, margin=0,
                         segmented_points = points[top_left_index:top_right_index + 1, :]
                         x = segmented_points[:, 0]
                         y = segmented_points[:, 1]
-
+                        ax.axis([min_x, max_x, min_y, max_y])
+                        ax.set_autoscale_on(False)  # allows us to define scale
                         ax.plot(x, y, linewidth=1.0)
                         ax.set_xlim([min_x, max_x])
                         ax.plot(x1, yleft, '-c')
@@ -393,7 +399,8 @@ def get_segment_multiple(name, margin=0,
 
 if __name__ == '__main__':
     # NOTE: Run on jupyter notebook
-    get_segment_multiple(name='../global_data/stl_data', margin=0,
-                         base_dir="/home/pasin/Documents/Google_Drive/Aa_TIT_LAB_Comp/Library/Tooth/Tooth/Model/my2DCNN/data/segment_2",
-                         # csv_dir="/home/pasin/Documents/Link_to_Tooth/Tooth/Model/global_data/Ground Truth Score_debug.csv",
+    get_segment_multiple(margin=0,
+                         name='../global_data/stl_data_debug',
+                         base_dir="/home/pasin/Documents/Google_Drive/Aa_TIT_LAB_Comp/Library/Tooth/Tooth/Model/my2DCNN/data/segment_debug",
+                         csv_dir="/home/pasin/Documents/Link_to_Tooth/Tooth/Model/global_data/Ground Truth Score_debug.csv",
                          point_only=False, fix_point=50)
