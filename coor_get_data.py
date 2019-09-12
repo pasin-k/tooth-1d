@@ -59,21 +59,23 @@ def decode_multiple_axis(data_dict):
             img = tf.sparse.to_dense(img)
             # img = tf.reshape(img, [299])
             img = tf.reshape(img, [data_length])
-            print(img)
+            # print(img)
             # img = tf.reshape(img, [data_dict['length']])
             # file_cropped = tf.squeeze(tf.image.resize_image_with_crop_or_pad(file_decoded, image_height, image_width))
             image_decoded.append(img)
 
     if numdegree != 4:
         raise ValueError("Edit this function as well, this compatible with numdeg=4")
-    image_stacked = tf.stack([image_decoded[0], image_decoded[1], image_decoded[2], image_decoded[3],
-                              image_decoded[4], image_decoded[5], image_decoded[6], image_decoded[7]], axis=1)
-    # image_stacked = tf.stack([image_decoded[0], image_decoded[4]], axis=1)  # Only one axis
+    # image_stacked = tf.stack([image_decoded[0], image_decoded[1], image_decoded[2], image_decoded[3],
+    #                           image_decoded[4], image_decoded[5], image_decoded[6], image_decoded[7]], axis=1)
+    image_stacked = tf.stack([image_decoded[0], image_decoded[4]], axis=1)  # Only one axis
     image_stacked = tf.cast(image_stacked, tf.float32)
     # label = tf.cast(data_dict['label'], tf.float32)
     label = tf.cast(data_dict[label_type_global], tf.float32)
     name = tf.cast(data_dict['name'], tf.string)
-    return image_stacked, label
+    feature = {'image': image_stacked, 'name': name}
+    return feature, label
+    # return image_stacked, label
 
 
 def train_input_fn(data_path, batch_size, data_type, configs):
@@ -115,7 +117,7 @@ def eval_input_fn(data_path, batch_size, data_type, configs):
     return eval_dataset
 
 
-def get_data_from_path(data_path, label_type, data_type=0):
+def get_data_from_path(data_path, label_type, data_type=1):
     global numdegree, data_length, label_type_global
     label_data = ["name", "Occ_B_median", "Occ_F_median", "Occ_L_median", "BL_median", "MD_median", "Integrity_median",
                   "Width_median", "Surface_median", "Sharpness_median"]

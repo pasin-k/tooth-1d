@@ -4,30 +4,34 @@ import csv
 
 # Save result from evaluation into csv file
 class EvalResultHook(tf.train.SessionRunHook):
-    def __init__(self, labels, predicted_class, probability, result_path):
+    def __init__(self, name, labels, predicted_class, probability, result_path):
+        self.name = name
         self.labels = labels
         self.predicted_class = predicted_class
         self.probability = probability
         self.result_path = result_path
 
     def before_run(self, run_context):
-        return tf.train.SessionRunArgs([self.labels, self.predicted_class, self.probability, self.result_path])
+        return tf.train.SessionRunArgs(
+            [self.name, self.labels, self.predicted_class, self.probability, self.result_path])
 
     def after_run(self,
                   run_context,  # pylint: disable=unused-argument
                   run_values):
-        labels = run_values.results[0]
-        predicted_classes = run_values.results[1]
-        probabilities = run_values.results[2]
-        result_path = run_values.results[3]
+        name = run_values.results[0]
+        labels = run_values.results[1]
+        predicted_classes = run_values.results[2]
+        probabilities = run_values.results[3]
+        result_path = run_values.results[4]
 
         with open(result_path, "a") as csvFile:
             writer = csv.writer(csvFile)
-            for label, pred, prob in zip(labels, predicted_classes, probabilities):
+            for n, label, pred, prob in zip(name, labels, predicted_classes, probabilities):
+                n = n.decode("utf-8")
                 prob = prob[pred]  # Show probability of the predicted class
                 label = (label * 2) + 1
                 pred = (pred * 2) + 1
-                writer.writerow([label, pred, prob])
+                writer.writerow([n, label, pred, prob])
                 # print("Label: %s, Prediction: %s" % (label, pred))
 
 

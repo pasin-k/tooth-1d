@@ -125,7 +125,7 @@ def model_cnn_1d(features, mode, params):
     '''
     # (1) Filter size: 7x32, max pooling of k3 s2
     # print(params)
-    conv1 = cnn_1d(features, 7, params['channels'][0] * 16, activation=params['activation'], name="conv1",
+    conv1 = cnn_1d(features['image'], 7, params['channels'][0] * 16, activation=params['activation'], name="conv1",
                    kernel_regularizer=0.01)
     conv1 = tf.keras.layers.BatchNormalization()(conv1)
     pool1 = max_pool_layer_1d(conv1, 3, name="pool1", stride=2)
@@ -153,8 +153,6 @@ def model_cnn_1d(features, mode, params):
     # Output: 65x128 -> 32x128 = 4096
 
     fc4 = flatten_layer(pool3)
-    print("debug")
-    print(fc4)
     fc4 = fc_layer(fc4, params['channels'][1] * 1024, activation=params['activation'], name='fc5',
                    kernel_regularizer=0.01)
     dropout4 = tf.keras.layers.Dropout(rate=params['dropout_rate'])(fc4)
@@ -296,7 +294,7 @@ def my_model(features, labels, mode, params, config):
     # Create result(.csv) file, if not exist
     if not os.path.isfile(params['result_path']):
         with open(params['result_path'] + params['result_file_name'], "w") as csvfile:
-            fieldnames = ['Label', 'Predicted Class', 'Confident level']
+            fieldnames = ['Name', 'Label', 'Predicted Class', 'Confident level']
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             writer.writeheader()
 
@@ -309,7 +307,7 @@ def my_model(features, labels, mode, params, config):
         saver_hook = tf.train.SummarySaverHook(save_steps=10, summary_op=tf.summary.merge_all(),
                                                output_dir=config.model_dir + 'eval')
     csv_name = tf.convert_to_tensor(params['result_path'] + params['result_file_name'], dtype=tf.string)
-    print_result_hook = EvalResultHook(labels, predicted_class, tf.nn.softmax(logits), csv_name)
+    print_result_hook = EvalResultHook(features['name'], labels, predicted_class, tf.nn.softmax(logits), csv_name)
     eval_hooks.append(saver_hook)
     eval_hooks.append(print_result_hook)
     return tf.estimator.EstimatorSpec(mode=mode, eval_metric_ops={'accuracy': accuracy}, loss=loss,

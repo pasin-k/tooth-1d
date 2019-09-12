@@ -223,13 +223,17 @@ def run(model_params=None):
 
     # Save necessary info to csv file, as reference
     info_dict = run_params.copy()
+    info_dict['accuracy'] = accuracy
     info_dict['learning_rate'] = model_params['learning_rate']
     info_dict['dropout_rate'] = model_params['dropout_rate']
     info_dict['activation'] = model_params['activation']
     info_dict['channels'] = model_params['channels']
     info_dict['loss_weight'] = model_params['loss_weight']
     info_dict['steps'] = global_step
-    info_dict['accuracy'] = accuracy
+    info_dict['score_type'] = model_params['label_type']
+    info_dict['data_length'] = model_params['data_length']
+    info_dict['data_degree'] = model_params['data_degree']
+
     with open((run_params['result_path'] + "config.csv"), "w") as csvfile:
         writer = csv.writer(csvfile)
         for key, val in info_dict.items():

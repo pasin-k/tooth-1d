@@ -333,7 +333,7 @@ def split_kfold(grouped_address, k_num):
     train_address = []
     eval_address = []
     # for train_indices, test_indices in kfold.split(grouped_address):
-    new_label = [i["BL_median"] for i in label]  # TODO: Best way to split data?
+    new_label = [i["Sharpness_median"] for i in label]
     for train_indices, test_indices in kfold.split(data, new_label):
         train_address_fold = []
         test_address_fold = []
@@ -446,9 +446,15 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
     # Calculate loss weight
     _, label = [list(e) for e in zip(*grouped_address)]
 
-    score = [i['Sharpness_median'] for i in label]  # TODO: Currently use sharpness to split score, and weight
+    class_weight = {}
+    for c in configs['data_type']:
+        if not c == "name":
+            score = [i[c] for i in label]
+            class_weight[c] = compute_class_weight('balanced', np.unique(score), score)
 
-    class_weight = compute_class_weight('balanced', np.unique(score), score)
+    # score = [i['Sharpness_median'] for i in label]  # TODO: Currently use sharpness to split score, and weight
+    #
+    # class_weight = compute_class_weight('balanced', np.unique(score), score)
     # class_weight = None
 
     if k_cross:  # If k_cross mode, output will be list
@@ -485,7 +491,7 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
                 filehandle.write('eval\n')
     else:
         train_address, eval_address = split_train_test(grouped_address, example_grouped_address,
-                                                       tfrecord_name, configs, class_weight)
+                                                       tfrecord_name, configs, class_weight["Sharpness_median"])
         if not get_data:  # Put in special format for writing tfrecord (pipeline)
             train_address = tuple(
                 [list(e) for e in zip(*train_address)])  # Convert to tuple of list[image address, label]
