@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="770e0596-62ef-4176-bd6c-3bded3f7c783" name="Default Changelist" comment="Augmentation data now should packed together in either train or validate set seperately">
+    <list default="true" id="770e0596-62ef-4176-bd6c-3bded3f7c783" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/coor_get_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/coor_get_data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/coor_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/coor_model.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/coor_tooth.config" beforeDir="false" afterPath="$PROJECT_DIR$/coor_tooth.config" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/coor_train.py" beforeDir="false" afterPath="$PROJECT_DIR$/coor_train.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/custom_hook.py" beforeDir="false" afterPath="$PROJECT_DIR$/custom_hook.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/imgtotfrecord.py" beforeDir="false" afterPath="$PROJECT_DIR$/imgtotfrecord.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/open_save_file.py" beforeDir="false" afterPath="$PROJECT_DIR$/open_save_file.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -64,7 +62,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.scratch_38">
+  <component name="RunManager" selected="Python.coor_train">
     <configuration name="coor_train" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="my2DCNN" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -179,8 +177,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.scratch_38" />
         <item itemvalue="Python.coor_train" />
+        <item itemvalue="Python.scratch_38" />
         <item itemvalue="Python.imgtotfrecord" />
         <item itemvalue="Python.open_save_file" />
         <item itemvalue="Python.scratch_36" />
@@ -197,13 +195,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1554715602048</updated>
-    </task>
-    <task id="LOCAL-00073" summary="KFold implemented">
-      <created>1561630806420</created>
-      <option name="number" value="00073" />
-      <option name="presentableId" value="LOCAL-00073" />
-      <option name="project" value="LOCAL" />
-      <updated>1561630806420</updated>
     </task>
     <task id="LOCAL-00074" summary="Debug saving coordinate as npy instead of csv">
       <created>1561630842013</created>
@@ -541,7 +532,14 @@
       <option name="project" value="LOCAL" />
       <updated>1568109391984</updated>
     </task>
-    <option name="localTasksCounter" value="122" />
+    <task id="LOCAL-00122" summary="More output config, now print name in result">
+      <created>1568277421025</created>
+      <option name="number" value="00122" />
+      <option name="presentableId" value="LOCAL-00122" />
+      <option name="project" value="LOCAL" />
+      <updated>1568277421025</updated>
+    </task>
+    <option name="localTasksCounter" value="123" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -572,7 +570,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="KFold implemented" />
     <MESSAGE value="Debug saving coordinate as npy instead of csv" />
     <MESSAGE value="Implemented K fold cross validate" />
     <MESSAGE value="Implemented K fold cross validate (For one run and optimize run)" />
@@ -597,7 +594,8 @@
     <MESSAGE value="Add fix amount of point and create error,config file" />
     <MESSAGE value="Compatible only with new tfrecord file" />
     <MESSAGE value="Augmentation data now should packed together in either train or validate set seperately" />
-    <option name="LAST_COMMIT_MESSAGE" value="Augmentation data now should packed together in either train or validate set seperately" />
+    <MESSAGE value="More output config, now print name in result" />
+    <option name="LAST_COMMIT_MESSAGE" value="More output config, now print name in result" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
 </project>

@@ -4,6 +4,7 @@ import numpy as np
 import os
 import glob
 import argparse
+import json
 from shutil import copy2
 import csv
 import datetime
@@ -116,19 +117,21 @@ def run(model_params=None):
     # Type in file name
     train_data_path = run_params['input_path'].replace('.tfrecords', '') + '_train.tfrecords'
     eval_data_path = run_params['input_path'].replace('.tfrecords', '') + '_eval.tfrecords'
-    info_path = run_params['input_path'].replace('.tfrecords', '.txt')
+    info_path = run_params['input_path'].replace('.tfrecords', '.json')
     loss_weight = []
 
     with open(info_path) as f:
-        filehandle = f.read().splitlines()
-        if not (filehandle[0] == 'distribution'):
-            print(filehandle[0])
-            raise KeyError("File does not have correct format, need 'train' and 'eval' keyword within file")
-        for line in filehandle[1:]:
-            if line == 'train':
-                break
-            else:
-                loss_weight.append(float(line))
+        data_loaded = json.load(f)
+        loss_weight = data_loaded['class_weight'][model_params['label_type']]
+        # filehandle = f.read().splitlines()
+        # if not (filehandle[0] == 'distribution'):
+        #     print(filehandle[0])
+        #     raise KeyError("File does not have correct format, need 'train' and 'eval' keyword within file")
+        # for line in filehandle[1:]:
+        #     if line == 'train':
+        #         break
+        #     else:
+        #         loss_weight.append(float(line))
     assert len(loss_weight) == 3, "Label does not have 3 unique value, found %s" % len(loss_weight)
     model_params['loss_weight'] = loss_weight
     print("Getting training data from %s" % train_data_path)

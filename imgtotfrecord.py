@@ -66,6 +66,8 @@ def image_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None, k_fold=False,
     save 4 files: train.tfrecord, eval.tfrecord, .txt (Save from another file)
     """
     # Create new directory if not created, get all info and zip to tfrecord
+    if tfrecord_name.split('.')[-1] == "tfrecords":  # Remove extension if exist
+        tfrecord_name = tfrecord_name[0:-10]
     tfrecord_dir = os.path.join("./data/tfrecord", tfrecord_name)
     if not os.path.exists(tfrecord_dir):
         os.makedirs(tfrecord_dir)
@@ -166,6 +168,8 @@ def coordinate_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None, k_fold=F
     """
 
     # Create new directory if not created, get all info and zip to tfrecord
+    if tfrecord_name.split('.')[-1] == "tfrecords":  # Remove extension if exist
+        tfrecord_name = tfrecord_name[0:-10]
     tfrecord_dir = os.path.join("./data/tfrecord", tfrecord_name)
     if not os.path.exists(tfrecord_dir):
         os.makedirs(tfrecord_dir)
@@ -193,10 +197,6 @@ def coordinate_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None, k_fold=F
     for i in range(k_num):
         train_data = grouped_train_data[i]
         eval_data = grouped_eval_data[i]
-        # tfrecord_train_name = os.path.join(tfrecord_dir, "%s_%s_%s_%s_train.tfrecords" % (
-        #     tfrecord_name, configs['label_data'], configs['label_type'], i))
-        # tfrecord_eval_name = os.path.join(tfrecord_dir, "%s_%s_%s_%s_eval.tfrecords" % (
-        #     tfrecord_name, configs['label_data'], configs['label_type'], i))
         tfrecord_train_name = os.path.join(tfrecord_dir, "%s_%s_train.tfrecords" % (tfrecord_name, i))
         tfrecord_eval_name = os.path.join(tfrecord_dir, "%s_%s_eval.tfrecords" % (tfrecord_name, i))
 
@@ -248,16 +248,10 @@ def coordinate_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None, k_fold=F
 if __name__ == '__main__':
     get_image = False
     # Select type of label to use
-    label_data = ["name", "Occ_B_median", "Occ_F_median", "Occ_L_median", "BL_median", "MD_median", "Integrity_median",
-                  "Width_median", "Surface_median", "Sharpness_median"]
-    # label_type = ["median"]
+    label_data = ["name", "Occ_B_median", "Occ_F_median", "Occ_L_median", "BL_median", "MD_median",
+                  "Integrity_median", "Width_median", "Surface_median", "Sharpness_median"]
     configs['train_eval_ratio'] = 0.8
-    # configs['label_data'] = "Taper_Sum"
-    # configs['label_type'] = "median"
     k_fold = False
-    # label_datas = ["Taper_Sum", "BL", "MD", "Occ_Sum", "Occ_L", "Occ_F",
-    #                "Occ_B"]  # Too lazy to do all of these one at a time
-    # label_datas = ["BL"]  # For debug
 
     configs['data_type'] = label_data
     print("Use label from %s with (%s) train:eval ratio" % (
@@ -267,26 +261,9 @@ if __name__ == '__main__':
         image_to_tfrecord(tfrecord_name="preparation_img_test", dataset_folder="./data/cross_section",
                           k_fold=k_fold)
     else:
-        # coordinate_to_tfrecord(tfrecord_name="preparation_coor_augment_new",
-        #                        dataset_folder="./data/coordinate_newer", k_fold=k_fold)
-        coordinate_to_tfrecord(tfrecord_name="right_augment_new",
-                               dataset_folder="./data/segment_2/right_point", k_fold=k_fold)
+        coordinate_to_tfrecord(tfrecord_name="coor_augment",
+                               dataset_folder="./data/coordinate_newer", k_fold=k_fold)
+        # coordinate_to_tfrecord(tfrecord_name="coor_augment",
+        #                        dataset_folder="./data/segment_2/right_point", k_fold=k_fold)
     print("Complete")
 
-    # for label_data_index in label_datas:
-    #     configs['label_data'] = label_data_index
-    #     print("Use label from %s category '%s' with (%s) train:eval ratio" % (
-    #         configs['label_data'], configs['label_type'], configs['train_eval_ratio']))
-    #     # File name will be [tfrecord_name]_train_Taper_sum_median
-    #
-    #     # tfrecord_name = "original_preparation_data"
-    #     # csv_name = "../global_data/Ground Truth Score_50.csv"
-    #     # Directory of image
-    #
-    #     if get_image:
-    #         image_to_tfrecord(tfrecord_name="preparation_img_test", dataset_folder="./data/cross_section",
-    #                           k_fold=k_fold)
-    #     else:
-    #         coordinate_to_tfrecord(tfrecord_name="preparation_coor_debug_new",
-    #                                dataset_folder="./data/coordinate_debug_new", k_fold=k_fold)
-    #     print("Complete")

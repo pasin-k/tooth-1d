@@ -1,5 +1,6 @@
 # import sys
 import os
+import json
 # import glob
 import csv
 import numpy as np
@@ -249,36 +250,53 @@ def split_train_test(grouped_address, example_grouped_address, tfrecord_name, co
     # Open file and read the content in a list
     # file_name = "./data/tfrecord/%s/%s_%s_%s.txt" % (
     #     tfrecord_name, tfrecord_name, configs['label_data'], configs['label_type'])
-    file_name = "./data/tfrecord/%s/%s_0.txt" % (
+    file_name = "./data/tfrecord/%s/%s_0.json" % (
         tfrecord_name, tfrecord_name)
     if os.path.isfile(file_name):  # Check if file exist
-        with open(file_name) as f:
-            filehandle = f.read().splitlines()
-        is_training = 0  # 0 = checking for distribution, 1 = checking for train, 2 = checking for eval
-        if not (filehandle[0] == 'distribution'):
-            print(filehandle[0])
-            raise KeyError("File does not have correct format, need 'train' and 'eval' keyword within file")
-        for line in filehandle[1:]:
-            if is_training == 0:  # Distribution state
-                if line == 'train':
-                    is_training = 1
-            elif is_training == 1:  # Training state
-                if line == 'eval':
-                    is_training = 2
-                else:
-                    try:
-                        index = example_grouped_address.index(line)
-                        train_index.append(index)
-                        data_index.pop(index)
-                    except (ValueError, IndexError) as e:
-                        pass
-            else:  # Eval state
+        with open(file_name) as filehandle:
+            data_loaded = json.load(filehandle)
+            for d in data_loaded['train']:
                 try:
-                    index = example_grouped_address.index(line)
+                    index = example_grouped_address.index(d)
+                    train_index.append(index)
+                    data_index.remove(index)
+                except (ValueError, IndexError) as e:
+                    print("Cannot find file (Train): %s" % d)
+            for d in data_loaded['eval']:
+                try:
+                    index = example_grouped_address.index(d)
                     eval_index.append(index)
-                    data_index.pop(index)
-                except ValueError:
-                    pass
+                    data_index.remove(index)
+                except (ValueError, IndexError) as e:
+                    print("Cannot find file (Eval): %s" % d)
+
+        # with open(file_name) as f:
+        #     filehandle = f.read().splitlines()
+        # is_training = 0  # 0 = checking for distribution, 1 = checking for train, 2 = checking for eval
+        # if not (filehandle[0] == 'distribution'):
+        #     print(filehandle[0])
+        #     raise KeyError("File does not have correct format, need 'train' and 'eval' keyword within file")
+        # for line in filehandle[1:]:
+        #     if is_training == 0:  # Distribution state
+        #         if line == 'train':
+        #             is_training = 1
+        #     elif is_training == 1:  # Training state
+        #         if line == 'eval':
+        #             is_training = 2
+        #         else:
+        #             try:
+        #                 index = example_grouped_address.index(line)
+        #                 train_index.append(index)
+        #                 data_index.pop(index)
+        #             except (ValueError, IndexError) as e:
+        #                 pass
+        #     else:  # Eval state
+        #         try:
+        #             index = example_grouped_address.index(line)
+        #             eval_index.append(index)
+        #             data_index.pop(index)
+        #         except ValueError:
+        #             pass
         print("Use %s train examples, %s eval examples from previous tfrecords as training" % (
             len(train_index), len(eval_index)))
 
@@ -297,25 +315,28 @@ def split_train_test(grouped_address, example_grouped_address, tfrecord_name, co
     eval_address = [example_grouped_address[i] for i in eval_index]
 
     # Save names of files of train address
-    file_name = "./data/tfrecord/%s/%s_0.txt" % (
-        tfrecord_name, tfrecord_name)
-    # file_name = "./data/tfrecord/%s/%s_%s_%s.txt" % (
-    #     tfrecord_name, tfrecord_name, configs['label_data'], configs['label_type'])
+    # file_name = "./data/tfrecord/%s/%s_0.txt" % (tfrecord_name, tfrecord_name)
+    # Save label distribution for weight balancing
+    file_name = "./data/tfrecord/%s/%s_0.json" % (tfrecord_name, tfrecord_name)
     with open(file_name, 'w') as filehandle:
-        # Header with 'distibution'
-        filehandle.write('distribution\n')
-        for listitem in class_weight:
-            filehandle.write('%s\n' % listitem)
-
-        # Header with 'train'
-        filehandle.write('train\n')
-        for listitem in train_address:
-            filehandle.write('%s\n' % listitem)
-
-        # Header with 'eval'
-        filehandle.write('eval\n')
-        for listitem in eval_address:
-            filehandle.write('%s\n' % listitem)
+        json.dump({"class_weight": class_weight, "train": train_address, "eval": eval_address}, filehandle, indent=4,
+                  sort_keys=True,
+                  separators=(',', ': '), ensure_ascii=False)
+    # with open(file_name, 'w') as filehandle:
+    #     # Header with 'distibution'
+    #     filehandle.write('distribution\n')
+    #     for listitem in class_weight:
+    #         filehandle.write('%s\n' % listitem)
+    #
+    #     # Header with 'train'
+    #     filehandle.write('train\n')
+    #     for listitem in train_address:
+    #         filehandle.write('%s\n' % listitem)
+    #
+    #     # Header with 'eval'
+    #     filehandle.write('eval\n')
+    #     for listitem in eval_address:
+    #         filehandle.write('%s\n' % listitem)
 
     return train_data, eval_data
 
@@ -450,12 +471,16 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
     for c in configs['data_type']:
         if not c == "name":
             score = [i[c] for i in label]
-            class_weight[c] = compute_class_weight('balanced', np.unique(score), score)
-
-    # score = [i['Sharpness_median'] for i in label]  # TODO: Currently use sharpness to split score, and weight
-    #
-    # class_weight = compute_class_weight('balanced', np.unique(score), score)
-    # class_weight = None
+            c_weight = compute_class_weight('balanced', np.unique(score), score)  # Assume score always 1,3,5
+            if np.shape(c_weight)[0] < 3:  # Sometime class 1 is missing, use weight 1 instead
+                possible_score = [1, 3, 5]
+                for index, sc in enumerate(possible_score):
+                    if not np.any(np.unique(score) == sc):  # Check if data doesn't exist, insert 1
+                        try:
+                            c_weight = np.insert(c_weight, index, 1)
+                        except IndexError:
+                            c_weight = np.concatenate(c_weight, 1)
+            class_weight[c] = c_weight.tolist()
 
     if k_cross:  # If k_cross mode, output will be list
         train_address_temp, eval_address_temp = split_kfold(grouped_address, k_num)
@@ -477,21 +502,23 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
             train_address.append(single_train_address)
             eval_address.append(single_eval_address)
 
-            # Save names of files of train address
-            # file_name = "./data/tfrecord/%s/%s_%s_%s_%s.txt" % (
-            #     tfrecord_name, tfrecord_name, configs['label_data'], configs['label_type'], i)
-            file_name = "./data/tfrecord/%s/%s_%s.txt" % (
-                tfrecord_name, tfrecord_name, i)
+            # Save label distribution for weight balancing
+            file_name = "./data/tfrecord/%s/%s_%s.json" % (tfrecord_name, tfrecord_name, i)
             with open(file_name, 'w') as filehandle:
-                # Header with 'distibution'
-                filehandle.write('distribution\n')
-                for listitem in class_weight:
-                    filehandle.write('%s\n' % listitem)
-                filehandle.write('train\n')
-                filehandle.write('eval\n')
+                json.dump({"class_weight": class_weight}, filehandle, indent=4, sort_keys=True,
+                          separators=(',', ': '), ensure_ascii=False)
+
+            # file_name = "./data/tfrecord/%s/%s_%s.txt" % (tfrecord_name, tfrecord_name, i)
+            # with open(file_name, 'w') as filehandle:
+            #     # Header with 'distibution'
+            #     filehandle.write('distribution\n')
+            #     for listitem in class_weight:
+            #         filehandle.write('%s\n' % listitem)
+            #     filehandle.write('train\n')
+            #     filehandle.write('eval\n')
     else:
         train_address, eval_address = split_train_test(grouped_address, example_grouped_address,
-                                                       tfrecord_name, configs, class_weight["Sharpness_median"])
+                                                       tfrecord_name, configs, class_weight)
         if not get_data:  # Put in special format for writing tfrecord (pipeline)
             train_address = tuple(
                 [list(e) for e in zip(*train_address)])  # Convert to tuple of list[image address, label]
