@@ -123,17 +123,9 @@ def run(model_params=None):
     with open(info_path) as f:
         data_loaded = json.load(f)
         loss_weight = data_loaded['class_weight'][model_params['label_type']]
-        # filehandle = f.read().splitlines()
-        # if not (filehandle[0] == 'distribution'):
-        #     print(filehandle[0])
-        #     raise KeyError("File does not have correct format, need 'train' and 'eval' keyword within file")
-        # for line in filehandle[1:]:
-        #     if line == 'train':
-        #         break
-        #     else:
-        #         loss_weight.append(float(line))
     assert len(loss_weight) == 3, "Label does not have 3 unique value, found %s" % len(loss_weight)
     model_params['loss_weight'] = loss_weight
+
     print("Getting training data from %s" % train_data_path)
     print("Saved model at %s" % run_params['result_path'])
 
@@ -332,12 +324,12 @@ def run_hyper_parameter_optimize():
         previous_record_files.append(file)
     previous_record_files.sort()
     if len(previous_record_files) > 0:  # Check if file has previous result
-        if not os.stat(previous_record_files[-1]).st_size == 0:
+        if not os.stat(previous_record_files[-1]).st_size == 0:  # Check if previous file is empty or not
             prev_data, header = read_file(previous_record_files[-1], header=True)
             if not prev_data:
                 prev_data = [['']]
             try:
-                # If the run doesn't end completely, continue (on workstation mode)
+                # Only for work station, continue if the run doesn't end completely
                 if prev_data[-1][0] != 'end' and run_params['is_workstation']:
                     n_calls = n_calls - len(prev_data)
                     l_data = prev_data[-1][1:]  # Latest_data
@@ -346,7 +338,7 @@ def run_hyper_parameter_optimize():
                     current_time = previous_record_files[-1].split("/")[-1].replace('.csv', '').replace(
                         "hyperparameters_result_", '')
                     print("Continue from %s" % current_time)
-                else:  # If previous file ended correctly or not workstation, create new file
+                else:  # Otherwise, create new file
                     save_file(run_params['summary_file_path'], [], field_name=field_name,
                               write_mode='w', create_folder=True, data_format="header_only")  # Create new summary file
                     default_param = default_parameters
@@ -361,12 +353,12 @@ def run_hyper_parameter_optimize():
             save_file(run_params['summary_file_path'], [], field_name=field_name, write_mode='w',
                       create_folder=True)  # Create new summary file
             default_param = default_parameters
-            print("Creating new runs")
+            print("Creating new runs, deleting previous empty file")
     else:  # If no file in folder, create new file
         save_file(run_params['summary_file_path'], [], field_name=field_name, write_mode='w',
                   create_folder=True)  # Create new summary file
         default_param = default_parameters
-        print("Creating new runs")
+        print("Creating new runs (new folder)")
 
     print("Saving hyperparameters_result in %s" % run_params['summary_file_path'])
     print("Running remaining: %s time" % n_calls)
@@ -397,19 +389,11 @@ def run_hyper_parameter_optimize():
             data = {field_name[0]: i[0] * -1}
             for j in range(1, len(field_name)):
                 data[field_name[1]] = i[1][j - 1]
-            # data = {field_name[0]: i[0] * -1,
-            #         field_name[1]: i[1][0],
-            #         field_name[2]: i[1][1],
-            #         field_name[3]: i[1][2],
-            #         field_name[4]: i[1][3],
-            #         field_name[5]: i[1][4]}
             new_data.append(data)
 
         save_file(run_params['summary_file_path'],
                   ['end', 'Completed', datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S")],
                   write_mode='a', data_format="one_row")
-        # space = search_result.space
-        # print("Best result: %s" % space.point_to_dict(search_result.x))
     print("Saving hyperparameters_result in %s" % run_params['summary_file_path'])
     return best_accuracy
 

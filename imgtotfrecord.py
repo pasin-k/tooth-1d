@@ -1,6 +1,8 @@
 import tensorflow as tf
 import numpy as np
+import random
 import os
+import json
 from open_save_file import get_input_and_label, read_file, save_file
 
 numdeg = 4  # Number of images on each example
@@ -9,6 +11,7 @@ numdeg = 4  # Number of images on each example
 configs = {'train_eval_ratio': 0.8,
            'data_type': 'BL_median',
            }
+
 
 def _int64_feature(value):
     return tf.train.Feature(int64_list=tf.train.Int64List(value=[value]))
@@ -159,7 +162,33 @@ def read_coordinate(file_name, label):
     return file_values
 
 
-def coordinate_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None, k_fold=False, k_num=5):
+def write_tfrecord(all_data, file_dir, degree, coordinate_length):
+    with tf.python_io.TFRecordWriter(file_dir) as writer:
+        for data in all_data:
+            default_key = list(data.keys())[0]  # Use for label since score should be the same
+            # Add general info
+            feature = {'degree': _int64_feature(degree), 'length': _int64_feature(coordinate_length)}
+            # Add labels
+            for d in configs['data_type']:
+                if d == "name":
+                    feature[d] = _bytes_feature(bytes(data[default_key][1][d], encoding='utf8'))
+                else:
+                    feature[d] = _int64_feature(data[default_key][1][d])
+            # Add data
+            for dname in data.keys():
+                for n in range(numdeg):
+                    for j in range(2):  # Flatten degree, axis
+                        val = data[dname][0][n][:, j].reshape(-1)
+                        if np.shape(val)[0] != 50:
+                            print("Error", data[dname][1]["name"])
+                            print(np.shape(val)[0])
+                        feature['%s_%s_%s' % (dname, n, j)] = tf.train.Feature(float_list=tf.train.FloatList(value=val))
+            example = tf.train.Example(features=tf.train.Features(feature=feature))
+            # Write TFrecord file
+            writer.write(example.SerializeToString())
+
+
+def coordinate_to_tfrecord(tfrecord_name, dataset_folders, csv_dir=None, k_fold=False, k_num=5):
     """
     tfrecord_name   : Name of .tfrecord output file
     dataset_folder  : Folder of the input data  (Not include label)
@@ -174,74 +203,67 @@ def coordinate_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None, k_fold=F
     if not os.path.exists(tfrecord_dir):
         os.makedirs(tfrecord_dir)
 
-    # Get amount of degree and augmentation
-    config_data = read_file(os.path.join(dataset_folder, "config.txt"))
-    configs['numdeg'] = int(config_data[0][0])      #  Get data from config.txt
-    configs['num_augment'] = int(config_data[1][0])
+    if isinstance(dataset_folders, str):
+        dataset_folders = {'img': dataset_folders}
 
-    # Get data from dataset_folder
-    grouped_train_data, grouped_eval_data = get_input_and_label(tfrecord_name, dataset_folder,
-                                                                csv_dir, configs, get_data=True,
-                                                                k_cross=k_fold, k_num=k_num)
+    dataset_list = [dict() for i in range(len(dataset_folders))]
+    seed = random.randint(0, 1000000)  # So that the result is always the same
 
-    # Use this to debug if number of point in varying
-    # print(len(grouped_eval_data))
-    # for d in grouped_eval_data:
-    #     print(np.shape(d[0][0]))
-    # raise ValueError("debug")
+    # Convert data into list (kfolds) of dictionary (left/right/...) of list of (train,eval) data
+    for dataset_name, dataset_folder in dataset_folders.items():
+        # Get amount of degree and augmentation
+        config_data = read_file(os.path.join(dataset_folder, "config.txt"))
+        configs['numdeg'] = int(config_data[0][0])  # Get data from config.txt
+        configs['num_augment'] = int(config_data[1][0])
 
-    if not k_fold:
-        k_num = 1
-        grouped_train_data = [grouped_train_data]
-        grouped_eval_data = [grouped_eval_data]
+        # Get data from dataset_folder
+        grouped_train_data, grouped_eval_data = get_input_and_label(tfrecord_name, dataset_folder,
+                                                                    configs, seed, get_data=True,
+                                                                    k_cross=k_fold, k_num=k_num)
+
+        if not k_fold:
+            k_num = 1
+            grouped_train_data = [grouped_train_data]
+            grouped_eval_data = [grouped_eval_data]
+        for i, (td, ed) in enumerate(zip(grouped_train_data, grouped_eval_data)):
+            dataset_list[i][dataset_name] = [td, ed]
+
     for i in range(k_num):
-        train_data = grouped_train_data[i]
-        eval_data = grouped_eval_data[i]
         tfrecord_train_name = os.path.join(tfrecord_dir, "%s_%s_train.tfrecords" % (tfrecord_name, i))
         tfrecord_eval_name = os.path.join(tfrecord_dir, "%s_%s_eval.tfrecords" % (tfrecord_name, i))
+        dataset_dict = dataset_list[i]
 
-        coordinate_length = len(train_data[0][0][0])
-        degree = len(train_data[0][0])
+        coordinate_length = len(list(dataset_dict.values())[0][0][0][0][0])
+        degree = len(list(dataset_dict.values())[0][0][0][0])
+        dataset_name = dataset_dict.keys()
 
-        with tf.python_io.TFRecordWriter(tfrecord_train_name) as writer:
-            for data in train_data:
-                # print(data)
-                # Add general info
-                feature = {'degree': _int64_feature(degree),
-                           'length': _int64_feature(coordinate_length)}
-                # Add labels
-                for d in configs['data_type']:
-                    if d == "name":
-                        feature[d] = _bytes_feature(bytes(data[1][d], encoding='utf8'))
-                    else:
-                        feature[d] = _int64_feature(data[1][d])
-                # Add data
-                for n in range(numdeg):
-                    for j in range(2):  # Flatten degree, axis
-                        val = data[0][n][:, j].reshape(-1)
-                        feature['img_%s_%s' % (n, j)] = tf.train.Feature(float_list=tf.train.FloatList(value=val))
-                example = tf.train.Example(features=tf.train.Features(feature=feature))
-                # Write TFrecord file
-                writer.write(example.SerializeToString())
+        # Rearrange order of data
+        train_data = []
+        eval_data = []
+        data_amount = len(list(dataset_dict.values())[0][0])  # Sample amount of train data
+        for j in range(data_amount):
+            td = {}
+            for n in dataset_name:
+                td[n] = dataset_dict[n][0][j]
+            train_data.append(td)
+        data_amount = len(list(dataset_dict.values())[0][1])  # Sample amount of eval data
+        for j in range(data_amount):
+            ed = {}
+            for n in dataset_name:
+                ed[n] = dataset_dict[n][1][j]
+            eval_data.append(ed)
 
-        with tf.python_io.TFRecordWriter(tfrecord_eval_name) as writer:
-            for data in eval_data:
-                feature = {'degree': _int64_feature(degree),
-                           'length': _int64_feature(coordinate_length)}
-                # Add labels
-                for d in configs['data_type']:
-                    if d == "name":
-                        feature[d] = _bytes_feature(bytes(data[1][d], encoding='utf8'))
-                    else:
-                        feature[d] = _int64_feature(data[1][d])
-                # Add data
-                for n in range(numdeg):
-                    for j in range(2):
-                        val = data[0][n][:, j].reshape(-1)
-                        feature['img_%s_%s' % (n, j)] = tf.train.Feature(float_list=tf.train.FloatList(value=val))
-                example = tf.train.Example(features=tf.train.Features(feature=feature))
-                # Write TFrecord file
-                writer.write(example.SerializeToString())
+        write_tfrecord(train_data, tfrecord_train_name, degree, coordinate_length)
+        write_tfrecord(eval_data, tfrecord_eval_name, degree, coordinate_length)
+
+        # Update info in json file
+        with open("./data/tfrecord/%s/%s_%s.json" % (tfrecord_name, tfrecord_name, i)) as filehandle:
+            data_loaded = json.load(filehandle)
+        data_loaded["degree"] = degree
+        data_loaded["data_length"] = coordinate_length
+        data_loaded["dataset_name"] = list(dataset_folders.keys())
+        with open("./data/tfrecord/%s/%s_%s.json" % (tfrecord_name, tfrecord_name, i), 'w') as filehandle:
+            json.dump(data_loaded, filehandle, indent=4, sort_keys=True, separators=(',', ': '), ensure_ascii=False)
         print("TFrecords created: %s, %s" % (tfrecord_train_name, tfrecord_eval_name))
 
 
@@ -261,9 +283,11 @@ if __name__ == '__main__':
         image_to_tfrecord(tfrecord_name="preparation_img_test", dataset_folder="./data/cross_section",
                           k_fold=k_fold)
     else:
-        coordinate_to_tfrecord(tfrecord_name="coor_augment",
-                               dataset_folder="./data/coordinate_newer", k_fold=k_fold)
         # coordinate_to_tfrecord(tfrecord_name="coor_augment",
-        #                        dataset_folder="./data/segment_2/right_point", k_fold=k_fold)
+        #                        dataset_folders="./data/coordinate_newer", k_fold=k_fold)
+        # coordinate_to_tfrecord(tfrecord_name="coor_split",
+        #                        dataset_folders="./data/segment_2/right_point", k_fold=k_fold)
+        coordinate_to_tfrecord(tfrecord_name="coor_split", dataset_folders={'right': "./data/segment_2/right_point",
+                                                                            'left': "./data/segment_2/left_point"},
+                               k_fold=k_fold)
     print("Complete")
-

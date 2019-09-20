@@ -7,92 +7,72 @@ import numpy as np
 numdegree = None
 data_length = None
 label_type_global = None
+single_slice = None
+name_type = None
 
 
 # Import tfrecord to dataset
 def deserialize(example):
+    global name_type
     feature = {label_type_global: tf.FixedLenFeature([], tf.int64),
                'degree': tf.FixedLenFeature([], tf.int64),
                'length': tf.FixedLenFeature([], tf.int64),
                "name": tf.FixedLenFeature([], tf.string)}  # Becareful if tfrecord doesn't have name
 
-    for i in range(4):
-        for j in range(2):
-            feature['img_%s_%s' % (i, j)] = tf.VarLenFeature(tf.float32)
+    for n in name_type:
+        for i in range(4):
+            for j in range(2):
+                feature['%s%s_%s' % (n, i, j)] = tf.VarLenFeature(tf.float32)
 
     return tf.parse_single_example(example, feature)
 
 
-def decode_one_axis(data_dict):
-    global label_type_global
-    # Create initial image, then stacking it for dense model
-    image_decoded = []
-    # Stacking the rest
-    for i in range(numdegree):
-        for j in range(2):
-            img = data_dict['img_%s_%s' % (i, j)]
-            img = tf.sparse.to_dense(img)
-            img = tf.reshape(img, [data_length])
-            # img = tf.reshape(img, [data_length])
-            # file_cropped = tf.squeeze(tf.image.resize_image_with_crop_or_pad(file_decoded, image_height, image_width))
-            image_decoded.append(img)
-
-    if numdegree != 4:
-        raise ValueError("Edit this function as well, this compatible with numdeg=4")
-    image_stacked = tf.concat([image_decoded[0], image_decoded[1], image_decoded[2], image_decoded[3],
-                               image_decoded[4], image_decoded[5], image_decoded[6], image_decoded[7]], axis=0)
-    # image_stacked.set_shape([tf.multiply(tf.convert_to_tensor(numdegree),length)])
-    image_stacked = tf.cast(image_stacked, tf.float32)
-    label = tf.cast(data_dict[label_type_global], tf.float32)
-    name = tf.cast(data_dict['name'], tf.string)  # Used for referencing
-    return image_stacked, label
-
-
-def decode_multiple_axis(data_dict):
-    global label_type_global
+def decode(data_dict):
+    global label_type_global, numdegree, name_type, single_slice, name_type
     # Create initial image, then stacking it for 1dCNN model
     image_decoded = []
+    dataset_amount = len(name_type)
     # Stacking the rest
-    for i in range(numdegree):
-        for j in range(2):
-            img = data_dict['img_%s_%s' % (i, j)]
-            img = tf.sparse.to_dense(img)
-            # img = tf.reshape(img, [299])
-            img = tf.reshape(img, [data_length])
-            # print(img)
-            # img = tf.reshape(img, [data_dict['length']])
-            # file_cropped = tf.squeeze(tf.image.resize_image_with_crop_or_pad(file_decoded, image_height, image_width))
-            image_decoded.append(img)
+    for n in name_type:
+        for i in range(numdegree):
+            for j in range(2):
+                img = data_dict['%s_%s_%s' % (n, i, j)]
+                img = tf.sparse.to_dense(img)
+                img = tf.reshape(img, [data_length])
+                # file_cropped = tf.squeeze(tf.image.resize_image_with_crop_or_pad(file_decoded, image_height, image_width))
+                image_decoded.append(img)
 
     if numdegree != 4:
         raise ValueError("Edit this function as well, this compatible with numdeg=4")
-    # image_stacked = tf.stack([image_decoded[0], image_decoded[1], image_decoded[2], image_decoded[3],
-    #                           image_decoded[4], image_decoded[5], image_decoded[6], image_decoded[7]], axis=1)
-    image_stacked = tf.stack([image_decoded[0], image_decoded[4]], axis=1)  # Only one axis
+    if single_slice:
+        image_stacked = tf.stack(image_decoded[0:numdegree * dataset_amount * 2:numdegree], axis=1)
+        if dataset_amount > 4 or dataset_amount < 1:
+            raise ValueError("Datset_amount not compatible: Found %s, but accept 1-4" % dataset_amount)
+    else:
+        image_stacked = tf.stack(image_decoded[0:numdegree * dataset_amount * 2], axis=1)
+        if dataset_amount > 4 or dataset_amount < 1:
+            raise ValueError("Datset_amount not compatible: Found %s, but accept 1-4" % dataset_amount)
+
     image_stacked = tf.cast(image_stacked, tf.float32)
-    # label = tf.cast(data_dict['label'], tf.float32)
     label = tf.cast(data_dict[label_type_global], tf.float32)
     name = tf.cast(data_dict['name'], tf.string)
     feature = {'image': image_stacked, 'name': name}
     return feature, label
-    # return image_stacked, label
 
 
 def train_input_fn(data_path, batch_size, data_type, configs):
-    global numdegree, data_length, label_type_global
+    global numdegree, data_length, label_type_global, single_slice, name_type
     print("Fetching label type: %s" % label_type_global)
-    numdegree = configs['data_degree']
-    data_length = configs['data_length']
-    label_type_global = configs['label_type']
+    numdegree, data_length, label_type_global, single_slice, name_type = configs['data_degree'], configs['data_length'], \
+                                                                         configs['label_type'], configs['single_slice'], \
+                                                                         configs['dataset_name']
+
     if not os.path.exists(data_path):
         raise ValueError("Train input file does not exist")
     # data_type=0 -> data is vectorize in to one vector else, stack in different dimension
     dataset = tf.data.TFRecordDataset(data_path)
     dataset = dataset.map(deserialize, num_parallel_calls=7)
-    if data_type == 0:
-        dataset = dataset.map(decode_one_axis, num_parallel_calls=7)
-    else:
-        dataset = dataset.map(decode_multiple_axis, num_parallel_calls=7)
+    dataset = dataset.map(decode, num_parallel_calls=7)
     dataset = dataset.shuffle(100)
     dataset = dataset.batch(batch_size, drop_remainder=False)  # Maybe batch after repeat?
     dataset = dataset.repeat(None)
@@ -101,18 +81,16 @@ def train_input_fn(data_path, batch_size, data_type, configs):
 
 
 def eval_input_fn(data_path, batch_size, data_type, configs):
-    global numdegree, data_length, label_type_global
-    numdegree = configs['data_degree']
-    data_length = configs['data_length']
-    label_type_global = configs['label_type']
+    global numdegree, data_length, label_type_global, single_slice, name_type
+    print("Fetching label type: %s" % label_type_global)
+    numdegree, data_length, label_type_global, single_slice, name_type = configs['data_degree'], configs['data_length'], \
+                                                                         configs['label_type'], configs['single_slice'], \
+                                                                         configs['dataset_name']
     if not os.path.exists(data_path):
         raise ValueError("Eval input file does not exist")
     eval_dataset = tf.data.TFRecordDataset(data_path)
     eval_dataset = eval_dataset.map(deserialize)
-    if data_type == 0:
-        eval_dataset = eval_dataset.map(decode_one_axis)
-    else:
-        eval_dataset = eval_dataset.map(decode_multiple_axis)
+    eval_dataset = eval_dataset.map(decode)
     eval_dataset = eval_dataset.batch(batch_size, drop_remainder=False)  # No need to shuffle this time
     return eval_dataset
 
@@ -128,27 +106,21 @@ def get_data_from_path(data_path, label_type, data_type=1):
         raise ValueError("Input file does not exist")
     dataset = tf.data.TFRecordDataset(data_path)
     dataset = dataset.map(deserialize)
-    if data_type == 0:
-        dataset = dataset.map(decode_one_axis)
-    else:
-        dataset = dataset.map(decode_multiple_axis)
+    dataset = dataset.map(decode)
 
     iterator = dataset.make_one_shot_iterator()
     next_image_data = iterator.get_next()
-    images = []
+    features = []
     label = []
-    name = []
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         try:
             # Keep extracting data till TFRecord is exhausted
             while True:
                 data = sess.run(next_image_data)
-                # print(data)
-                images.append(data[0])
+                features.append(data[0])
                 label.append(data[1])
-                # name.append(data[2])  # For referenncing
         except tf.errors.OutOfRangeError:
             pass
 
-    return images, label
+    return features, label

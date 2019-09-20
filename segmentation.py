@@ -14,7 +14,8 @@ from pre_processing import fix_amount_of_point
 
 # TODO; Check if all file is created
 
-augment_config = [0, 1, 2, 3, -1, -2, -3]
+# augment_config = [0, 1, 2, 3, -1, -2, -3, 180, 179, 178, 177, 181, 182, 183]
+augment_config = [0]
 degree = [0, 45, 90, 135]
 
 
@@ -104,7 +105,7 @@ def get_segment(points, mode=None, margin=0, file_name=None):
     img_size = 800
     fig = plt.figure(figsize=(img_size / dpi, img_size / dpi), dpi=dpi)
     ax = fig.gca()
-    min_x, max_x, min_y, max_y = -5, 5, -6, 6
+    min_x, max_x, min_y, max_y = -6, 6, -6, 6
     if mode is None:
         ax.axis([min_x, max_x, min_y, max_y])
         ax.set_autoscale_on(False)  # allows us to define scale
@@ -112,7 +113,7 @@ def get_segment(points, mode=None, margin=0, file_name=None):
 
     if file_name is not None:
         # plot lines for viewing
-        x1 = range(-5, 5)
+        x1 = range(-6, 6)
         yleft = np.full((10,), points[top_left_index, :][1])
         yright = np.full((10,), points[top_right_index, :][1])
         ax.plot(x1, yleft, '-c')
@@ -133,8 +134,8 @@ def get_segment(points, mode=None, margin=0, file_name=None):
 
 
 def get_segment_multiple(name, margin=0,
-                         base_dir="/home/pasin/Documents/Google_Drive/Aa_TIT_LAB_Comp/Library/Tooth/Tooth/Model/my2DCNN/data/segment_2",
-                         point_only=False, fix_point=None,
+                         save_base_dir="/home/pasin/Documents/Google_Drive/Aa_TIT_LAB_Comp/Library/Tooth/Tooth/Model/my2DCNN/data/segment_2",
+                         point_only=False, fix_point=None, no_line=False,
                          csv_dir='../global_data/Ground Truth Score_new.csv'):
     """
     Get a segments of cross section from multiple files, used to train
@@ -145,8 +146,9 @@ def get_segment_multiple(name, margin=0,
     :param fix_point: integer, number of point for .npy file. None if doesn't want normalization
     :return: ndarray of segmented image or saved image (Not sure)
     """
-    save_dir = [base_dir + "/full/", base_dir + "/left/", base_dir + "/left_point/", base_dir + "/right/",
-                base_dir + "/right_point/", base_dir + "/top/", base_dir + "/top_point/"]
+    save_dir = [save_base_dir + "/full/", save_base_dir + "/left/", save_base_dir + "/left_point/",
+                save_base_dir + "/right/",
+                save_base_dir + "/right_point/", save_base_dir + "/top/", save_base_dir + "/top_point/"]
     for s in save_dir:  # Create directory if not exist
         if not os.path.exists(s):
             os.makedirs(s)
@@ -241,40 +243,42 @@ def get_segment_multiple(name, margin=0,
                     if point_only:
                         # Left
                         # If there is margin, choose points slightly below x_min_index
-                        if margin > 0:
-                            segmented_points = points[0:top_left_index + 1, :]
-                            segmented_points = segmented_points[
-                                segmented_points[:, 1] > points[x_min_index, 1] - margin]
-                        else:
-                            segmented_points = points[x_min_index:top_left_index + 1, :]
+                        segmented_points = points[0:top_left_index, :]
+                        # if margin > 0:
+                        #     segmented_points = points[0:top_left_index + 1, :]
+                        #     segmented_points = segmented_points[
+                        #         segmented_points[:, 1] > points[x_min_index, 1] - margin]
+                        # else:
+                        #     segmented_points = points[x_min_index:top_left_index + 1, :]
                         if fix_point is not None:
                             segmented_points = fix_amount_of_point(segmented_points, fix_point)
 
-                        np.save(base_dir + "/left_point/" + file_name_point, segmented_points)
+                        np.save(save_base_dir + "/left_point/" + file_name_point, segmented_points)
 
                         # Right
-                        if margin > 0:
-                            segmented_points = points[top_right_index:, :]
-                            segmented_points = segmented_points[
-                                segmented_points[:, 1] > points[x_max_index, 1] - margin]
-                        else:
-                            segmented_points = points[top_right_index:x_max_index + 1, :]
+                        segmented_points = points[top_right_index:, :]
+                        # if margin > 0:
+                        #     segmented_points = points[top_right_index:, :]
+                        #     segmented_points = segmented_points[
+                        #         segmented_points[:, 1] > points[x_max_index, 1] - margin]
+                        # else:
+                        #     segmented_points = points[top_right_index:x_max_index + 1, :]
 
                         if fix_point is not None:
                             segmented_points = fix_amount_of_point(segmented_points, fix_point)
-                        np.save(base_dir + "/right_point/" + file_name_point, segmented_points)
+                        np.save(save_base_dir + "/right_point/" + file_name_point, segmented_points)
 
                         # Top
-                        segmented_points = points[top_left_index:top_right_index + 1, :]
+                        segmented_points = points[top_left_index:top_right_index, :]
                         if fix_point is not None:
                             segmented_points = fix_amount_of_point(segmented_points, fix_point)
-                        np.save(base_dir + "/top_point/" + file_name_point, segmented_points)
+                        np.save(save_base_dir + "/top_point/" + file_name_point, segmented_points)
                     else:
                         dpi = 100
                         img_size = 800
                         fig = plt.figure(figsize=(img_size / dpi, img_size / dpi), dpi=dpi)
                         ax = fig.gca()
-                        min_x, max_x, min_y, max_y = -5, 5, -6, 6
+                        min_x, max_x, min_y, max_y = -6, 6, -6, 6
                         ax.axis([min_x, max_x, min_y, max_y])
                         ax.set_autoscale_on(False)  # allows us to define scale
                         # plot lines for viewing
@@ -292,14 +296,15 @@ def get_segment_multiple(name, margin=0,
                         y = points[:, 1]
 
                         ax.plot(x, y, linewidth=1.0)
-                        ax.plot(x1, yleft, '-c')
-                        ax.plot(x1, yright, '-r')
-                        ax.plot(x1, ybottom_left_margin, '-py')
-                        ax.plot(x1, ybottom_left, '-y')
-                        ax.plot(x1, ybottom_right_margin, '-pb')
-                        ax.plot(x1, ybottom_right, '-b')
+                        if not no_line:
+                            ax.plot(x1, yleft, '-c')
+                            ax.plot(x1, yright, '-r')
+                            ax.plot(x1, ybottom_left_margin, '-py')
+                            ax.plot(x1, ybottom_left, '-y')
+                            ax.plot(x1, ybottom_right_margin, '-pb')
+                            ax.plot(x1, ybottom_right, '-b')
 
-                        fig.savefig(base_dir + "/full/" + file_name, bbox_inches='tight')
+                        fig.savefig(save_base_dir + "/full/" + file_name, bbox_inches='tight')
                         plt.clf()
                         # plt.close()
 
@@ -308,13 +313,14 @@ def get_segment_multiple(name, margin=0,
                         ax.autoscale()
 
                         # Left
+                        segmented_points = points[0:top_left_index, :]
                         # If there is margin, choose points slightly below x_min_index
-                        if margin > 0:
-                            segmented_points = points[0:top_left_index + 1, :]
-                            segmented_points = segmented_points[
-                                segmented_points[:, 1] > points[x_min_index, 1] - margin]
-                        else:
-                            segmented_points = points[x_min_index:top_left_index + 1, :]
+                        # if margin > 0:
+                        #     segmented_points = points[0:top_left_index + 1, :]
+                        #     segmented_points = segmented_points[
+                        #         segmented_points[:, 1] > points[x_min_index, 1] - margin]
+                        # else:
+                        #     segmented_points = points[x_min_index:top_left_index + 1, :]
                         x = segmented_points[:, 0]
                         y = segmented_points[:, 1]
 
@@ -328,19 +334,20 @@ def get_segment_multiple(name, margin=0,
                         ax.plot(x1, ybottom_left, '-y')
                         if fix_point is not None:
                             segmented_points = fix_amount_of_point(segmented_points, fix_point)
-                        fig.savefig(base_dir + "/left/" + file_name, bbox_inches='tight')
-                        np.save(base_dir + "/left_point/" + file_name_point, segmented_points)
+                        fig.savefig(save_base_dir + "/left/" + file_name, bbox_inches='tight')
+                        np.save(save_base_dir + "/left_point/" + file_name_point, segmented_points)
 
                         plt.clf()
                         # plt.close()
                         ax = fig.gca()
                         # Right
-                        if margin > 0:
-                            segmented_points = points[top_right_index:, :]
-                            segmented_points = segmented_points[
-                                segmented_points[:, 1] > points[x_max_index, 1] - margin]
-                        else:
-                            segmented_points = points[top_right_index:x_max_index + 1, :]
+                        segmented_points = points[top_right_index:, :]
+                        # if margin > 0:
+                        #     segmented_points = points[top_right_index:, :]
+                        #     segmented_points = segmented_points[
+                        #         segmented_points[:, 1] > points[x_max_index, 1] - margin]
+                        # else:
+                        #     segmented_points = points[top_right_index:x_max_index + 1, :]
                         x = segmented_points[:, 0]
                         y = segmented_points[:, 1]
                         ax.axis([min_x, max_x, min_y, max_y])
@@ -352,14 +359,14 @@ def get_segment_multiple(name, margin=0,
                         ax.plot(x1, ybottom_right, '-b')
                         if fix_point is not None:
                             segmented_points = fix_amount_of_point(segmented_points, fix_point)
-                        fig.savefig(base_dir + "/right/" + file_name, bbox_inches='tight')
-                        np.save(base_dir + "/right_point/" + file_name_point, segmented_points)
+                        fig.savefig(save_base_dir + "/right/" + file_name, bbox_inches='tight')
+                        np.save(save_base_dir + "/right_point/" + file_name_point, segmented_points)
                         plt.clf()
                         # plt.close()
 
                         # Top
                         ax = fig.gca()
-                        segmented_points = points[top_left_index:top_right_index + 1, :]
+                        segmented_points = points[top_left_index:top_right_index, :]
                         x = segmented_points[:, 0]
                         y = segmented_points[:, 1]
                         ax.axis([min_x, max_x, min_y, max_y])
@@ -372,8 +379,8 @@ def get_segment_multiple(name, margin=0,
                         # ax.plot(x1, ybottom_left, '-y')
                         if fix_point is not None:
                             segmented_points = fix_amount_of_point(segmented_points, fix_point)
-                        fig.savefig(base_dir + "/top/" + file_name, bbox_inches='tight')
-                        np.save(base_dir + "/top_point/" + file_name_point, segmented_points)
+                        fig.savefig(save_base_dir + "/top/" + file_name, bbox_inches='tight')
+                        np.save(save_base_dir + "/top_point/" + file_name_point, segmented_points)
                         plt.clf()
                         plt.close()
             # plt.close()
@@ -400,7 +407,7 @@ def get_segment_multiple(name, margin=0,
 if __name__ == '__main__':
     # NOTE: Run on jupyter notebook
     get_segment_multiple(margin=0,
-                         name='../global_data/stl_data_debug',
-                         base_dir="/home/pasin/Documents/Google_Drive/Aa_TIT_LAB_Comp/Library/Tooth/Tooth/Model/my2DCNN/data/segment_debug",
-                         csv_dir="/home/pasin/Documents/Link_to_Tooth/Tooth/Model/global_data/Ground Truth Score_debug.csv",
-                         point_only=False, fix_point=50)
+                         name='../global_data/stl_data',
+                         save_base_dir="/home/pasin/Documents/Google_Drive/Aa_TIT_LAB_Comp/Library/Tooth/Tooth/Model/my2DCNN/data/segment_okuyama",
+                         # csv_dir="/home/pasin/Documents/Link_to_Tooth/Tooth/Model/global_data/Ground Truth Score_debug.csv",
+                         point_only=False, fix_point=50, no_line=True)

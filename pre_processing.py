@@ -16,7 +16,7 @@ v = '1.2.0'
 # 1.2: Now save image with their own name
 print("pre_processing.py version: " + str(v))
 
-augment_config = [0, -1, -2, -3, 1, 2, 3]
+augment_config = [0, -1, -2, -3, 1, 2, 3, 180, 179, 178, 177, 181, 182, 183]
 degree = [0, 45, 90, 135]
 numdeg = len(degree)
 
@@ -128,9 +128,6 @@ def get_cross_section(data_type, stat_type, augment_config=[0], folder_name='../
                 augment_val = str(abs(augment_val))
             if point is None:  # If the output has error, remove label of that file
                 error_file_names.append(image_name[i] + "_" + augment_val)
-                # index = label_name_temp.index(image_name[i])
-                # label_name_temp.pop(index)
-                # label_temp.pop(index)
             else:
                 stl_points.append(point)
                 label_name_temp.append(image_name[i] + "_" + augment_val)
@@ -200,10 +197,6 @@ def save_coordinate(coor_list, out_directory, file_header_name, image_name, degr
     out_directory = os.path.abspath(out_directory)
     if not os.path.exists(out_directory):
         os.makedirs(out_directory)
-    # if len(degree) != len(coor_list[0]):
-    #     print("# of Degree expected: %d" % len(degree))
-    #     print("# of Degree found: %d" % len(coor_list[0]))
-    #     raise Exception('Number of degree specified is not equals to coordinate ')
 
     # for corr_index in range(len(coor_list)):
     for deg_index in range(len(degree)):
@@ -213,9 +206,7 @@ def save_coordinate(coor_list, out_directory, file_header_name, image_name, degr
         fullname = "%s_%s_%d.npy" % (file_header_name, image_name, degree[deg_index])
         # fullname = "%s_%s_%s_%d.npy" % (file_header_name, image_name, augment_number, degree[deg_index])
         output_name = os.path.join(out_directory, fullname)
-        # np.savetxt(output_name, coor, delimiter=',')
         np.save(output_name, coor)
-        # np.savetxt(output_name.replace(".npy",".txt"), coor)
     # print("Finished saving coordinates: %d files with %d rotations at dir: %s" % (
     #     len(coor_list), len(degree), out_directory))
 
@@ -253,8 +244,8 @@ if __name__ == '__main__':
     points_all, lbl_all, lbl_name_all, err_name_all, header = get_cross_section(data_type="BL",
                                                                                 stat_type="median",
                                                                                 augment_config=augment_config,
-                                                                                folder_name='../global_data/stl_data_debug',
-                                                                                csv_dir='../global_data/Ground Truth Score_debug.csv',
+                                                                                # folder_name='../global_data/stl_data_debug',
+                                                                                # csv_dir='../global_data/Ground Truth Score_debug.csv',
                                                                                 )
     # folder_name="/home/pasin/Documents/Link_to_Tooth/Tooth/Model/global_data/stl_data_debug",
     # csv_dir="/home/pasin/Documents/Link_to_Tooth/Tooth/Model/global_data/Ground Truth Score_debug.csv")
@@ -266,17 +257,18 @@ if __name__ == '__main__':
         for i in range(len(points_all)):
             for d_index in range(len(degree)):
                 points_all[i][d_index] = fix_amount_of_point(points_all[i][d_index], fix_amount)
-            print("Done %s out of %s" % (i + 1, len(points_all)))
+            if i % 50 == 0:
+                print("Done %s out of %s" % (i + 1, len(points_all)))
 
     if save_img:
         print("Start saving images...")
-        image_dir = "./data/cross_section_debug_newer"
+        image_dir = "./data/cross_section_14augment"
         save_image(points_all, lbl_name_all, err_name_all, image_dir=image_dir)
         save_file(os.path.join(image_dir, "score.csv"), lbl_all, data_format="dict_list", field_name=header)
 
     if save_coor:
         print("Start saving coordinates...")
-        file_dir = "./data/coordinate_debug_newer"
+        file_dir = "./data/coordinate_14augment"
         save_stl_point(points_all, lbl_name_all, err_name_all, file_dir=file_dir)
         save_file(os.path.join(file_dir, "score.csv"), lbl_all, data_format="dict_list", field_name=header)
     print("pre_processing.py: done")

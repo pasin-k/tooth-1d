@@ -3,6 +3,7 @@ import os
 import json
 # import glob
 import csv
+import random
 import numpy as np
 import matplotlib as mpl
 import collections
@@ -88,8 +89,7 @@ def get_label(dataname, stattype, double_data=False, one_hotted=False, normalize
     label_name = dict()
     for i, key in enumerate(label_name_key):
         label_name[key] = 3 * i
-    # label_name = {"Occ_B": 0, "Occ_F": 3, "Occ_L": 6, "Occ_Sum": 9,
-    #               "BL": 12, "MD": 15, "Taper_Sum": 18}
+    # label_name = {"Occ_B": 0, "Occ_F": 3, "Occ_L": 6, "Occ_Sum": 9, "BL": 12, "MD": 15, "Taper_Sum": 18}
     label_max_score = {"Occ_B": 5, "Occ_F": 5, "Occ_L": 5, "Occ_Sum": 15,
                        "BL": 5, "MD": 5, "Taper_Sum": 10, "Integrity": 5, "Width": 5, "Surface": 5, "Sharpness": 5}
     stat_type = {"average": 1, "median": 2}
@@ -184,9 +184,6 @@ def save_plot(coor_list, out_directory, file_header_name, image_name, degree, fi
     :param show_axis:           [Optional], if true, will show axis
     :return:                    Save as output outside
     """
-    # if len(coor_list) != len(image_name):
-    #     raise ValueError("save_plot: number of image(%s) is not equal to number of image_name(%s)"
-    #                      % (len(coor_list), len(image_name)))
     if len(coor_list) != len(degree):
         raise ValueError("Number of degree is not equal to %s, found %s", (len(degree), len(coor_list)))
     out_directory = os.path.abspath(out_directory)
@@ -248,8 +245,6 @@ def split_train_test(grouped_address, example_grouped_address, tfrecord_name, co
 
     train_amount = int(configs['train_eval_ratio'] * len(grouped_address))  # Calculate amount of training data
     # Open file and read the content in a list
-    # file_name = "./data/tfrecord/%s/%s_%s_%s.txt" % (
-    #     tfrecord_name, tfrecord_name, configs['label_data'], configs['label_type'])
     file_name = "./data/tfrecord/%s/%s_0.json" % (
         tfrecord_name, tfrecord_name)
     if os.path.isfile(file_name):  # Check if file exist
@@ -257,6 +252,7 @@ def split_train_test(grouped_address, example_grouped_address, tfrecord_name, co
             data_loaded = json.load(filehandle)
             for d in data_loaded['train']:
                 try:
+                    # print((example_grouped_address))
                     index = example_grouped_address.index(d)
                     train_index.append(index)
                     data_index.remove(index)
@@ -270,33 +266,6 @@ def split_train_test(grouped_address, example_grouped_address, tfrecord_name, co
                 except (ValueError, IndexError) as e:
                     print("Cannot find file (Eval): %s" % d)
 
-        # with open(file_name) as f:
-        #     filehandle = f.read().splitlines()
-        # is_training = 0  # 0 = checking for distribution, 1 = checking for train, 2 = checking for eval
-        # if not (filehandle[0] == 'distribution'):
-        #     print(filehandle[0])
-        #     raise KeyError("File does not have correct format, need 'train' and 'eval' keyword within file")
-        # for line in filehandle[1:]:
-        #     if is_training == 0:  # Distribution state
-        #         if line == 'train':
-        #             is_training = 1
-        #     elif is_training == 1:  # Training state
-        #         if line == 'eval':
-        #             is_training = 2
-        #         else:
-        #             try:
-        #                 index = example_grouped_address.index(line)
-        #                 train_index.append(index)
-        #                 data_index.pop(index)
-        #             except (ValueError, IndexError) as e:
-        #                 pass
-        #     else:  # Eval state
-        #         try:
-        #             index = example_grouped_address.index(line)
-        #             eval_index.append(index)
-        #             data_index.pop(index)
-        #         except ValueError:
-        #             pass
         print("Use %s train examples, %s eval examples from previous tfrecords as training" % (
             len(train_index), len(eval_index)))
 
@@ -315,33 +284,15 @@ def split_train_test(grouped_address, example_grouped_address, tfrecord_name, co
     eval_address = [example_grouped_address[i] for i in eval_index]
 
     # Save names of files of train address
-    # file_name = "./data/tfrecord/%s/%s_0.txt" % (tfrecord_name, tfrecord_name)
-    # Save label distribution for weight balancing
     file_name = "./data/tfrecord/%s/%s_0.json" % (tfrecord_name, tfrecord_name)
     with open(file_name, 'w') as filehandle:
         json.dump({"class_weight": class_weight, "train": train_address, "eval": eval_address}, filehandle, indent=4,
                   sort_keys=True,
                   separators=(',', ': '), ensure_ascii=False)
-    # with open(file_name, 'w') as filehandle:
-    #     # Header with 'distibution'
-    #     filehandle.write('distribution\n')
-    #     for listitem in class_weight:
-    #         filehandle.write('%s\n' % listitem)
-    #
-    #     # Header with 'train'
-    #     filehandle.write('train\n')
-    #     for listitem in train_address:
-    #         filehandle.write('%s\n' % listitem)
-    #
-    #     # Header with 'eval'
-    #     filehandle.write('eval\n')
-    #     for listitem in eval_address:
-    #         filehandle.write('%s\n' % listitem)
-
     return train_data, eval_data
 
 
-def split_kfold(grouped_address, k_num):
+def split_kfold(grouped_address, k_num, seed=0):
     """
     Split data into multiple set using KFold algorithm
     :param grouped_address:     List, all data ready to be shuffled [[X1,y1],[X2,y2],...]
@@ -349,7 +300,7 @@ def split_kfold(grouped_address, k_num):
     :return:                    List of Train, Eval data
     """
     # kfold = KFold(k_num, shuffle=True,random_state=0)
-    kfold = StratifiedKFold(k_num, shuffle=False, random_state=0)
+    kfold = StratifiedKFold(k_num, shuffle=False, random_state=seed)
     data, label = [list(e) for e in zip(*grouped_address)]
     train_address = []
     eval_address = []
@@ -367,14 +318,14 @@ def split_kfold(grouped_address, k_num):
     return train_address, eval_address
 
 
-def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_data=False,
+def get_input_and_label(tfrecord_name, dataset_folder, configs, seed, get_data=False,
                         double_data=False, k_cross=False, k_num=5):
     """
     This function is used in imgtotfrecord
     :param tfrecord_name:   String, Name of tfrecord output file
     :param dataset_folder:  String, Folder directory of input data [Assume only data is in this folder]
-    :param csv_dir:         String, directory of label file (.csv). Can be None and use default directory
     :param configs:         Dictionary, containing numdeg, train_eval_ratio, data_type
+    :param seed:            Integer, to determine shuffling
     :param get_data:        Boolean, if true will return raw data instead of file name
     :param double_data:     Boolean, if true will do flip data augmentation
     :param k_cross:         Boolean, if true will use K-fold cross validation, else
@@ -390,14 +341,6 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
 
     labels, _ = read_score(os.path.join(dataset_folder, "score.csv"),
                            data_type=configs['data_type'])
-
-    # # Get label and label name[Not used right now]
-    # if csv_dir is None:
-    #     labels, label_name = get_label(configs['label_data'], configs['label_type'], double_data=double_data,
-    #                                    one_hotted=False, normalized=False)
-    # else:
-    #     labels, label_name = get_label(configs['label_data'], configs['label_type'], double_data=double_data,
-    #                                    one_hotted=False, normalized=False, file_dir=csv_dir)
 
     if len(image_address) / len(labels) != numdeg or len(image_address) == 0:
         print(image_address)
@@ -416,7 +359,6 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
     if get_data:
         image_address_temp = []
         for addr in image_address:
-            # image_address_temp.append(np.loadtxt(addr, delimiter=','))
             image_address_temp.append(np.load(addr))
         image_address = image_address_temp
 
@@ -441,14 +383,13 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
         # Zip, shuffle, unzip
         z = list(zip(temp_address, temp_example_address))
         # z = list(zip(grouped_address, example_grouped_address))
-        shuffle(z)
+        random.Random(seed).shuffle(z)
         temp_address[:], temp_example_address[:] = zip(*z)
         # grouped_address[:], example_grouped_address[:] = zip(*z)
 
         # Unpack data
         grouped_address = [item for sublist in temp_address for item in sublist]
-        example_grouped_address = [item for sublist in temp_example_address for item in sublist]
-
+        example_grouped_address = [item.split('/')[-1] for sublist in temp_example_address for item in sublist]
     else:
         # Pack data
         temp_address = []  # New temporary address packs augmented data together
@@ -459,8 +400,7 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
             else:
                 temp_name[os.path.basename(ex_g_add).split('_')[1]] = len(temp_address)
                 temp_address.append([g_add])
-        shuffle(grouped_address)
-        # shuffle(grouped_address)
+        random.Random(seed).shuffle(grouped_address)
         # Unpack data
         grouped_address = [item for sublist in temp_address for item in sublist]
 
@@ -483,7 +423,7 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
             class_weight[c] = c_weight.tolist()
 
     if k_cross:  # If k_cross mode, output will be list
-        train_address_temp, eval_address_temp = split_kfold(grouped_address, k_num)
+        train_address_temp, eval_address_temp = split_kfold(grouped_address, k_num, seed)
         train_address = []
         eval_address = []
         for i in range(k_num):
@@ -508,14 +448,6 @@ def get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs, get_dat
                 json.dump({"class_weight": class_weight}, filehandle, indent=4, sort_keys=True,
                           separators=(',', ': '), ensure_ascii=False)
 
-            # file_name = "./data/tfrecord/%s/%s_%s.txt" % (tfrecord_name, tfrecord_name, i)
-            # with open(file_name, 'w') as filehandle:
-            #     # Header with 'distibution'
-            #     filehandle.write('distribution\n')
-            #     for listitem in class_weight:
-            #         filehandle.write('%s\n' % listitem)
-            #     filehandle.write('train\n')
-            #     filehandle.write('eval\n')
     else:
         train_address, eval_address = split_train_test(grouped_address, example_grouped_address,
                                                        tfrecord_name, configs, class_weight)
