@@ -7,7 +7,7 @@ import numpy as np
 numdegree = None
 data_length = None
 label_type_global = None
-single_slice = None
+single_slice = False
 name_type = None
 
 
@@ -22,7 +22,7 @@ def deserialize(example):
     for n in name_type:
         for i in range(4):
             for j in range(2):
-                feature['%s%s_%s' % (n, i, j)] = tf.VarLenFeature(tf.float32)
+                feature['%s_%s_%s' % (n, i, j)] = tf.VarLenFeature(tf.float32)
 
     return tf.parse_single_example(example, feature)
 
@@ -60,12 +60,12 @@ def decode(data_dict):
     return feature, label
 
 
-def train_input_fn(data_path, batch_size, data_type, configs):
+def train_input_fn(data_path, batch_size, configs):
     global numdegree, data_length, label_type_global, single_slice, name_type
+    numdegree, data_length, label_type_global, name_type = configs['degree'], configs['data_length'], \
+                                                           configs['label_type'], \
+                                                           configs['dataset_name']
     print("Fetching label type: %s" % label_type_global)
-    numdegree, data_length, label_type_global, single_slice, name_type = configs['data_degree'], configs['data_length'], \
-                                                                         configs['label_type'], configs['single_slice'], \
-                                                                         configs['dataset_name']
 
     if not os.path.exists(data_path):
         raise ValueError("Train input file does not exist")
@@ -80,12 +80,12 @@ def train_input_fn(data_path, batch_size, data_type, configs):
     return dataset
 
 
-def eval_input_fn(data_path, batch_size, data_type, configs):
+def eval_input_fn(data_path, batch_size, configs):
     global numdegree, data_length, label_type_global, single_slice, name_type
     print("Fetching label type: %s" % label_type_global)
-    numdegree, data_length, label_type_global, single_slice, name_type = configs['data_degree'], configs['data_length'], \
-                                                                         configs['label_type'], configs['single_slice'], \
-                                                                         configs['dataset_name']
+    numdegree, data_length, label_type_global, name_type = configs['degree'], configs['data_length'], \
+                                                           configs['label_type'], \
+                                                           configs['dataset_name']
     if not os.path.exists(data_path):
         raise ValueError("Eval input file does not exist")
     eval_dataset = tf.data.TFRecordDataset(data_path)

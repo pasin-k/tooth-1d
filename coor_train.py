@@ -68,6 +68,7 @@ run_params = {'batch_size': configs.batch_size,
               'config_path': os.path.abspath(args.config),
               'steps': configs.steps,
               'is_workstation': configs.is_workstation,
+              'label_type': configs.label_type,
               'comment': configs.comment}
 
 kfold = configs.is_kfold
@@ -91,7 +92,6 @@ model_configs = {'learning_rate': configs.learning_rate,
                  'model_num': model_num,
                  'data_degree': configs.data_degree,
                  'data_length': configs.data_length,
-                 'label_type': configs.label_type,
                  }
 
 
@@ -110,7 +110,7 @@ def run(model_params=None):
     model_params = check_exist(model_params, learning_rate=None,
                                dropout_rate=None, activation=None,
                                channels=None, result_path=None, model_num=None,
-                               data_degree=None, data_length=None, label_type=None)
+                               data_degree=None, data_length=None)
     # Note on some model_params:    loss_weight is calculated inside
     #                               channels (in CNN case) is [CNN channels, Dense channels]
 
@@ -118,12 +118,13 @@ def run(model_params=None):
     train_data_path = run_params['input_path'].replace('.tfrecords', '') + '_train.tfrecords'
     eval_data_path = run_params['input_path'].replace('.tfrecords', '') + '_eval.tfrecords'
     info_path = run_params['input_path'].replace('.tfrecords', '.json')
-    loss_weight = []
 
     with open(info_path) as f:
-        data_loaded = json.load(f)
-        loss_weight = data_loaded['class_weight'][model_params['label_type']]
+        tfrecord_info = json.load(f)
+        loss_weight = tfrecord_info['class_weight'][run_params['label_type']]
+
     assert len(loss_weight) == 3, "Label does not have 3 unique value, found %s" % len(loss_weight)
+    tfrecord_info['label_type'] = run_params['label_type']
     model_params['loss_weight'] = loss_weight
 
     print("Getting training data from %s" % train_data_path)
@@ -135,7 +136,6 @@ def run(model_params=None):
     # Setting checkpoint config
     my_checkpoint_config = tf.estimator.RunConfig(
         save_checkpoints_secs=run_params['checkpoint_min'] * 60,
-        # save_summary_steps=params['checkpoint_min'] * 10,
         keep_checkpoint_max=10,
         log_step_count_steps=500,
         session_config=tf.ConfigProto(allow_soft_placement=True),
@@ -149,18 +149,18 @@ def run(model_params=None):
         config=my_checkpoint_config
     )
 
-    if model_num == 0:
-        data_type = 0  # 0 is getting vectorized data, used with Dense model
-    else:
-        data_type = 1  # 1 is getting stacked data, used with 1d CNN model
+    # if model_num == 0:
+    #     data_type = 0  # 0 is getting vectorized data, used with Dense model
+    # else:
+    #     data_type = 1  # 1 is getting stacked data, used with 1d CNN model
 
     train_hook = tf.contrib.estimator.stop_if_no_decrease_hook(classifier, "loss", run_params['early_stop_step'])
     train_spec = tf.estimator.TrainSpec(
-        input_fn=lambda: train_input_fn(train_data_path, batch_size=run_params['batch_size'], data_type=data_type, configs=model_params),
+        input_fn=lambda: train_input_fn(train_data_path, batch_size=run_params['batch_size'], configs=tfrecord_info),
         max_steps=run_params['steps'], hooks=[train_hook])
     # TODO: Evaluate only once? why?
     eval_spec = tf.estimator.EvalSpec(
-        input_fn=lambda: eval_input_fn(eval_data_path, batch_size=run_params['batch_size'], data_type=data_type, configs=model_params), )
+        input_fn=lambda: eval_input_fn(eval_data_path, batch_size=run_params['batch_size'], configs=tfrecord_info), )
     # steps=None,
     # start_delay_secs=0, throttle_secs=0)
     # classifier.train(input_fn=lambda: train_input_fn(train_data_path, batch_size=params['batch_size']),
@@ -188,7 +188,7 @@ def run(model_params=None):
     )
 
     eval_result = classifier.evaluate(
-        input_fn=lambda: eval_input_fn(train_data_path, batch_size=run_params['batch_size'], data_type=data_type, configs=model_params))
+        input_fn=lambda: eval_input_fn(train_data_path, batch_size=run_params['batch_size'], configs=tfrecord_info))
 
     model_params['result_file_name'] = 'result.csv'
     # No need to use predict since we can get data from hook now
@@ -225,7 +225,6 @@ def run(model_params=None):
     info_dict['channels'] = model_params['channels']
     info_dict['loss_weight'] = model_params['loss_weight']
     info_dict['steps'] = global_step
-    info_dict['score_type'] = model_params['label_type']
     info_dict['data_length'] = model_params['data_length']
     info_dict['data_degree'] = model_params['data_degree']
 
@@ -299,7 +298,6 @@ def fitness(learning_rate, dropout_rate, activation, channels):
                  'model_num': model_num,
                  'data_degree': configs.data_degree,
                  'data_length': configs.data_length,
-                 'label_type': configs.label_type,
                  }
 
     accuracy, global_step, result = run(md_config)

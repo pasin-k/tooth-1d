@@ -100,10 +100,6 @@ def image_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None, k_fold=False,
 
         elem = it.get_next()
 
-        # tfrecord_train_name = os.path.join(tfrecord_dir, "%s_%s_%s_%s_train.tfrecords" % (
-        #     tfrecord_name, configs['label_data'], configs['label_type'], i))
-        # tfrecord_eval_name = os.path.join(tfrecord_dir, "%s_%s_%s_%s_eval.tfrecords" % (
-        #     tfrecord_name, configs['label_data'], configs['label_type'], i))
         tfrecord_train_name = os.path.join(tfrecord_dir, "%s_%s_train.tfrecords" % (tfrecord_name, i))
         tfrecord_eval_name = os.path.join(tfrecord_dir, "%s_%s_eval.tfrecords" % (tfrecord_name, i))
 
