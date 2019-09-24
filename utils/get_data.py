@@ -1,5 +1,4 @@
 import tensorflow as tf
-# tf.enable_eager_execution()
 import numpy as np
 
 # Fixed parameter
@@ -10,10 +9,10 @@ image_width = 360  # Used for cropping
 
 # Import tfrecord to dataset
 def deserialize(example):
-    feature = {'label': tf.io.FixedLenFeature([], tf.int64)}
+    feature = {'label': tf.FixedLenFeature([], tf.int64)}
     for i in range(numdegree):
-        feature['img' + str(i)] = tf.io.FixedLenFeature([], tf.string)
-    return tf.io.parse_single_example(serialized=example, features=feature)
+        feature['img' + str(i)] = tf.FixedLenFeature([], tf.string)
+    return tf.parse_single_example(example, feature)
 
 
 def decode(data_dict):
@@ -31,22 +30,22 @@ def decode(data_dict):
 
     image_stacked = tf.stack([image_decoded[0], image_decoded[1], image_decoded[2], image_decoded[3]], axis=2)
     image_stacked = tf.cast(image_stacked, tf.float32)
-    label = data_dict['label']
+    label = tf.cast(data_dict['label'], tf.float32)
     # output = (image_stacked, label)
     # return {'images': image_stacked, 'label': label}  # Output is [Channel, Height, Width]
     return image_stacked, label
 
 
-def _int64_feature(value):
-    return tf.train.Feature(int64_list=tf.train.Int64List(value=[value]))
-
-
-def _bytes_feature(value):
-    return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
-
-
-def _float_feature(value):
-    return tf.train.Feature(float_list=tf.train.FloatList(value=[value]))
+# def _int64_feature(value):
+#     return tf.train.Feature(int64_list=tf.train.Int64List(value=[value]))
+#
+#
+# def _bytes_feature(value):
+#     return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
+#
+#
+# def _float_feature(value):
+#     return tf.train.Feature(float_list=tf.train.FloatList(value=[value]))
 
 
 def train_input_fn(data_path, batch_size):
@@ -74,11 +73,19 @@ def get_data_from_path(data_path):
     dataset = dataset.map(deserialize)
     dataset = dataset.map(decode)
 
-    dataset = dataset.batch(1000, drop_remainder=False)
-    whole_dataset_tensors = tf.data.experimental.get_single_element(dataset)
-    with tf.compat.v1.Session() as sess:
-        whole_dataset_arrays = sess.run(whole_dataset_tensors)
-    images = whole_dataset_arrays[0]
-    label = whole_dataset_arrays[1]
-    return images, label
+    iterator = dataset.make_one_shot_iterator()
+    next_image_data = iterator.get_next()
+    images = []
+    label = []
+    with tf.Session() as sess:
+        sess.run(tf.global_variables_initializer())
 
+        try:
+            # Keep extracting data till TFRecord is exhausted
+            while True:
+                data = sess.run(next_image_data)
+                images.append(data[0])
+                label.append(data[1])
+        except tf.errors.OutOfRangeError:
+            pass
+    return images, label

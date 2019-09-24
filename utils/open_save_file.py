@@ -1,24 +1,19 @@
-# import sys
 import os
 import json
-# import glob
 import csv
 import random
 import numpy as np
 import matplotlib as mpl
-import collections
 from sklearn.model_selection import KFold, StratifiedKFold
 from sklearn.utils.class_weight import compute_class_weight
 
 mpl.use('TkAgg')
 import matplotlib.pyplot as plt
-from matplotlib.pyplot import figure
-from random import shuffle
 
 
 def get_file_name(folder_name='../global_data/', file_name=None, exception_file=None):
     """
-    Get sorted List of filenames: search for all file within folder with specific file name, ignore specific filename
+    Search for all filename within folder that end "file name", can except a specific filename
     :param folder_name:     Folder direcory to search
     :param file_name:       Retrieve only filename specified, can be None
     :param exception_file:  List, file name to be excluded
@@ -29,8 +24,6 @@ def get_file_name(folder_name='../global_data/', file_name=None, exception_file=
     if exception_file is None:
         exception_file = []
 
-    # if file_name is None:
-    #     file_name = 'PreparationScan.stl'
     file_dir = list()
     folder_dir = list()
     for root, dirs, files in os.walk(folder_name):
@@ -50,9 +43,14 @@ def get_file_name(folder_name='../global_data/', file_name=None, exception_file=
     return file_dir, folder_dir
 
 
-# Since some score can only be in a certain range (E.g. 1,3 or 5), if any median score that is outside of this range
-# appear, move it to the nearby value instead based on average. (Round the other direction from average)
 def readjust_median_label(label, avg_data):
+    """
+    Since some score can only be in a certain range (E.g. 1,3 or 5), if any median score that is outside of this range
+    appear, move it to the nearby value instead based on average. (Round the other direction from average)
+    :param label: List of actual score
+    :param avg_data: Average value of the whole data
+    :return:
+    """
     possible_value = [1, 3, 5]
     if len(label) != len(avg_data):
         raise ValueError("Size of label and average data is not equal")
@@ -71,118 +69,16 @@ def readjust_median_label(label, avg_data):
     return label
 
 
-def get_label(dataname, stattype, double_data=False, one_hotted=False, normalized=False,
-              file_dir='../global_data/Ground Truth Score_new.csv'):
+def save_plot(coor_list, out_directory, image_name, degree, file_type="png", show_axis=False):
     """
-    Get label of Ground Truth Score.csv file
-    :param dataname:    String, Type of label e.g. [Taper/Occ]
-    :param stattype:    String, Label measurement e.g [Average/Median]
-    :param double_data: Boolean, Double amount of data of label, for augmentation **Not using anymore
-    :param one_hotted:  Boolean, Return output as one-hot data
-    :param normalized:  Boolean, Normalize output to 0-1 (Not applied for one hot)
-    :param file_dir:    Directory of csv file
-    :return: labels     List of score of requested dat
-             label_name List of score name, used to identify order of data
-    """
-    label_name_key = ["Occ_B", "Occ_F", "Occ_L", "Occ_Sum", "BL", "MD", "Taper_Sum", "Integrity", "Width", "Surface",
-                      "Sharpness"]
-    label_name = dict()
-    for i, key in enumerate(label_name_key):
-        label_name[key] = 3 * i
-    # label_name = {"Occ_B": 0, "Occ_F": 3, "Occ_L": 6, "Occ_Sum": 9, "BL": 12, "MD": 15, "Taper_Sum": 18}
-    label_max_score = {"Occ_B": 5, "Occ_F": 5, "Occ_L": 5, "Occ_Sum": 15,
-                       "BL": 5, "MD": 5, "Taper_Sum": 10, "Integrity": 5, "Width": 5, "Surface": 5, "Sharpness": 5}
-    stat_type = {"average": 1, "median": 2}
-
-    try:
-        data_column = label_name[dataname]
-    except:
-        raise Exception(
-            "Wrong dataname, Type as %s, Valid name: %s" % (dataname, label_name_key))
-    try:
-        if one_hotted & (stattype == 1):
-            stattype = 2
-            print("Note: One-hot mode only supported median")
-        label_column = data_column
-        avg_column = data_column + 1
-        data_column = data_column + stat_type[stattype]  # Shift the interested column by one or two, depends on type
-    except:
-        raise Exception("Wrong stattype, Type as %s, Valid name: (\"average\",\"median\")" % stattype)
-
-    max_score = label_max_score[dataname]
-    labels_name = []
-    labels_data = []
-    avg_data = []
-    print("get_label: Import from %s" % os.path.join(file_dir))
-    with open(file_dir) as csvfile:
-        readCSV = csv.reader(csvfile, delimiter=',')
-        header = True
-        for row in readCSV:
-            if header:
-                header = False
-            else:
-                try:
-                    if row[data_column] != '':
-                        label = row[label_column]
-                        val = row[data_column]
-                        avg_val = row[avg_column]
-                        if one_hotted or (not normalized):  # Don't normalize if output is one hot encoding
-                            normalized_value = int(val)  # Turn string to int
-                        else:
-                            normalized_value = float(val) / max_score  # Turn string to float
-                        labels_name.append(label)
-                        labels_data.append(normalized_value)
-                        avg_data.append(float(avg_val))
-                except IndexError:
-                    print("Data incomplete, no data of %s, or missing label in csv file" % file_dir)
-
-    # If consider median data on anything except Taper_Sum/Occ_sum and does not normalized
-    if stattype is "median" and (not normalized) and dataname is not "Occ_Sum" and dataname is not "Taper_Sum":
-        labels_data = readjust_median_label(labels_data, avg_data)
-
-    # Sort data by name
-    labels_name, labels_data = zip(*sorted(zip(labels_name, labels_data)))
-    labels_name = list(labels_name)  # Turn tuples into list
-    labels_data = list(labels_data)
-
-    # Duplicate value if required
-    if double_data:
-        labels_data = [val for val in labels_data for _ in (0, 1)]
-
-    # Turn to one hotted if required
-    if one_hotted:
-        one_hot_labels = list()
-        for label in labels_data:
-            label = int(label)
-            one_hot_label = np.zeros(max_score + 1)
-            one_hot_label[label] = 1
-            one_hot_labels.append(one_hot_label)
-        print("get_label: Upload one-hotted label completed (as a list): %d examples" % (len(one_hot_labels)))
-        return one_hot_labels, labels_name
-    else:
-        # if filetype != 'list':  # If not list, output will be as numpy instead
-        #     size = len(labels)
-        #     labelnum = np.zeros((size,))
-        #     for i in range(0, size):
-        #         labelnum[i] = labels[i]
-        #     labels = labelnum
-        #     print("Upload label completed (as a numpy): %d examples" % (size))
-        # else:
-        print("get_label: Upload non one-hotted label completed (as a list): %d examples" % (len(labels_data)))
-        return labels_data, labels_name
-
-
-def save_plot(coor_list, out_directory, file_header_name, image_name, degree, file_type="png", show_axis=False):
-    """
-    Plot the list of coordinates and save it as PNG image
-    :param coor_list:           List of numpy coordinates <- get from stlSlicer should have 4 cross section
+    Save list of coordinates as a PNG image
+    :param coor_list:           List of ndarrays <- get from stlSlicer should have slices = len(degree)
     :param out_directory:       String, Directory to save output
-    :param file_header_name:    String, header of name of the file, follow by image_num
     :param image_name:          List of name of the image
     :param degree:              List of angles used in, add the angle in file name as well
     :param file_type:           [Optional], such as png,jpeg,...
     :param show_axis:           [Optional], if true, will show axis
-    :return:                    Save as output outside
+    :return:                    File saved at out_directory
     """
     if len(coor_list) != len(degree):
         raise ValueError("Number of degree is not equal to %s, found %s", (len(degree), len(coor_list)))
@@ -194,11 +90,7 @@ def save_plot(coor_list, out_directory, file_header_name, image_name, degree, fi
 
     for d in range(len(degree)):
         coor = coor_list[d]
-        # plt.plot(coor[:, 0], coor[:, 1], color='black', linewidth=1)
-        # plt.axis('off')
-        # Name with some additional data
-        fullname = "%s_%s_%d.%s" % (file_header_name, image_name, degree[d], file_type)
-        # fullname = "%s_%s_%s_%d.%s" % (file_header_name, image_name, augment_number, degree[d], file_type)
+        fullname = "%s_%d.%s" % (image_name, degree[d], file_type)
         output_name = os.path.join(out_directory, fullname)
 
         dpi = 100
@@ -233,60 +125,88 @@ def save_plot(coor_list, out_directory, file_header_name, image_name, degree, fi
 
         fig.savefig(output_name, bbox_inches='tight')
         plt.close('all')
-
     # print("Finished plotting for %d images with %d rotations at %s" % (len(coor_list), len(degree), out_directory))
+
+
+# Save coordinate as .npy file
+def save_coordinate(coor_list, out_directory, image_name, degree):
+    """
+    Save list of coordinates as a .npy file
+    :param coor_list: List of coordinates, should have length equals to len(degree)
+    :param out_directory: Output directory
+    :param image_name: Name of image
+    :param degree: List of degree of rotation
+    :return: File saved at out_directory
+    """
+    # Check if size coordinate, image name has same length
+    if len(coor_list) != len(degree):
+        raise ValueError("Number of degree is not equal to %s, found %s", (len(degree), len(coor_list)))
+    out_directory = os.path.abspath(out_directory)
+    if not os.path.exists(out_directory):
+        os.makedirs(out_directory)
+
+    # for corr_index in range(len(coor_list)):
+    for deg_index in range(len(degree)):
+        coor = coor_list[deg_index]
+        fullname = "%s_%d.npy" % (image_name, degree[deg_index])
+        output_name = os.path.join(out_directory, fullname)
+        np.save(output_name, coor)
 
 
 def split_train_test(grouped_address, example_grouped_address, tfrecord_name, configs, class_weight):
     # Split into train and test set
-    data_index = list(range(len(example_grouped_address)))
-    train_index = []
-    eval_index = []
+    # data_index = list(range(len(example_grouped_address)))
+    # train_index = []
+    # eval_index = []
 
     train_amount = int(configs['train_eval_ratio'] * len(grouped_address))  # Calculate amount of training data
-    # Open file and read the content in a list
-    file_name = "./data/tfrecord/%s/%s_0.json" % (
-        tfrecord_name, tfrecord_name)
-    if os.path.isfile(file_name):  # Check if file exist
-        with open(file_name) as filehandle:
-            data_loaded = json.load(filehandle)
-            for d in data_loaded['train']:
-                try:
-                    # print((example_grouped_address))
-                    index = example_grouped_address.index(d)
-                    train_index.append(index)
-                    data_index.remove(index)
-                except (ValueError, IndexError) as e:
-                    print("Cannot find file (Train): %s" % d)
-            for d in data_loaded['eval']:
-                try:
-                    index = example_grouped_address.index(d)
-                    eval_index.append(index)
-                    data_index.remove(index)
-                except (ValueError, IndexError) as e:
-                    print("Cannot find file (Eval): %s" % d)
+    # # Open file and read the content in a list
+    # file_name = "./data/tfrecord/%s/%s_0.json" % (
+    #     tfrecord_name, tfrecord_name)
+    # if os.path.isfile(file_name):  # Check if file exist
+    #     with open(file_name) as filehandle:
+    #         data_loaded = json.load(filehandle)
+    #         for d in data_loaded['train']:
+    #             try:
+    #                 # print((example_grouped_address))
+    #                 index = example_grouped_address.index(d)
+    #                 train_index.append(index)
+    #                 data_index.remove(index)
+    #             except (ValueError, IndexError) as e:
+    #                 print("Cannot find file (Train): %s" % d)
+    #         for d in data_loaded['eval']:
+    #             try:
+    #                 index = example_grouped_address.index(d)
+    #                 eval_index.append(index)
+    #                 data_index.remove(index)
+    #             except (ValueError, IndexError) as e:
+    #                 print("Cannot find file (Eval): %s" % d)
+    #
+    #     print("Use %s train examples, %s eval examples from previous tfrecords as training" % (
+    #         len(train_index), len(eval_index)))
 
-        print("Use %s train examples, %s eval examples from previous tfrecords as training" % (
-            len(train_index), len(eval_index)))
+    # # Split training and test (Split 80:20)
+    # train_amount = train_amount - len(train_index)
+    # if train_amount < 0:
+    #     train_amount = 0
+    #     print("imgtotfrecord: amount of training is not correct, might want to check")
 
-    # Split training and test (Split 80:20)
-    train_amount = train_amount - len(train_index)
-    if train_amount < 0:
-        train_amount = 0
-        print("imgtotfrecord: amount of training is not correct, might want to check")
+    # train_index.extend(data_index[0:train_amount])
+    # eval_index.extend(data_index[train_amount:])
 
-    train_index.extend(data_index[0:train_amount])
-    eval_index.extend(data_index[train_amount:])
+    # train_data = [grouped_address[i] for i in train_index]
+    # eval_data = [grouped_address[i] for i in eval_index]
+    train_data = grouped_address[0:train_amount]
+    eval_data = grouped_address[train_amount:]
 
-    train_data = [grouped_address[i] for i in train_index]
-    eval_data = [grouped_address[i] for i in eval_index]
-    train_address = [example_grouped_address[i] for i in train_index]
-    eval_address = [example_grouped_address[i] for i in eval_index]
+    # train_address = [example_grouped_address[i] for i in train_index]
+    # eval_address = [example_grouped_address[i] for i in eval_index]
 
     # Save names of files of train address
-    file_name = "./data/tfrecord/%s/%s_0.json" % (tfrecord_name, tfrecord_name)
+    file_name = "../data/tfrecord/%s/%s_0.json" % (tfrecord_name, tfrecord_name)
     with open(file_name, 'w') as filehandle:
-        json.dump({"class_weight": class_weight, "train": train_address, "eval": eval_address}, filehandle, indent=4,
+        # json.dump({"class_weight": class_weight, "train": train_address, "eval": eval_address}, filehandle, indent=4,
+        json.dump({"class_weight": class_weight}, filehandle, indent=4,
                   sort_keys=True,
                   separators=(',', ': '), ensure_ascii=False)
     return train_data, eval_data
@@ -318,16 +238,14 @@ def split_kfold(grouped_address, k_num, seed=0):
     return train_address, eval_address
 
 
-def get_input_and_label(tfrecord_name, dataset_folder, configs, seed, get_data=False,
-                        double_data=False, k_cross=False, k_num=5):
+def get_input_and_label(tfrecord_name, dataset_folder, configs, seed, get_data=False, k_cross=False, k_num=5):
     """
-    This function is used in imgtotfrecord
-    :param tfrecord_name:   String, Name of tfrecord output file
-    :param dataset_folder:  String, Folder directory of input data [Assume only data is in this folder]
-    :param configs:         Dictionary, containing numdeg, train_eval_ratio, data_type
-    :param seed:            Integer, to determine shuffling
+    This function is specifically used in image_to_tfrecord, fetching
+    :param tfrecord_name:   String, Directory of output file
+    :param dataset_folder:  String, Folder directory of input data [Only data in this folder]
+    :param configs:         Dictionary, containing {numdeg, train_eval_ratio, data_type}
+    :param seed:            Integer, to determine randomness
     :param get_data:        Boolean, if true will return raw data instead of file name
-    :param double_data:     Boolean, if true will do flip data augmentation
     :param k_cross:         Boolean, if true will use K-fold cross validation, else
     :param k_num:           Integer, parameter for KFold
     :return:                Train, Eval: Tuple of list[image address, label]. Also save some txt file
@@ -335,7 +253,7 @@ def get_input_and_label(tfrecord_name, dataset_folder, configs, seed, get_data=F
     """
     numdeg = configs['numdeg']
 
-    # Get image address, or image data
+    # Get image address and labels
     image_address, _ = get_file_name(folder_name=dataset_folder, file_name=None,
                                      exception_file=["config.txt", "error_file.txt", "score.csv"])
 
@@ -348,64 +266,64 @@ def get_input_and_label(tfrecord_name, dataset_folder, configs, seed, get_data=F
             '# of images and labels is not compatible: %d images, %d labels. '
             'Expected # of images to be %s times of label' % (
                 len(image_address), len(labels), numdeg))
+    # Create list of file names of 0 degree
+    image_name = []
+    for i in range(len(labels)):
+        image_name.append(image_address[i * numdeg].split('.')[0])  # Only 0 degree
 
-    # Create list of file names used in split_train_test (To remember which one is train/eval)
-    if not k_cross:
-        example_grouped_address = []
-        for i in range(len(labels)):
-            example_grouped_address.append(image_address[i * numdeg].split('.')[0])  # Only 0 degree
-
-    # Convert name to data (only if request output to be value, not file name)
+    # Load data if get_data is True, image address will now be list of ndarray instead
     if get_data:
         image_address_temp = []
         for addr in image_address:
             image_address_temp.append(np.load(addr))
         image_address = image_address_temp
 
-    # Group up 4 images and label together first, shuffle
-    grouped_address = []
+    # Group up images and label together, then pack all augmentation together, then shuffle
+    packed_image = []
     for i in range(len(labels)):
-        grouped_address.append([image_address[i * numdeg:(i + 1) * numdeg], labels[i]])  # All degrees
+        packed_image.append([image_address[i * numdeg:(i + 1) * numdeg], labels[i]])
     if not k_cross:
-        # Packing data
-        temp_address = []  # New temporary address packs augmented data together
-        temp_example_address = []
+        # Pack data
+        temp_image = []  # New temporary address packs augmented data together
+        # temp_image_name = []
         temp_name = {}
-        for g_add, ex_g_add in zip(grouped_address, example_grouped_address):
+        # Loop over each file, packed image from same stl file together
+        for g_add, ex_g_add in zip(packed_image, image_name):
             if os.path.basename(ex_g_add).split('_')[1] in temp_name:
-                temp_address[temp_name[os.path.basename(ex_g_add).split('_')[1]]].append(g_add)
-                temp_example_address[temp_name[os.path.basename(ex_g_add).split('_')[1]]].append(ex_g_add)
+                temp_image[temp_name[os.path.basename(ex_g_add).split('_')[1]]].append(g_add)
+                # temp_image_name[temp_name[os.path.basename(ex_g_add).split('_')[1]]].append(ex_g_add)
             else:
-                temp_name[os.path.basename(ex_g_add).split('_')[1]] = len(temp_address)
-                temp_address.append([g_add])
-                temp_example_address.append([ex_g_add])
+                temp_name[os.path.basename(ex_g_add).split('_')[1]] = len(temp_image)
+                temp_image.append([g_add])
+                # temp_image_name.append([ex_g_add])
 
         # Zip, shuffle, unzip
-        z = list(zip(temp_address, temp_example_address))
-        # z = list(zip(grouped_address, example_grouped_address))
-        random.Random(seed).shuffle(z)
-        temp_address[:], temp_example_address[:] = zip(*z)
+        # z = list(zip(temp_image, temp_image_name))
+        # random.Random(seed).shuffle(z)
+        # temp_image[:], temp_image_name[:] = zip(*z)
+        random.Random(seed).shuffle(temp_image)
+        # temp_image[:]= zip(*temp_image)
+        print(len(list(temp_name.keys())))
         # grouped_address[:], example_grouped_address[:] = zip(*z)
 
         # Unpack data
-        grouped_address = [item for sublist in temp_address for item in sublist]
-        example_grouped_address = [item.split('/')[-1] for sublist in temp_example_address for item in sublist]
+        packed_image = [item for sublist in temp_image for item in sublist]
+        # image_name = [item.split('/')[-1] for sublist in temp_image_name for item in sublist]
     else:
         # Pack data
-        temp_address = []  # New temporary address packs augmented data together
+        temp_image = []  # New temporary address packs augmented data together
         temp_name = {}
-        for g_add, ex_g_add in zip(grouped_address, example_grouped_address):
+        for g_add, ex_g_add in zip(packed_image, image_name):
             if os.path.basename(ex_g_add).split('_')[1] in temp_name:
-                temp_address[temp_name[os.path.basename(ex_g_add).split('_')[1]]].append(g_add)
+                temp_image[temp_name[os.path.basename(ex_g_add).split('_')[1]]].append(g_add)
             else:
-                temp_name[os.path.basename(ex_g_add).split('_')[1]] = len(temp_address)
-                temp_address.append([g_add])
-        random.Random(seed).shuffle(grouped_address)
+                temp_name[os.path.basename(ex_g_add).split('_')[1]] = len(temp_image)
+                temp_image.append([g_add])
+        random.Random(seed).shuffle(packed_image)
         # Unpack data
-        grouped_address = [item for sublist in temp_address for item in sublist]
-
+        packed_image = [item for sublist in temp_image for item in sublist]
     # Calculate loss weight
-    _, label = [list(e) for e in zip(*grouped_address)]
+    _, label = [list(e) for e in zip(*packed_image)]
 
     class_weight = {}
     for c in configs['data_type']:
@@ -423,7 +341,7 @@ def get_input_and_label(tfrecord_name, dataset_folder, configs, seed, get_data=F
             class_weight[c] = c_weight.tolist()
 
     if k_cross:  # If k_cross mode, output will be list
-        train_address_temp, eval_address_temp = split_kfold(grouped_address, k_num, seed)
+        train_address_temp, eval_address_temp = split_kfold(packed_image, k_num, seed)
         train_address = []
         eval_address = []
         for i in range(k_num):
@@ -443,13 +361,13 @@ def get_input_and_label(tfrecord_name, dataset_folder, configs, seed, get_data=F
             eval_address.append(single_eval_address)
 
             # Save label distribution for weight balancing
-            file_name = "./data/tfrecord/%s/%s_%s.json" % (tfrecord_name, tfrecord_name, i)
+            file_name = "../data/tfrecord/%s/%s_%s.json" % (tfrecord_name, tfrecord_name, i)
             with open(file_name, 'w') as filehandle:
                 json.dump({"class_weight": class_weight}, filehandle, indent=4, sort_keys=True,
                           separators=(',', ': '), ensure_ascii=False)
 
     else:
-        train_address, eval_address = split_train_test(grouped_address, example_grouped_address,
+        train_address, eval_address = split_train_test(packed_image, image_name,
                                                        tfrecord_name, configs, class_weight)
         if not get_data:  # Put in special format for writing tfrecord (pipeline)
             train_address = tuple(
@@ -490,7 +408,7 @@ def read_file(csv_dir, header=False):
 
 def read_score(csv_dir, data_type):
     """
-    Extension to read_file, specifically used to read csv file made from pre_processing.py
+    Extension to read_file, specifically used to read csv file made from stl_to_image.py
     :param csv_dir:
     :param data_type: List of data type to fetch
     :return:
@@ -705,4 +623,105 @@ def get2DImage(directory, name, singleval=False, realVal=False, threshold=253):
         grayim = grayim.astype(int)
         print("Get 2D images from %s done with size: (%d,%d,%d)" % (name, w, h, num_im))
         return grayim
+'''
+
+'''
+def get_label(dataname, stattype, double_data=False, one_hotted=False, normalized=False,
+              file_dir='../global_data/Ground Truth Score_new.csv'):
+    """
+    Get label of Ground Truth Score.csv file
+    :param dataname:    String, Type of label e.g. [Taper/Occ]
+    :param stattype:    String, Label measurement e.g [Average/Median]
+    :param double_data: Boolean, Double amount of data of label, for augmentation **Not using anymore
+    :param one_hotted:  Boolean, Return output as one-hot data
+    :param normalized:  Boolean, Normalize output to 0-1 (Not applied for one hot)
+    :param file_dir:    Directory of csv file
+    :return: labels     List of score of requested dat
+             label_name List of score name, used to identify order of data
+    """
+    label_name_key = ["Occ_B", "Occ_F", "Occ_L", "Occ_Sum", "BL", "MD", "Taper_Sum", "Integrity", "Width", "Surface",
+                      "Sharpness"]
+    label_name = dict()
+    for i, key in enumerate(label_name_key):
+        label_name[key] = 3 * i
+    label_max_score = {"Occ_B": 5, "Occ_F": 5, "Occ_L": 5, "Occ_Sum": 15,
+                       "BL": 5, "MD": 5, "Taper_Sum": 10, "Integrity": 5, "Width": 5, "Surface": 5, "Sharpness": 5}
+    stat_type = {"average": 1, "median": 2}
+
+    try:
+        data_column = label_name[dataname]
+    except:
+        raise Exception(
+            "Wrong dataname, Type as %s, Valid name: %s" % (dataname, label_name_key))
+    try:
+        if one_hotted & (stattype == 1):
+            stattype = 2
+            print("Note: One-hot mode only supported median")
+        label_column = data_column
+        avg_column = data_column + 1
+        data_column = data_column + stat_type[stattype]  # Shift the interested column by one or two, depends on type
+    except:
+        raise Exception("Wrong stattype, Type as %s, Valid name: (\"average\",\"median\")" % stattype)
+
+    max_score = label_max_score[dataname]
+    labels_name = []
+    labels_data = []
+    avg_data = []
+    print("get_label: Import from %s" % os.path.join(file_dir))
+    with open(file_dir) as csvfile:
+        readCSV = csv.reader(csvfile, delimiter=',')
+        header = True
+        for row in readCSV:
+            if header:
+                header = False
+            else:
+                try:
+                    if row[data_column] != '':
+                        label = row[label_column]
+                        val = row[data_column]
+                        avg_val = row[avg_column]
+                        if one_hotted or (not normalized):  # Don't normalize if output is one hot encoding
+                            normalized_value = int(val)  # Turn string to int
+                        else:
+                            normalized_value = float(val) / max_score  # Turn string to float
+                        labels_name.append(label)
+                        labels_data.append(normalized_value)
+                        avg_data.append(float(avg_val))
+                except IndexError:
+                    print("Data incomplete, no data of %s, or missing label in csv file" % file_dir)
+
+    # If consider median data on anything except Taper_Sum/Occ_sum and does not normalized
+    if stattype is "median" and (not normalized) and dataname is not "Occ_Sum" and dataname is not "Taper_Sum":
+        labels_data = readjust_median_label(labels_data, avg_data)
+
+    # Sort data by name
+    labels_name, labels_data = zip(*sorted(zip(labels_name, labels_data)))
+    labels_name = list(labels_name)  # Turn tuples into list
+    labels_data = list(labels_data)
+
+    # Duplicate value if required
+    if double_data:
+        labels_data = [val for val in labels_data for _ in (0, 1)]
+
+    # Turn to one hotted if required
+    if one_hotted:
+        one_hot_labels = list()
+        for label in labels_data:
+            label = int(label)
+            one_hot_label = np.zeros(max_score + 1)
+            one_hot_label[label] = 1
+            one_hot_labels.append(one_hot_label)
+        print("get_label: Upload one-hotted label completed (as a list): %d examples" % (len(one_hot_labels)))
+        return one_hot_labels, labels_name
+    else:
+        # if filetype != 'list':  # If not list, output will be as numpy instead
+        #     size = len(labels)
+        #     labelnum = np.zeros((size,))
+        #     for i in range(0, size):
+        #         labelnum[i] = labels[i]
+        #     labels = labelnum
+        #     print("Upload label completed (as a numpy): %d examples" % (size))
+        # else:
+        print("get_label: Upload non one-hotted label completed (as a list): %d examples" % (len(labels_data)))
+        return labels_data, labels_name
 '''

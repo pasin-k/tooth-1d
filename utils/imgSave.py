@@ -1,7 +1,8 @@
 import os
 import numpy as np
-#import matplotlib
+# import matplotlib
 import matplotlib as mpl
+
 mpl.use('TkAgg')
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure
@@ -32,7 +33,8 @@ def saveplot(coorList, outDirectory, fileName, degree, fileType="png"):
             coor = coorList[i][d]
             plt.plot(coor[:, 0], coor[:, 1], color='black', linewidth=1)
             plt.axis('off')
-            fullname = "%s_%s_%d.%s" % (fileName, str(i).zfill(3), degree[d], fileType)  # Name with some additional data
+            fullname = "%s_%s_%d.%s" % (
+            fileName, str(i).zfill(3), degree[d], fileType)  # Name with some additional data
             outName = os.path.join(outDirectory, fullname)
 
             plt.savefig(outName, bbox_inches='tight')

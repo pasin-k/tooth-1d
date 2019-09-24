@@ -3,11 +3,11 @@ import numpy as np
 import random
 import os
 import json
-from open_save_file import get_input_and_label, read_file, save_file
+from utils.open_save_file import get_input_and_label, read_file, save_file
 
 numdeg = 4  # Number of images on each example
 
-# Global Variable
+# Default value
 configs = {'train_eval_ratio': 0.8,
            'data_type': 'BL_median',
            }
@@ -25,13 +25,14 @@ def _float_feature(value):
     return tf.train.Feature(float_list=tf.train.FloatList(value=[value]))
 
 
-# Run images from pre_processing.py into tfrecords
+# Run images from stl_to_image.py into tfrecords
 def serialize_image(example):
+    global numdeg
     # Record name and image data
     feature = {}
     for i in range(numdeg):
         feature['img' + str(i)] = _bytes_feature(example['img' + str(i)])
-    # Record all available label
+    # Record all available label, mostly int except for 'name'
     for d in configs['data_type']:
         if d == "name":
             feature[d] = _bytes_feature(bytes(example[d], encoding='utf8'))
@@ -43,42 +44,33 @@ def serialize_image(example):
 
 
 def read_image(file_name, label):
+    global numdeg
     file_values = label
-    # file_values = {'label': label}
     for i in range(numdeg):
         file_values['img' + str(i)] = tf.read_file(file_name[i])
     return file_values
 
 
-'''
-# Read and load image
-def load_image(addr):
-    img = cv2.imread(addr, cv2.IMREAD_GRAYSCALE)
-    # cv2.imshow('IMAGE WINDOW',img)
-    # cv2.waitKey()
-    # print(np.shape(img))
-    return img
-'''
-
-
 def image_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None, k_fold=False, k_num=5):
     """
-    tfrecord_name   : Name of .tfrecord output file
-    dataset_folder  : Folder of the input data  (Not include label)
-    csv_dir         : Folder of label data (If not specified, will use the default directory)
-    save 4 files: train.tfrecord, eval.tfrecord, .txt (Save from another file)
+
+    :param tfrecord_name:   String, Name of .tfrecord output file
+    :param dataset_folder:  Folder of the input data  (Not include label)
+    :param csv_dir:         Folder of label data (If not specified, will use the default directory)
+    :param k_fold:          Boolean, Option to save tfrecord for k_fold usage
+    :param k_num:           int, If k_fold is true, select amount of k-fold
+    :return: save 3 files: train.tfrecord, eval.tfrecord, config (as .json)
     """
     # Create new directory if not created, get all info and zip to tfrecord
     if tfrecord_name.split('.')[-1] == "tfrecords":  # Remove extension if exist
-        tfrecord_name = tfrecord_name[0:-10]
-    tfrecord_dir = os.path.join("./data/tfrecord", tfrecord_name)
+        tfrecord_name = os.path.splitext(os.path.basename(tfrecord_name))[0]
+    tfrecord_dir = os.path.join("../data/tfrecord", tfrecord_name)
     if not os.path.exists(tfrecord_dir):
         os.makedirs(tfrecord_dir)
 
-    # Get amount of degree and augmentation
+    # Read config file to get amount of degree and augmentation
     config_data = read_file(os.path.join(dataset_folder, "config.txt"))
-    configs['numdeg'] = config_data[0]
-    configs['num_augment'] = config_data[1]
+    configs['numdeg'], configs['num_augment'] = config_data[0], config_data[1]
 
     # Get file name from dataset_folder
     grouped_train_address, grouped_eval_address = get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs,
@@ -134,7 +126,7 @@ def image_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None, k_fold=False,
         print("TFrecords created: %s, %s" % (tfrecord_train_name, tfrecord_eval_name))
 
 
-# Run images from pre_processing.py into tfrecords, not using right now
+# Run images from stl_to_image.py into tfrecords, not using right now
 def serialize_coordinate(example):
     feature = {}
     for i in range(numdeg):
@@ -175,7 +167,7 @@ def write_tfrecord(all_data, file_dir, degree, coordinate_length):
                 for n in range(numdeg):
                     for j in range(2):  # Flatten degree, axis
                         val = data[dname][0][n][:, j].reshape(-1)
-                        if np.shape(val)[0] != 50:
+                        if np.shape(val)[0] != coordinate_length:
                             print("Error", data[dname][1]["name"])
                             print(np.shape(val)[0])
                         feature['%s_%s_%s' % (dname, n, j)] = tf.train.Feature(float_list=tf.train.FloatList(value=val))
@@ -195,7 +187,7 @@ def coordinate_to_tfrecord(tfrecord_name, dataset_folders, csv_dir=None, k_fold=
     # Create new directory if not created, get all info and zip to tfrecord
     if tfrecord_name.split('.')[-1] == "tfrecords":  # Remove extension if exist
         tfrecord_name = tfrecord_name[0:-10]
-    tfrecord_dir = os.path.join("./data/tfrecord", tfrecord_name)
+    tfrecord_dir = os.path.join("../data/tfrecord", tfrecord_name)
     if not os.path.exists(tfrecord_dir):
         os.makedirs(tfrecord_dir)
 
@@ -253,12 +245,12 @@ def coordinate_to_tfrecord(tfrecord_name, dataset_folders, csv_dir=None, k_fold=
         write_tfrecord(eval_data, tfrecord_eval_name, degree, coordinate_length)
 
         # Update info in json file
-        with open("./data/tfrecord/%s/%s_%s.json" % (tfrecord_name, tfrecord_name, i)) as filehandle:
+        with open("../data/tfrecord/%s/%s_%s.json" % (tfrecord_name, tfrecord_name, i)) as filehandle:
             data_loaded = json.load(filehandle)
         data_loaded["degree"] = degree
         data_loaded["data_length"] = coordinate_length
         data_loaded["dataset_name"] = list(dataset_folders.keys())
-        with open("./data/tfrecord/%s/%s_%s.json" % (tfrecord_name, tfrecord_name, i), 'w') as filehandle:
+        with open("../data/tfrecord/%s/%s_%s.json" % (tfrecord_name, tfrecord_name, i), 'w') as filehandle:
             json.dump(data_loaded, filehandle, indent=4, sort_keys=True, separators=(',', ': '), ensure_ascii=False)
         print("TFrecords created: %s, %s" % (tfrecord_train_name, tfrecord_eval_name))
 
@@ -276,14 +268,14 @@ if __name__ == '__main__':
         configs['data_type'], configs['train_eval_ratio']))
 
     if get_image:
-        image_to_tfrecord(tfrecord_name="preparation_img_test", dataset_folder="./data/cross_section",
+        image_to_tfrecord(tfrecord_name="preparation_img_test", dataset_folder="../data/cross_section",
                           k_fold=k_fold)
     else:
-        # coordinate_to_tfrecord(tfrecord_name="coor_augment",
-        #                        dataset_folders="./data/coordinate_newer", k_fold=k_fold)
+        coordinate_to_tfrecord(tfrecord_name="fast_debug",
+                               dataset_folders="../data/coordinate", k_fold=k_fold)
         # coordinate_to_tfrecord(tfrecord_name="coor_split",
-        #                        dataset_folders="./data/segment_2/right_point", k_fold=k_fold)
-        coordinate_to_tfrecord(tfrecord_name="coor_split", dataset_folders={'right': "./data/segment_2/right_point",
-                                                                            'left': "./data/segment_2/left_point"},
-                               k_fold=k_fold)
+        #                        dataset_folders="../data/segment_2/right_point", k_fold=k_fold)
+        # coordinate_to_tfrecord(tfrecord_name="coor_split", dataset_folders={'right': "../data/segment_2/right_point",
+        #                                                                     'left': "../data/segment_2/left_point"},
+        #                        k_fold=k_fold)
     print("Complete")

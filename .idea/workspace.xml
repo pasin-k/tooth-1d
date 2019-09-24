@@ -2,11 +2,36 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="770e0596-62ef-4176-bd6c-3bded3f7c783" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/utils/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/coor_get_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/coor_get_data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/coor_tooth.config" beforeDir="false" afterPath="$PROJECT_DIR$/coor_tooth.config" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/coor_train.py" beforeDir="false" afterPath="$PROJECT_DIR$/coor_train.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/imgtotfrecord.py" beforeDir="false" afterPath="$PROJECT_DIR$/imgtotfrecord.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Dockerfile" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Dockerfile_coor" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/autoencoder.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cifar10_get_data.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cifar10_model.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cifar10_tfrecord.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cifar10_train.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/coor_get_data.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/coor_tooth.config" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/coor_tooth_workspace.config" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/custom_hook.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/get_data.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/get_data_v2.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/get_input.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/imgSave.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/imgtotfrecord.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/imgtotfrecord_v2.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/mnist.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/model_v2.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/open_save_file.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/plot_focal_loss.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pre_processing.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/report.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/segmentation.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stlSlicer.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tooth.config" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tooth_workspace.config" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/train_v2.py" beforeDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -45,6 +70,9 @@
     <option name="mySupportQtDebugging" value="false" />
   </component>
   <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/utils" />
+    </key>
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/../../../../../../../Link to Tooth/Tooth/Model/my2DCNN/data" />
       <recent name="$PROJECT_DIR$" />
@@ -62,7 +90,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.coor_train">
+  <component name="RunManager" selected="Python.image_to_tfrecord">
     <configuration name="coor_train" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="my2DCNN" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -84,6 +112,27 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="image_to_tfrecord" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="my2DCNN" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/preprocess" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/preprocess/image_to_tfrecord.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="imgtotfrecord" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="my2DCNN" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -97,6 +146,27 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/imgtotfrecord.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="open_save_file" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="my2DCNN" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/utils" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/utils/open_save_file.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -126,62 +196,20 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="scratch_1" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="my2DCNN" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$APPLICATION_CONFIG_DIR$/scratches" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$APPLICATION_CONFIG_DIR$/scratches/scratch_1.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="scratch_2" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="my2DCNN" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$APPLICATION_CONFIG_DIR$/scratches" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$APPLICATION_CONFIG_DIR$/scratches/scratch_2.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <list>
       <item itemvalue="Python.scratch" />
       <item itemvalue="Python.imgtotfrecord" />
-      <item itemvalue="Python.scratch_2" />
-      <item itemvalue="Python.scratch_1" />
       <item itemvalue="Python.coor_train" />
+      <item itemvalue="Python.image_to_tfrecord" />
+      <item itemvalue="Python.open_save_file" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.image_to_tfrecord" />
+        <item itemvalue="Python.open_save_file" />
         <item itemvalue="Python.coor_train" />
         <item itemvalue="Python.scratch" />
         <item itemvalue="Python.imgtotfrecord" />
-        <item itemvalue="Python.scratch_1" />
-        <item itemvalue="Python.scratch_2" />
       </list>
     </recent_temporary>
   </component>
@@ -195,13 +223,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1554715602048</updated>
-    </task>
-    <task id="LOCAL-00076" summary="Implemented K fold cross validate (For one run and optimize run)">
-      <created>1561969357676</created>
-      <option name="number" value="00076" />
-      <option name="presentableId" value="LOCAL-00076" />
-      <option name="project" value="LOCAL" />
-      <updated>1561969357676</updated>
     </task>
     <task id="LOCAL-00077" summary="Implemented K fold cross validate (For one run and optimize run)">
       <created>1561969482621</created>
@@ -539,7 +560,14 @@
       <option name="project" value="LOCAL" />
       <updated>1568984691964</updated>
     </task>
-    <option name="localTasksCounter" value="125" />
+    <task id="LOCAL-00125" summary="Save more config in json. Now compatible for multiple dataset combined">
+      <created>1568987243119</created>
+      <option name="number" value="00125" />
+      <option name="presentableId" value="LOCAL-00125" />
+      <option name="project" value="LOCAL" />
+      <updated>1568987243119</updated>
+    </task>
+    <option name="localTasksCounter" value="126" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
