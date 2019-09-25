@@ -47,7 +47,7 @@ We use protocol buffer to feed those parameters into our file. Look up `coor_too
 
 
 ### Model Architecture
-Our model architecture is in `coor_model.py` which composed of multiple 1D-CNN and max pooling.
+For information in model architecture, look up in `coor_model.py` which composed of multiple 1D-CNN and max pooling.
 
 
 ### Output and Evaluation
