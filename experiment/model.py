@@ -160,12 +160,12 @@ def customized_incepnet_v2(features, mode, params):
 def customized_incepnet_v3(features, mode, params):
     # (1) Filter size: 5x5x64
     conv1 = cnn_2d(features, 5, params['channels'][0], activation=params['activation'], name="conv1")
-    pool1 = max_and_cnn_layer(conv1, 4, params['channels'][0], activation=params['activation'], name ="pool1")
+    pool1 = max_and_cnn_layer(conv1, 4, params['channels'][0], activation=params['activation'], name="pool1")
     # Output: 60x90x64
 
     # (2) Filter size: 3x3x64
     conv2 = cnn_2d(pool1, 3, params['channels'][1], activation=params['activation'], name="conv2")
-    pool2 = max_and_cnn_layer(conv1, 2, params['channels'][1], activation=params['activation'], name ="pool2")
+    pool2 = max_and_cnn_layer(conv1, 2, params['channels'][1], activation=params['activation'], name="pool2")
     # Output: 30x45x64
 
     # (3.1) Max Pool, then Filter size: 64
@@ -191,7 +191,7 @@ def customized_incepnet_v3(features, mode, params):
 
     concat4 = tf.concat([conv3_1, conv3_2, conv3_3, conv3_4], 3)
     total_layer = params['channels'][2] + params['channels'][4] + params['channels'][7] + params['channels'][8]
-    pool4 = max_and_cnn_layer(concat4, 3, total_layer, activation=params['activation'], name ="pool4")
+    pool4 = max_and_cnn_layer(concat4, 3, total_layer, activation=params['activation'], name="pool4")
     # Output: 10x15x256 = 38400
 
     fc5 = flatten_layer(pool4)
@@ -210,7 +210,7 @@ def customized_incepnet_v3(features, mode, params):
 def my_model(features, labels, mode, params, config):
     # Input: (Batch_size,240,360,4)
     logits = customized_incepnet(features, mode, params)
-    logits = tf.squeeze(logits,1)
+    logits = tf.squeeze(logits, 1)
     logits_aft = tf.math.scalar_mul(5, logits) + 5
     # Predict Mode
     # predicted_class = tf.argmax(logits, 1)
