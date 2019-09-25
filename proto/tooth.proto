@@ -13,16 +13,15 @@ message TrainConfig{
     // Number of steps required before early stopping
     optional uint32 early_stop_step = 3 [default = 30000];
 
+    // tf record name
+    optional string input_path = 6;
+
     // Path to saving model
     optional string result_path = 4;
 
     // Training steps
     optional uint32 steps = 5;
 
-    // tf record name
-    optional string input_path = 6;
-
-    // Here are repeatable value
     // 1 is relu, 2 is default leaky relu
     optional float learning_rate = 7;
 
@@ -32,19 +31,11 @@ message TrainConfig{
 
     optional uint32 channels = 10;
 
-    optional float model_type = 11;
-
     optional string comment = 12;
 
-    optional bool is_workstation = 13;
+    optional string run_mode = 13;
 
-    optional bool is_kfold = 14;
-
-    optional uint32 data_length = 15;
-
-    optional uint32 data_degree = 16;
-
-    optional string label_type = 17;
+    optional string label_type = 14;
 
 }
 

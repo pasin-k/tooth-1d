@@ -11,13 +11,13 @@ from proto import tooth_pb2
 from google.protobuf import text_format
 
 import skopt
-from skopt import gp_minimize, forest_minimize
+from skopt import gp_minimize
 from skopt.space import Real, Categorical, Integer
 from skopt.utils import use_named_args
 
 # from model import my_model
 from coor_model import my_model
-from utils.coor_get_data import train_input_fn, eval_input_fn, get_data_from_path
+from utils.coor_get_data import train_input_fn, eval_input_fn
 from utils.open_save_file import read_file, save_file, check_exist
 
 # Read tooth.config file
@@ -74,6 +74,7 @@ def run(model_params):
         model_params['loss_weight'] = tfrecord_info['class_weight'][run_configs['label_type']]
         model_params["data_degree"] = tfrecord_info['data_degree']
         model_params["data_length"] = tfrecord_info['data_length']
+        model_params["dataset_name"] = tfrecord_info['dataset_name']
 
     assert len(model_params['loss_weight']) == 3, "Label does not have 3 unique value, found %s" % len(
         model_params['loss_weight'])
@@ -208,11 +209,10 @@ def fitness(learning_rate, dropout_rate, activation, channels):
         learning_rate, dropout_rate, activation, channels))
 
     # Set result path combine with current time of running
-    channels_full = [channels, 2]
     md_config = {'learning_rate': learning_rate,
                  'dropout_rate': dropout_rate,
                  'activation': activation_dict[activation],
-                 'channels': channels_full,
+                 'channels': [channels, 2],
                  'result_path': run_configs['result_path_base'] +
                                 datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S") + "/",
                  'result_file_name': 'result.csv',
@@ -354,10 +354,7 @@ model_configs = {'learning_rate': configs.learning_rate,
                  'channels': channels_full,
                  }
 
-
 if __name__ == '__main__':
-    run_single = run_configs['is_workstation']
-
     if run_mode == "single":
         run_configs['input_path'] = run_configs['input_path'].split(".tfrecords")[0] + "_0.tfrecords"
         model_configs['result_file_name'] = 'result.csv'

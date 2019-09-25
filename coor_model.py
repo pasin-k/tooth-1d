@@ -4,7 +4,6 @@ import os
 
 from utils.custom_hook import EvalResultHook, PrintValueHook
 
-
 # In case of needing l2-regularization: https://stackoverflow.com/questions/44232566/add-l2-regularization-when-using-high-level-tf-layers/44238354#44238354
 
 
@@ -98,7 +97,6 @@ def model_cnn_1d(features, mode, params):
     This model is based on "A Comparison of 1-D and 2-D Deep Convolutional Neural Networks in ECG Classification"
     '''
     # (1) Filter size: 7x32, max pooling of k3 s2
-    # print(params)
     conv1 = cnn_1d(features['image'], 7, params['channels'][0] * 16, activation=params['activation'], name="conv1",
                    kernel_regularizer=0.01)
     conv1 = tf.keras.layers.BatchNormalization()(conv1)
@@ -203,7 +201,7 @@ def my_model(features, labels, mode, params, config):
     loss_weight = tf.matmul(one_hot_label, weight, transpose_b=True, a_is_sparse=True)
 
     # loss = softmax_focal_loss(labels, logits, gamma=0., alpha=loss_weight)  # Focal loss
-
+    # Cross-entropy loss
     loss = tf.losses.sparse_softmax_cross_entropy(labels, logits,
                                                   weights=loss_weight)  # labels is int of class, logits is vector
 

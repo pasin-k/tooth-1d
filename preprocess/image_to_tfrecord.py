@@ -176,11 +176,11 @@ def write_tfrecord(all_data, file_dir, degree, coordinate_length):
             writer.write(example.SerializeToString())
 
 
-def coordinate_to_tfrecord(tfrecord_name, dataset_folders, csv_dir=None, k_fold=False, k_num=5):
+def coordinate_to_tfrecord(tfrecord_name, dataset_folders, k_fold=False, k_num=5):
     """
     tfrecord_name   : Name of .tfrecord output file
     dataset_folder  : Folder of the input data  (Not include label)
-    csv_dir         : Folder of label data (If not specified, will use the default directory)
+    k_fold          : Boolean if want to use kfold
     save 4 files: train.tfrecord, eval.tfrecord, .txt (Save from another file)
     """
 
@@ -271,10 +271,10 @@ if __name__ == '__main__':
         image_to_tfrecord(tfrecord_name="preparation_img_test", dataset_folder="../data/cross_section",
                           k_fold=k_fold)
     else:
-        coordinate_to_tfrecord(tfrecord_name="fast_debug",
-                               dataset_folders="../data/coordinate", k_fold=k_fold)
-        # coordinate_to_tfrecord(tfrecord_name="coor_split",
-        #                        dataset_folders="../data/segment_2/right_point", k_fold=k_fold)
+        # coordinate_to_tfrecord(tfrecord_name="fast_debug",
+        #                        dataset_folders="../data/coordinate", k_fold=k_fold)
+        coordinate_to_tfrecord(tfrecord_name="coor_split",
+                               dataset_folders="../data/segment_2/right_point", k_fold=k_fold)
         # coordinate_to_tfrecord(tfrecord_name="coor_split", dataset_folders={'right': "../data/segment_2/right_point",
         #                                                                     'left': "../data/segment_2/left_point"},
         #                        k_fold=k_fold)
