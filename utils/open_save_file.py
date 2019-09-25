@@ -490,6 +490,27 @@ def save_file(csv_dir, all_data, field_name=None, write_mode='w', data_format=No
                 writer.writerow([data])  # May need to add [data] in some case
 
 
+def check_exist(dictionary, **kwargs):
+    """
+    Check if key exist in dictionary or not, if not will replace by the value given
+    :param dictionary: Dictionary parameter
+    :param kwargs: key, value pair. If value is None, will raise Error when cannot find key
+    :return: Same dictionary
+    """
+    output_dict = dictionary
+    for key, value in kwargs.items():
+        try:
+            output_dict[key] = dictionary[key]
+            # output = params[dict_name]
+        except (KeyError, TypeError) as error:
+            if value is None:
+                raise KeyError("Parameter '%s' not defined" % key)
+            else:
+                output_dict[key] = value
+                print("Parameters: %s not found, use default value = %s" % (key, value))
+    return output_dict
+
+
 # Below are unused stl-to-voxel functions
 '''
 def create_name(num_file, exceptions=[-1]):

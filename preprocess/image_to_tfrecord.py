@@ -247,7 +247,7 @@ def coordinate_to_tfrecord(tfrecord_name, dataset_folders, csv_dir=None, k_fold=
         # Update info in json file
         with open("../data/tfrecord/%s/%s_%s.json" % (tfrecord_name, tfrecord_name, i)) as filehandle:
             data_loaded = json.load(filehandle)
-        data_loaded["degree"] = degree
+        data_loaded["data_degree"] = degree
         data_loaded["data_length"] = coordinate_length
         data_loaded["dataset_name"] = list(dataset_folders.keys())
         with open("../data/tfrecord/%s/%s_%s.json" % (tfrecord_name, tfrecord_name, i), 'w') as filehandle:

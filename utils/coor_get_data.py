@@ -61,8 +61,15 @@ def decode(data_dict):
 
 
 def train_input_fn(data_path, batch_size, configs):
+    """
+    Use to fetch training dataset
+    :param data_path: Training tfrecords path
+    :param batch_size: Batch size
+    :param configs: Dictionary, should contain data_degree, data_length, label_type, dataset_name
+    :return: tf.Dataset use for training
+    """
     global numdegree, data_length, label_type_global, single_slice, name_type
-    numdegree, data_length, label_type_global, name_type = configs['degree'], configs['data_length'], \
+    numdegree, data_length, label_type_global, name_type = configs['data_degree'], configs['data_length'], \
                                                            configs['label_type'], \
                                                            configs['dataset_name']
     print("Fetching label type: %s" % label_type_global)
@@ -81,9 +88,16 @@ def train_input_fn(data_path, batch_size, configs):
 
 
 def eval_input_fn(data_path, batch_size, configs):
+    """
+    Use to fetch validation dataset
+    :param data_path: Evaluate tfrecords path
+    :param batch_size: Batch size
+    :param configs: Dictionary, should contain data_degree, data_length, label_type, dataset_name
+    :return: tf.Dataset use for validation
+    """
     global numdegree, data_length, label_type_global, single_slice, name_type
     print("Fetching label type: %s" % label_type_global)
-    numdegree, data_length, label_type_global, name_type = configs['degree'], configs['data_length'], \
+    numdegree, data_length, label_type_global, name_type = configs['data_degree'], configs['data_length'], \
                                                            configs['label_type'], \
                                                            configs['dataset_name']
     if not os.path.exists(data_path):
@@ -95,7 +109,14 @@ def eval_input_fn(data_path, batch_size, configs):
     return eval_dataset
 
 
-def get_data_from_path(data_path, label_type, data_type=1):
+def get_data_from_path(data_path, label_type):
+    """
+    Use to read data from tfrecords file. Mostly use for debugging
+    :param data_path:
+    :param label_type:
+    :return:
+    """
+
     global numdegree, data_length, label_type_global
     label_data = ["name", "Occ_B_median", "Occ_F_median", "Occ_L_median", "BL_median", "MD_median", "Integrity_median",
                   "Width_median", "Surface_median", "Sharpness_median"]

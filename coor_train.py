@@ -1,11 +1,9 @@
 import tensorflow as tf
 from tensorflow.python.client import device_lib
-import numpy as np
 import os
 import glob
 import argparse
 import json
-from shutil import copy2
 import csv
 import datetime
 
@@ -19,123 +17,77 @@ from skopt.utils import use_named_args
 
 # from model import my_model
 from coor_model import my_model
-from coor_get_data import train_input_fn, eval_input_fn, get_data_from_path
-from open_save_file import read_file, save_file
+from utils.coor_get_data import train_input_fn, eval_input_fn, get_data_from_path
+from utils.open_save_file import read_file, save_file, check_exist
 
 # Read tooth.config file
 parser = argparse.ArgumentParser()
 parser.add_argument('config', help="Directory of config file")
-# parser.add_argument('--config',help="Config directory")
 args = parser.parse_args()
 
-activation_dict = {'0': tf.nn.relu, '1': tf.nn.leaky_relu}  # Declare global dictionary
 configs = tooth_pb2.TrainConfig()
 with open(args.config, 'r') as f:
     text_format.Merge(f.read(), configs)
 
-'''
-# Convert protobuf data to list
-learning_rate_list = protobuf_to_list(configs.learning_rate)
-dropout_rate_list = protobuf_to_list(configs.dropout_rate)
-activation_list = protobuf_to_list(configs.activation, activation_dict)
-channel_list = protobuf_to_channels(configs.channels)
-'''
+# Settings used in run
+run_configs = {'batch_size': configs.batch_size,
+               'checkpoint_min': configs.checkpoint_min,
+               'early_stop_step': configs.early_stop_step,
+               'input_path': configs.input_path,
+               'result_path_base': configs.result_path,
+               'config_path': os.path.abspath(args.config),
+               'steps': configs.steps,
+               'label_type': configs.label_type,
+               'comment': configs.comment}
+
+run_mode = configs.run_mode  # Run mode (Single, search, etc.)
+
+run_configs = check_exist(run_configs, batch_size=None, checkpoint_min=10, early_stop_step=5000,
+                          input_path=None, result_path_base=None, steps=None, config_path=None)
+
+channels_full = [configs.channels, 2]
+
+activation_dict = {'0': tf.nn.relu, '1': tf.nn.leaky_relu}
 
 
-# Check if parameters exist, if not, give default parameters or raiseError
-# params: dictionary, dict_name: string, default: value (if None will raiseError)
-def check_exist(dictionary, **kwargs):
-    output_dict = dictionary
-    for key, value in kwargs.items():
-        try:
-            output_dict[key] = dictionary[key]
-            # output = params[dict_name]
-        except (KeyError, TypeError) as error:
-            if value is None:
-                raise KeyError("Parameter '%s' not defined" % key)
-            else:
-                output_dict[key] = value
-                print("Parameters: %s not found, use default value = %s" % (key, value))
-    return output_dict
-
-
-# These are important parameters
-run_params = {'batch_size': configs.batch_size,
-              'checkpoint_min': configs.checkpoint_min,
-              'early_stop_step': configs.early_stop_step,
-              'input_path': configs.input_path,
-              'result_path_base': configs.result_path,
-              'config_path': os.path.abspath(args.config),
-              'steps': configs.steps,
-              'is_workstation': configs.is_workstation,
-              'label_type': configs.label_type,
-              'comment': configs.comment}
-
-kfold = configs.is_kfold
-
-model_num = configs.model_type  # Borrowed parameter name 0 -> dense, 1 -> 1dCNN
-
-run_params = check_exist(run_params, batch_size=None,
-                         checkpoint_min=10, early_stop_step=5000,
-                         input_path=None, result_path_base=None,
-                         steps=None, config_path=None)
-
-if model_num == 0:
-    channels_full = [configs.channels]
-else:
-    channels_full = [configs.channels, 2]
-
-model_configs = {'learning_rate': configs.learning_rate,
-                 'dropout_rate': configs.dropout_rate,
-                 'activation': activation_dict[configs.activation],
-                 'channels': channels_full,
-                 'model_num': model_num,
-                 'data_degree': configs.data_degree,
-                 'data_length': configs.data_length,
-                 }
-
-
+# For multi-gpu
 def get_available_gpus():
     local_device_protos = device_lib.list_local_devices()
     return [x.name for x in local_device_protos if x.device_type == 'GPU']
 
 
-class_value = ['1', '3', '5']
-
-
-def run(model_params=None):
-    if model_params is None:
-        raise ValueError("No model_params found")
+def run(model_params):
     # Check if all values exist
-    model_params = check_exist(model_params, learning_rate=None,
-                               dropout_rate=None, activation=None,
-                               channels=None, result_path=None, model_num=None,
-                               data_degree=None, data_length=None)
+    model_params = check_exist(model_params, learning_rate=None, dropout_rate=None, activation=None,
+                               channels=None, result_path=None)
     # Note on some model_params:    loss_weight is calculated inside
     #                               channels (in CNN case) is [CNN channels, Dense channels]
 
     # Type in file name
-    train_data_path = run_params['input_path'].replace('.tfrecords', '') + '_train.tfrecords'
-    eval_data_path = run_params['input_path'].replace('.tfrecords', '') + '_eval.tfrecords'
-    info_path = run_params['input_path'].replace('.tfrecords', '.json')
+    train_data_path = run_configs['input_path'].replace('.tfrecords', '') + '_train.tfrecords'
+    eval_data_path = run_configs['input_path'].replace('.tfrecords', '') + '_eval.tfrecords'
+    info_path = run_configs['input_path'].replace('.tfrecords', '.json')
 
-    with open(info_path) as f:
-        tfrecord_info = json.load(f)
-        loss_weight = tfrecord_info['class_weight'][run_params['label_type']]
+    # Add some more parameters from config file
+    with open(info_path) as filehandle:
+        tfrecord_info = json.load(filehandle)
+        model_params['loss_weight'] = tfrecord_info['class_weight'][run_configs['label_type']]
+        model_params["data_degree"] = tfrecord_info['data_degree']
+        model_params["data_length"] = tfrecord_info['data_length']
 
-    assert len(loss_weight) == 3, "Label does not have 3 unique value, found %s" % len(loss_weight)
-    tfrecord_info['label_type'] = run_params['label_type']
-    model_params['loss_weight'] = loss_weight
+    assert len(model_params['loss_weight']) == 3, "Label does not have 3 unique value, found %s" % len(
+        model_params['loss_weight'])
+    model_params['label_type'] = run_configs['label_type']
 
     print("Getting training data from %s" % train_data_path)
-    print("Saved model at %s" % run_params['result_path'])
+    print("Saved model at %s" % model_params['result_path'])
 
     tf.logging.set_verbosity(tf.logging.INFO)  # To see some additional info
     # Setting for multiple GPUs
     mirrored_strategy = tf.distribute.MirroredStrategy(devices=get_available_gpus())
     # Setting checkpoint config
     my_checkpoint_config = tf.estimator.RunConfig(
-        save_checkpoints_secs=run_params['checkpoint_min'] * 60,
+        save_checkpoints_secs=run_configs['checkpoint_min'] * 60,
         keep_checkpoint_max=10,
         log_step_count_steps=500,
         session_config=tf.ConfigProto(allow_soft_placement=True),
@@ -145,29 +97,28 @@ def run(model_params=None):
     classifier = tf.estimator.Estimator(
         model_fn=my_model,
         params=model_params,
-        model_dir=run_params['result_path'],
+        model_dir=model_params['result_path'],
         config=my_checkpoint_config
     )
 
-    # if model_num == 0:
-    #     data_type = 0  # 0 is getting vectorized data, used with Dense model
-    # else:
-    #     data_type = 1  # 1 is getting stacked data, used with 1d CNN model
+    train_hook = tf.contrib.estimator.stop_if_no_decrease_hook(classifier, "loss", run_configs['early_stop_step'])
 
-    train_hook = tf.contrib.estimator.stop_if_no_decrease_hook(classifier, "loss", run_params['early_stop_step'])
+    # Fetch training_data and evaluation
     train_spec = tf.estimator.TrainSpec(
-        input_fn=lambda: train_input_fn(train_data_path, batch_size=run_params['batch_size'], configs=tfrecord_info),
-        max_steps=run_params['steps'], hooks=[train_hook])
-    # TODO: Evaluate only once? why?
+        input_fn=lambda: train_input_fn(train_data_path, batch_size=run_configs['batch_size'], configs=model_params),
+        max_steps=run_configs['steps'], hooks=[train_hook])
     eval_spec = tf.estimator.EvalSpec(
-        input_fn=lambda: eval_input_fn(eval_data_path, batch_size=run_params['batch_size'], configs=tfrecord_info), )
+        input_fn=lambda: eval_input_fn(eval_data_path, batch_size=run_configs['batch_size'], configs=model_params), )
     # steps=None,
     # start_delay_secs=0, throttle_secs=0)
     # classifier.train(input_fn=lambda: train_input_fn(train_data_path, batch_size=params['batch_size']),
     #     max_steps=params['steps'], hooks=[train_hook])
     # eval_result = classifier.evaluate(input_fn=lambda: eval_input_fn(eval_data_path, batch_size=32))
 
+    # Train and evaluate
     eval_result = tf.estimator.train_and_evaluate(classifier, train_spec, eval_spec)
+
+    # Show result
     print("Eval result:")
     print(eval_result)
     try:
@@ -183,41 +134,17 @@ def run(model_params=None):
     classifier = tf.estimator.Estimator(
         model_fn=my_model,
         params=model_params,
-        model_dir=run_params['result_path'],
+        model_dir=model_params['result_path'],
         config=my_checkpoint_config
     )
 
     eval_result = classifier.evaluate(
-        input_fn=lambda: eval_input_fn(train_data_path, batch_size=run_params['batch_size'], configs=tfrecord_info))
+        input_fn=lambda: eval_input_fn(train_data_path, batch_size=run_configs['batch_size'], configs=model_params))
 
     model_params['result_file_name'] = 'result.csv'
-    # No need to use predict since we can get data from hook now
-    # # images, expected = get_data_from_path(eval_data_path)
-    # score_address = run_params['input_path'].replace('.tfrecords', '') + '_score.npy'
-    # print(score_address)
-    # expected = np.load(score_address)
-    # print(expected)
-    # predictions = classifier.predict(input_fn=lambda: eval_input_fn(eval_data_path, batch_size=1))
-    #
-    # predict_score = ['Prediction']
-    # label_score = ['Label']
-    # for pred_dict, expec in zip(predictions, expected):
-    #     # print(pred_dict)
-    #     # print("Score: " + str(pred_dict['score']))
-    #     class_id = pred_dict['score']
-    #     # probability = pred_dict['probabilities'][class_id]
-    #     # print("Actual score: %s, Predicted score: %s " % (expec, class_id))
-    #     predict_score.append(class_id)
-    #     label_score.append(expec)
-    #
-    # predict_result = zip(label_score, predict_score)
-
-    # print(eval_result[0]['accuracy'])
-    # print('\nTest set accuracy: {accuracy:0.3f}\n'.format(**eval_result))
-    predict_result = None
 
     # Save necessary info to csv file, as reference
-    info_dict = run_params.copy()
+    info_dict = run_configs.copy()
     info_dict['accuracy'] = accuracy
     info_dict['learning_rate'] = model_params['learning_rate']
     info_dict['dropout_rate'] = model_params['dropout_rate']
@@ -228,12 +155,12 @@ def run(model_params=None):
     info_dict['data_length'] = model_params['data_length']
     info_dict['data_degree'] = model_params['data_degree']
 
-    with open((run_params['result_path'] + "config.csv"), "w") as csvfile:
+    # Save information in config.csv
+    with open((model_params['result_path'] + "config.csv"), "w") as csvfile:
         writer = csv.writer(csvfile)
         for key, val in info_dict.items():
             writer.writerow([key, val])
-
-    return accuracy, global_step, predict_result
+    return accuracy, global_step
 
 
 # # Run with multiple parameters (Grid-search)
@@ -248,10 +175,10 @@ def run(model_params=None):
 #                                  'dropout_rate': dr,
 #                                  'activation': act,
 #                                  'channels': ch}
-#                     run_params['result_path'] = name
+#                     model_params['result_path'] = name
 #                     run(md_config)
 #                     # Copy config file to result path as well
-#                     copy2(run_params['config_path'], run_params['result_path'])
+#                     copy2(run_params['config_path'], model_params['result_path'])
 
 
 dim_learning_rate = Real(low=5e-6, high=5e-3, prior='log-uniform', name='learning_rate')
@@ -267,58 +194,50 @@ dimensions = [dim_learning_rate,
 default_parameters = [configs.learning_rate, configs.dropout_rate, configs.activation, configs.channels]
 
 
-# TODO: Do more point?, Normalize value? Regularization?
 @use_named_args(dimensions=dimensions)
 def fitness(learning_rate, dropout_rate, activation, channels):
     """
-    Hyper-parameters:
+    Hyper-parameters search
     learning_rate:     Learning-rate for the optimizer.
-    dropout_rate:
+    dropout_rate:      Dropout rate
     activation:        Activation function for all layers.
-    channels
+    channels           Amount of channel
     """
     # Create the neural network with these hyper-parameters
     print("Learning_rate, Dropout_rate, Activation, Channels = %s, %s, %s, %s" % (
         learning_rate, dropout_rate, activation, channels))
 
     # Set result path combine with current time of running
-    run_params['result_path'] = run_params['result_path_base'] + "/" + datetime.datetime.now().strftime(
-        "%Y%m%d_%H_%M_%S") + "/"
-
-    if model_num == 0:
-        channels_full = [channels]
-    else:
-        channels_full = [channels, 2]
+    channels_full = [channels, 2]
     md_config = {'learning_rate': learning_rate,
                  'dropout_rate': dropout_rate,
                  'activation': activation_dict[activation],
                  'channels': channels_full,
-                 'result_path': run_params['result_path'],
+                 'result_path': run_configs['result_path_base'] +
+                                datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S") + "/",
                  'result_file_name': 'result.csv',
-                 'model_num': model_num,
-                 'data_degree': configs.data_degree,
-                 'data_length': configs.data_length,
                  }
 
-    accuracy, global_step, result = run(md_config)
+    accuracy, global_step = run(md_config)
     # Save info of hyperparameter search in a specific csv file
-    save_file(run_params['summary_file_path'], [accuracy, learning_rate, dropout_rate, activation,
-                                                channels], write_mode='a', data_format="one_row")
+    save_file(run_configs['summary_file_path'], [accuracy, learning_rate, dropout_rate, activation,
+                                                 channels], write_mode='a', data_format="one_row")
     return -accuracy
 
 
 def run_hyper_parameter_optimize():
-    current_time = datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S")
     # Name of the summary result from hyperparameter search (This variable is not used in run)
-    run_params['summary_file_path'] = run_params[
-                                          'result_path_base'] + '/' + "hyperparameters_result_" + current_time + ".csv"
+    current_time = datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S")
+    run_configs['summary_file_path'] = run_configs[
+                                           'result_path_base'] + "hyperparameters_result_" + current_time + ".csv"
     field_name = [i.name for i in dimensions]
     field_name.insert(0, 'accuracy')
 
     n_calls = 20  # Expected number of trainings
 
+    # Check if there is previous unfinished file or not. If exist, continue training for last model
     previous_record_files = []
-    for file in glob.glob(run_params['result_path_base'] + '/' + "hyperparameters_result_" + '*'):
+    for file in glob.glob(run_configs['result_path_base'] + "hyperparameters_result_" + '*'):
         previous_record_files.append(file)
     previous_record_files.sort()
     if len(previous_record_files) > 0:  # Check if file has previous result
@@ -327,17 +246,17 @@ def run_hyper_parameter_optimize():
             if not prev_data:
                 prev_data = [['']]
             try:
-                # Only for work station, continue if the run doesn't end completely
-                if prev_data[-1][0] != 'end' and run_params['is_workstation']:
+                # Resume only if run_mode is single
+                if prev_data[-1][0] != 'end' and run_mode == "single":
                     n_calls = n_calls - len(prev_data)
                     l_data = prev_data[-1][1:]  # Latest_data
                     default_param = [float(l_data[0]), float(l_data[1]), l_data[2], int(l_data[3])]
-                    run_params['summary_file_path'] = previous_record_files[-1]
+                    run_configs['summary_file_path'] = previous_record_files[-1]
                     current_time = previous_record_files[-1].split("/")[-1].replace('.csv', '').replace(
                         "hyperparameters_result_", '')
                     print("Continue from %s" % current_time)
                 else:  # Otherwise, create new file
-                    save_file(run_params['summary_file_path'], [], field_name=field_name,
+                    save_file(run_configs['summary_file_path'], [], field_name=field_name,
                               write_mode='w', create_folder=True, data_format="header_only")  # Create new summary file
                     default_param = default_parameters
                     print("Creating new runs")
@@ -348,27 +267,28 @@ def run_hyper_parameter_optimize():
                 raise ValueError("Previous file doesn't end completely")
         else:
             os.remove(previous_record_files[-1])  # Delete empty file
-            save_file(run_params['summary_file_path'], [], field_name=field_name, write_mode='w',
+            save_file(run_configs['summary_file_path'], [], field_name=field_name, write_mode='w',
                       create_folder=True)  # Create new summary file
             default_param = default_parameters
             print("Creating new runs, deleting previous empty file")
     else:  # If no file in folder, create new file
-        save_file(run_params['summary_file_path'], [], field_name=field_name, write_mode='w',
+        save_file(run_configs['summary_file_path'], [], field_name=field_name, write_mode='w',
                   create_folder=True)  # Create new summary file
         default_param = default_parameters
         print("Creating new runs (new folder)")
 
-    print("Saving hyperparameters_result in %s" % run_params['summary_file_path'])
+    print("Saving hyperparameters_result in %s" % run_configs['summary_file_path'])
     print("Running remaining: %s time" % n_calls)
+
     best_accuracy = 0
     if n_calls < 11:
         print("Hyper parameter optimize ENDED: run enough calls already")
-        save_file(run_params['summary_file_path'],
+        save_file(run_configs['summary_file_path'],
                   ['end', 'Completed (faster than expected)', datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S")],
                   write_mode='a', data_format="one_row")
     else:
-        # Make all run seperated in a folder
-        run_params['result_path_base'] = run_params['result_path_base'] + "/" + current_time
+        # Start hyperparameter search. Save each file in seperate folder
+        run_configs['result_path_base'] = run_configs['result_path_base'] + current_time
         search_result = gp_minimize(func=fitness,
                                     dimensions=dimensions,
                                     acq_func='EI',  # Expected Improvement.
@@ -389,17 +309,17 @@ def run_hyper_parameter_optimize():
                 data[field_name[1]] = i[1][j - 1]
             new_data.append(data)
 
-        save_file(run_params['summary_file_path'],
+        save_file(run_configs['summary_file_path'],
                   ['end', 'Completed', datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S")],
                   write_mode='a', data_format="one_row")
-    print("Saving hyperparameters_result in %s" % run_params['summary_file_path'])
+    print("Saving hyperparameters_result in %s" % run_configs['summary_file_path'])
     return best_accuracy
 
 
 def run_kfold(model_params, k_num=5):
-    input_path = os.path.splitext(run_params['input_path'])[0]
-    result_path = run_params['result_path']
-    kfold_path = run_params['result_path'] + "kfold.csv"
+    input_path = os.path.splitext(run_configs['input_path'])[0]
+    result_path = run_configs['result_path']
+    kfold_path = run_configs['result_path'] + "kfold.csv"
     if os.path.exists(kfold_path):
         data = read_file(kfold_path)
         current_run = len(data)
@@ -407,43 +327,51 @@ def run_kfold(model_params, k_num=5):
         current_run = 0
     all_accuracy = []
     for i in range(current_run, k_num):
-        run_params['input_path'] = input_path + ("_%s.tfrecords" % i)
-        run_params['result_path'] = result_path + ("/%s/" % i)
-        model_configs['result_path'] = run_params['result_path']
-        accuracy, _, _ = run(model_params)
+        run_configs['input_path'] = input_path + ("_%s.tfrecords" % i)
+        run_configs['result_path'] = result_path + ("/%s/" % i)
+        model_params['result_path'] = run_configs['result_path']
+        accuracy, _ = run(model_params)
         save_file(kfold_path, ["%s_%s" % (i, accuracy)], write_mode='a')
         all_accuracy.append(accuracy)
     print(all_accuracy)
 
 
 def run_hyper_parameter_optimize_kfold(k_num=5):
-    input_path = os.path.splitext(run_params['input_path'])[0]
-    result_path_base = run_params['result_path_base']
+    input_path = os.path.splitext(run_configs['input_path'])[0]
+    result_path_base = run_configs['result_path_base']
     all_accuracy = []
     for i in range(k_num):
-        run_params['input_path'] = input_path + ("_%s.tfrecords" % i)
-        run_params['result_path_base'] = result_path_base + ("/%s" % i)
+        run_configs['input_path'] = input_path + ("_%s.tfrecords" % i)
+        run_configs['result_path_base'] = result_path_base + str(i)
         accuracy = run_hyper_parameter_optimize()
         all_accuracy.append(accuracy)
     print(all_accuracy)
 
 
-if __name__ == '__main__':
-    run_single = run_params['is_workstation']
+model_configs = {'learning_rate': configs.learning_rate,
+                 'dropout_rate': configs.dropout_rate,
+                 'activation': activation_dict[configs.activation],
+                 'channels': channels_full,
+                 }
 
-    if run_single:
-        run_params['result_path'] = run_params['result_path_base'] + '/'
+
+if __name__ == '__main__':
+    run_single = run_configs['is_workstation']
+
+    if run_mode == "single":
+        run_configs['input_path'] = run_configs['input_path'].split(".tfrecords")[0] + "_0.tfrecords"
         model_configs['result_file_name'] = 'result.csv'
-        model_configs['result_path'] = run_params['result_path']
-        if kfold:
-            run_kfold(model_configs)
-        else:
-            run_params['input_path'] = run_params['input_path'].split(".tfrecords")[0] + "_0.tfrecords"
-            run(model_configs)
+        model_configs['result_path'] = run_configs['result_path']
+        run(model_configs)
+    elif run_mode == "kfold":
+        model_configs['result_file_name'] = 'result.csv'
+        model_configs['result_path'] = run_configs['result_path']
+        run_kfold(model_configs)
+    elif run_mode == "search":
+        run_configs['input_path'] = run_configs['input_path'].split(".tfrecords")[0] + "_0.tfrecords"
+        run_hyper_parameter_optimize()
+    elif run_mode == "kfold_search":
+        run_hyper_parameter_optimize_kfold()
     else:
-        if kfold:
-            run_hyper_parameter_optimize_kfold()
-        else:
-            run_params['input_path'] = run_params['input_path'].split(".tfrecords")[0] + "_0.tfrecords"
-            run_hyper_parameter_optimize()
+        raise ValueError('run_mode invalid. Expect "single", "kfold", "search", "kfold_search". Found %s' % run_mode)
     print("train.py completed")

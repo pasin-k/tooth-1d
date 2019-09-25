@@ -2,8 +2,7 @@ import tensorflow as tf
 import csv
 import os
 
-# tf.enable_eager_execution()
-from custom_hook import EvalResultHook, PrintValueHook
+from utils.custom_hook import EvalResultHook, PrintValueHook
 
 
 # In case of needing l2-regularization: https://stackoverflow.com/questions/44232566/add-l2-regularization-when-using-high-level-tf-layers/44238354#44238354
@@ -21,8 +20,6 @@ def cnn_1d(layer,
     layer = tf.keras.layers.Conv1D(num_filters, conv_filter_size, strides=stride, padding=padding,
                                    activation=activation,
                                    kernel_regularizer=tf.keras.regularizers.l2(kernel_regularizer))(layer)
-
-    # cnn_sum = tf.summary.histogram(name+'_activation',layer)
     return layer
 
 
@@ -87,29 +84,6 @@ def max_and_cnn_layer(layer, pl_size, num_filters, activation, name):
                                   activation=activation)(layer)
     concat = tf.keras.layers.concatenate([pool, conv], 3)
     return concat
-
-
-'''
-def dropout(layer, dropout_rate, training, name):
-    return tf.layers.dropout(layer, rate=dropout_rate, training=training, name=name)
-'''
-
-
-# Using average pooling
-def standard_fc(features, mode, params):
-    require_channel = 1
-    if len(params['channels']) != require_channel:
-        raise ValueError("This model need %s channels input, current input: %s" % (require_channel, params['channels']))
-
-    layer1 = fc_layer(features, num_outputs=params['channels'][0] * 64, activation=params['activation'])
-    layer2 = fc_layer(layer1, num_outputs=params['channels'][0] * 128, activation=params['activation'])
-    dropout2 = tf.keras.layers.Dropout(rate=params['dropout_rate'])(layer2)
-    layer3 = fc_layer(dropout2, num_outputs=params['channels'][0] * 64, activation=params['activation'])
-    dropout3 = tf.keras.layers.Dropout(rate=params['dropout_rate'])(layer3)
-    logits = fc_layer(dropout3, 3, activation=tf.sigmoid, name='predict')
-
-    print("Fully conneted layer")
-    return logits
 
 
 # Using max pooling
@@ -204,11 +178,8 @@ def softmax_focal_loss(labels_l, logits_l, gamma=2., alpha=4.):
 
 # Define Model
 def my_model(features, labels, mode, params, config):
-    # Input: (Batch_size,240,360,4)
-    if params['model_num'] == 0:
-        logits = standard_fc(features, mode, params)
-    else:
-        logits = model_cnn_1d(features, mode, params)
+    # Input: (Batch_size,300,8)
+    logits = model_cnn_1d(features, mode, params)
     # Predict Mode
     predicted_class = tf.argmax(logits, 1)
     if mode == tf.estimator.ModeKeys.PREDICT:
@@ -218,11 +189,12 @@ def my_model(features, labels, mode, params, config):
             'logits': logits
         }
         return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
-    labels = (labels - 1) / 2
+    labels = (labels - 1) / 2  # Convert score from 1,3,5 to 0,1,2
     one_hot_label = tf.one_hot(indices=tf.cast(labels, tf.int32), depth=3)
     labels = tf.cast(labels, tf.int64)
 
-    clamp_val = 5  # Max value cannot be more than 5 times of min
+    # Create loss weight to help imbalance dataset between each class
+    clamp_val = 5  # Max loss weight cannot be more than 5 times of min value
     if max(params['loss_weight']) / min(params['loss_weight']) > clamp_val:
         params['loss_weight'][params['loss_weight'].index(max(params['loss_weight']))] = clamp_val * min(
             params['loss_weight'])
@@ -230,22 +202,17 @@ def my_model(features, labels, mode, params, config):
                          dtype=tf.float32)
     loss_weight = tf.matmul(one_hot_label, weight, transpose_b=True, a_is_sparse=True)
 
-    loss = softmax_focal_loss(labels, logits, gamma=0., alpha=loss_weight)  # labels is int of class, logits is vector
+    # loss = softmax_focal_loss(labels, logits, gamma=0., alpha=loss_weight)  # Focal loss
 
-    # loss = tf.losses.sparse_softmax_cross_entropy(labels, logits,
-    #                                               weights=loss_weight)  # labels is int of class, logits is vector
+    loss = tf.losses.sparse_softmax_cross_entropy(labels, logits,
+                                                  weights=loss_weight)  # labels is int of class, logits is vector
 
     accuracy = tf.metrics.accuracy(labels, predicted_class)
 
     my_accuracy = tf.reduce_mean(tf.cast(tf.equal(labels, predicted_class), dtype=tf.float32))
     acc = tf.summary.scalar("accuracy_manual", my_accuracy)  # Number of correct answer
-    # acc2 = tf.summary.scalar("Accuracy_update", accuracy[1])
 
-    # img1 = tf.summary.image("Input_image1", tf.expand_dims(features[:, :, :, 0], 3))
-    # img2 = tf.summary.image("Input_image2", tf.expand_dims(features[:, :, :, 1], 3))
-    # img3 = tf.summary.image("Input_image3", tf.expand_dims(features[:, :, :, 2], 3))
-    # img4 = tf.summary.image("Input_image4", tf.expand_dims(features[:, :, :, 3], 3))
-
+    # Create parameters to show in Tensorboard
     ex_prediction = tf.summary.scalar("example_prediction", predicted_class[0])
     # print(predicted_class[0])
     ex_ground_truth = tf.summary.scalar("example_ground_truth", labels[0])
@@ -253,11 +220,7 @@ def my_model(features, labels, mode, params, config):
 
     d_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
     # print(d_vars)
-    if params['model_num'] == 0:
-        summary_name = ["fc1", "fc2", "fc3", "predict"]
-    else:
-        summary_name = ["conv1", "conv2", "conv3_1", "conv3_2", "conv3_3", "fc4",
-                        "fc5", "predict"]
+    summary_name = ["conv1", "conv2", "conv3_1", "conv3_2", "conv3_3", "fc4", "fc5", "predict"]
 
     if len(summary_name) == int(len(d_vars) / 2):
         for i in range(len(summary_name)):

@@ -18,8 +18,8 @@ from skopt.utils import use_named_args
 
 # from model import my_model
 from model_classify import my_model
-from get_data import train_input_fn, eval_input_fn, get_data_from_path
-from open_save_file import read_file, save_file
+from utils.get_data import train_input_fn, eval_input_fn, get_data_from_path
+from utils.open_save_file import read_file, save_file
 
 # Read tooth.config file
 parser = argparse.ArgumentParser()
