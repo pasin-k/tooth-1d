@@ -2,36 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="770e0596-62ef-4176-bd6c-3bded3f7c783" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/utils/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Dockerfile" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Dockerfile_coor" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/autoencoder.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cifar10_get_data.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cifar10_model.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cifar10_tfrecord.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cifar10_train.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/coor_get_data.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/coor_tooth.config" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/coor_tooth_workspace.config" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/custom_hook.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/get_data.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/get_data_v2.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/get_input.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/imgSave.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/imgtotfrecord.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/imgtotfrecord_v2.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/mnist.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/model_v2.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/open_save_file.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/plot_focal_loss.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pre_processing.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/report.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/segmentation.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/stlSlicer.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tooth.config" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tooth_workspace.config" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/train_v2.py" beforeDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -223,13 +194,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1554715602048</updated>
-    </task>
-    <task id="LOCAL-00077" summary="Implemented K fold cross validate (For one run and optimize run)">
-      <created>1561969482621</created>
-      <option name="number" value="00077" />
-      <option name="presentableId" value="LOCAL-00077" />
-      <option name="project" value="LOCAL" />
-      <updated>1561969482621</updated>
     </task>
     <task id="LOCAL-00078" summary="Implemented K fold cross validate (For one run and optimize run)">
       <created>1561978291714</created>
@@ -567,7 +531,14 @@
       <option name="project" value="LOCAL" />
       <updated>1568987243119</updated>
     </task>
-    <option name="localTasksCounter" value="126" />
+    <task id="LOCAL-00126" summary="Reorganize code">
+      <created>1569335650271</created>
+      <option name="number" value="00126" />
+      <option name="presentableId" value="LOCAL-00126" />
+      <option name="project" value="LOCAL" />
+      <updated>1569335650271</updated>
+    </task>
+    <option name="localTasksCounter" value="127" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -598,7 +569,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Implemented K fold cross validate (For one run and optimize run)" />
     <MESSAGE value="Debug eval tfrecord as train" />
     <MESSAGE value="Kfold also works on image. Print loss weight instead of histrogram to the txt file" />
     <MESSAGE value="Print loss weight instead of histrogram to the txt file" />
@@ -623,7 +593,8 @@
     <MESSAGE value="More output config, now print name in result" />
     <MESSAGE value="Class weight for each label score, now save in json for readability, easy to program" />
     <MESSAGE value="Save more config in json. Now compatible for multiple dataset combined" />
-    <option name="LAST_COMMIT_MESSAGE" value="Save more config in json. Now compatible for multiple dataset combined" />
+    <MESSAGE value="Reorganize code" />
+    <option name="LAST_COMMIT_MESSAGE" value="Reorganize code" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
 </project>
