@@ -22,7 +22,6 @@ ipython==7.2.0
 ipython-genutils==0.2.0
 ipywidgets==7.4.2
 jedi==0.13.2
-Jinja2==2.10
 jsonschema==2.6.0
 jupyter==1.0.0
 jupyter-client==5.2.4
@@ -43,7 +42,7 @@ mock==2.0.0
 nbconvert==5.3.1
 nbformat==4.4.0
 networkx==2.3
-notebook==5.7.4
+notebook==5.7.8
 numpy==1.16.4
 numpy-stl==2.9.0
 olefile==0.46
@@ -95,6 +94,5 @@ user-agent==0.1.9
 wcwidth==0.1.7
 webencodings==0.5.1
 weblib==0.1.30
-Werkzeug==0.14.1
 widgetsnbextension==3.4.2
 wrapt==1.11.2
