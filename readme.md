@@ -42,7 +42,8 @@ Use 'coor_train.py'. We have multiple mode available.
 
 ### Hyperparameters
 There are some hyperparameters and other parameters such as input directory, batch_size, steps, etc in `/cfg` folder. 
-We use protocol buffer to feed those parameters into our file. Look up `coor_tooth.config` as a reference.
+We use protocol buffer to feed those parameters into our file. Look up `coor_tooth.config` as a reference. 
+<br> Note: label_type is a score category which the instructor gave based on each criteria. You can ask for more info about these label. 
 
 
 ### Model Architecture
