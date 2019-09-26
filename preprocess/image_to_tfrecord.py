@@ -158,7 +158,7 @@ def write_tfrecord(all_data, file_dir, degree, coordinate_length):
     :param all_data: List of all data to save as tfrecords
     :param file_dir: Directory and file name to save (End with .tfrecords)
     :param degree: List of degree used
-    :param coordinate_length:
+    :param coordinate_length: Number of points on each file (Similar to image size but in 1D)
     :return:
     """
     with tf.python_io.TFRecordWriter(file_dir) as writer:

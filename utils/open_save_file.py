@@ -269,8 +269,6 @@ def save_plot(coor_list, out_directory, image_name, degree, file_type="png", sho
     if not os.path.exists(out_directory):
         os.makedirs(out_directory)
 
-    fig = plt.figure()
-
     for d in range(len(degree)):
         coor = coor_list[d]
         fullname = "%s_%d.%s" % (image_name, degree[d], file_type)
@@ -336,59 +334,16 @@ def save_coordinate(coor_list, out_directory, image_name, degree):
         np.save(output_name, coor)
 
 
-def split_train_test(grouped_address, example_grouped_address, tfrecord_name, configs, class_weight):
-    # Split into train and test set
-    # data_index = list(range(len(example_grouped_address)))
-    # train_index = []
-    # eval_index = []
+def split_train_test(packed_image, tfrecord_name, configs, class_weight):
+    train_amount = int(configs['train_eval_ratio'] * len(packed_image))  # Calculate amount of training data
 
-    train_amount = int(configs['train_eval_ratio'] * len(grouped_address))  # Calculate amount of training data
-    # # Open file and read the content in a list
-    # file_name = "./data/tfrecord/%s/%s_0.json" % (
-    #     tfrecord_name, tfrecord_name)
-    # if os.path.isfile(file_name):  # Check if file exist
-    #     with open(file_name) as filehandle:
-    #         data_loaded = json.load(filehandle)
-    #         for d in data_loaded['train']:
-    #             try:
-    #                 # print((example_grouped_address))
-    #                 index = example_grouped_address.index(d)
-    #                 train_index.append(index)
-    #                 data_index.remove(index)
-    #             except (ValueError, IndexError) as e:
-    #                 print("Cannot find file (Train): %s" % d)
-    #         for d in data_loaded['eval']:
-    #             try:
-    #                 index = example_grouped_address.index(d)
-    #                 eval_index.append(index)
-    #                 data_index.remove(index)
-    #             except (ValueError, IndexError) as e:
-    #                 print("Cannot find file (Eval): %s" % d)
-    #
-    #     print("Use %s train examples, %s eval examples from previous tfrecords as training" % (
-    #         len(train_index), len(eval_index)))
-
-    # # Split training and test (Split 80:20)
-    # train_amount = train_amount - len(train_index)
-    # if train_amount < 0:
-    #     train_amount = 0
-    #     print("imgtotfrecord: amount of training is not correct, might want to check")
-
-    # train_index.extend(data_index[0:train_amount])
-    # eval_index.extend(data_index[train_amount:])
-
-    # train_data = [grouped_address[i] for i in train_index]
-    # eval_data = [grouped_address[i] for i in eval_index]
-    train_data = grouped_address[0:train_amount]
-    eval_data = grouped_address[train_amount:]
-
-    # train_address = [example_grouped_address[i] for i in train_index]
-    # eval_address = [example_grouped_address[i] for i in eval_index]
+    train_data = packed_image[0:train_amount]
+    eval_data = packed_image[train_amount:]
 
     # Save names of files of train address
     file_name = "../data/tfrecord/%s/%s_0.json" % (tfrecord_name, tfrecord_name)
     with open(file_name, 'w') as filehandle:
-        # json.dump({"class_weight": class_weight, "train": train_address, "eval": eval_address}, filehandle, indent=4,
+        # json.dump({"class_weight": class_weight, "train": train_data, "eval": eval_data}, filehandle, indent=4,
         json.dump({"class_weight": class_weight}, filehandle, indent=4,
                   sort_keys=True,
                   separators=(',', ': '), ensure_ascii=False)
@@ -480,13 +435,8 @@ def get_input_and_label(tfrecord_name, dataset_folder, configs, seed, get_data=F
                 # temp_image_name.append([ex_g_add])
 
         # Zip, shuffle, unzip
-        # z = list(zip(temp_image, temp_image_name))
-        # random.Random(seed).shuffle(z)
-        # temp_image[:], temp_image_name[:] = zip(*z)
         random.Random(seed).shuffle(temp_image)
-        # temp_image[:]= zip(*temp_image)
         print(len(list(temp_name.keys())))
-        # grouped_address[:], example_grouped_address[:] = zip(*z)
 
         # Unpack data
         packed_image = [item for sublist in temp_image for item in sublist]
@@ -523,24 +473,24 @@ def get_input_and_label(tfrecord_name, dataset_folder, configs, seed, get_data=F
             class_weight[c] = c_weight.tolist()
 
     if k_fold is not None:  # If k-cross validation, output will be list of each k-fold
-        train_address_temp, eval_address_temp = split_kfold(packed_image, k_fold, seed)
-        train_address = []
-        eval_address = []
+        train_image_temp, eval_image_temp = split_kfold(packed_image, k_fold, seed)
+        train_image = []
+        eval_image = []
         for i in range(k_fold):
-            single_train_address = train_address_temp[i]
-            single_eval_address = eval_address_temp[i]
+            single_train_image = train_image_temp[i]
+            single_eval_image = eval_image_temp[i]
             if not get_data:  # Put in special format for writing tfrecord (pipeline)
-                single_train_address = tuple(
-                    [list(e) for e in zip(*single_train_address)])  # Convert to tuple of list[image address, label]
+                single_train_image = tuple(
+                    [list(e) for e in zip(*single_train_image)])  # Convert to tuple of list[image address, label]
 
-                single_eval_address = tuple(
-                    [list(e) for e in zip(*single_eval_address)])  # Convert to tuple of list[image address, label]
+                single_eval_image = tuple(
+                    [list(e) for e in zip(*single_eval_image)])  # Convert to tuple of list[image address, label]
                 print(
-                    "Train files: %d, Evaluate Files: %d" % (len(single_train_address[0]), len(single_eval_address[0])))
+                    "Train files: %d, Evaluate Files: %d" % (len(single_train_image[0]), len(single_eval_image[0])))
             else:
-                print("Train files: %d, Evaluate Files: %d" % (len(single_train_address), len(single_eval_address)))
-            train_address.append(single_train_address)
-            eval_address.append(single_eval_address)
+                print("Train files: %d, Evaluate Files: %d" % (len(single_train_image), len(single_eval_image)))
+            train_image.append(single_train_image)
+            eval_image.append(single_eval_image)
 
             # Save label distribution for weight balancing
             file_name = "../data/tfrecord/%s/%s_%s.json" % (tfrecord_name, tfrecord_name, i)
@@ -549,21 +499,20 @@ def get_input_and_label(tfrecord_name, dataset_folder, configs, seed, get_data=F
                           separators=(',', ': '), ensure_ascii=False)
 
     else:  # Normal operation, but will return as a list of one big data as well
-        train_address, eval_address = split_train_test(packed_image, image_name,
-                                                       tfrecord_name, configs, class_weight)
+        train_image, eval_image = split_train_test(packed_image, tfrecord_name, configs, class_weight)
         if not get_data:  # Put in special format for writing tfrecord (pipeline)
-            train_address = tuple(
-                [list(e) for e in zip(*train_address)])  # Convert to tuple of list[image address, label]
+            train_image = tuple(
+                [list(e) for e in zip(*train_image)])  # Convert to tuple of list[image address, label]
 
-            eval_address = tuple(
-                [list(e) for e in zip(*eval_address)])  # Convert to tuple of list[image address, label]
-            print("Train files: %d, Evaluate Files: %d" % (len(train_address[0]), len(eval_address[0])))
+            eval_image = tuple(
+                [list(e) for e in zip(*eval_image)])  # Convert to tuple of list[image address, label]
+            print("Train files: %d, Evaluate Files: %d" % (len(train_image[0]), len(eval_image[0])))
         else:
-            print("Train files: %d, Evaluate Files: %d" % (len(train_address), len(eval_address)))
-        train_address = [train_address]
-        eval_address = [eval_address]
+            print("Train files: %d, Evaluate Files: %d" % (len(train_image), len(eval_image)))
+        train_image = [train_image]
+        eval_image = [eval_image]
 
-    return train_address, eval_address
+    return train_image, eval_image
 
 
 def read_file(csv_dir, header=False):
@@ -577,8 +526,8 @@ def read_file(csv_dir, header=False):
     header_name = []
     data = []
     with open(csv_dir) as csvFile:
-        readCSV = csv.reader(csvFile, delimiter=',')
-        for row in readCSV:
+        read_csv = csv.reader(csvFile, delimiter=',')
+        for row in read_csv:
             if header:
                 header_name.append(row)
                 header = False
@@ -604,9 +553,9 @@ def read_score(csv_dir, data_type):
     data = []
     data_name = []
     with open(csv_dir) as csvFile:
-        readCSV = csv.reader(csvFile, delimiter=',')
+        read_csv = csv.reader(csvFile, delimiter=',')
         is_header = True
-        for row in readCSV:
+        for row in read_csv:
             if is_header:
                 header_name = row
                 data_index = [header_name.index(i) for i in data_type]  # If ValueError, data_type is not in csv header

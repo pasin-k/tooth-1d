@@ -3,10 +3,8 @@
   <component name="ChangeListManager">
     <list default="true" id="770e0596-62ef-4176-bd6c-3bded3f7c783" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cfg/coor_tooth.config" beforeDir="false" afterPath="$PROJECT_DIR$/cfg/coor_tooth.config" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/preprocess/image_to_tfrecord.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocess/image_to_tfrecord.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/preprocess/segmentation.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocess/segmentation.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/preprocess/stl_to_image.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocess/stl_to_image.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/get_input.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/get_input.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/open_save_file.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/open_save_file.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -63,7 +61,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.stl_to_image">
+  <component name="RunManager" selected="Python.coor_train">
     <configuration name="coor_train" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="my2DCNN" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -178,11 +176,11 @@
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.coor_train" />
         <item itemvalue="Python.stl_to_image" />
         <item itemvalue="Python.segmentation (1)" />
         <item itemvalue="Python.segmentation" />
         <item itemvalue="Python.image_to_tfrecord" />
-        <item itemvalue="Python.coor_train" />
       </list>
     </recent_temporary>
   </component>
@@ -196,13 +194,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1554715602048</updated>
-    </task>
-    <task id="LOCAL-00085" summary="Debug eval tfrecord as train">
-      <created>1562068783964</created>
-      <option name="number" value="00085" />
-      <option name="presentableId" value="LOCAL-00085" />
-      <option name="project" value="LOCAL" />
-      <updated>1562068783964</updated>
     </task>
     <task id="LOCAL-00086" summary="Debug eval tfrecord as train">
       <created>1562070003910</created>
@@ -540,7 +531,14 @@
       <option name="project" value="LOCAL" />
       <updated>1569477918641</updated>
     </task>
-    <option name="localTasksCounter" value="134" />
+    <task id="LOCAL-00134" summary="Reorganize code">
+      <created>1569485150669</created>
+      <option name="number" value="00134" />
+      <option name="presentableId" value="LOCAL-00134" />
+      <option name="project" value="LOCAL" />
+      <updated>1569485150669</updated>
+    </task>
+    <option name="localTasksCounter" value="135" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
