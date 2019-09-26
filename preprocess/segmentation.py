@@ -1,21 +1,20 @@
 import os
 import numpy as np
-from stl import mesh
 import sys
+from utils.stl_slicer import getSlicer
+from utils.open_save_file import get_file_name, save_file, get_label
+from preprocess.stl_to_image import point_sampling
 
 import matplotlib
 
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure
-from stlSlicer import getSlicer
-from open_save_file import get_file_name, get_label, save_file
-from pre_processing import fix_amount_of_point
 
 # TODO; Check if all file is created
 
-# augment_config = [0, 1, 2, 3, -1, -2, -3, 180, 179, 178, 177, 181, 182, 183]
-augment_config = [0]
+augment_config = [0, 1, 2, 3, -1, -2, -3, 180, 179, 178, 177, 181, 182, 183]
+# augment_config = [0]
 degree = [0, 45, 90, 135]
 
 
@@ -28,11 +27,12 @@ def find_slope(point1, point2):  # function to find top line
 
 def get_segment(points, mode=None, margin=0, file_name=None):
     """
-    Get a segments of cross section
+    Split tooth cross-section into 3 parts, left, right and top. Return one part back
     :param points: ndarray of N*2
     :param mode: String, [left, right, top, debug] -> select which part to return
     :param margin: Float, amount of margin from minimum line
-    :return: ndarray of segmented image or saved image (Not sure)
+    :param file_name: Name of image
+    :return: ndarray of segmented image or saved image
     """
     # Turn into numpy
     points = np.asarray(points)
@@ -44,7 +44,7 @@ def get_segment(points, mode=None, margin=0, file_name=None):
     left_point = points[x_min_index, :]
     right_point = points[x_max_index, :]
 
-    # Initial slope, (+20 points to avoid corner of the curve which could provide a unusually large slope)
+    # Initial slope, (Move by +20 points to avoid corner of the curve which could provide a unusually large slope)
     top_left_index = x_min_index + 20
     top_right_index = x_max_index - 20
     left_slope = find_slope(left_point, points[top_left_index])
@@ -65,11 +65,6 @@ def get_segment(points, mode=None, margin=0, file_name=None):
             top_right_index = i
 
     # Current coordinates: x_min_index, top_left_index, x_max_index, top_right_index
-
-    #     # saves the points from condition above
-    #     FigureCoords = np.asarray(B)
-    #     np.save(file=save_path + '1dfigs/' + directory[1] + '_' + str(cross_sections[ind]), arr=FigureCoords)
-
     if mode == "left":
         # If there is margin, choose points slightly below x_min_index
         if margin > 0:
@@ -133,17 +128,18 @@ def get_segment(points, mode=None, margin=0, file_name=None):
     return segmented_points
 
 
-def get_segment_multiple(name, margin=0,
-                         save_base_dir="/home/pasin/Documents/Google_Drive/Aa_TIT_LAB_Comp/Library/Tooth/Tooth/Model/my2DCNN/data/segment_2",
-                         point_only=False, fix_point=None, no_line=False,
-                         csv_dir='../global_data/Ground Truth Score_new.csv'):
+def get_segment_multiple(name, margin=0, point_only=False, fix_point=None, no_line=False,
+                         save_base_dir="../data/segment_2",
+                         csv_dir='../../global_data/Ground Truth Score_new.csv'):
     """
     Get a segments of cross section from multiple files, used to train
-    :param points: ndarray of N*2
+    :param name: Stl directory
     :param margin: Float, amount of margin from minimum line
-    :param base_dir: String, directory to save file and everything
     :param point_only: Boolean, save only point file
-    :param fix_point: integer, number of point for .npy file. None if doesn't want normalization
+    :param fix_point: integer, number of point for .npy file. None if doesn't want sampling
+    :param no_line: Boolean, True if want to show cutoff line between sections
+    :param save_base_dir: String, directory to save file and everything
+    :param csv_dir: Directory of score file (.csv format)
     :return: ndarray of segmented image or saved image (Not sure)
     """
     save_dir = [save_base_dir + "/full/", save_base_dir + "/left/", save_base_dir + "/left_point/",
@@ -153,8 +149,6 @@ def get_segment_multiple(name, margin=0,
         if not os.path.exists(s):
             os.makedirs(s)
     name_dir, image_name = get_file_name(folder_name=name, file_name="PreparationScan.stl")
-
-    cnt = 0
 
     error_file_names_all = []  # Used to record error file
 
@@ -182,13 +176,11 @@ def get_segment_multiple(name, margin=0,
     label_name_all = []
 
     for image_index, (n_name, im_name) in enumerate(zip(name_dir, image_name)):
-        if cnt % 50 == 0:
-            print("Progress: %s out of %s, current image: %s" % (cnt, len(image_name), im_name))
+        if image_index % 50 == 0:
+            print("Progress: %s out of %s, current image: %s" % (image_index, len(image_name), im_name))
         label_name_temp = []
-        cnt += 1
+        image_index += 1
         points_all = getSlicer(n_name, 0, degree, augment=augment_config, axis=1)
-
-        # error_file_names = []  # Names of file that cannot get cross-section image
 
         for index, point in enumerate(points_all):  # Enumerate over all augmentation points
             augment_val = augment_config[index]
@@ -234,11 +226,6 @@ def get_segment_multiple(name, margin=0,
                             top_right_index = i
 
                     # Current coordinates: x_min_index, top_left_index, x_max_index, top_right_index
-
-                    #     # saves the points from condition above
-                    #     FigureCoords = np.asarray(B)
-                    #     np.save(file=save_path + '1dfigs/' + directory[1] + '_' + str(cross_sections[ind]), arr=FigureCoords)
-
                     # Plotting
                     if point_only:
                         # Left
@@ -251,7 +238,7 @@ def get_segment_multiple(name, margin=0,
                         # else:
                         #     segmented_points = points[x_min_index:top_left_index + 1, :]
                         if fix_point is not None:
-                            segmented_points = fix_amount_of_point(segmented_points, fix_point)
+                            segmented_points = point_sampling(segmented_points, fix_point)
 
                         np.save(save_base_dir + "/left_point/" + file_name_point, segmented_points)
 
@@ -265,13 +252,13 @@ def get_segment_multiple(name, margin=0,
                         #     segmented_points = points[top_right_index:x_max_index + 1, :]
 
                         if fix_point is not None:
-                            segmented_points = fix_amount_of_point(segmented_points, fix_point)
+                            segmented_points = point_sampling(segmented_points, fix_point)
                         np.save(save_base_dir + "/right_point/" + file_name_point, segmented_points)
 
                         # Top
                         segmented_points = points[top_left_index:top_right_index, :]
                         if fix_point is not None:
-                            segmented_points = fix_amount_of_point(segmented_points, fix_point)
+                            segmented_points = point_sampling(segmented_points, fix_point)
                         np.save(save_base_dir + "/top_point/" + file_name_point, segmented_points)
                     else:
                         dpi = 100
@@ -329,11 +316,10 @@ def get_segment_multiple(name, margin=0,
 
                         ax.plot(x, y, linewidth=1.0)
                         ax.plot(x1, yleft, '-c')
-                        # ax.plot(x1, yright, '-r')
                         ax.plot(x1, ybottom_left_margin, '-py')
                         ax.plot(x1, ybottom_left, '-y')
                         if fix_point is not None:
-                            segmented_points = fix_amount_of_point(segmented_points, fix_point)
+                            segmented_points = point_sampling(segmented_points, fix_point)
                         fig.savefig(save_base_dir + "/left/" + file_name, bbox_inches='tight')
                         np.save(save_base_dir + "/left_point/" + file_name_point, segmented_points)
 
@@ -358,11 +344,10 @@ def get_segment_multiple(name, margin=0,
                         ax.plot(x1, ybottom_right_margin, '-pb')
                         ax.plot(x1, ybottom_right, '-b')
                         if fix_point is not None:
-                            segmented_points = fix_amount_of_point(segmented_points, fix_point)
+                            segmented_points = point_sampling(segmented_points, fix_point)
                         fig.savefig(save_base_dir + "/right/" + file_name, bbox_inches='tight')
                         np.save(save_base_dir + "/right_point/" + file_name_point, segmented_points)
                         plt.clf()
-                        # plt.close()
 
                         # Top
                         ax = fig.gca()
@@ -375,21 +360,17 @@ def get_segment_multiple(name, margin=0,
                         ax.set_xlim([min_x, max_x])
                         ax.plot(x1, yleft, '-c')
                         ax.plot(x1, yright, '-r')
-                        # ax.plot(x1, ybottom_left_margin, '-py')
-                        # ax.plot(x1, ybottom_left, '-y')
                         if fix_point is not None:
-                            segmented_points = fix_amount_of_point(segmented_points, fix_point)
+                            segmented_points = point_sampling(segmented_points, fix_point)
                         fig.savefig(save_base_dir + "/top/" + file_name, bbox_inches='tight')
                         np.save(save_base_dir + "/top_point/" + file_name_point, segmented_points)
                         plt.clf()
                         plt.close()
-            # plt.close()
-            # Add all label (augmented included)
 
+        # Add all label (augmented included)
         for key, value in label.items():
             label_all[key] += [value[image_index] for _ in range(len(label_name_temp))]
         label_name_all += label_name_temp  # Also add label name to the big one
-        # error_file_names_all.append(error_file_names)
 
     label_all["name"] = label_name_all
     for s in save_dir:
@@ -407,7 +388,7 @@ def get_segment_multiple(name, margin=0,
 if __name__ == '__main__':
     # NOTE: Run on jupyter notebook
     get_segment_multiple(margin=0,
-                         name='../global_data/stl_data',
-                         save_base_dir="/home/pasin/Documents/Google_Drive/Aa_TIT_LAB_Comp/Library/Tooth/Tooth/Model/my2DCNN/data/segment_okuyama",
-                         # csv_dir="/home/pasin/Documents/Link_to_Tooth/Tooth/Model/global_data/Ground Truth Score_debug.csv",
+                         name='../../global_data/stl_data',
+                         save_base_dir="../data/segment_14",
+                         # csv_dir="../../global_data/Ground Truth Score_debug.csv",
                          point_only=False, fix_point=50, no_line=True)

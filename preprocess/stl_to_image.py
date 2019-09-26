@@ -5,8 +5,7 @@ After running this, use image_to_tfrecord.py to turn images into tfrecord
 
 # Import Libraries
 import os
-from utils.open_save_file import save_plot, save_coordinate, save_file
-from utils.get_input import get_cross_section
+from utils.open_save_file import save_plot, save_coordinate, save_file, get_cross_section
 import numpy as np
 
 augment_config = [0, -1, -2, -3, 1, 2, 3, 180, 179, 178, 177, 181, 182, 183]
@@ -156,8 +155,8 @@ if __name__ == '__main__':
     # data_type, stat_type will not be used unless you want to look at lbl value
     points_all, lbl_all, lbl_name_all, err_name_all, header = get_cross_section(degree=degree,
                                                                                 augment_config=augment_config,
-                                                                                # folder_name='../global_data/stl_data_debug',
-                                                                                # csv_dir='../global_data/Ground Truth Score_debug.csv',
+                                                                                # folder_name='../../global_data/stl_data_debug',
+                                                                                # csv_dir='../../global_data/Ground Truth Score_debug.csv',
                                                                                 )
     if is_fix_amount:
         fix_amount = fix_amount + 1  # Compensate for the missing data
@@ -170,13 +169,13 @@ if __name__ == '__main__':
 
     if save_img:
         print("Start saving images...")
-        image_dir = "./data/cross_section_14augment"
+        image_dir = "../data/cross_section_14augment"
         save_image(points_all, lbl_name_all, err_name_all, out_directory=image_dir)
         save_file(os.path.join(image_dir, "score.csv"), lbl_all, data_format="dict_list", field_name=header)
 
     if save_coor:
         print("Start saving coordinates...")
-        file_dir = "./data/coordinate_14augment"
+        file_dir = "../data/coordinate_14augment"
         save_stl_point(points_all, lbl_name_all, err_name_all, out_directory=file_dir)
         save_file(os.path.join(file_dir, "score.csv"), lbl_all, data_format="dict_list", field_name=header)
     print("stl_to_image.py: done")

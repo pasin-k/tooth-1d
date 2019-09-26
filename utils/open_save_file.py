@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib as mpl
 from sklearn.model_selection import KFold, StratifiedKFold
 from sklearn.utils.class_weight import compute_class_weight
+from utils.stl_slicer import getSlicer
 
 mpl.use('TkAgg')
 import matplotlib.pyplot as plt
@@ -41,6 +42,188 @@ def get_file_name(folder_name='../global_data/', file_name=None, exception_file=
     folder_dir.sort()
     print("get_file_name: Uploaded %d file names" % len(file_dir))
     return file_dir, folder_dir
+
+
+def get_label(dataname, stattype, double_data=False, one_hotted=False, normalized=False,
+              file_dir='../global_data/Ground Truth Score_new.csv'):
+    """
+    Get label of Ground Truth Score.csv file
+    :param dataname:    String, Type of label e.g. [Taper/Occ]
+    :param stattype:    String, Label measurement e.g [Average/Median]
+    :param double_data: Boolean, Double amount of data of label, for augmentation **Not using anymore
+    :param one_hotted:  Boolean, Return output as one-hot data
+    :param normalized:  Boolean, Normalize output to 0-1 (Not applied for one hot)
+    :param file_dir:    Directory of csv file
+    :return: labels     List of score of requested dat
+             label_name List of score name, used to identify order of data
+    """
+    label_name_key = ["Occ_B", "Occ_F", "Occ_L", "Occ_Sum", "BL", "MD", "Taper_Sum", "Integrity", "Width", "Surface",
+                      "Sharpness"]
+    label_name = dict()
+    for i, key in enumerate(label_name_key):
+        label_name[key] = 3 * i
+    label_max_score = {"Occ_B": 5, "Occ_F": 5, "Occ_L": 5, "Occ_Sum": 15,
+                       "BL": 5, "MD": 5, "Taper_Sum": 10, "Integrity": 5, "Width": 5, "Surface": 5, "Sharpness": 5}
+    stat_type = {"average": 1, "median": 2}
+
+    try:
+        data_column = label_name[dataname]
+    except KeyError:
+        raise Exception(
+            "Wrong dataname, Type as %s, Valid name: %s" % (dataname, label_name_key))
+    try:
+        if one_hotted & (stattype == 1):
+            stattype = 2
+            print("Note: One-hot mode only supported median")
+        label_column = data_column
+        avg_column = data_column + 1
+        data_column = data_column + stat_type[stattype]  # Shift the interested column by one or two, depends on type
+    except KeyError:
+        raise Exception("Wrong stattype, Type as %s, Valid name: (\"average\",\"median\")" % stattype)
+
+    max_score = label_max_score[dataname]
+    labels_name = []
+    labels_data = []
+    avg_data = []
+    print("get_label: Import from %s" % os.path.join(file_dir))
+    with open(file_dir) as csvfile:
+        read_csv = csv.reader(csvfile, delimiter=',')
+        header = True
+        for row in read_csv:
+            if header:
+                header = False
+            else:
+                try:
+                    if row[data_column] != '':
+                        label = row[label_column]
+                        val = row[data_column]
+                        avg_val = row[avg_column]
+                        if one_hotted or (not normalized):  # Don't normalize if output is one hot encoding
+                            normalized_value = int(val)  # Turn string to int
+                        else:
+                            normalized_value = float(val) / max_score  # Turn string to float
+                        labels_name.append(label)
+                        labels_data.append(normalized_value)
+                        avg_data.append(float(avg_val))
+                except IndexError:
+                    print("Data incomplete, no data of %s, or missing label in csv file" % file_dir)
+
+    # If consider median data on anything except Taper_Sum/Occ_sum and does not normalized
+    if stattype is "median" and (not normalized) and dataname is not "Occ_Sum" and dataname is not "Taper_Sum":
+        labels_data = readjust_median_label(labels_data, avg_data)
+
+    # Sort data by name
+    labels_name, labels_data = zip(*sorted(zip(labels_name, labels_data)))
+    labels_name = list(labels_name)  # Turn tuples into list
+    labels_data = list(labels_data)
+
+    # Duplicate value if required
+    if double_data:
+        labels_data = [val for val in labels_data for _ in (0, 1)]
+
+    # Turn to one hotted if required
+    if one_hotted:
+        one_hot_labels = list()
+        for label in labels_data:
+            label = int(label)
+            one_hot_label = np.zeros(max_score + 1)
+            one_hot_label[label] = 1
+            one_hot_labels.append(one_hot_label)
+        print("get_label: Upload one-hotted label completed (as a list): %d examples" % (len(one_hot_labels)))
+        return one_hot_labels, labels_name
+    else:
+        print("get_label: Upload non one-hotted label completed (as a list): %d examples" % (len(labels_data)))
+        return labels_data, labels_name
+
+
+def get_cross_section(degree, augment_config=None, folder_name='../../global_data/stl_data',
+                      file_name="PreparationScan.stl",
+                      csv_dir='../../global_data/Ground Truth Score_new.csv'):
+    """
+    Get coordinates of stl file and label from csv file
+    :param degree:          List of rotation angles
+    :param augment_config:  List of all augmentation angles
+    :param folder_name:     String, folder directory of stl file
+    :param csv_dir:         String, file directory of label (csv file)
+    :param file_name:       String, filename can be None
+    :return:
+    stl_points_all          List of all point (ndarray)
+    label_all               List of label
+    label_name_all          List of label name (id)
+    error_file_names_all    List of label name that has error
+    """
+    if augment_config is None:
+        augment_config = [0]
+
+    # Get data and transformed to cross-section image.
+    data_type = ["Occ_B", "Occ_F", "Occ_L", "Occ_Sum", "BL", "MD", "Taper_Sum", "Integrity", "Width", "Surface",
+                 "Sharpness"]  # CSV header
+    stat_type = ["median"]
+
+    name_dir, image_name = get_file_name(folder_name=folder_name, file_name=file_name)
+
+    label = dict()
+    label_header = ["name"]
+
+    for d in data_type:
+        for s in stat_type:
+            l, label_name = get_label(d, s, double_data=False, one_hotted=False, normalized=False, file_dir=csv_dir)
+            label[d + "_" + s] = l
+            label_header.append(d + "_" + s)
+
+    # Number of data should be the same as number of label
+    if image_name != label_name:
+        print(image_name)
+        print(label_name)
+        diff = list(set(image_name).symmetric_difference(set(label_name)))
+        raise Exception("ERROR, image and label not similar: %d images, %d labels. Possible missing files: %s"
+                        % (len(image_name), (len(label_name)), diff))
+
+    # To verify number of coordinates
+    min_point = 1000
+    max_point = 0
+
+    stl_points_all = []
+    label_all = {k: [] for k in dict.fromkeys(label.keys())}
+    label_name_all = []
+    error_file_names_all = []
+    for i in range(len(name_dir)):
+        # Prepare two set of list, one for data, another for augmented data
+        label_name_temp = []
+        points_all = getSlicer(name_dir[i], 0, degree, augment=augment_config, axis=1)
+        stl_points = []
+        error_file_names = []  # Names of file that cannot get cross-section image
+
+        for index, point in enumerate(points_all):
+            augment_val = augment_config[index]
+            if augment_val < 0:
+                augment_val = "n" + str(abs(augment_val))
+            else:
+                augment_val = str(abs(augment_val))
+            if point is None:  # If the output has error, remove label of that file
+                error_file_names.append(image_name[i] + "_" + augment_val)
+            else:
+                stl_points.append(point)
+                label_name_temp.append(image_name[i] + "_" + augment_val)
+                if len(point[0]) > max_point:
+                    max_point = len(point[0])
+                if len(point[0]) < min_point:
+                    min_point = len(point[0])
+
+        # Add all label (augmented included)
+        for key, value in label.items():
+            label_all[key] += [value[i] for _ in range(len(stl_points))]
+        stl_points_all += stl_points  # Add these points to the big one
+        label_name_all += label_name_temp  # Also add label name to the big one
+        error_file_names_all += error_file_names  # Same as error file
+    label_all["name"] = label_name_all
+
+    # The output is list(examples) of list(degrees) of numpy array (N*2 coordinates)
+    for label_name in label_name_all:
+        print("Finished with %d examples" % (len(label_name)))
+
+    print("Max amount of coordinates: %s, min  coordinates: %s" % (max_point, min_point))
+    return stl_points_all, label_all, label_name_all, error_file_names_all, label_header
 
 
 def readjust_median_label(label, avg_data):
@@ -98,7 +281,7 @@ def save_plot(coor_list, out_directory, image_name, degree, file_type="png", sho
         fig = plt.figure(figsize=(img_size / dpi, img_size / dpi), dpi=dpi)
         ax = fig.gca()
         ax.set_autoscale_on(False)
-        min_x, max_x, min_y, max_y = -5, 5, -6.4, 6.4
+        min_x, max_x, min_y, max_y = -6.5, 6.5, -6.5, 6.5
         if min(coor[:, 0]) < min_x or max(coor[:, 0]) > max_x:
             ax.plot(coor[:, 0], coor[:, 1], linewidth=1.0)
             ax.axis([min_x - 1, max_x + 1, min_y, max_y])
@@ -238,7 +421,7 @@ def split_kfold(grouped_address, k_num, seed=0):
     return train_address, eval_address
 
 
-def get_input_and_label(tfrecord_name, dataset_folder, configs, seed, get_data=False, k_cross=False, k_num=5):
+def get_input_and_label(tfrecord_name, dataset_folder, configs, seed, get_data=False, k_fold=None):
     """
     This function is specifically used in image_to_tfrecord, fetching
     :param tfrecord_name:   String, Directory of output file
@@ -246,8 +429,7 @@ def get_input_and_label(tfrecord_name, dataset_folder, configs, seed, get_data=F
     :param configs:         Dictionary, containing {numdeg, train_eval_ratio, data_type}
     :param seed:            Integer, to determine randomness
     :param get_data:        Boolean, if true will return raw data instead of file name
-    :param k_cross:         Boolean, if true will use K-fold cross validation, else
-    :param k_num:           Integer, parameter for KFold
+    :param k_fold:          Integer, parameter for KFold. If None, will have no K-fold
     :return:                Train, Eval: Tuple of list[image address, label]. Also save some txt file
                             loss_weight: numpy array use for loss weight
     """
@@ -282,7 +464,7 @@ def get_input_and_label(tfrecord_name, dataset_folder, configs, seed, get_data=F
     packed_image = []
     for i in range(len(labels)):
         packed_image.append([image_address[i * numdeg:(i + 1) * numdeg], labels[i]])
-    if not k_cross:
+    if k_fold is None:
         # Pack data
         temp_image = []  # New temporary address packs augmented data together
         # temp_image_name = []
@@ -340,11 +522,11 @@ def get_input_and_label(tfrecord_name, dataset_folder, configs, seed, get_data=F
                             c_weight = np.concatenate(c_weight, 1)
             class_weight[c] = c_weight.tolist()
 
-    if k_cross:  # If k_cross mode, output will be list
-        train_address_temp, eval_address_temp = split_kfold(packed_image, k_num, seed)
+    if k_fold is not None:  # If k-cross validation, output will be list of each k-fold
+        train_address_temp, eval_address_temp = split_kfold(packed_image, k_fold, seed)
         train_address = []
         eval_address = []
-        for i in range(k_num):
+        for i in range(k_fold):
             single_train_address = train_address_temp[i]
             single_eval_address = eval_address_temp[i]
             if not get_data:  # Put in special format for writing tfrecord (pipeline)
@@ -366,7 +548,7 @@ def get_input_and_label(tfrecord_name, dataset_folder, configs, seed, get_data=F
                 json.dump({"class_weight": class_weight}, filehandle, indent=4, sort_keys=True,
                           separators=(',', ': '), ensure_ascii=False)
 
-    else:
+    else:  # Normal operation, but will return as a list of one big data as well
         train_address, eval_address = split_train_test(packed_image, image_name,
                                                        tfrecord_name, configs, class_weight)
         if not get_data:  # Put in special format for writing tfrecord (pipeline)
@@ -378,6 +560,8 @@ def get_input_and_label(tfrecord_name, dataset_folder, configs, seed, get_data=F
             print("Train files: %d, Evaluate Files: %d" % (len(train_address[0]), len(eval_address[0])))
         else:
             print("Train files: %d, Evaluate Files: %d" % (len(train_address), len(eval_address)))
+        train_address = [train_address]
+        eval_address = [eval_address]
 
     return train_address, eval_address
 
@@ -646,103 +830,5 @@ def get2DImage(directory, name, singleval=False, realVal=False, threshold=253):
         return grayim
 '''
 
-'''
-def get_label(dataname, stattype, double_data=False, one_hotted=False, normalized=False,
-              file_dir='../global_data/Ground Truth Score_new.csv'):
-    """
-    Get label of Ground Truth Score.csv file
-    :param dataname:    String, Type of label e.g. [Taper/Occ]
-    :param stattype:    String, Label measurement e.g [Average/Median]
-    :param double_data: Boolean, Double amount of data of label, for augmentation **Not using anymore
-    :param one_hotted:  Boolean, Return output as one-hot data
-    :param normalized:  Boolean, Normalize output to 0-1 (Not applied for one hot)
-    :param file_dir:    Directory of csv file
-    :return: labels     List of score of requested dat
-             label_name List of score name, used to identify order of data
-    """
-    label_name_key = ["Occ_B", "Occ_F", "Occ_L", "Occ_Sum", "BL", "MD", "Taper_Sum", "Integrity", "Width", "Surface",
-                      "Sharpness"]
-    label_name = dict()
-    for i, key in enumerate(label_name_key):
-        label_name[key] = 3 * i
-    label_max_score = {"Occ_B": 5, "Occ_F": 5, "Occ_L": 5, "Occ_Sum": 15,
-                       "BL": 5, "MD": 5, "Taper_Sum": 10, "Integrity": 5, "Width": 5, "Surface": 5, "Sharpness": 5}
-    stat_type = {"average": 1, "median": 2}
 
-    try:
-        data_column = label_name[dataname]
-    except:
-        raise Exception(
-            "Wrong dataname, Type as %s, Valid name: %s" % (dataname, label_name_key))
-    try:
-        if one_hotted & (stattype == 1):
-            stattype = 2
-            print("Note: One-hot mode only supported median")
-        label_column = data_column
-        avg_column = data_column + 1
-        data_column = data_column + stat_type[stattype]  # Shift the interested column by one or two, depends on type
-    except:
-        raise Exception("Wrong stattype, Type as %s, Valid name: (\"average\",\"median\")" % stattype)
 
-    max_score = label_max_score[dataname]
-    labels_name = []
-    labels_data = []
-    avg_data = []
-    print("get_label: Import from %s" % os.path.join(file_dir))
-    with open(file_dir) as csvfile:
-        readCSV = csv.reader(csvfile, delimiter=',')
-        header = True
-        for row in readCSV:
-            if header:
-                header = False
-            else:
-                try:
-                    if row[data_column] != '':
-                        label = row[label_column]
-                        val = row[data_column]
-                        avg_val = row[avg_column]
-                        if one_hotted or (not normalized):  # Don't normalize if output is one hot encoding
-                            normalized_value = int(val)  # Turn string to int
-                        else:
-                            normalized_value = float(val) / max_score  # Turn string to float
-                        labels_name.append(label)
-                        labels_data.append(normalized_value)
-                        avg_data.append(float(avg_val))
-                except IndexError:
-                    print("Data incomplete, no data of %s, or missing label in csv file" % file_dir)
-
-    # If consider median data on anything except Taper_Sum/Occ_sum and does not normalized
-    if stattype is "median" and (not normalized) and dataname is not "Occ_Sum" and dataname is not "Taper_Sum":
-        labels_data = readjust_median_label(labels_data, avg_data)
-
-    # Sort data by name
-    labels_name, labels_data = zip(*sorted(zip(labels_name, labels_data)))
-    labels_name = list(labels_name)  # Turn tuples into list
-    labels_data = list(labels_data)
-
-    # Duplicate value if required
-    if double_data:
-        labels_data = [val for val in labels_data for _ in (0, 1)]
-
-    # Turn to one hotted if required
-    if one_hotted:
-        one_hot_labels = list()
-        for label in labels_data:
-            label = int(label)
-            one_hot_label = np.zeros(max_score + 1)
-            one_hot_label[label] = 1
-            one_hot_labels.append(one_hot_label)
-        print("get_label: Upload one-hotted label completed (as a list): %d examples" % (len(one_hot_labels)))
-        return one_hot_labels, labels_name
-    else:
-        # if filetype != 'list':  # If not list, output will be as numpy instead
-        #     size = len(labels)
-        #     labelnum = np.zeros((size,))
-        #     for i in range(0, size):
-        #         labelnum[i] = labels[i]
-        #     labels = labelnum
-        #     print("Upload label completed (as a numpy): %d examples" % (size))
-        # else:
-        print("get_label: Upload non one-hotted label completed (as a list): %d examples" % (len(labels_data)))
-        return labels_data, labels_name
-'''
