@@ -2,15 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="770e0596-62ef-4176-bd6c-3bded3f7c783" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/evaluate.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cfg/coor_tooth.config" beforeDir="false" afterPath="$PROJECT_DIR$/cfg/coor_tooth.config" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cfg/coor_tooth_workspace.config" beforeDir="false" afterPath="$PROJECT_DIR$/cfg/coor_tooth_workspace.config" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/coor_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/coor_model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/coor_train.py" beforeDir="false" afterPath="$PROJECT_DIR$/coor_train.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/preprocess/image_to_tfrecord.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocess/image_to_tfrecord.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/preprocess/segmentation.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocess/segmentation.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/coor_get_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/coor_get_data.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -199,13 +191,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1554715602048</updated>
-    </task>
-    <task id="LOCAL-00087" summary="Kfold also works on image. Print loss weight instead of histrogram to the txt file">
-      <created>1562071783293</created>
-      <option name="number" value="00087" />
-      <option name="presentableId" value="LOCAL-00087" />
-      <option name="project" value="LOCAL" />
-      <updated>1562071783293</updated>
     </task>
     <task id="LOCAL-00088" summary="Print loss weight instead of histrogram to the txt file">
       <created>1562073351107</created>
@@ -543,7 +528,14 @@
       <option name="project" value="LOCAL" />
       <updated>1569488606009</updated>
     </task>
-    <option name="localTasksCounter" value="136" />
+    <task id="LOCAL-00136" summary="Improve code to prevent bug from config">
+      <created>1570096813110</created>
+      <option name="number" value="00136" />
+      <option name="presentableId" value="LOCAL-00136" />
+      <option name="project" value="LOCAL" />
+      <updated>1570096813110</updated>
+    </task>
+    <option name="localTasksCounter" value="137" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -574,7 +566,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Debug eval tfrecord as train" />
     <MESSAGE value="Kfold also works on image. Print loss weight instead of histrogram to the txt file" />
     <MESSAGE value="Print loss weight instead of histrogram to the txt file" />
     <MESSAGE value="Now can do multiple data augmentation" />
@@ -599,7 +590,8 @@
     <MESSAGE value="Class weight for each label score, now save in json for readability, easy to program" />
     <MESSAGE value="Save more config in json. Now compatible for multiple dataset combined" />
     <MESSAGE value="Reorganize code" />
-    <option name="LAST_COMMIT_MESSAGE" value="Reorganize code" />
+    <MESSAGE value="Improve code to prevent bug from config" />
+    <option name="LAST_COMMIT_MESSAGE" value="Improve code to prevent bug from config" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
 </project>
