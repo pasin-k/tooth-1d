@@ -6,7 +6,6 @@ import numpy as np
 import matplotlib as mpl
 from sklearn.model_selection import KFold, StratifiedKFold
 from sklearn.utils.class_weight import compute_class_weight
-from utils.stl_slicer import getSlicer
 
 mpl.use('TkAgg')
 import matplotlib.pyplot as plt
@@ -152,6 +151,8 @@ def get_cross_section(degree, augment_config=None, folder_name='../../global_dat
     label_name_all          List of label name (id)
     error_file_names_all    List of label name that has error
     """
+    from utils.stl_slicer import getSlicer
+
     if augment_config is None:
         augment_config = [0]
 
