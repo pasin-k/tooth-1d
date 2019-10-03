@@ -9,9 +9,7 @@ import matplotlib
 
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-from matplotlib.pyplot import figure
 
-# TODO; Check if all file is created
 
 augment_config = [0, 1, 2, 3, -1, -2, -3, 180, 179, 178, 177, 181, 182, 183]
 # augment_config = [0]
@@ -383,6 +381,7 @@ def get_segment_multiple(name, margin=0, point_only=False, fix_point=None, no_li
             filehandle.write('%s\n' % len(degree))
             filehandle.write('%s\n' % len(augment_config))
         save_file(s + "score.csv", label_all, data_format="dict_list", field_name=label_header)
+    print("Finish saving file at %s" % save_base_dir)
 
 
 if __name__ == '__main__':

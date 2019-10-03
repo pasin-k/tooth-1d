@@ -40,6 +40,11 @@ run_configs = {'batch_size': configs.batch_size,
                'label_type': configs.label_type,
                'comment': configs.comment}
 
+# Change folder of input_path into a filename
+assert os.path.isdir(run_configs['input_path']), \
+    "Input path should be folder directory, not file directory %s" % run_configs['input_path']
+run_configs['input_path'] = os.path.join(run_configs['input_path'], os.path.basename(run_configs['input_path']))
+
 run_mode = configs.run_mode  # Run mode (Single, search, etc.)
 
 run_configs = check_exist(run_configs, batch_size=None, checkpoint_min=10, early_stop_step=5000,
@@ -64,9 +69,9 @@ def run(model_params):
     #                               channels (in CNN case) is [CNN channels, Dense channels]
 
     # Type in file name
-    train_data_path = run_configs['input_path'].replace('.tfrecords', '') + '_train.tfrecords'
-    eval_data_path = run_configs['input_path'].replace('.tfrecords', '') + '_eval.tfrecords'
-    info_path = run_configs['input_path'].replace('.tfrecords', '.json')
+    train_data_path = run_configs['input_path'] + '_train.tfrecords'
+    eval_data_path = run_configs['input_path'] + '_eval.tfrecords'
+    info_path = run_configs['input_path'] + '.json'
 
     # Add some more parameters from config file
     with open(info_path) as filehandle:
@@ -157,7 +162,7 @@ def run(model_params):
     info_dict['data_degree'] = model_params['data_degree']
 
     # Save information in config.csv
-    with open((model_params['result_path'] + "config.csv"), "w") as csvfile:
+    with open(os.path.join(model_params['result_path'], "config.csv"), "w") as csvfile:
         writer = csv.writer(csvfile)
         for key, val in info_dict.items():
             writer.writerow([key, val])
@@ -213,8 +218,8 @@ def fitness(learning_rate, dropout_rate, activation, channels):
                  'dropout_rate': dropout_rate,
                  'activation': activation_dict[activation],
                  'channels': [channels, 2],
-                 'result_path': run_configs['result_path_base'] +
-                                datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S") + "/",
+                 'result_path': os.path.join(run_configs['result_path_base'],
+                                             datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S")),
                  'result_file_name': 'result.csv',
                  }
 
@@ -228,8 +233,9 @@ def fitness(learning_rate, dropout_rate, activation, channels):
 def run_hyper_parameter_optimize():
     # Name of the summary result from hyperparameter search (This variable is not used in run)
     current_time = datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S")
-    run_configs['summary_file_path'] = run_configs[
-                                           'result_path_base'] + "hyperparameters_result_" + current_time + ".csv"
+    run_configs['summary_file_path'] = os.path.join(run_configs[
+                                                        'result_path_base'],
+                                                    "hyperparameters_result_" + current_time + ".csv")
     field_name = [i.name for i in dimensions]
     field_name.insert(0, 'accuracy')
 
@@ -237,7 +243,7 @@ def run_hyper_parameter_optimize():
 
     # Check if there is previous unfinished file or not. If exist, continue training for last model
     previous_record_files = []
-    for file in glob.glob(run_configs['result_path_base'] + "hyperparameters_result_" + '*'):
+    for file in glob.glob(os.path.join(run_configs['result_path_base'], "hyperparameters_result_" + '*')):
         previous_record_files.append(file)
     previous_record_files.sort()
     if len(previous_record_files) > 0:  # Check if file has previous result
@@ -288,7 +294,7 @@ def run_hyper_parameter_optimize():
                   write_mode='a', data_format="one_row")
     else:
         # Start hyperparameter search. Save each file in seperate folder
-        run_configs['result_path_base'] = run_configs['result_path_base'] + current_time
+        run_configs['result_path_base'] = os.path.join(run_configs['result_path_base'], current_time)
         search_result = gp_minimize(func=fitness,
                                     dimensions=dimensions,
                                     acq_func='EI',  # Expected Improvement.
@@ -317,9 +323,9 @@ def run_hyper_parameter_optimize():
 
 
 def run_kfold(model_params, k_num=5):
-    input_path = os.path.splitext(run_configs['input_path'])[0]
+    base_input_path = run_configs['input_path']
     result_path = run_configs['result_path']
-    kfold_path = run_configs['result_path'] + "kfold.csv"
+    kfold_path = os.path.join(run_configs['result_path'], "kfold.csv")
     if os.path.exists(kfold_path):
         data = read_file(kfold_path)
         current_run = len(data)
@@ -327,8 +333,8 @@ def run_kfold(model_params, k_num=5):
         current_run = 0
     all_accuracy = []
     for i in range(current_run, k_num):
-        run_configs['input_path'] = input_path + ("_%s.tfrecords" % i)
-        run_configs['result_path'] = result_path + ("/%s/" % i)
+        run_configs['input_path'] = base_input_path + ("_%s" % i)
+        run_configs['result_path'] = os.path.join(result_path, str(i))
         model_params['result_path'] = run_configs['result_path']
         accuracy, _ = run(model_params)
         save_file(kfold_path, ["%s_%s" % (i, accuracy)], write_mode='a')
@@ -337,12 +343,12 @@ def run_kfold(model_params, k_num=5):
 
 
 def run_hyper_parameter_optimize_kfold(k_num=5):
-    input_path = os.path.splitext(run_configs['input_path'])[0]
+    base_input_path = run_configs['input_path']
     result_path_base = run_configs['result_path_base']
     all_accuracy = []
     for i in range(k_num):
-        run_configs['input_path'] = input_path + ("_%s.tfrecords" % i)
-        run_configs['result_path_base'] = result_path_base + str(i)
+        run_configs['input_path'] = base_input_path + ("_%s" % i)
+        run_configs['result_path_base'] = os.path.join(result_path_base, str(i))
         accuracy = run_hyper_parameter_optimize()
         all_accuracy.append(accuracy)
     print(all_accuracy)
@@ -356,7 +362,7 @@ model_configs = {'learning_rate': configs.learning_rate,
 
 if __name__ == '__main__':
     if run_mode == "single":
-        run_configs['input_path'] = run_configs['input_path'].split(".tfrecords")[0] + "_0.tfrecords"
+        run_configs['input_path'] = run_configs['input_path'] + "_0"
         model_configs['result_file_name'] = 'result.csv'
         model_configs['result_path'] = run_configs['result_path']
         run(model_configs)
@@ -365,7 +371,7 @@ if __name__ == '__main__':
         model_configs['result_path'] = run_configs['result_path']
         run_kfold(model_configs)
     elif run_mode == "search":
-        run_configs['input_path'] = run_configs['input_path'].split(".tfrecords")[0] + "_0.tfrecords"
+        run_configs['input_path'] = run_configs['input_path'] + "_0"
         run_hyper_parameter_optimize()
     elif run_mode == "kfold_search":
         run_hyper_parameter_optimize_kfold()

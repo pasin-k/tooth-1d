@@ -44,11 +44,11 @@ def decode(data_dict):
 
     if numdegree != 4:
         raise ValueError("Edit this function as well, this compatible with numdeg=4")
-    if single_slice:
+    if single_slice:  # Fetch only the first cross-section
         image_stacked = tf.stack(image_decoded[0:numdegree * dataset_amount * 2:numdegree], axis=1)
         if dataset_amount > 4 or dataset_amount < 1:
             raise ValueError("Datset_amount not compatible: Found %s, but accept 1-4" % dataset_amount)
-    else:
+    else:  # Fetch all cross-section
         image_stacked = tf.stack(image_decoded[0:numdegree * dataset_amount * 2], axis=1)
         if dataset_amount > 4 or dataset_amount < 1:
             raise ValueError("Datset_amount not compatible: Found %s, but accept 1-4" % dataset_amount)

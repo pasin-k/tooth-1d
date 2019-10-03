@@ -254,7 +254,7 @@ def my_model(features, labels, mode, params, config):
     print("Evaluation Mode")
     # Create result(.csv) file, if not exist
     if not os.path.isfile(params['result_path']):
-        with open(params['result_path'] + params['result_file_name'], "w") as csvfile:
+        with open(os.path.join(params['result_path'], params['result_file_name']), "w") as csvfile:
             fieldnames = ['Name', 'Label', 'Predicted Class', 'Confident level']
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             writer.writeheader()
@@ -267,7 +267,7 @@ def my_model(features, labels, mode, params, config):
     else:
         saver_hook = tf.train.SummarySaverHook(save_steps=10, summary_op=tf.summary.merge_all(),
                                                output_dir=config.model_dir + 'eval')
-    csv_name = tf.convert_to_tensor(params['result_path'] + params['result_file_name'], dtype=tf.string)
+    csv_name = tf.convert_to_tensor(os.path.join(params['result_path'], params['result_file_name']), dtype=tf.string)
     print_result_hook = EvalResultHook(features['name'], labels, predicted_class, tf.nn.softmax(logits), csv_name)
     eval_hooks.append(saver_hook)
     eval_hooks.append(print_result_hook)

@@ -205,7 +205,10 @@ def coordinate_to_tfrecord(tfrecord_name, dataset_folders, k_fold=None):
     if isinstance(dataset_folders, str):
         dataset_folders = {'img': dataset_folders}
 
-    dataset_list = [dict() for i in range(len(dataset_folders))]
+    if k_fold is None:
+        dataset_list = [dict()]
+    else:
+        dataset_list = [dict() for i in range(k_fold)]
     seed = random.randint(0, 1000000)  # So that the result is always the same
 
     # Convert data into list (kfolds) of dictionary (left/right/...) of list of (train,eval) data
@@ -286,11 +289,11 @@ if __name__ == '__main__':
     elif data_mode == "coordinate":
         # coordinate_to_tfrecord(tfrecord_name="fast_debug",
         #                        dataset_folders="../data/coordinate", k_fold=k_fold)
-        # coordinate_to_tfrecord(tfrecord_name="coor_augment14",
-        #                        dataset_folders="../data/coordinate_14augment", k_fold=k_fold)
-        coordinate_to_tfrecord(tfrecord_name="coor_split", dataset_folders={'right': "../data/segment_2/right_point",
-                                                                            'left': "../data/segment_2/left_point"},
-                               k_fold=k_fold)
+        coordinate_to_tfrecord(tfrecord_name="coor_right",
+                               dataset_folders="../data/segment_14/right_point", k_fold=k_fold)
+        # coordinate_to_tfrecord(tfrecord_name="coor_left_right", dataset_folders={'right': "../data/segment_14/right_point",
+        #                                                                     'left': "../data/segment_14/left_point"},
+        #                        k_fold=k_fold)
     else:
         raise ValueError("Wrong data_mode")
     print("Complete")
