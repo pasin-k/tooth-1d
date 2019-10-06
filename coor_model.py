@@ -263,10 +263,10 @@ def my_model(features, labels, mode, params, config):
     eval_hooks = []
     if params['result_file_name'] == 'train_result.csv':
         saver_hook = tf.train.SummarySaverHook(save_steps=10, summary_op=tf.summary.merge_all(),
-                                               output_dir=config.model_dir + 'train_final')
+                                               output_dir=os.path.join(config.model_dir, 'train_final'))
     else:
         saver_hook = tf.train.SummarySaverHook(save_steps=10, summary_op=tf.summary.merge_all(),
-                                               output_dir=config.model_dir + 'eval')
+                                               output_dir=os.path.join(config.model_dir, 'eval'))
     csv_name = tf.convert_to_tensor(os.path.join(params['result_path'], params['result_file_name']), dtype=tf.string)
     print_result_hook = EvalResultHook(features['name'], labels, predicted_class, tf.nn.softmax(logits), csv_name)
     eval_hooks.append(saver_hook)

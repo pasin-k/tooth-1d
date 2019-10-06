@@ -3,7 +3,9 @@
   <component name="ChangeListManager">
     <list default="true" id="770e0596-62ef-4176-bd6c-3bded3f7c783" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cfg/Dockerfile_coor" beforeDir="false" afterPath="$PROJECT_DIR$/cfg/Dockerfile_coor" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cfg/coor_tooth.config" beforeDir="false" afterPath="$PROJECT_DIR$/cfg/coor_tooth.config" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cfg/coor_tooth_workspace.config" beforeDir="false" afterPath="$PROJECT_DIR$/cfg/coor_tooth_workspace.config" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/coor_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/coor_model.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -32,7 +34,7 @@
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="ToolWindowDocker.ShowToolbar" value="false" />
     <property name="com.intellij.ide.scratch.LRUPopupBuilder$1/New Scratch File" value="Python&#10;TEXT" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../../../../../../Link_to_Tooth/Tooth/Model/my2DCNN/coor_model.py" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PythonContentEntriesConfigurable" />
   </component>
   <component name="PyDebuggerOptionsProvider">
@@ -43,7 +45,7 @@
       <recent name="$PROJECT_DIR$/utils" />
     </key>
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/../../../../../../../Link to Tooth/Tooth/Model/my2DCNN/data" />
+      <recent name="$USER_HOME$/Link to Tooth/Tooth/Model/my2DCNN/data" />
       <recent name="$PROJECT_DIR$" />
     </key>
   </component>
@@ -192,13 +194,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1554715602048</updated>
-    </task>
-    <task id="LOCAL-00090" summary="Print loss weight instead of histrogram to the txt file">
-      <created>1562119407054</created>
-      <option name="number" value="00090" />
-      <option name="presentableId" value="LOCAL-00090" />
-      <option name="project" value="LOCAL" />
-      <updated>1562119407054</updated>
     </task>
     <task id="LOCAL-00091" summary="Print loss weight instead of histrogram to the txt file">
       <created>1562570229944</created>
@@ -536,7 +531,14 @@
       <option name="project" value="LOCAL" />
       <updated>1570100215529</updated>
     </task>
-    <option name="localTasksCounter" value="139" />
+    <task id="LOCAL-00139" summary="Improve code to prevent bug from config">
+      <created>1570157703805</created>
+      <option name="number" value="00139" />
+      <option name="presentableId" value="LOCAL-00139" />
+      <option name="project" value="LOCAL" />
+      <updated>1570157703805</updated>
+    </task>
+    <option name="localTasksCounter" value="140" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
