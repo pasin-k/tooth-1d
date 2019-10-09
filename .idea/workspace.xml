@@ -2,10 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="770e0596-62ef-4176-bd6c-3bded3f7c783" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cfg/coor_tooth.config" beforeDir="false" afterPath="$PROJECT_DIR$/cfg/coor_tooth.config" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cfg/coor_tooth_workspace.config" beforeDir="false" afterPath="$PROJECT_DIR$/cfg/coor_tooth_workspace.config" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/coor_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/coor_model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/coor_train.py" beforeDir="false" afterPath="$PROJECT_DIR$/coor_train.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/coor_get_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/coor_get_data.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -194,13 +196,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1554715602048</updated>
-    </task>
-    <task id="LOCAL-00091" summary="Print loss weight instead of histrogram to the txt file">
-      <created>1562570229944</created>
-      <option name="number" value="00091" />
-      <option name="presentableId" value="LOCAL-00091" />
-      <option name="project" value="LOCAL" />
-      <updated>1562570229944</updated>
     </task>
     <task id="LOCAL-00092" summary="Print loss weight instead of histrogram to the txt file">
       <created>1562570326763</created>
@@ -538,7 +533,14 @@
       <option name="project" value="LOCAL" />
       <updated>1570157703805</updated>
     </task>
-    <option name="localTasksCounter" value="140" />
+    <task id="LOCAL-00140" summary="Improve code to prevent bug from config">
+      <created>1570348951535</created>
+      <option name="number" value="00140" />
+      <option name="presentableId" value="LOCAL-00140" />
+      <option name="project" value="LOCAL" />
+      <updated>1570348951535</updated>
+    </task>
+    <option name="localTasksCounter" value="141" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">

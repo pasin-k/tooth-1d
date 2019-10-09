@@ -98,8 +98,7 @@ def eval_input_fn(data_path, batch_size, configs):
     global numdegree, data_length, label_type_global, single_slice, name_type
     print("Fetching label type: %s" % label_type_global)
     numdegree, data_length, label_type_global, name_type = configs['data_degree'], configs['data_length'], \
-                                                           configs['label_type'], \
-                                                           configs['dataset_name']
+                                                           configs['label_type'], configs['dataset_name']
     if not os.path.exists(data_path):
         raise ValueError("Eval input file does not exist")
     eval_dataset = tf.data.TFRecordDataset(data_path)

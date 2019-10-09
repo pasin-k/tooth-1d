@@ -91,7 +91,6 @@ def model_cnn_1d(features, mode, params):
     require_channel = 2
     if len(params['channels']) != require_channel:
         raise ValueError("This model need %s channels input, current input: %s" % (require_channel, params['channels']))
-
     # Input size:300x8
     '''
     This model is based on "A Comparison of 1-D and 2-D Deep Convolutional Neural Networks in ECG Classification"
@@ -200,10 +199,12 @@ def my_model(features, labels, mode, params, config):
                          dtype=tf.float32)
     loss_weight = tf.matmul(one_hot_label, weight, transpose_b=True, a_is_sparse=True)
 
-    # loss = softmax_focal_loss(labels, logits, gamma=0., alpha=loss_weight)  # Focal loss
+
     # Cross-entropy loss
     loss = tf.losses.sparse_softmax_cross_entropy(labels, logits,
                                                   weights=loss_weight)  # labels is int of class, logits is vector
+    # Focal loss
+    # loss = softmax_focal_loss(labels, logits, gamma=0., alpha=loss_weight)
 
     accuracy = tf.metrics.accuracy(labels, predicted_class)
 

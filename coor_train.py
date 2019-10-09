@@ -94,6 +94,7 @@ def run(model_params):
     # Setting checkpoint config
     my_checkpoint_config = tf.estimator.RunConfig(
         save_checkpoints_secs=run_configs['checkpoint_min'] * 60,
+        # save_checkpoints_steps=100,
         keep_checkpoint_max=10,
         log_step_count_steps=500,
         session_config=tf.ConfigProto(allow_soft_placement=True),
@@ -114,7 +115,8 @@ def run(model_params):
         input_fn=lambda: train_input_fn(train_data_path, batch_size=run_configs['batch_size'], configs=model_params),
         max_steps=run_configs['steps'], hooks=[train_hook])
     eval_spec = tf.estimator.EvalSpec(
-        input_fn=lambda: eval_input_fn(eval_data_path, batch_size=run_configs['batch_size'], configs=model_params), )
+        input_fn=lambda: eval_input_fn(eval_data_path, batch_size=32, configs=model_params),
+        steps=None, throttle_secs=run_configs['checkpoint_min'] * 60)
     # steps=None,
     # start_delay_secs=0, throttle_secs=0)
     # classifier.train(input_fn=lambda: train_input_fn(train_data_path, batch_size=params['batch_size']),
