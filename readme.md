@@ -1,4 +1,4 @@
-Machine learning approach for evaluation of tooth shape 
+Evaluation of tooth shape for dental procedure using machine learning approach
 ======
 ## Overview
 This is a collaboration project with Faculty of Dentistry in order to train the dental student to do "Tooth Preparation" process which is a dental procedure to remove outer layer of the tooth.
