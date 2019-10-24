@@ -24,14 +24,15 @@ class EvalResultHook(tf.train.SessionRunHook):
         probabilities = run_values.results[3]
         result_path = run_values.results[4]
 
+        # If change any data here, don't forget to change header in my_model (coor_model.py)
         with open(result_path, "a") as csvFile:
             writer = csv.writer(csvFile)
             for n, label, pred, prob in zip(name, labels, predicted_classes, probabilities):
                 n = n.decode("utf-8")
-                prob = prob[pred]  # Show probability of the predicted class
+                best_prob = prob[pred]  # Show probability of the predicted class
                 label = (label * 2) + 1
                 pred = (pred * 2) + 1
-                writer.writerow([n, label, pred, prob])
+                writer.writerow([n, label, pred, best_prob, prob])
                 # print("Label: %s, Prediction: %s" % (label, pred))
 
 
@@ -48,7 +49,7 @@ class PrintValueHook(tf.train.SessionRunHook):
 
     def after_run(self, run_context, run_values):
         if run_values.results[2] == 0:
-            print("Variable %s: %s" % (run_values.results[1], run_values.results[0]))
+            print("Hook %s: %s" % (run_values.results[1].decode("utf-8"), run_values.results[0]))
         else:
             if run_values.results[2] % run_values.results[3] == 0:
-                print("Variable %s: %s" % (run_values.results[1], run_values.results[0]))
+                print("Hook %s: %s" % (run_values.results[1].decode("utf-8"), run_values.results[0]))

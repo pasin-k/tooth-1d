@@ -111,33 +111,54 @@ def run(model_params):
     train_hook = tf.contrib.estimator.stop_if_no_decrease_hook(classifier, "loss", run_configs['early_stop_step'])
 
     # Fetch training_data and evaluation
+    '''
     train_spec = tf.estimator.TrainSpec(
         input_fn=lambda: train_input_fn(train_data_path, batch_size=run_configs['batch_size'], configs=model_params),
         max_steps=run_configs['steps'], hooks=[train_hook])
     eval_spec = tf.estimator.EvalSpec(
         input_fn=lambda: eval_input_fn(eval_data_path, batch_size=32, configs=model_params),
         steps=None, throttle_secs=run_configs['checkpoint_min'] * 60)
-    # steps=None,
-    # start_delay_secs=0, throttle_secs=0)
-    # classifier.train(input_fn=lambda: train_input_fn(train_data_path, batch_size=params['batch_size']),
-    #     max_steps=params['steps'], hooks=[train_hook])
-    # eval_result = classifier.evaluate(input_fn=lambda: eval_input_fn(eval_data_path, batch_size=32))
-
+    # steps=None, start_delay_secs=0)
     # Train and evaluate
     eval_result = tf.estimator.train_and_evaluate(classifier, train_spec, eval_spec)
+    
+    
+    '''
+    # Alternate between train and evaluate to see the result every eval_step but the whole training must have at least eval_times
+    eval_step = 1000  # Number of step which we will evaluate once
+    min_eval_times = 10  # The whole run must have eval at least 10 times
+    if run_configs['steps'] / eval_step < min_eval_times:
+        eval_times = min_eval_times
+        eval_step = int(run_configs['steps'] / min_eval_times)
+        print("Eval every %s instead" % eval_step)
+    else:
+        eval_times = int(run_configs['steps'] / eval_step)
+
+    print("Run %s times with %s step each" % (eval_times, eval_step))
+    for i in range(eval_times):
+        classifier.train(input_fn=lambda: train_input_fn(train_data_path, batch_size=run_configs['batch_size'],
+                                                         configs=model_params),
+                         steps=eval_step, hooks=[train_hook])
+        eval_result = classifier.evaluate(
+            input_fn=lambda: eval_input_fn(eval_data_path, batch_size=run_configs['batch_size'], configs=model_params))
+        tf.keras.backend.clear_session()
+
+    # Final evaluation
+    eval_result = classifier.evaluate(
+        input_fn=lambda: eval_input_fn(eval_data_path, batch_size=run_configs['batch_size'], configs=model_params))
 
     # Show result
     print("Eval result:")
     print(eval_result)
     try:
-        accuracy = eval_result[0]['accuracy']
-        global_step = eval_result[0]['global_step']
+        accuracy = eval_result['accuracy']
+        global_step = eval_result['global_step']
     except TypeError:
         print("Warning, does receive evaluation result")
         accuracy = 0
         global_step = 0
 
-    # Evaluate using train set
+    # Evaluate training set
     model_params['result_file_name'] = 'train_result.csv'
     classifier = tf.estimator.Estimator(
         model_fn=my_model,

@@ -227,6 +227,58 @@ def get_cross_section(degree, augment_config=None, folder_name='../../global_dat
     return stl_points_all, label_all, label_name_all, error_file_names_all, label_header
 
 
+def predict_get_cross_section(degree, augment_config=None, folder_name='../../global_data/stl_data',
+                              file_name="PreparationScan.stl"):
+    """
+    Get coordinates of stl file from csv file, only use for prediction
+    :param degree:          List of rotation angles
+    :param augment_config:  List of all augmentation angles, if still want to do
+    :param folder_name:     String, folder directory of stl file
+    :param file_name:       String, filename can be None
+    :return:
+    stl_points_all          List of all point (ndarray)
+    error_file_names_all    List of label name that has error
+    """
+    from utils.stl_slicer import getSlicer
+
+    if augment_config is None:
+        augment_config = [0]
+
+    name_dir, image_name = get_file_name(folder_name=folder_name, file_name=file_name)
+
+    # To verify number of coordinates
+    min_point = 1000
+    max_point = 0
+
+    stl_points_all = []
+    error_file_names_all = []
+    for i in range(len(name_dir)):
+        # Prepare two set of list, one for data, another for augmented data
+        points_all = getSlicer(name_dir[i], 0, degree, augment=augment_config, axis=1)
+        stl_points = []
+        error_file_names = []  # Names of file that cannot get cross-section image
+
+        for index, point in enumerate(points_all):
+            augment_val = augment_config[index]
+            if augment_val < 0:
+                augment_val = "n" + str(abs(augment_val))
+            else:
+                augment_val = str(abs(augment_val))
+            if point is None:  # If the output has error, remove label of that file
+                error_file_names.append(image_name[i] + "_" + augment_val)
+            else:
+                stl_points.append(point)
+                if len(point[0]) > max_point:
+                    max_point = len(point[0])
+                if len(point[0]) < min_point:
+                    min_point = len(point[0])
+
+        stl_points_all += stl_points  # Add these points to the big one
+        error_file_names_all += error_file_names  # Same as error file
+    print("Max amount of coordinates: %s, min  coordinates: %s" % (max_point, min_point))
+    return stl_points_all, error_file_names_all
+
+
 def readjust_median_label(label, avg_data):
     """
     Since some score can only be in a certain range (E.g. 1,3 or 5), if any median score that is outside of this range

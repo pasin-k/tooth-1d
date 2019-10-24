@@ -28,7 +28,7 @@ def deserialize(example):
 
 
 def decode(data_dict):
-    global label_type_global, numdegree, name_type, single_slice, name_type
+    global label_type_global, numdegree, name_type, single_slice
     # Create initial image, then stacking it for 1dCNN model
     image_decoded = []
     dataset_amount = len(name_type)
@@ -72,7 +72,7 @@ def train_input_fn(data_path, batch_size, configs):
     numdegree, data_length, label_type_global, name_type = configs['data_degree'], configs['data_length'], \
                                                            configs['label_type'], \
                                                            configs['dataset_name']
-    print("Fetching label type: %s" % label_type_global)
+    print("Fetching label type for training: %s" % label_type_global)
 
     if not os.path.exists(data_path):
         raise ValueError("Train input file does not exist")
@@ -96,7 +96,7 @@ def eval_input_fn(data_path, batch_size, configs):
     :return: tf.Dataset use for validation
     """
     global numdegree, data_length, label_type_global, single_slice, name_type
-    print("Fetching label type: %s" % label_type_global)
+    print("Fetching label type for eval: %s" % label_type_global)
     numdegree, data_length, label_type_global, name_type = configs['data_degree'], configs['data_length'], \
                                                            configs['label_type'], configs['dataset_name']
     if not os.path.exists(data_path):
@@ -116,11 +116,13 @@ def get_data_from_path(data_path, label_type):
     :return:
     """
 
-    global numdegree, data_length, label_type_global
+    global numdegree, data_length, label_type_global, name_type
+
     label_data = ["name", "Occ_B_median", "Occ_F_median", "Occ_L_median", "BL_median", "MD_median", "Integrity_median",
                   "Width_median", "Surface_median", "Sharpness_median"]
     numdegree = 4
-    data_length = 300
+    data_length = 0
+    name_type = "img"
     label_type_global = label_type
     if not os.path.exists(data_path):
         raise ValueError("Input file does not exist")

@@ -287,10 +287,10 @@ if __name__ == '__main__':
         image_to_tfrecord(tfrecord_name="preparation_img_test", dataset_folder="../data/cross_section",
                           k_fold=k_fold)
     elif data_mode == "coordinate":
-        # coordinate_to_tfrecord(tfrecord_name="fast_debug",
-        #                        dataset_folders="../data/coordinate", k_fold=k_fold)
-        coordinate_to_tfrecord(tfrecord_name="coor_right",
-                               dataset_folders="../data/segment_14/right_point", k_fold=k_fold)
+        coordinate_to_tfrecord(tfrecord_name="debug_coor_augment",
+                               dataset_folders="../data/coordinate_debug", k_fold=k_fold)
+        # coordinate_to_tfrecord(tfrecord_name="coor_right",
+        #                        dataset_folders="../data/segment_14/right_point", k_fold=k_fold)
         # coordinate_to_tfrecord(tfrecord_name="coor_left_right", dataset_folders={'right': "../data/segment_14/right_point",
         #                                                                     'left': "../data/segment_14/left_point"},
         #                        k_fold=k_fold)
