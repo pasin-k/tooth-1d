@@ -250,6 +250,7 @@ def predict_get_cross_section(degree, augment_config=None, folder_name='../../gl
     min_point = 1000
     max_point = 0
 
+    file_name_all = []
     stl_points_all = []
     error_file_names_all = []
     for i in range(len(name_dir)):
@@ -257,7 +258,7 @@ def predict_get_cross_section(degree, augment_config=None, folder_name='../../gl
         points_all = getSlicer(name_dir[i], 0, degree, augment=augment_config, axis=1)
         stl_points = []
         error_file_names = []  # Names of file that cannot get cross-section image
-
+        file_name = []
         for index, point in enumerate(points_all):
             augment_val = augment_config[index]
             if augment_val < 0:
@@ -267,6 +268,7 @@ def predict_get_cross_section(degree, augment_config=None, folder_name='../../gl
             if point is None:  # If the output has error, remove label of that file
                 error_file_names.append(image_name[i] + "_" + augment_val)
             else:
+                file_name.append(image_name[i] + "_" + augment_val)
                 stl_points.append(point)
                 if len(point[0]) > max_point:
                     max_point = len(point[0])
@@ -274,9 +276,10 @@ def predict_get_cross_section(degree, augment_config=None, folder_name='../../gl
                     min_point = len(point[0])
 
         stl_points_all += stl_points  # Add these points to the big one
+        file_name_all += file_name
         error_file_names_all += error_file_names  # Same as error file
     print("Max amount of coordinates: %s, min  coordinates: %s" % (max_point, min_point))
-    return stl_points_all, error_file_names_all
+    return stl_points_all, file_name_all, error_file_names_all
 
 
 def readjust_median_label(label, avg_data):

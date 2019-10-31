@@ -2,14 +2,14 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="770e0596-62ef-4176-bd6c-3bded3f7c783" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/coor_predict.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cfg/coor_tooth.config" beforeDir="false" afterPath="$PROJECT_DIR$/cfg/coor_tooth.config" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/coor_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/coor_model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/coor_predict.py" beforeDir="false" afterPath="$PROJECT_DIR$/coor_predict.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/coor_train.py" beforeDir="false" afterPath="$PROJECT_DIR$/coor_train.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/preprocess/image_to_tfrecord.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocess/image_to_tfrecord.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/preprocess/stl_to_image.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocess/stl_to_image.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/coor_get_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/coor_get_data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/custom_hook.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/custom_hook.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/open_save_file.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/open_save_file.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -39,7 +39,7 @@
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="ToolWindowDocker.ShowToolbar" value="false" />
     <property name="com.intellij.ide.scratch.LRUPopupBuilder$1/New Scratch File" value="Python&#10;TEXT" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/utils/coor_get_data.py" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/preprocess/stl_to_image.py" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PythonContentEntriesConfigurable" />
   </component>
   <component name="PyDebuggerOptionsProvider">
@@ -66,7 +66,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.coor_predict">
+  <component name="RunManager" selected="Python.coor_train">
     <configuration name="coor_predict" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="my2DCNN" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -80,7 +80,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/coor_predict.py" />
-      <option name="PARAMETERS" value="-t $PROJECT_DIR$/../global_data/stl_data_debug -f 300" />
+      <option name="PARAMETERS" value="-t $PROJECT_DIR$/../global_data/stl_data_debug -f 300 -m $PROJECT_DIR$/../../../../../../Pasin/model/debug/20191029_15_19_45/model/1572330247" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
@@ -130,27 +130,6 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="scratch_3" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="my2DCNN" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$APPLICATION_CONFIG_DIR$/scratches" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$APPLICATION_CONFIG_DIR$/scratches/scratch_3.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <configuration name="scratch_5" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="my2DCNN" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -172,20 +151,41 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="stl_to_image" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="my2DCNN" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/preprocess" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/preprocess/stl_to_image.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <list>
       <item itemvalue="Python.coor_train" />
       <item itemvalue="Python.image_to_tfrecord" />
-      <item itemvalue="Python.scratch_3" />
       <item itemvalue="Python.coor_predict" />
       <item itemvalue="Python.scratch_5" />
+      <item itemvalue="Python.stl_to_image" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.coor_train" />
         <item itemvalue="Python.coor_predict" />
         <item itemvalue="Python.scratch_5" />
-        <item itemvalue="Python.coor_train" />
         <item itemvalue="Python.image_to_tfrecord" />
-        <item itemvalue="Python.scratch_3" />
+        <item itemvalue="Python.stl_to_image" />
       </list>
     </recent_temporary>
   </component>
@@ -199,13 +199,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1554715602048</updated>
-    </task>
-    <task id="LOCAL-00093" summary="Print loss weight instead of histrogram to the txt file">
-      <created>1562573760513</created>
-      <option name="number" value="00093" />
-      <option name="presentableId" value="LOCAL-00093" />
-      <option name="project" value="LOCAL" />
-      <updated>1562573760513</updated>
     </task>
     <task id="LOCAL-00094" summary="Now can do multiple data augmentation">
       <created>1562739849170</created>
@@ -543,7 +536,14 @@
       <option name="project" value="LOCAL" />
       <updated>1570602507876</updated>
     </task>
-    <option name="localTasksCounter" value="142" />
+    <task id="LOCAL-00142" summary="Evaluation on tensorboard should tracked every one min instead of 10">
+      <created>1571903997584</created>
+      <option name="number" value="00142" />
+      <option name="presentableId" value="LOCAL-00142" />
+      <option name="project" value="LOCAL" />
+      <updated>1571903997584</updated>
+    </task>
+    <option name="localTasksCounter" value="143" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">

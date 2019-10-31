@@ -121,8 +121,8 @@ def get_data_from_path(data_path, label_type):
     label_data = ["name", "Occ_B_median", "Occ_F_median", "Occ_L_median", "BL_median", "MD_median", "Integrity_median",
                   "Width_median", "Surface_median", "Sharpness_median"]
     numdegree = 4
-    data_length = 0
-    name_type = "img"
+    data_length = 300
+    name_type = ["img"]
     label_type_global = label_type
     if not os.path.exists(data_path):
         raise ValueError("Input file does not exist")
@@ -146,3 +146,8 @@ def get_data_from_path(data_path, label_type):
             pass
 
     return features, label
+
+
+def read_raw_tfrecord(tfrecord_path):  # For debugging purpose, reading all content inside
+    for example in tf.python_io.tf_record_iterator(tfrecord_path):
+        print(tf.train.Example.FromString(example))

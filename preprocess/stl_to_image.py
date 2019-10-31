@@ -154,9 +154,10 @@ if __name__ == '__main__':
 
     # data_type, stat_type will not be used unless you want to look at lbl value
     points_all, lbl_all, lbl_name_all, err_name_all, header = get_cross_section(degree=degree,
-                                                                                augment_config=augment_config,
-                                                                                # folder_name='../../global_data/stl_data_debug',
-                                                                                # csv_dir='../../global_data/Ground Truth Score_debug.csv',
+                                                                                augment_config=[0],
+                                                                                # augment_config=augment_config,
+                                                                                folder_name='../../global_data/stl_data_debug',
+                                                                                csv_dir='../../global_data/Ground Truth Score_debug.csv',
                                                                                 )
     if is_fix_amount:
         fix_amount = fix_amount + 1  # Compensate for the missing data
@@ -169,13 +170,13 @@ if __name__ == '__main__':
 
     if save_img:
         print("Start saving images...")
-        image_dir = "../data/cross_section_14augment"
+        image_dir = "../data/cross_section_no_augment_debug"
         save_image(points_all, lbl_name_all, err_name_all, out_directory=image_dir)
         save_file(os.path.join(image_dir, "score.csv"), lbl_all, data_format="dict_list", field_name=header)
 
     if save_coor:
         print("Start saving coordinates...")
-        file_dir = "../data/coordinate_14augment"
+        file_dir = "../data/coordinate_no_augment_debug"
         save_stl_point(points_all, lbl_name_all, err_name_all, out_directory=file_dir)
         save_file(os.path.join(file_dir, "score.csv"), lbl_all, data_format="dict_list", field_name=header)
     print("stl_to_image.py: done")
