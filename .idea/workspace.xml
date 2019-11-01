@@ -5,13 +5,7 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cfg/coor_tooth.config" beforeDir="false" afterPath="$PROJECT_DIR$/cfg/coor_tooth.config" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/coor_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/coor_model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/coor_predict.py" beforeDir="false" afterPath="$PROJECT_DIR$/coor_predict.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/coor_train.py" beforeDir="false" afterPath="$PROJECT_DIR$/coor_train.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/preprocess/segmentation.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocess/segmentation.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/coor_get_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/coor_get_data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/get_input.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/get_input.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/open_save_file.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/open_save_file.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/stl_slicer.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/stl_slicer.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -67,7 +61,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.scratch_5">
+  <component name="RunManager" selected="Python.coor_train">
     <configuration name="coor_model" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="my2DCNN" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -182,9 +176,9 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.scratch_5" />
         <item itemvalue="Python.coor_train" />
         <item itemvalue="Python.coor_model" />
+        <item itemvalue="Python.scratch_5" />
         <item itemvalue="Python.coor_predict" />
         <item itemvalue="Python.image_to_tfrecord" />
       </list>
@@ -200,13 +194,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1554715602048</updated>
-    </task>
-    <task id="LOCAL-00095" summary="Add batch normalization">
-      <created>1562740064227</created>
-      <option name="number" value="00095" />
-      <option name="presentableId" value="LOCAL-00095" />
-      <option name="project" value="LOCAL" />
-      <updated>1562740064227</updated>
     </task>
     <task id="LOCAL-00096" summary="Can do augmentation in any angle, should work fine now. Also print new csv file inside folder">
       <created>1562831839915</created>
@@ -544,7 +531,14 @@
       <option name="project" value="LOCAL" />
       <updated>1572500652025</updated>
     </task>
-    <option name="localTasksCounter" value="144" />
+    <task id="LOCAL-00144" summary="Finding bug where model now overfit">
+      <created>1572570600708</created>
+      <option name="number" value="00144" />
+      <option name="presentableId" value="LOCAL-00144" />
+      <option name="project" value="LOCAL" />
+      <updated>1572570600708</updated>
+    </task>
+    <option name="localTasksCounter" value="145" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -575,7 +569,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Now can do multiple data augmentation" />
     <MESSAGE value="Add batch normalization" />
     <MESSAGE value="Can do augmentation in any angle, should work fine now. Also print new csv file inside folder" />
     <MESSAGE value="Can do augmentation in any angle, should work fine now." />
@@ -600,7 +593,8 @@
     <MESSAGE value="Improve code to prevent bug from config" />
     <MESSAGE value="Evaluation on tensorboard should tracked every one min instead of 10" />
     <MESSAGE value="Implemente predict.py" />
-    <option name="LAST_COMMIT_MESSAGE" value="Implemente predict.py" />
+    <MESSAGE value="Finding bug where model now overfit" />
+    <option name="LAST_COMMIT_MESSAGE" value="Finding bug where model now overfit" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
 </project>

@@ -93,7 +93,7 @@ def max_and_cnn_layer(layer, pl_size, num_filters, activation, name):
 
 
 # Using max pooling
-def model_cnn_1d(features, mode, params):
+def model_cnn_1d(features, mode, params, config):
     # print(features)
     require_channel = 2
     if len(params['channels']) != require_channel:
@@ -103,12 +103,14 @@ def model_cnn_1d(features, mode, params):
     This model is based on "A Comparison of 1-D and 2-D Deep Convolutional Neural Networks in ECG Classification"
     '''
     # (1) Filter size: 7x32, max pooling of k3 s2
+    print("Input:", features['image'])
     conv1 = cnn_1d(features['image'], 7, params['channels'][0] * 16, activation=params['activation'], name="conv1",
-                   kernel_regularizer=0.01)
+                   kernel_regularizer=0.01, input_shape=(300, 8))
+    print("Conv1", conv1)
     conv1 = tf.keras.layers.BatchNormalization()(conv1)
     pool1 = max_pool_layer_1d(conv1, 3, name="pool1", stride=2)
     # Output: 294x32 -> 147x32
-
+    print("Pool1", pool1)
     # (2) Filter size: 5x64, max pooling of k3 s2
     conv2 = cnn_1d(pool1, 5, params['channels'][0] * 32, activation=params['activation'], name="conv2",
                    kernel_regularizer=0.01)
@@ -183,7 +185,7 @@ def softmax_focal_loss(labels_l, logits_l, gamma=2., alpha=4.):
 # Define Model
 def my_model(features, labels, mode, params, config):
     # Input: (Batch_size,300,8)
-    logits = model_cnn_1d(features, mode, params)
+    logits = model_cnn_1d(features, mode, params, config)
     # Predict Mode
     predicted_class = tf.argmax(logits, 1)
     if mode == tf.estimator.ModeKeys.PREDICT:
@@ -228,13 +230,13 @@ def my_model(features, labels, mode, params, config):
     # print(d_vars)
     summary_name = ["conv1", "conv2", "conv3_1", "conv3_2", "conv3_3", "fc4", "fc5", "predict"]
 
-    if len(summary_name) == int(len(d_vars) / 2):
-        for i in range(len(summary_name)):
-            tf.summary.histogram(summary_name[i] + "_weights", d_vars[2 * i])
-            tf.summary.histogram(summary_name[i] + "_biases", d_vars[2 * i + 1])
-    else:
-        print("Warning, expected weight&variable not equals: amount of var = %s" % len(d_vars))
-        print(d_vars)
+    # if len(summary_name) == int(len(d_vars) / 2):
+    #     for i in range(len(summary_name)):
+    #         tf.summary.histogram(summary_name[i] + "_weights", d_vars[2 * i])
+    #         tf.summary.histogram(summary_name[i] + "_biases", d_vars[2 * i + 1])
+    # else:
+    #     print("Warning, expected weight&variable not equals: amount of var = %s" % len(d_vars))
+    #     print(d_vars)
 
     summary = tf.summary.histogram("Prediction", predicted_class)
     summary2 = tf.summary.histogram("Ground_Truth", labels)
@@ -256,7 +258,7 @@ def my_model(features, labels, mode, params, config):
         print_input_hook = PrintValueHook(features['image'], "Input value", tf.train.get_global_step(), 5000)
         train_hooks.append(saver_hook)
         train_hooks.append(print_variable_hook)
-        train_hooks.append(print_input_hook)
+        # train_hooks.append(print_input_hook)
         return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op,
                                           training_hooks=train_hooks)
 
