@@ -1,4 +1,4 @@
-from utils.stl_slicer import getSlicer
+from utils.stl_slicer import get_cross_section
 import argparse
 import tensorflow as tf
 import numpy as np

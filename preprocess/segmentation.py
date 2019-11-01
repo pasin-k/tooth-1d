@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import sys
-from utils.stl_slicer import getSlicer
+from utils.stl_slicer import get_cross_section
 from utils.open_save_file import get_file_name, save_file, get_label
 from preprocess.stl_to_image import point_sampling
 
@@ -178,7 +178,7 @@ def get_segment_multiple(name, margin=0, point_only=False, fix_point=None, no_li
             print("Progress: %s out of %s, current image: %s" % (image_index, len(image_name), im_name))
         label_name_temp = []
         image_index += 1
-        points_all = getSlicer(n_name, 0, degree, augment=augment_config, axis=1)
+        points_all = get_cross_section(n_name, 0, degree, augment=augment_config, axis=1)
 
         for index, point in enumerate(points_all):  # Enumerate over all augmentation points
             augment_val = augment_config[index]

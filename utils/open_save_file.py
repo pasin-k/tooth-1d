@@ -151,7 +151,7 @@ def get_cross_section(degree, augment_config=None, folder_name='../../global_dat
     label_name_all          List of label name (id)
     error_file_names_all    List of label name that has error
     """
-    from utils.stl_slicer import getSlicer
+    from utils.stl_slicer import get_cross_section
 
     if augment_config is None:
         augment_config = [0]
@@ -191,7 +191,7 @@ def get_cross_section(degree, augment_config=None, folder_name='../../global_dat
     for i in range(len(name_dir)):
         # Prepare two set of list, one for data, another for augmented data
         label_name_temp = []
-        points_all = getSlicer(name_dir[i], 0, degree, augment=augment_config, axis=1)
+        points_all = get_cross_section(name_dir[i], 0, degree, augment=augment_config, axis=1)
         stl_points = []
         error_file_names = []  # Names of file that cannot get cross-section image
 
@@ -239,7 +239,7 @@ def predict_get_cross_section(degree, augment_config=None, folder_name='../../gl
     stl_points_all          List of all point (ndarray)
     error_file_names_all    List of label name that has error
     """
-    from utils.stl_slicer import getSlicer
+    from utils.stl_slicer import get_cross_section
 
     if augment_config is None:
         augment_config = [0]
@@ -255,7 +255,7 @@ def predict_get_cross_section(degree, augment_config=None, folder_name='../../gl
     error_file_names_all = []
     for i in range(len(name_dir)):
         # Prepare two set of list, one for data, another for augmented data
-        points_all = getSlicer(name_dir[i], 0, degree, augment=augment_config, axis=1)
+        points_all = get_cross_section(name_dir[i], 0, degree, augment=augment_config, axis=1)
         stl_points = []
         error_file_names = []  # Names of file that cannot get cross-section image
         file_name = []

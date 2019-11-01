@@ -1,32 +1,32 @@
 import tensorflow as tf
 import csv
 import os
-import numpy as np
 
 from utils.custom_hook import EvalResultHook, PrintValueHook
-
 
 # In case of needing l2-regularization: https://stackoverflow.com/questions/44232566/add-l2-regularization-when-using-high-level-tf-layers/44238354#44238354
 
 
 # Default stride of 1, padding:same
-def cnn_1d(inp,
+def cnn_1d(layer,
            conv_filter_size,  # [Scalar]
            num_filters,  # [Scalar]
-           mode,
            activation=tf.nn.relu,
            stride=1,
-           padding='same',
+           padding='valid',
+           input_shape=None,
            name='', kernel_regularizer=0.0):  # Stride of CNN
     # We shall define the weights that will be trained using create_weights function.
-    layer = tf.keras.layers.Conv1D(num_filters, conv_filter_size, strides=stride, padding=padding,
-                                   activation=activation,
-                                   kernel_regularizer=tf.keras.regularizers.l2(kernel_regularizer), name=name)
-    output = layer(inp)
-    if mode == tf.estimator.ModeKeys.TRAIN:
-        return output, layer.get_weights()
+    if input_shape is None:
+        layer = tf.keras.layers.Conv1D(num_filters, conv_filter_size, strides=stride, padding=padding,
+                                       activation=activation,
+                                       kernel_regularizer=tf.keras.regularizers.l2(kernel_regularizer))(layer)
     else:
-        return output, None
+        layer = tf.keras.layers.Conv1D(num_filters, conv_filter_size, strides=stride, padding=padding,
+                                       activation=activation,
+                                       input_shape=input_shape,
+                                       kernel_regularizer=tf.keras.regularizers.l2(kernel_regularizer))(layer)
+    return layer
 
 
 def max_pool_layer_1d(layer, pooling_size, name=None, stride=-1):
@@ -59,20 +59,15 @@ def flatten_layer(layer):  # Flatten from 2D/3D to 1D (not count batch dimension
     return layer
 
 
-def fc_layer(inp,  #
+def fc_layer(layer,  #
              num_outputs,
-             mode,
              activation=tf.nn.relu,
              name='',
              kernel_regularizer=0.0):
     # Let's define trainable weights and biases.
     layer = tf.keras.layers.Dense(num_outputs, activation=activation,
-                                  kernel_regularizer=tf.keras.regularizers.l2(kernel_regularizer))
-    output = layer(inp)
-    if mode == tf.estimator.ModeKeys.TRAIN:
-        return output, layer.get_weights()
-    else:
-        return output, None
+                                  kernel_regularizer=tf.keras.regularizers.l2(kernel_regularizer))(layer)
+    return layer
 
 
 def avg_pool_layer(layer, pooling_size, name=None, stride=-1):
@@ -101,71 +96,52 @@ def max_and_cnn_layer(layer, pl_size, num_filters, activation, name):
 def model_cnn_1d(features, mode, params):
     # print(features)
     require_channel = 2
-    assert len(params['channels']) == require_channel, \
-        "This model need %s channels input, current input: %s" % (require_channel, params['channels'])
+    if len(params['channels']) != require_channel:
+        raise ValueError("This model need %s channels input, current input: %s" % (require_channel, params['channels']))
     # Input size:300x8
     '''
     This model is based on "A Comparison of 1-D and 2-D Deep Convolutional Neural Networks in ECG Classification"
     '''
     # (1) Filter size: 7x32, max pooling of k3 s2
-    conv1, conv1_w = cnn_1d(features['image'], 7, params['channels'][0] * 16,
-                            mode=mode,
-                            activation=params['activation'],
-                            name="conv1",
-                            kernel_regularizer=0.01)
+    conv1 = cnn_1d(features['image'], 7, params['channels'][0] * 16, activation=params['activation'], name="conv1",
+                   kernel_regularizer=0.01)
     conv1 = tf.keras.layers.BatchNormalization()(conv1)
     pool1 = max_pool_layer_1d(conv1, 3, name="pool1", stride=2)
     # Output: 294x32 -> 147x32
 
     # (2) Filter size: 5x64, max pooling of k3 s2
-    conv2, conv2_w = cnn_1d(pool1, 5, params['channels'][0] * 32,
-                            mode=mode,
-                            activation=params['activation'], name="conv2",
-                            kernel_regularizer=0.01)
+    conv2 = cnn_1d(pool1, 5, params['channels'][0] * 32, activation=params['activation'], name="conv2",
+                   kernel_regularizer=0.01)
     conv2 = tf.keras.layers.BatchNormalization()(conv2)
     pool2 = max_pool_layer_1d(conv2, 3, "pool2", stride=2)
     # Output: 143x64 -> 71x64
 
     # (3) Filter size: 3x128 (3 times), max pooling of k3 s2
-    conv3, conv3_w = cnn_1d(pool2, 3, params['channels'][0] * 64,
-                            mode=mode,
-                            activation=params['activation'], name="conv3_1",
-                            kernel_regularizer=0.01)
+    conv3 = cnn_1d(pool2, 3, params['channels'][0] * 64, activation=params['activation'], name="conv3_1",
+                   kernel_regularizer=0.01)
     conv3 = tf.keras.layers.BatchNormalization()(conv3)
-    conv4, conv4_w = cnn_1d(conv3, 3, params['channels'][0] * 64,
-                            mode=mode,
-                            activation=params['activation'], name="conv3_2",
-                            kernel_regularizer=0.01)
-    conv4 = tf.keras.layers.BatchNormalization()(conv4)
-    conv5, conv5_w = cnn_1d(conv4, 3, params['channels'][0] * 64,
-                            mode=mode,
-                            activation=params['activation'], name="conv3_3",
-                            kernel_regularizer=0.01)
-    conv5 = tf.keras.layers.BatchNormalization()(conv5)
-    pool5 = max_pool_layer_1d(conv5, 3, "pool2", stride=2)
+    conv3 = cnn_1d(conv3, 3, params['channels'][0] * 64, activation=params['activation'], name="conv3_2",
+                   kernel_regularizer=0.01)
+    conv3 = tf.keras.layers.BatchNormalization()(conv3)
+    conv3 = cnn_1d(conv3, 3, params['channels'][0] * 64, activation=params['activation'], name="conv3_3",
+                   kernel_regularizer=0.01)
+    conv3 = tf.keras.layers.BatchNormalization()(conv3)
+    pool3 = max_pool_layer_1d(conv3, 3, "pool2", stride=2)
     # print("Pool: %s"% pool3)
     # Output: 65x128 -> 32x128 = 4096
 
-    fc6 = flatten_layer(pool5)
-    fc6, fc6_w = fc_layer(fc6, params['channels'][1] * 1024,
-                          mode=mode,
-                          activation=params['activation'], kernel_regularizer=0.01,
-                          name='fc5', )
-    dropout6 = tf.keras.layers.Dropout(rate=params['dropout_rate'])(fc6)
+    fc4 = flatten_layer(pool3)
+    fc4 = fc_layer(fc4, params['channels'][1] * 1024, activation=params['activation'], name='fc5',
+                   kernel_regularizer=0.01)
+    dropout4 = tf.keras.layers.Dropout(rate=params['dropout_rate'])(fc4)
     # Output: 4096 -> 4096 -> 3
 
-    fc7, fc7_w = fc_layer(dropout6, params['channels'][1] * 1024,
-                          mode=mode,
-                          activation=params['activation'], name='fc6',
-                          kernel_regularizer=0.01)
-    dropout7 = tf.keras.layers.Dropout(rate=params['dropout_rate'])(fc7)
+    fc5 = fc_layer(dropout4, params['channels'][1] * 1024, activation=params['activation'], name='fc6',
+                   kernel_regularizer=0.01)
+    dropout5 = tf.keras.layers.Dropout(rate=params['dropout_rate'])(fc5)
 
-    logits, _ = fc_layer(dropout7, 3,
-                         mode=mode,
-                         activation=tf.nn.tanh, name='predict', kernel_regularizer=0.01)
-
-    return logits, {'conv1': conv1_w, 'conv2': conv2_w, 'conv3': conv3_w, 'conv4': conv4_w,
-                    'conv5': conv5_w, 'fc6': fc6_w, 'fc7': fc7_w}
+    logits = fc_layer(dropout5, 3, activation=tf.nn.tanh, name='predict', kernel_regularizer=0.01)
+    return logits
 
 
 def softmax_focal_loss(labels_l, logits_l, gamma=2., alpha=4.):
@@ -207,7 +183,7 @@ def softmax_focal_loss(labels_l, logits_l, gamma=2., alpha=4.):
 # Define Model
 def my_model(features, labels, mode, params, config):
     # Input: (Batch_size,300,8)
-    logits, weights = model_cnn_1d(features, mode, params)
+    logits = model_cnn_1d(features, mode, params)
     # Predict Mode
     predicted_class = tf.argmax(logits, 1)
     if mode == tf.estimator.ModeKeys.PREDICT:
@@ -230,6 +206,7 @@ def my_model(features, labels, mode, params, config):
                          dtype=tf.float32)
     loss_weight = tf.matmul(one_hot_label, weight, transpose_b=True, a_is_sparse=True)
 
+
     # Cross-entropy loss
     loss = tf.losses.sparse_softmax_cross_entropy(labels, logits,
                                                   weights=loss_weight)  # labels is int of class, logits is vector
@@ -246,18 +223,21 @@ def my_model(features, labels, mode, params, config):
     # print(predicted_class[0])
     ex_ground_truth = tf.summary.scalar("example_ground_truth", labels[0])
     # print(labels[0])
-    if mode == tf.estimator.ModeKeys.TRAIN:
-        for name, w in weights.items():
-            tf.summary.histogram(name + "_weights", w[0])
-            tf.summary.histogram(name + "_biases", w[1])
+
+    d_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
+    # print(d_vars)
+    summary_name = ["conv1", "conv2", "conv3_1", "conv3_2", "conv3_3", "fc4", "fc5", "predict"]
+
+    if len(summary_name) == int(len(d_vars) / 2):
+        for i in range(len(summary_name)):
+            tf.summary.histogram(summary_name[i] + "_weights", d_vars[2 * i])
+            tf.summary.histogram(summary_name[i] + "_biases", d_vars[2 * i + 1])
+    else:
+        print("Warning, expected weight&variable not equals: amount of var = %s" % len(d_vars))
+        print(d_vars)
 
     summary = tf.summary.histogram("Prediction", predicted_class)
     summary2 = tf.summary.histogram("Ground_Truth", labels)
-    d_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
-    # model_vars = tf.trainable_variables()
-    # print(d_vars)
-    # summary_name = ["conv1", "conv2", "conv3_1", "conv3_2", "conv3_3", "fc4", "fc5", "predict"]
-
     # global_step = tf.summary.scalar("Global steps",tf.train.get_global_step())
 
     # Train Mode
@@ -270,26 +250,22 @@ def my_model(features, labels, mode, params, config):
         saver_hook = tf.train.SummarySaverHook(save_steps=1000, summary_op=tf.summary.merge_all(),
                                                output_dir=config.model_dir)
 
+        # model_vars = tf.trainable_variables()
         train_hooks = []
+        print_variable_hook = PrintValueHook(tf.nn.softmax(logits), "Training logits", tf.train.get_global_step(), 5000)
+        print_input_hook = PrintValueHook(features['image'], "Input value", tf.train.get_global_step(), 5000)
         train_hooks.append(saver_hook)
-        print_logits_hook = PrintValueHook(tf.nn.softmax(logits), "Training logits", tf.train.get_global_step(), 5000)
-        train_hooks.append(print_logits_hook)
-        # print_weight_hook = PrintValueHook(tf.convert_to_tensor(conv3_w[0], np.float32), "Conv3 weight",
-        #                                    tf.train.get_global_step(), 5000)
-        # print_bias_hook = PrintValueHook(tf.convert_to_tensor(conv3_w[1], np.float32), "Conv3 bias",
-        #                                  tf.train.get_global_step(), 5000)
-        # train_hooks.append(print_weight_hook)
-        # train_hooks.append(print_bias_hook)
+        train_hooks.append(print_variable_hook)
+        train_hooks.append(print_input_hook)
         return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op,
                                           training_hooks=train_hooks)
 
     # Evaluate Mode
     print("Evaluation Mode")
     # Create result(.csv) file, if not exist
-    # If change any header here, don't forget to change data in EvalResultHook (custom_hook.py)
     if not os.path.isfile(params['result_path']):
         with open(os.path.join(params['result_path'], params['result_file_name']), "w") as csvfile:
-            fieldnames = ['Name', 'Label', 'Predicted Class', 'Confident level', 'All confident level']
+            fieldnames = ['Name', 'Label', 'Predicted Class', 'Confident level']
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             writer.writeheader()
 

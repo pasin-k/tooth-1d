@@ -1,7 +1,7 @@
 import numpy as np
 import os
 import csv
-from utils.stl_slicer import getSlicer
+from utils.stl_slicer import get_cross_section
 
 
 # Get sorted List of filenames: search for all file within folder with specific file name

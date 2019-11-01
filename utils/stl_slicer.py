@@ -5,15 +5,15 @@ import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure
 
 
-def getSlicer(stl_file_name, z_plane, degree=None, augment=None, is_rearrange=True, axis=1):
+def get_cross_section(stl_file_name, z_plane, degree=None, augment=None, is_rearrange=True, axis=1):
     """
     Get cross-section of an stl file from selected x/y/z plane as well as cross-section of an rotated angle.
     We also have augmentation option to duplicate more data by rotating (Recommend small degree like 1,2,3)
     :param stl_file_name:   String, Folder name
-    :param z_plane:          float or int, Selected plane (E.g. at Z = 0)
+    :param z_plane:         float or int, Selected plane (E.g. get cross-section at plane z = 0)
     :param degree:          List of degree of cross-section you want
     :param augment:         List of rotation degree to increase datasize, None will give only 0 degree
-    :param is_rearrange:    Boolean, Rearrange coordinate from bottom left to right
+    :param is_rearrange:    Boolean, Rearrange coordinate from bottom left to right, else the data will be unordered
     :param axis:            Axis of rotation (0 = X,1 = Y,2 = Z) (Default at 1 for our data)
     :return: reP_all:       List of list of numpy array with size of [len(augment),len(degree),[N,2])
     """

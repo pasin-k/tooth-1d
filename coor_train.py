@@ -125,7 +125,7 @@ def run(model_params):
     
     '''
     # Alternate between train and evaluate to see the result every eval_step but the whole training must have at least eval_times
-    eval_step = 1000  # Number of step which we will evaluate once
+    eval_step = 10000  # Number of step which we will evaluate once
     min_eval_times = 10  # The whole run must have eval at least 10 times
     if run_configs['steps'] / eval_step < min_eval_times:
         eval_times = min_eval_times
@@ -170,24 +170,7 @@ def run(model_params):
     eval_result = classifier.evaluate(
         input_fn=lambda: eval_input_fn(train_data_path, batch_size=run_configs['batch_size'], configs=model_params))
 
-
     model_params['result_file_name'] = 'result.csv'
-
-    # Save model (Only single mode due to storage restriction)
-    def serving_input_receiver_fn():
-        """Build the serving inputs."""
-        # The outer dimension (None) allows us to batch up inputs for
-        # efficiency. However, it also means that if we want a prediction
-        # for a single instance, we'll need to wrap it in an outer list.
-        inputs = {"image": tf.placeholder(shape=[None, 300, 8], dtype=tf.float32)}
-        return tf.estimator.export.ServingInputReceiver(inputs, inputs)
-
-    if run_mode == "single":
-        export_dir = classifier.export_saved_model(
-            export_dir_base=os.path.join(model_params["result_path"], "model"),
-            serving_input_receiver_fn=serving_input_receiver_fn)
-        print("Save usable model at", os.path.join(model_params["result_path"], "model"))
-
 
     # Save necessary info to csv file, as reference
     info_dict = run_configs.copy()
@@ -404,13 +387,11 @@ if __name__ == '__main__':
     if run_mode == "single":
         run_configs['input_path'] = run_configs['input_path'] + "_0"
         model_configs['result_file_name'] = 'result.csv'
-        model_configs['result_path'] = os.path.join(run_configs['result_path_base'],
-                                                    datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S"))
+        model_configs['result_path'] = run_configs['result_path']
         run(model_configs)
     elif run_mode == "kfold":
         model_configs['result_file_name'] = 'result.csv'
-        model_configs['result_path'] = os.path.join(run_configs['result_path_base'],
-                                                    datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S"))
+        model_configs['result_path'] = run_configs['result_path']
         run_kfold(model_configs)
     elif run_mode == "search":
         run_configs['input_path'] = run_configs['input_path'] + "_0"

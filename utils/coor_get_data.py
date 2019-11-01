@@ -149,5 +149,8 @@ def get_data_from_path(data_path, label_type):
 
 
 def read_raw_tfrecord(tfrecord_path):  # For debugging purpose, reading all content inside
+    i = 0
     for example in tf.python_io.tf_record_iterator(tfrecord_path):
+        i += 1
         print(tf.train.Example.FromString(example))
+    print(i)
