@@ -59,7 +59,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.scratch_7">
+  <component name="RunManager" selected="Python.coor_train">
     <configuration name="coor_model" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="my2DCNN" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -174,9 +174,9 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.scratch_7" />
         <item itemvalue="Python.coor_train" />
         <item itemvalue="Python.coor_model" />
+        <item itemvalue="Python.scratch_7" />
         <item itemvalue="Python.scratch_5" />
         <item itemvalue="Python.coor_predict" />
       </list>
@@ -192,20 +192,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1554715602048</updated>
-    </task>
-    <task id="LOCAL-00097" summary="Can do augmentation in any angle, should work fine now.">
-      <created>1562841537994</created>
-      <option name="number" value="00097" />
-      <option name="presentableId" value="LOCAL-00097" />
-      <option name="project" value="LOCAL" />
-      <updated>1562841537994</updated>
-    </task>
-    <task id="LOCAL-00098" summary="Edit typo">
-      <created>1563260996142</created>
-      <option name="number" value="00098" />
-      <option name="presentableId" value="LOCAL-00098" />
-      <option name="project" value="LOCAL" />
-      <updated>1563260996142</updated>
     </task>
     <task id="LOCAL-00099" summary="Degree ,data length now in config + New label + Clamping data">
       <created>1563261066791</created>
@@ -536,7 +522,21 @@
       <option name="project" value="LOCAL" />
       <updated>1572605758401</updated>
     </task>
-    <option name="localTasksCounter" value="146" />
+    <task id="LOCAL-00146" summary="Dynamic Weight">
+      <created>1572606942219</created>
+      <option name="number" value="00146" />
+      <option name="presentableId" value="LOCAL-00146" />
+      <option name="project" value="LOCAL" />
+      <updated>1572606942219</updated>
+    </task>
+    <task id="LOCAL-00147" summary="Dynamic Weight">
+      <created>1572606986618</created>
+      <option name="number" value="00147" />
+      <option name="presentableId" value="LOCAL-00147" />
+      <option name="project" value="LOCAL" />
+      <updated>1572606986618</updated>
+    </task>
+    <option name="localTasksCounter" value="148" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -567,7 +567,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Can do augmentation in any angle, should work fine now. Also print new csv file inside folder" />
     <MESSAGE value="Can do augmentation in any angle, should work fine now." />
     <MESSAGE value="Edit typo" />
     <MESSAGE value="Degree ,data length now in config + New label + Clamping data" />
@@ -592,7 +591,8 @@
     <MESSAGE value="Implemente predict.py" />
     <MESSAGE value="Finding bug where model now overfit" />
     <MESSAGE value="COnvert back to model that supposed to work (model, train)" />
-    <option name="LAST_COMMIT_MESSAGE" value="COnvert back to model that supposed to work (model, train)" />
+    <MESSAGE value="Dynamic Weight" />
+    <option name="LAST_COMMIT_MESSAGE" value="Dynamic Weight" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
 </project>

@@ -183,13 +183,14 @@ def softmax_focal_loss(labels_l, logits_l, gamma=2., alpha=4.):
 
 
 def get_loss_weight(labels):
-    score_one = tf.reduce_sum(tf.cast(tf.equal(labels, tf.constant(0)), dtype=tf.float32))
-    score_three = tf.reduce_sum(tf.cast(tf.equal(labels, tf.constant(1)), dtype=tf.float32))
-    score_five = tf.reduce_sum(tf.cast(tf.equal(labels, tf.constant(2)), dtype=tf.float32))
+    score_one = tf.reduce_sum(tf.cast(tf.equal(labels, tf.constant(0, dtype=tf.int64)), dtype=tf.float32))
+    score_three = tf.reduce_sum(tf.cast(tf.equal(labels, tf.constant(1, dtype=tf.int64)), dtype=tf.float32))
+    score_five = tf.reduce_sum(tf.cast(tf.equal(labels, tf.constant(2, dtype=tf.int64)), dtype=tf.float32))
     sum_total = score_one + score_three + score_five
-
-    weight = [tf.div(sum_total, score_one + 1), tf.div(sum_total, score_three + 1), tf.div(sum_total, score_five + 1)]
-    return weight
+    weight = tf.stack(
+        [tf.div(sum_total, score_one + 1), tf.div(sum_total, score_three + 1), tf.div(sum_total, score_five + 1)],
+        axis=0)
+    return tf.expand_dims(weight, axis=0)
 
 
 # Define Model
@@ -266,14 +267,10 @@ def my_model(features, labels, mode, params, config):
         # model_vars = tf.trainable_variables()
         train_hooks = []
         print_variable_hook = PrintValueHook(tf.nn.softmax(logits), "Training logits", tf.train.get_global_step(), 5000)
-        print_input_hook1 = PrintValueHook(weight[0], "Loss weight:1", tf.train.get_global_step(), 5000)
-        print_input_hook3 = PrintValueHook(weight[1], "Loss weight:3", tf.train.get_global_step(), 5000)
-        print_input_hook5 = PrintValueHook(weight[2], "Loss weight:5", tf.train.get_global_step(), 5000)
+        print_input_hook = PrintValueHook(weight, "Loss weight", tf.train.get_global_step(), 5000)
         train_hooks.append(saver_hook)
         train_hooks.append(print_variable_hook)
-        train_hooks.append(print_input_hook1)
-        train_hooks.append(print_input_hook3)
-        train_hooks.append(print_input_hook5)
+        train_hooks.append(print_input_hook)
         return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op,
                                           training_hooks=train_hooks)
 
