@@ -2,6 +2,7 @@ import tensorflow as tf
 import numpy as np
 import random
 import os
+import datetime
 import json
 from utils.open_save_file import get_input_and_label, read_file, save_file
 
@@ -232,6 +233,7 @@ def coordinate_to_tfrecord(tfrecord_name, dataset_folders, k_fold=None):
     if k_fold is None:
         k_fold = 1
 
+    time_stamp = datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S")
     for i in range(k_fold):
         tfrecord_train_name = os.path.join(tfrecord_dir, "%s_%s_train.tfrecords" % (tfrecord_name, i))
         tfrecord_eval_name = os.path.join(tfrecord_dir, "%s_%s_eval.tfrecords" % (tfrecord_name, i))
@@ -266,6 +268,7 @@ def coordinate_to_tfrecord(tfrecord_name, dataset_folders, k_fold=None):
         data_loaded["data_degree"] = degree
         data_loaded["data_length"] = coordinate_length
         data_loaded["dataset_name"] = list(dataset_folders.keys())
+        data_loaded["timestamp"] = time_stamp
         with open("../data/tfrecord/%s/%s_%s.json" % (tfrecord_name, tfrecord_name, i), 'w') as filehandle:
             json.dump(data_loaded, filehandle, indent=4, sort_keys=True, separators=(',', ': '), ensure_ascii=False)
         print("TFrecords created: %s, %s" % (tfrecord_train_name, tfrecord_eval_name))
