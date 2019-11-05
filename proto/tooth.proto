@@ -8,7 +8,7 @@ message TrainConfig{
     optional uint32 batch_size = 1 [default =16];
 
     // Minutes until a checkpoint
-    optional uint32 checkpoint_min = 2 [default = 5];
+    optional float checkpoint_min = 2 [default = 5];
 
     // Number of steps required before early stopping
     optional uint32 early_stop_step = 3 [default = 30000];

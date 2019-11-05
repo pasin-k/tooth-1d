@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto2',
     serialized_options=None,
     serialized_pb=_b(
-        '\n\x11proto/tooth.proto\"\xa2\x02\n\x0bTrainConfig\x12\x16\n\nbatch_size\x18\x01 \x01(\r:\x02\x31\x36\x12\x19\n\x0e\x63heckpoint_min\x18\x02 \x01(\r:\x01\x35\x12\x1e\n\x0f\x65\x61rly_stop_step\x18\x03 \x01(\r:\x05\x33\x30\x30\x30\x30\x12\x12\n\ninput_path\x18\x06 \x01(\t\x12\x13\n\x0bresult_path\x18\x04 \x01(\t\x12\r\n\x05steps\x18\x05 \x01(\r\x12\x15\n\rlearning_rate\x18\x07 \x01(\x02\x12\x14\n\x0c\x64ropout_rate\x18\x08 \x01(\x02\x12\x12\n\nactivation\x18\t \x01(\t\x12\x10\n\x08\x63hannels\x18\n \x01(\r\x12\x0f\n\x07\x63omment\x18\x0c \x01(\t\x12\x10\n\x08run_mode\x18\r \x01(\t\x12\x12\n\nlabel_type\x18\x0e \x01(\t\"\x1b\n\x08\x43hannels\x12\x0f\n\x07\x63hannel\x18\x01 \x03(\r')
+        '\n\x11proto/tooth.proto\"\xa2\x02\n\x0bTrainConfig\x12\x16\n\nbatch_size\x18\x01 \x01(\r:\x02\x31\x36\x12\x19\n\x0e\x63heckpoint_min\x18\x02 \x01(\x02:\x01\x35\x12\x1e\n\x0f\x65\x61rly_stop_step\x18\x03 \x01(\r:\x05\x33\x30\x30\x30\x30\x12\x12\n\ninput_path\x18\x06 \x01(\t\x12\x13\n\x0bresult_path\x18\x04 \x01(\t\x12\r\n\x05steps\x18\x05 \x01(\r\x12\x15\n\rlearning_rate\x18\x07 \x01(\x02\x12\x14\n\x0c\x64ropout_rate\x18\x08 \x01(\x02\x12\x12\n\nactivation\x18\t \x01(\t\x12\x10\n\x08\x63hannels\x18\n \x01(\r\x12\x0f\n\x07\x63omment\x18\x0c \x01(\t\x12\x10\n\x08run_mode\x18\r \x01(\t\x12\x12\n\nlabel_type\x18\x0e \x01(\t\"\x1b\n\x08\x43hannels\x12\x0f\n\x07\x63hannel\x18\x01 \x03(\r')
 )
 
 
@@ -42,8 +42,8 @@ _TRAINCONFIG = _descriptor.Descriptor(
         serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='checkpoint_min', full_name='TrainConfig.checkpoint_min', index=1,
-      number=2, type=13, cpp_type=3, label=1,
-      has_default_value=True, default_value=5,
+        number=2, type=2, cpp_type=6, label=1,
+        has_default_value=True, default_value=float(5),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
         serialized_options=None, file=DESCRIPTOR),
