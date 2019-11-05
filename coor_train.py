@@ -80,6 +80,10 @@ def run(model_params):
         model_params["data_degree"] = tfrecord_info['data_degree']
         model_params["data_length"] = tfrecord_info['data_length']
         model_params["dataset_name"] = tfrecord_info['dataset_name']
+        try:
+            run_configs["dataset_timestamp"] = tfrecord_info['data_timestamp']
+        except KeyError:
+            run_configs["dataset_timestamp"] = "None"
 
     assert len(model_params['loss_weight']) == 3, "Label does not have 3 unique value, found %s" % len(
         model_params['loss_weight'])
