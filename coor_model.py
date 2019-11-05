@@ -22,12 +22,12 @@ def cnn_1d(inp,
         layer = tf.keras.layers.Conv1D(num_filters, conv_filter_size, strides=stride, padding=padding,
                                        activation=activation,
                                        kernel_regularizer=tf.keras.regularizers.l2(kernel_regularizer), name=name)
-        output = layer(input)
+        output = layer(inp)
     else:
         layer = tf.keras.layers.Conv1D(num_filters, conv_filter_size, strides=stride, padding=padding,
                                        activation=activation, input_shape=input_shape,
                                        kernel_regularizer=tf.keras.regularizers.l2(kernel_regularizer), name=name)
-        output = layer(input)
+        output = layer(inp)
     if mode == tf.estimator.ModeKeys.TRAIN:
         return output, layer.get_weights()
     else:
@@ -119,7 +119,8 @@ def model_cnn_1d(features, mode, params, config):
                             name="conv1",
                             input_shape=(300, 8),
                             kernel_regularizer=0.01)
-    conv1 = tf.keras.layers.BatchNormalization()(conv1)
+    conv1 = tf.layers.batch_normalization(conv1)
+    # conv1 = tf.keras.layers.BatchNormalization()(conv1)
     pool1 = max_pool_layer_1d(conv1, 3, name="pool1", stride=2)
     # Output: 294x32 -> 147x32
     print("Pool1", pool1)
@@ -128,7 +129,8 @@ def model_cnn_1d(features, mode, params, config):
                             mode=mode,
                             activation=params['activation'], name="conv2",
                             kernel_regularizer=0.01)
-    conv2 = tf.keras.layers.BatchNormalization()(conv2)
+    conv2 = tf.layers.batch_normalization(conv2)
+    # conv2 = tf.keras.layers.BatchNormalization()(conv2)
     pool2 = max_pool_layer_1d(conv2, 3, "pool2", stride=2)
     # Output: 143x64 -> 71x64
 
@@ -137,17 +139,20 @@ def model_cnn_1d(features, mode, params, config):
                             mode=mode,
                             activation=params['activation'], name="conv3_1",
                             kernel_regularizer=0.01)
-    conv3 = tf.keras.layers.BatchNormalization()(conv3)
+    conv3 = tf.layers.batch_normalization(conv3)
+    # conv3 = tf.keras.layers.BatchNormalization()(conv3)
     conv4, conv4_w = cnn_1d(conv3, 3, params['channels'][0] * 64,
                             mode=mode,
                             activation=params['activation'], name="conv3_2",
                             kernel_regularizer=0.01)
-    conv4 = tf.keras.layers.BatchNormalization()(conv4)
+    conv4 = tf.layers.batch_normalization(conv4)
+    # conv4 = tf.keras.layers.BatchNormalization()(conv4)
     conv5, conv5_w = cnn_1d(conv4, 3, params['channels'][0] * 64,
                             mode=mode,
                             activation=params['activation'], name="conv3_3",
                             kernel_regularizer=0.01)
-    conv5 = tf.keras.layers.BatchNormalization()(conv5)
+    conv5 = tf.layers.batch_normalization(conv5)
+    # conv5 = tf.keras.layers.BatchNormalization()(conv5)
     pool5 = max_pool_layer_1d(conv5, 3, "pool2", stride=2)
     # print("Pool: %s"% pool3)
     # Output: 65x128 -> 32x128 = 4096
@@ -241,8 +246,12 @@ def my_model(features, labels, mode, params, config):
     #         params['loss_weight'])
     # weight = tf.constant([[params['loss_weight'][0], params['loss_weight'][1], params['loss_weight'][2]]],
     #                      dtype=tf.float32)
-    loss_weight = tf.matmul(one_hot_label, get_loss_weight(labels), transpose_b=True, a_is_sparse=True)
 
+    if not mode == tf.estimator.ModeKeys.TRAIN:
+        loss_weight = 1.0
+    else:
+        loss_weight_raw = get_loss_weight(labels)
+        loss_weight = tf.matmul(one_hot_label, loss_weight_raw, transpose_b=True, a_is_sparse=True)
 
     # Cross-entropy loss
     loss = tf.losses.sparse_softmax_cross_entropy(labels, logits,
@@ -279,16 +288,15 @@ def my_model(features, labels, mode, params, config):
                                                    20000, 0.96, staircase=True)
         optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
         train_op = optimizer.minimize(loss, global_step=steps)
+
         saver_hook = tf.train.SummarySaverHook(save_steps=1000, summary_op=tf.summary.merge_all(),
                                                output_dir=config.model_dir)
-
-        # model_vars = tf.trainable_variables()
-        train_hooks = []
         print_logits_hook = PrintValueHook(tf.nn.softmax(logits), "Training logits", tf.train.get_global_step(), 5000)
-        print_input_hook = PrintValueHook(loss_weight, "Loss weight", tf.train.get_global_step(), 5000)
-        train_hooks.append(saver_hook)
-        train_hooks.append(print_logits_hook)
-        train_hooks.append(print_input_hook)
+        print_input_hook = PrintValueHook(loss_weight_raw, "Loss weight", tf.train.get_global_step(), 5000)
+
+        # Setting logging parameters
+        train_hooks = [saver_hook, print_logits_hook, print_input_hook]
+
         return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op,
                                           training_hooks=train_hooks)
 
