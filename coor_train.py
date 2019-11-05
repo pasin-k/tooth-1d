@@ -228,7 +228,8 @@ def fitness(learning_rate, dropout_rate, activation, channels):
     accuracy, global_step = run(md_config)
     # Save info of hyperparameter search in a specific csv file
     save_file(run_configs['summary_file_path'], [accuracy, learning_rate, dropout_rate, activation,
-                                                 channels], write_mode='a', data_format="one_row")
+                                                 channels, run_configs['current_time']], write_mode='a',
+              data_format="one_row")
     return -accuracy
 
 
@@ -238,8 +239,10 @@ def run_hyper_parameter_optimize():
     run_configs['summary_file_path'] = os.path.join(run_configs[
                                                         'result_path_base'],
                                                     "hyperparameters_result_" + current_time + ".csv")
+    run_configs['current_time'] = current_time
     field_name = [i.name for i in dimensions]
     field_name.insert(0, 'accuracy')
+    field_name.append('timestamp')
 
     n_calls = 20  # Expected number of trainings
 
