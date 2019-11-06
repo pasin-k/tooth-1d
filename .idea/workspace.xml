@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="770e0596-62ef-4176-bd6c-3bded3f7c783" name="Default Changelist" comment="">
+    <list default="true" id="770e0596-62ef-4176-bd6c-3bded3f7c783" name="Default Changelist" comment="Change Checkpoint min to float">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cfg/coor_tooth.config" beforeDir="false" afterPath="$PROJECT_DIR$/cfg/coor_tooth.config" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/coor_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/coor_model.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/coor_train.py" beforeDir="false" afterPath="$PROJECT_DIR$/coor_train.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/proto/tooth.proto" beforeDir="false" afterPath="$PROJECT_DIR$/proto/tooth.proto" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/proto/tooth_pb2.py" beforeDir="false" afterPath="$PROJECT_DIR$/proto/tooth_pb2.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/open_save_file.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/open_save_file.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -36,7 +34,7 @@
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="ToolWindowDocker.ShowToolbar" value="false" />
     <property name="com.intellij.ide.scratch.LRUPopupBuilder$1/New Scratch File" value="Python&#10;TEXT" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/proto/tooth.proto" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/cfg/Dockerfile_coor" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PythonContentEntriesConfigurable" />
   </component>
   <component name="PyDebuggerOptionsProvider">
@@ -196,13 +194,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1554715602048</updated>
-    </task>
-    <task id="LOCAL-00106" summary="Code Optimization, trying to combine all score in one tfrecord">
-      <created>1566561105193</created>
-      <option name="number" value="00106" />
-      <option name="presentableId" value="LOCAL-00106" />
-      <option name="project" value="LOCAL" />
-      <updated>1566561105193</updated>
     </task>
     <task id="LOCAL-00107" summary="Now receive name from tfrecord">
       <created>1566800959859</created>
@@ -540,7 +531,14 @@
       <option name="project" value="LOCAL" />
       <updated>1572929833352</updated>
     </task>
-    <option name="localTasksCounter" value="155" />
+    <task id="LOCAL-00155" summary="Change Checkpoint min to float">
+      <created>1572939633625</created>
+      <option name="number" value="00155" />
+      <option name="presentableId" value="LOCAL-00155" />
+      <option name="project" value="LOCAL" />
+      <updated>1572939633625</updated>
+    </task>
+    <option name="localTasksCounter" value="156" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -571,7 +569,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="point cloud function" />
     <MESSAGE value="First Commit" />
     <MESSAGE value="Commit" />
     <MESSAGE value="Code Optimization, trying to combine all score in one tfrecord" />
@@ -596,7 +593,8 @@
     <MESSAGE value="Updated to the weight-tracking version" />
     <MESSAGE value="Add datetime in json file to track version of data" />
     <MESSAGE value="Convert back to weight tracking, but with dynamic weight. Also ignore loss weight when not training" />
-    <option name="LAST_COMMIT_MESSAGE" value="Convert back to weight tracking, but with dynamic weight. Also ignore loss weight when not training" />
+    <MESSAGE value="Change Checkpoint min to float" />
+    <option name="LAST_COMMIT_MESSAGE" value="Change Checkpoint min to float" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
 </project>

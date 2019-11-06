@@ -14,7 +14,7 @@ def cnn_1d(inp,
            mode,
            activation=tf.nn.relu,
            stride=1,
-           padding='same',
+           padding='valid',
            input_shape=None,
            name='', kernel_regularizer=0.0):  # Stride of CNN
     # We shall define the weights that will be trained using create_weights function.
@@ -113,13 +113,16 @@ def model_cnn_1d(features, mode, params, config):
     This model is based on "A Comparison of 1-D and 2-D Deep Convolutional Neural Networks in ECG Classification"
     '''
     # (1) Filter size: 7x32, max pooling of k3 s2
+    print("Input", features['image'])
     conv1, conv1_w = cnn_1d(features['image'], 7, params['channels'][0] * 16,
                             mode=mode,
                             activation=params['activation'],
                             name="conv1",
                             input_shape=(300, 8),
                             kernel_regularizer=0.01)
+    print("Conv1", conv1)
     conv1 = tf.layers.batch_normalization(conv1)
+    print("Batch1", conv1)
     # conv1 = tf.keras.layers.BatchNormalization()(conv1)
     pool1 = max_pool_layer_1d(conv1, 3, name="pool1", stride=2)
     # Output: 294x32 -> 147x32
@@ -293,9 +296,12 @@ def my_model(features, labels, mode, params, config):
                                                output_dir=config.model_dir)
         print_logits_hook = PrintValueHook(tf.nn.softmax(logits), "Training logits", tf.train.get_global_step(), 5000)
         print_input_hook = PrintValueHook(loss_weight_raw, "Loss weight", tf.train.get_global_step(), 5000)
+        print_lr_hook = PrintValueHook(optimizer._lr, "Learning Rate", tf.train.get_global_step(), 5000)
+        print_weight_hook = PrintValueHook(tf.convert_to_tensor(weights['conv1'][0], dtype=tf.float32),
+                                           "Conv1; weights", tf.train.get_global_step(), 5000)
 
         # Setting logging parameters
-        train_hooks = [saver_hook, print_logits_hook, print_input_hook]
+        train_hooks = [saver_hook, print_logits_hook, print_input_hook, print_lr_hook, print_weight_hook]
 
         return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op,
                                           training_hooks=train_hooks)

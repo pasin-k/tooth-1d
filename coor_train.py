@@ -92,7 +92,7 @@ def run(model_params):
     print("Getting training data from %s" % train_data_path)
     print("Saved model at %s" % model_params['result_path'])
 
-    tf.logging.set_verbosity(tf.logging.INFO)  # To see some additional info
+    # tf.logging.set_verbosity(tf.logging.INFO)  # To see some additional info
     # Setting for multiple GPUs
     mirrored_strategy = tf.distribute.MirroredStrategy(devices=get_available_gpus())
     # Setting checkpoint config
@@ -120,9 +120,7 @@ def run(model_params):
         max_steps=run_configs['steps'], hooks=[train_hook])
     eval_spec = tf.estimator.EvalSpec(
         input_fn=lambda: eval_input_fn(eval_data_path, batch_size=32, configs=model_params),
-        steps=None, throttle_secs=run_configs['checkpoint_min'] * 60)
-    # steps=None,
-    # start_delay_secs=0, throttle_secs=0)
+        steps=None, throttle_secs=0)
     # classifier.train(input_fn=lambda: train_input_fn(train_data_path, batch_size=params['batch_size']),
     #     max_steps=params['steps'], hooks=[train_hook])
     # eval_result = classifier.evaluate(input_fn=lambda: eval_input_fn(eval_data_path, batch_size=32))

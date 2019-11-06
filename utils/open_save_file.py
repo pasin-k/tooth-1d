@@ -135,6 +135,67 @@ def get_label(dataname, stattype, double_data=False, one_hotted=False, normalize
         return labels_data, labels_name
 
 
+def get_label_new_score(dataname, file_dir='../global_data/Ground Truth Score_new.csv',
+                        one_hotted=False, normalized=False, ):
+    """
+    Get label of Ground Truth Score.csv file for new set of score
+    :param dataname:    String, Type of label e.g. [Taper/Occ]
+    :param file_dir:    Directory of csv file
+    :param one_hotted:  Boolean, Return output as one-hot data
+    :param normalized:  Boolean, Normalize output to 0-1 (Does not work if one_hotted is True)
+    :return: labels     List of score of requested dat
+             label_name List of score name, used to identify order of data
+    """
+    label_name_key = {"Taper": 1, "Width": 2, "Sharpness": 4}
+    max_score = 5
+
+    try:
+        data_column = label_name_key[dataname]
+    except KeyError:
+        raise Exception(
+            "Wrong dataname, Type as %s, Valid name: %s" % (dataname, label_name_key))
+
+    labels_name = []
+    labels_data = []
+    print("get_label: Import from %s" % os.path.join(file_dir))
+    with open(file_dir) as csvfile:
+        read_csv = csv.reader(csvfile, delimiter=',')
+        header = True  # Ignore first row
+        for row in read_csv:
+            if header:
+                header = False
+            else:
+                try:
+                    if row[data_column] != '':
+                        label = row[0]
+                        val = row[data_column]
+                        if one_hotted or (not normalized):  # Don't normalize if output is one hot encoding
+                            normalized_value = int(val)  # Turn string to int
+                        else:
+                            normalized_value = float(val) / max_score  # Turn string to float
+                        labels_name.append(label)
+                        labels_data.append(normalized_value)
+                except IndexError:
+                    print("Data incomplete, no data of %s, or missing label in csv file" % file_dir)
+
+    # Sort data by name
+    labels_name, labels_data = zip(*sorted(zip(labels_name, labels_data)))
+    labels_name = list(labels_name)  # Turn tuples into list
+    labels_data = list(labels_data)
+
+    # Turn to one hotted if required
+    if one_hotted:
+        one_hot_labels = list()
+        for label in labels_data:
+            label = (label - 1) / 2
+            one_hot_labels.append(np.array([int(i == label) for i in range(3)]))
+        print("get_label: Upload one-hotted label completed (as a list): %d examples" % (len(one_hot_labels)))
+        return one_hot_labels, labels_name
+    else:
+        print("get_label: Upload non one-hotted label completed (as a list): %d examples" % (len(labels_data)))
+        return labels_data, labels_name
+
+
 def get_cross_section(degree, augment_config=None, folder_name='../../global_data/stl_data',
                       file_name="PreparationScan.stl",
                       csv_dir='../../global_data/Ground Truth Score_new.csv'):
@@ -834,6 +895,3 @@ def get2DImage(directory, name, singleval=False, realVal=False, threshold=253):
         print("Get 2D images from %s done with size: (%d,%d,%d)" % (name, w, h, num_im))
         return grayim
 '''
-
-
-
