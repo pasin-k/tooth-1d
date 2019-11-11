@@ -1,11 +1,11 @@
 import tensorflow as tf
 import csv
 import os
-
+import numpy as np
 from utils.custom_hook import EvalResultHook, PrintValueHook
 
 # In case of needing l2-regularization: https://stackoverflow.com/questions/44232566/add-l2-regularization-when-using-high-level-tf-layers/44238354#44238354
-
+initilizer = "he_uniform"
 
 # Default stride of 1, padding:same
 def cnn_1d(inp,
@@ -20,12 +20,12 @@ def cnn_1d(inp,
     # We shall define the weights that will be trained using create_weights function.
     if input_shape is None:
         layer = tf.keras.layers.Conv1D(num_filters, conv_filter_size, strides=stride, padding=padding,
-                                       activation=activation,
+                                       activation=activation, kernel_initializer=initilizer,
                                        kernel_regularizer=tf.keras.regularizers.l2(kernel_regularizer), name=name)
         output = layer(inp)
     else:
         layer = tf.keras.layers.Conv1D(num_filters, conv_filter_size, strides=stride, padding=padding,
-                                       activation=activation, input_shape=input_shape,
+                                       activation=activation, input_shape=input_shape, kernel_initializer=initilizer,
                                        kernel_regularizer=tf.keras.regularizers.l2(kernel_regularizer), name=name)
         output = layer(inp)
     if mode == tf.estimator.ModeKeys.TRAIN:
@@ -71,7 +71,7 @@ def fc_layer(inp,  #
              name='',
              kernel_regularizer=0.0):
     # Let's define trainable weights and biases.
-    layer = tf.keras.layers.Dense(num_outputs, activation=activation,
+    layer = tf.keras.layers.Dense(num_outputs, activation=activation, kernel_initializer=initilizer,
                                   kernel_regularizer=tf.keras.regularizers.l2(kernel_regularizer))
     output = layer(inp)
     if mode == tf.estimator.ModeKeys.TRAIN:
@@ -175,7 +175,7 @@ def model_cnn_1d(features, mode, params, config):
                          mode=mode,
                          activation=tf.nn.tanh, name='predict', kernel_regularizer=0.01)
     return logits, {'conv1': conv1_w, 'conv2': conv2_w, 'conv3': conv3_w, 'conv4': conv4_w,
-                    'conv5': conv5_w, 'fc6': fc6_w, 'fc7': fc7_w}
+                    'conv5': conv5_w, 'fc6': fc6_w, 'fc7': fc7_w}, fc7
 
 
 def softmax_focal_loss(labels_l, logits_l, gamma=2., alpha=4.):
@@ -220,15 +220,17 @@ def get_loss_weight(labels):
     score_five = tf.reduce_sum(tf.cast(tf.equal(labels, tf.constant(2, dtype=tf.int64)), dtype=tf.float32))
     sum_total = score_one + score_three + score_five
     weight = tf.stack(
-        [tf.div(sum_total, score_one + 1), tf.div(sum_total, score_three + 1), tf.div(sum_total, score_five + 1)],
+        [tf.math.divide(sum_total, score_one + 1), tf.math.divide(sum_total, score_three + 1),
+         tf.math.divide(sum_total, score_five + 1)],
         axis=0)
     return tf.expand_dims(weight, axis=0)
 
 
 # Define Model
 def my_model(features, labels, mode, params, config):
+    params['activation'] = tf.nn.leaky_relu
     # Input: (Batch_size,300,8)
-    logits, weights = model_cnn_1d(features, mode, params, config)
+    logits, weights, fc7 = model_cnn_1d(features, mode, params, config)
     # Predict Mode
     predicted_class = tf.argmax(logits, 1)
     if mode == tf.estimator.ModeKeys.PREDICT:
@@ -250,12 +252,11 @@ def my_model(features, labels, mode, params, config):
     # weight = tf.constant([[params['loss_weight'][0], params['loss_weight'][1], params['loss_weight'][2]]],
     #                      dtype=tf.float32)
 
-    if not mode == tf.estimator.ModeKeys.TRAIN:
-        loss_weight = 1.0
-    else:
+    if mode == tf.estimator.ModeKeys.TRAIN:
         loss_weight_raw = get_loss_weight(labels)
         loss_weight = tf.matmul(one_hot_label, loss_weight_raw, transpose_b=True, a_is_sparse=True)
-
+    else:
+        loss_weight = 1.0
     # Cross-entropy loss
     loss = tf.losses.sparse_softmax_cross_entropy(labels, logits,
                                                   weights=loss_weight)  # labels is int of class, logits is vector
@@ -269,9 +270,7 @@ def my_model(features, labels, mode, params, config):
 
     # Create parameters to show in Tensorboard
     ex_prediction = tf.summary.scalar("example_prediction", predicted_class[0])
-    # print(predicted_class[0])
     ex_ground_truth = tf.summary.scalar("example_ground_truth", labels[0])
-    # print(labels[0])
     if mode == tf.estimator.ModeKeys.TRAIN:
         for name, w in weights.items():
             tf.summary.histogram(name + "_weights", w[0])
@@ -279,9 +278,7 @@ def my_model(features, labels, mode, params, config):
     summary = tf.summary.histogram("Prediction", predicted_class)
     summary2 = tf.summary.histogram("Ground_Truth", labels)
     d_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
-    # model_vars = tf.trainable_variables()
     # print(d_vars)
-    # summary_name = ["conv1", "conv2", "conv3_1", "conv3_2", "conv3_3", "fc4", "fc5", "predict"]
     # global_step = tf.summary.scalar("Global steps",tf.train.get_global_step())
 
     # Train Mode
@@ -290,18 +287,29 @@ def my_model(features, labels, mode, params, config):
         learning_rate = tf.train.exponential_decay(params['learning_rate'], steps,
                                                    20000, 0.96, staircase=True)
         optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
+        loss_gradient = optimizer.compute_gradients(loss, fc7)
         train_op = optimizer.minimize(loss, global_step=steps)
 
-        saver_hook = tf.train.SummarySaverHook(save_steps=1000, summary_op=tf.summary.merge_all(),
+        save_steps = 1000
+        saver_hook = tf.train.SummarySaverHook(save_steps=save_steps, summary_op=tf.summary.merge_all(),
                                                output_dir=config.model_dir)
-        print_logits_hook = PrintValueHook(tf.nn.softmax(logits), "Training logits", tf.train.get_global_step(), 5000)
-        print_input_hook = PrintValueHook(loss_weight_raw, "Loss weight", tf.train.get_global_step(), 5000)
-        print_lr_hook = PrintValueHook(optimizer._lr, "Learning Rate", tf.train.get_global_step(), 5000)
-        print_weight_hook = PrintValueHook(tf.convert_to_tensor(weights['conv1'][0], dtype=tf.float32),
-                                           "Conv1; weights", tf.train.get_global_step(), 5000)
+        print_logits_hook = PrintValueHook(tf.nn.softmax(logits), "Training logits", tf.train.get_global_step(),
+                                           save_steps)
+        print_label_hook = PrintValueHook(labels, "Labels", tf.train.get_global_step(), save_steps)
+        print_loss_hook = PrintValueHook(loss, "Loss", tf.train.get_global_step(), save_steps)
+        print_reg_loss_hook = PrintValueHook(tf.losses.get_regularization_loss(), "Regularization Loss",
+                                             tf.train.get_global_step(), save_steps)
+        print_input_hook = PrintValueHook(loss_weight_raw, "Loss weight", tf.train.get_global_step(), save_steps)
+        print_lr_hook = PrintValueHook(loss_gradient, "Loss gradient", tf.train.get_global_step(), save_steps)
+        # print(np.shape(weights['conv1'][0]))
+        print_weight_hook = PrintValueHook(tf.convert_to_tensor(weights['conv1'][0][0, 0:20], dtype=tf.float32),
+                                           "Conv1; weights", tf.train.get_global_step(), save_steps)
 
         # Setting logging parameters
-        train_hooks = [saver_hook, print_logits_hook, print_input_hook, print_lr_hook, print_weight_hook]
+        train_hooks = [saver_hook, print_logits_hook, print_label_hook, print_loss_hook, print_reg_loss_hook,
+                       print_input_hook, print_lr_hook,
+                       # print_weight_hook
+                       ]
 
         return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op,
                                           training_hooks=train_hooks)

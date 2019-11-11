@@ -62,6 +62,7 @@ def get_available_gpus():
 
 
 def run(model_params):
+    print("Beginning run..")
     # Check if all values exist
     model_params = check_exist(model_params, learning_rate=None, dropout_rate=None, activation=None,
                                channels=None, result_path=None)
@@ -170,6 +171,7 @@ def run(model_params):
         writer = csv.writer(csvfile)
         for key, val in info_dict.items():
             writer.writerow([key, val])
+    print("Run completed, finished saving csv file ")
     return accuracy, global_step
 
 
@@ -191,7 +193,7 @@ def run(model_params):
 #                     copy2(run_params['config_path'], model_params['result_path'])
 
 
-dim_learning_rate = Real(low=5e-6, high=5e-3, prior='log-uniform', name='learning_rate')
+dim_learning_rate = Real(low=1e-4, high=5e-2, prior='log-uniform', name='learning_rate')
 dim_dropout_rate = Real(low=0, high=0.875, name='dropout_rate')
 dim_activation = Categorical(categories=['0', '1'],
                              name='activation')
@@ -217,13 +219,13 @@ def fitness(learning_rate, dropout_rate, activation, channels):
     print("Learning_rate, Dropout_rate, Activation, Channels = %s, %s, %s, %s" % (
         learning_rate, dropout_rate, activation, channels))
 
+    run_configs['current_time'] = datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S")
     # Set result path combine with current time of running
     md_config = {'learning_rate': learning_rate,
                  'dropout_rate': dropout_rate,
                  'activation': activation_dict[activation],
                  'channels': [channels, 2],
-                 'result_path': os.path.join(run_configs['result_path_base'],
-                                             datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S")),
+                 'result_path': os.path.join(run_configs['result_path_base'], run_configs['current_time']),
                  'result_file_name': 'result.csv',
                  }
 
@@ -241,7 +243,7 @@ def run_hyper_parameter_optimize():
     run_configs['summary_file_path'] = os.path.join(run_configs[
                                                         'result_path_base'],
                                                     "hyperparameters_result_" + current_time + ".csv")
-    run_configs['current_time'] = current_time
+
     field_name = [i.name for i in dimensions]
     field_name.insert(0, 'accuracy')
     field_name.append('timestamp')
@@ -318,7 +320,11 @@ def run_hyper_parameter_optimize():
             if i[0] > best_accuracy:
                 best_accuracy = i[0]
             data = {field_name[0]: i[0] * -1}
-            for j in range(1, len(field_name)):
+            for j in range(1, len(field_name) - 1):
+                print(len(i))
+                print(len(i[1]))
+                print(len(field_name))
+                print((field_name))
                 data[field_name[1]] = i[1][j - 1]
             new_data.append(data)
 
