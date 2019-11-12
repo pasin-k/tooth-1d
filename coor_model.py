@@ -161,13 +161,13 @@ def model_cnn_1d(features, mode, params, config):
     # print("Pool: %s"% pool3)
     # Output: 65x128 -> 32x128 = 4096
     fc6 = flatten_layer(pool5)
-    fc6, fc6_w = fc_layer(fc6, params['channels'][1] * 1024,
+    fc6, fc6_w = fc_layer(fc6, params['channels'][1] * 128,  # 1024
                           mode=mode,
                           activation=params['activation'], kernel_regularizer=0.01,
                           name='fc5', )
     dropout6 = tf.keras.layers.Dropout(rate=params['dropout_rate'])(fc6)
     # Output: 4096 -> 4096 -> 3
-    fc7, fc7_w = fc_layer(dropout6, params['channels'][1] * 1024,
+    fc7, fc7_w = fc_layer(dropout6, params['channels'][1] * 128,  #1024
                           mode=mode,
                           activation=params['activation'], name='fc6',
                           kernel_regularizer=0.01)

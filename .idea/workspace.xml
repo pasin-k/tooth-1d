@@ -3,11 +3,9 @@
   <component name="ChangeListManager">
     <list default="true" id="770e0596-62ef-4176-bd6c-3bded3f7c783" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cfg/coor_tooth.config" beforeDir="false" afterPath="$PROJECT_DIR$/cfg/coor_tooth.config" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/coor_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/coor_model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/coor_train.py" beforeDir="false" afterPath="$PROJECT_DIR$/coor_train.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/preprocess/stl_to_image.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocess/stl_to_image.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/open_save_file.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/open_save_file.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/stl_slicer.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/stl_slicer.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -63,7 +61,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.scratch_10">
+  <component name="RunManager" selected="Python.stl_to_image">
     <configuration name="coor_train" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="my2DCNN" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -98,27 +96,6 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$APPLICATION_CONFIG_DIR$/scratches/scratch_10.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="scratch_7" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="my2DCNN" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$APPLICATION_CONFIG_DIR$/scratches" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$APPLICATION_CONFIG_DIR$/scratches/scratch_7.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -169,20 +146,41 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="stl_to_image" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="my2DCNN" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/preprocess" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/preprocess/stl_to_image.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <list>
       <item itemvalue="Python.coor_train" />
-      <item itemvalue="Python.scratch_7" />
       <item itemvalue="Python.scratch_8" />
       <item itemvalue="Python.scratch_9" />
       <item itemvalue="Python.scratch_10" />
+      <item itemvalue="Python.stl_to_image" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.stl_to_image" />
         <item itemvalue="Python.scratch_10" />
         <item itemvalue="Python.scratch_9" />
         <item itemvalue="Python.coor_train" />
         <item itemvalue="Python.scratch_8" />
-        <item itemvalue="Python.scratch_7" />
       </list>
     </recent_temporary>
   </component>
@@ -196,20 +194,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1554715602048</updated>
-    </task>
-    <task id="LOCAL-00111" summary="Has parameter to show axis">
-      <created>1566825304913</created>
-      <option name="number" value="00111" />
-      <option name="presentableId" value="LOCAL-00111" />
-      <option name="project" value="LOCAL" />
-      <updated>1566825304913</updated>
-    </task>
-    <task id="LOCAL-00112" summary="Add fix amount of point and create error,config file">
-      <created>1566825317887</created>
-      <option name="number" value="00112" />
-      <option name="presentableId" value="LOCAL-00112" />
-      <option name="project" value="LOCAL" />
-      <updated>1566825317887</updated>
     </task>
     <task id="LOCAL-00113" summary="Compatible only with new tfrecord file">
       <created>1566899353134</created>
@@ -540,7 +524,21 @@
       <option name="project" value="LOCAL" />
       <updated>1573456053171</updated>
     </task>
-    <option name="localTasksCounter" value="160" />
+    <task id="LOCAL-00160" summary="More logging to find where gradient disappear">
+      <created>1573550593175</created>
+      <option name="number" value="00160" />
+      <option name="presentableId" value="LOCAL-00160" />
+      <option name="project" value="LOCAL" />
+      <updated>1573550593176</updated>
+    </task>
+    <task id="LOCAL-00161" summary="Change config">
+      <created>1573550679444</created>
+      <option name="number" value="00161" />
+      <option name="presentableId" value="LOCAL-00161" />
+      <option name="project" value="LOCAL" />
+      <updated>1573550679445</updated>
+    </task>
+    <option name="localTasksCounter" value="162" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -571,8 +569,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Code Optimization, trying to combine all score in one tfrecord" />
-    <MESSAGE value="Now receive name from tfrecord" />
     <MESSAGE value="Now all label in tfrecord, edit helper function" />
     <MESSAGE value="New config parameters: label_type" />
     <MESSAGE value="Has parameter to show axis" />
@@ -596,7 +592,9 @@
     <MESSAGE value="Change Checkpoint min to float" />
     <MESSAGE value="Add some parameter to debug, now should print eval every half minutes" />
     <MESSAGE value="Finding bugs where regularization doesn't work" />
-    <option name="LAST_COMMIT_MESSAGE" value="Finding bugs where regularization doesn't work" />
+    <MESSAGE value="More logging to find where gradient disappear" />
+    <MESSAGE value="Change config" />
+    <option name="LAST_COMMIT_MESSAGE" value="Change config" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
 </project>
