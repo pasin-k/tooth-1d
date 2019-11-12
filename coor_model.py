@@ -28,6 +28,7 @@ def cnn_1d(inp,
                                        activation=activation, input_shape=input_shape, kernel_initializer=initilizer,
                                        kernel_regularizer=tf.keras.regularizers.l2(kernel_regularizer), name=name)
         output = layer(inp)
+    print("Reg loss", tf.losses.get_regularization_loss())
     if mode == tf.estimator.ModeKeys.TRAIN:
         return output, layer.get_weights()
     else:
@@ -173,7 +174,7 @@ def model_cnn_1d(features, mode, params, config):
     dropout7 = tf.keras.layers.Dropout(rate=params['dropout_rate'])(fc7)
     logits, _ = fc_layer(dropout7, 3,
                          mode=mode,
-                         activation=tf.nn.tanh, name='predict', kernel_regularizer=0.01)
+                         activation=None, name='predict', kernel_regularizer=0.01)
     return logits, {'conv1': conv1_w, 'conv2': conv2_w, 'conv3': conv3_w, 'conv4': conv4_w,
                     'conv5': conv5_w, 'fc6': fc6_w, 'fc7': fc7_w}, fc7
 
@@ -296,19 +297,22 @@ def my_model(features, labels, mode, params, config):
         print_logits_hook = PrintValueHook(tf.nn.softmax(logits), "Training logits", tf.train.get_global_step(),
                                            save_steps)
         print_label_hook = PrintValueHook(labels, "Labels", tf.train.get_global_step(), save_steps)
+        print_lr_hook = PrintValueHook(learning_rate, "Learning rate", tf.train.get_global_step(), save_steps)
         print_loss_hook = PrintValueHook(loss, "Loss", tf.train.get_global_step(), save_steps)
         print_reg_loss_hook = PrintValueHook(tf.losses.get_regularization_loss(), "Regularization Loss",
                                              tf.train.get_global_step(), save_steps)
         print_input_hook = PrintValueHook(loss_weight_raw, "Loss weight", tf.train.get_global_step(), save_steps)
         print_lr_hook = PrintValueHook(loss_gradient, "Loss gradient", tf.train.get_global_step(), save_steps)
         # print(np.shape(weights['conv1'][0]))
-        print_weight_hook = PrintValueHook(tf.convert_to_tensor(weights['conv1'][0][0, 0:20], dtype=tf.float32),
-                                           "Conv1; weights", tf.train.get_global_step(), save_steps)
+        print_weight_hook = PrintValueHook(tf.convert_to_tensor(weights['fc7'][0], dtype=tf.float32),
+                                           "fc7; weights", tf.train.get_global_step(), save_steps)
 
         # Setting logging parameters
-        train_hooks = [saver_hook, print_logits_hook, print_label_hook, print_loss_hook, print_reg_loss_hook,
+        train_hooks = [saver_hook, print_logits_hook, print_label_hook,
+                       print_lr_hook,
+                       print_loss_hook, print_reg_loss_hook,
                        print_input_hook, print_lr_hook,
-                       # print_weight_hook
+                       print_weight_hook
                        ]
 
         return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op,

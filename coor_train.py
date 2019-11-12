@@ -321,10 +321,6 @@ def run_hyper_parameter_optimize():
                 best_accuracy = i[0]
             data = {field_name[0]: i[0] * -1}
             for j in range(1, len(field_name) - 1):
-                print(len(i))
-                print(len(i[1]))
-                print(len(field_name))
-                print((field_name))
                 data[field_name[1]] = i[1][j - 1]
             new_data.append(data)
 
