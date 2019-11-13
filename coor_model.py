@@ -103,6 +103,7 @@ def max_and_cnn_layer(layer, pl_size, num_filters, activation, name):
     return concat
 
 
+l2_regularizer = 0.00
 # Using max pooling
 def model_cnn_1d(features, mode, params, config):
     # print(features)
@@ -120,7 +121,7 @@ def model_cnn_1d(features, mode, params, config):
                             activation=params['activation'],
                             name="conv1",
                             input_shape=(300, 8),
-                            kernel_regularizer=0.01)
+                            kernel_regularizer=l2_regularizer)
     print("Conv1", conv1)
     conv1 = tf.layers.batch_normalization(conv1)
     print("Batch1", conv1)
@@ -132,7 +133,7 @@ def model_cnn_1d(features, mode, params, config):
     conv2, conv2_w = cnn_1d(pool1, 5, params['channels'][0] * 32,
                             mode=mode,
                             activation=params['activation'], name="conv2",
-                            kernel_regularizer=0.01)
+                            kernel_regularizer=l2_regularizer)
     conv2 = tf.layers.batch_normalization(conv2)
     # conv2 = tf.keras.layers.BatchNormalization()(conv2)
     pool2 = max_pool_layer_1d(conv2, 3, "pool2", stride=2)
@@ -142,19 +143,19 @@ def model_cnn_1d(features, mode, params, config):
     conv3, conv3_w = cnn_1d(pool2, 3, params['channels'][0] * 64,
                             mode=mode,
                             activation=params['activation'], name="conv3_1",
-                            kernel_regularizer=0.01)
+                            kernel_regularizer=l2_regularizer)
     conv3 = tf.layers.batch_normalization(conv3)
     # conv3 = tf.keras.layers.BatchNormalization()(conv3)
     conv4, conv4_w = cnn_1d(conv3, 3, params['channels'][0] * 64,
                             mode=mode,
                             activation=params['activation'], name="conv3_2",
-                            kernel_regularizer=0.01)
+                            kernel_regularizer=l2_regularizer)
     conv4 = tf.layers.batch_normalization(conv4)
     # conv4 = tf.keras.layers.BatchNormalization()(conv4)
     conv5, conv5_w = cnn_1d(conv4, 3, params['channels'][0] * 64,
                             mode=mode,
                             activation=params['activation'], name="conv3_3",
-                            kernel_regularizer=0.01)
+                            kernel_regularizer=l2_regularizer)
     conv5 = tf.layers.batch_normalization(conv5)
     # conv5 = tf.keras.layers.BatchNormalization()(conv5)
     pool5 = max_pool_layer_1d(conv5, 3, "pool2", stride=2)
@@ -163,18 +164,18 @@ def model_cnn_1d(features, mode, params, config):
     fc6 = flatten_layer(pool5)
     fc6, fc6_w = fc_layer(fc6, params['channels'][1] * 128,  # 1024
                           mode=mode,
-                          activation=params['activation'], kernel_regularizer=0.01,
+                          activation=params['activation'], kernel_regularizer=l2_regularizer,
                           name='fc5', )
     dropout6 = tf.keras.layers.Dropout(rate=params['dropout_rate'])(fc6)
     # Output: 4096 -> 4096 -> 3
     fc7, fc7_w = fc_layer(dropout6, params['channels'][1] * 128,  #1024
                           mode=mode,
                           activation=params['activation'], name='fc6',
-                          kernel_regularizer=0.01)
+                          kernel_regularizer=l2_regularizer)
     dropout7 = tf.keras.layers.Dropout(rate=params['dropout_rate'])(fc7)
     logits, _ = fc_layer(dropout7, 3,
                          mode=mode,
-                         activation=None, name='predict', kernel_regularizer=0.01)
+                         activation=None, name='predict', kernel_regularizer=l2_regularizer)
     return logits, {'conv1': conv1_w, 'conv2': conv2_w, 'conv3': conv3_w, 'conv4': conv4_w,
                     'conv5': conv5_w, 'fc6': fc6_w, 'fc7': fc7_w}, fc7
 
