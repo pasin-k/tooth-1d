@@ -33,8 +33,6 @@ def get_cross_section(stl_file_name, z_plane, degree=None, augment=None, is_rear
         print("No degree input found, use default value")
     elif isinstance(degree, int) or isinstance(degree, float):  # In case of single value, put list over it
         degree = [degree]
-    else:
-        raise ValueError("degree must be list or int/float")
 
     all_points = []
     for Tmain in all_triangle:  # Loop for every augmentation
