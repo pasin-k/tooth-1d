@@ -36,7 +36,7 @@ def get_file_name(folder_name='../global_data/', file_name=None, exception_file=
             else:
                 if filename.split('/')[-1] == file_name:
                     file_dir.append(os.path.abspath(os.path.join(root, filename)))
-                    folder_dir.append(root.split('/')[-1].split('-')[0])
+                    folder_dir.append(root.split('/')[-1].split('-')[0])  # File name always has format: "[id]-2"
     file_dir.sort()
     folder_dir.sort()
     print("get_file_name: Uploaded %d file names" % len(file_dir))
@@ -48,8 +48,8 @@ def get_label(dataname, stattype, double_data=False, one_hotted=False, normalize
     """
     Get label of Ground Truth Score.csv file
     :param dataname:    String, Type of label e.g. [Taper/Occ]
-    :param stattype:    String, Label measurement e.g [Average/Median]
-    :param double_data: Boolean, Double amount of data of label, for augmentation **Not using anymore
+    :param stattype:    String, Label measurement e.g [average/median]
+    :param double_data: Boolean, Double amount of data of label, for augmentation **Not using anymore**
     :param one_hotted:  Boolean, Return output as one-hot data
     :param normalized:  Boolean, Normalize output to 0-1 (Not applied for one hot)
     :param file_dir:    Directory of csv file
@@ -135,8 +135,98 @@ def get_label(dataname, stattype, double_data=False, one_hotted=False, normalize
         return labels_data, labels_name
 
 
-def get_label_new_score(dataname, file_dir='../global_data/Ground Truth Score_new.csv',
-                        one_hotted=False, normalized=False, ):
+def get_cross_section_label(degree, augment_config=None, folder_name='../../global_data/stl_data',
+                            file_name="PreparationScan.stl",
+                            csv_dir='../../global_data/Ground Truth Score_new.csv'):
+    """
+    Get coordinates of stl file and label from csv file
+    :param degree:          List of rotation angles
+    :param augment_config:  List of all augmentation angles
+    :param folder_name:     String, folder directory of stl file
+    :param csv_dir:         String, file directory of label (csv file)
+    :param file_name:       String, filename can be None
+    :return:
+    stl_points_all          List of all point (ndarray)
+    label_all               Dict of label(Check 'data_type'), name, error_name
+    """
+    from utils.stl_slicer import get_cross_section
+
+    if augment_config is None:
+        augment_config = [0]
+
+    # Get data and transformed to cross-section image.
+    data_type = ["Occ_B", "Occ_F", "Occ_L", "Occ_Sum", "BL", "MD", "Taper_Sum", "Integrity", "Width", "Surface",
+                 "Sharpness"]  # CSV header
+    stat_type = ["median"]
+
+    name_dir, image_name = get_file_name(folder_name=folder_name, file_name=file_name)
+
+    label = dict()
+    label_header = ["name"]
+
+    for d in data_type:
+        for s in stat_type:
+            l, label_name = get_label(d, s, double_data=False, one_hotted=False, normalized=False, file_dir=csv_dir)
+            label[d + "_" + s] = l
+            label_header.append(d + "_" + s)
+
+    # Number of data should be the same as number of label
+    if image_name != label_name:
+        print(image_name)
+        print(label_name)
+        diff = list(set(image_name).symmetric_difference(set(label_name)))
+        raise Exception("ERROR, image and label not similar: %d images, %d labels. Possible missing files: %s"
+                        % (len(image_name), (len(label_name)), diff))
+
+    # To verify number of coordinates
+    min_point = 1000
+    max_point = 0
+
+    stl_points_all = []
+    label_all = {k: [] for k in dict.fromkeys(label.keys())}
+    label_all["name"] = []
+    label_all["error_name"] = []
+    for i in range(len(name_dir)):
+        # Prepare two set of list, one for data, another for augmented data
+        label_name_temp = []
+        points_all = get_cross_section(name_dir[i], 0, degree, augment=augment_config, axis=1)
+        stl_points = []
+        error_file_names = []  # Names of file that cannot get cross-section image
+
+        for index, point in enumerate(points_all):
+            augment_val = augment_config[index]
+            if augment_val < 0:
+                augment_val = "n" + str(abs(augment_val))
+            else:
+                augment_val = str(abs(augment_val))
+            if point is None:  # If the output has error, remove label of that file
+                error_file_names.append(image_name[i] + "_" + augment_val)
+            else:
+                stl_points.append(point)
+                label_name_temp.append(image_name[i] + "_" + augment_val)
+                if len(point[0]) > max_point:
+                    max_point = len(point[0])
+                if len(point[0]) < min_point:
+                    min_point = len(point[0])
+
+        # Add all label (augmented included)
+        for key, value in label.items():
+            label_all[key] += [value[i] for _ in range(len(stl_points))]
+        stl_points_all += stl_points  # Add these points to the big one
+        label_all["name"] += label_name_temp  # Also add label name to the big one
+        label_all["error_name"] += error_file_names  # Same as error file
+
+    # The output is list(examples) of list(degrees) of numpy array (N*2 coordinates)
+    for label_name in label_all["name"]:
+        print("Finished with %d examples" % (len(label_name)))
+
+    print("Max amount of coordinates: %s, min  coordinates: %s" % (max_point, min_point))
+    return stl_points_all, label_all, label_header
+
+
+# The two functions below is used for new type of data, currently on prototype
+def get_label_new_data(dataname, file_dir='../global_data/new_score(okuyama).csv',
+                       one_hotted=False, normalized=False, ):
     """
     Get label of Ground Truth Score.csv file for new set of score
     :param dataname:    String, Type of label e.g. [Taper/Occ]
@@ -196,9 +286,9 @@ def get_label_new_score(dataname, file_dir='../global_data/Ground Truth Score_ne
         return labels_data, labels_name
 
 
-def get_cross_section(degree, augment_config=None, folder_name='../../global_data/stl_data',
-                      file_name="PreparationScan.stl",
-                      csv_dir='../../global_data/Ground Truth Score_new.csv'):
+def get_cross_section_label_new_data(degree, augment_config=None, folder_name='../../global_data/stl_data',
+                                     file_name="PreparationScan.stl",
+                                     csv_dir='../../global_data/new_score(okuyama).csv'):
     """
     Get coordinates of stl file and label from csv file
     :param degree:          List of rotation angles
@@ -208,9 +298,7 @@ def get_cross_section(degree, augment_config=None, folder_name='../../global_dat
     :param file_name:       String, filename can be None
     :return:
     stl_points_all          List of all point (ndarray)
-    label_all               List of label
-    label_name_all          List of label name (id)
-    error_file_names_all    List of label name that has error
+    label_all               Dict of label(Check 'data_type'), name, error_name
     """
     from utils.stl_slicer import get_cross_section
 
@@ -218,9 +306,8 @@ def get_cross_section(degree, augment_config=None, folder_name='../../global_dat
         augment_config = [0]
 
     # Get data and transformed to cross-section image.
-    data_type = ["Occ_B", "Occ_F", "Occ_L", "Occ_Sum", "BL", "MD", "Taper_Sum", "Integrity", "Width", "Surface",
-                 "Sharpness"]  # CSV header
-    stat_type = ["median"]
+    data_type = ["Taper", "Width", "Sharpness"]  # CSV header
+    # stat_type = ["median"]
 
     name_dir, image_name = get_file_name(folder_name=folder_name, file_name=file_name)
 
@@ -228,64 +315,66 @@ def get_cross_section(degree, augment_config=None, folder_name='../../global_dat
     label_header = ["name"]
 
     for d in data_type:
-        for s in stat_type:
-            l, label_name = get_label(d, s, double_data=False, one_hotted=False, normalized=False, file_dir=csv_dir)
-            label[d + "_" + s] = l
-            label_header.append(d + "_" + s)
-
-    # Number of data should be the same as number of label
-    if image_name != label_name:
-        print(image_name)
-        print(label_name)
-        diff = list(set(image_name).symmetric_difference(set(label_name)))
-        raise Exception("ERROR, image and label not similar: %d images, %d labels. Possible missing files: %s"
-                        % (len(image_name), (len(label_name)), diff))
-
+        l, label_name = get_label_new_data(d, one_hotted=False, normalized=False, file_dir=csv_dir)
+        label[d] = l
+        label_header.append(d)
+        for deg, name in zip(degree, label_name[0:len(degree)]):
+            assert int(name.split('_')[-1]) in degree, "Degree input is not the same as label in {}, found {}".format(
+                degree, name)
+    label["name"] = label_name
     # To verify number of coordinates
     min_point = 1000
     max_point = 0
 
+    # List of all cross-section ndarray (Augmented)
     stl_points_all = []
+
+    # Create a dictionary of empty list
     label_all = {k: [] for k in dict.fromkeys(label.keys())}
-    label_name_all = []
-    error_file_names_all = []
-    for i in range(len(name_dir)):
-        # Prepare two set of list, one for data, another for augmented data
-        label_name_temp = []
-        points_all = get_cross_section(name_dir[i], 0, degree, augment=augment_config, axis=1)
-        stl_points = []
-        error_file_names = []  # Names of file that cannot get cross-section image
+    label_all["name"] = label["name"]
+    label_all["error_name"] = []
 
-        for index, point in enumerate(points_all):
-            augment_val = augment_config[index]
-            if augment_val < 0:
-                augment_val = "n" + str(abs(augment_val))
-            else:
-                augment_val = str(abs(augment_val))
-            if point is None:  # If the output has error, remove label of that file
-                error_file_names.append(image_name[i] + "_" + augment_val)
-            else:
-                stl_points.append(point)
-                label_name_temp.append(image_name[i] + "_" + augment_val)
-                if len(point[0]) > max_point:
-                    max_point = len(point[0])
-                if len(point[0]) < min_point:
-                    min_point = len(point[0])
+    for l_index, name in enumerate(label["name"]):
+        name_id = name.split('_')[0]
+        deg = int(name.split('_')[1])
 
-        # Add all label (augmented included)
-        for key, value in label.items():
-            label_all[key] += [value[i] for _ in range(len(stl_points))]
-        stl_points_all += stl_points  # Add these points to the big one
-        label_name_all += label_name_temp  # Also add label name to the big one
-        error_file_names_all += error_file_names  # Same as error file
-    label_all["name"] = label_name_all
+        try:
+            name_index = image_name.index(name_id)
+            points_all = get_cross_section(name_dir[name_index], 0, deg, augment=augment_config, axis=1)
+
+            # points_all is list of all possible augmentation but some might be None due to stl file corruption
+            for p_index, point in enumerate(points_all):
+                augment_val = augment_config[p_index]
+
+                # Convert augment angle to string, change negative to 'n' instead
+                if augment_val >= 0:
+                    augment_val = str(augment_val)
+                else:
+                    augment_val = "n" + str(abs(augment_val))
+
+                # Check if cross-section doesn't have error
+                if point is None:
+                    label_all["error_name"].append("{}_{}".format(name, augment_val))
+                else:
+                    stl_points_all.append(point)
+                    label_all["name"].append("{}_{}".format(name, augment_val))
+                    for key in label.keys():
+                        print(len(label[key]))
+                        print(l_index)
+                        label_all[key].append(label[key][l_index])
+                    # Check number of points in cross-section
+                    if len(point[0]) > max_point:
+                        max_point = len(point[0])
+                    elif len(point[0]) < min_point:
+                        min_point = len(point[0])
+        except ValueError:  # Cannot find file with this id
+            pass
 
     # The output is list(examples) of list(degrees) of numpy array (N*2 coordinates)
-    for label_name in label_name_all:
-        print("Finished with %d examples" % (len(label_name)))
+    print("Finished with {} examples".format(len(label_all["name"])))
 
     print("Max amount of coordinates: %s, min  coordinates: %s" % (max_point, min_point))
-    return stl_points_all, label_all, label_name_all, error_file_names_all, label_header
+    return stl_points_all, label_all, label_header
 
 
 def predict_get_cross_section(degree, augment_config=None, folder_name='../../global_data/stl_data',

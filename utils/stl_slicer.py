@@ -1,4 +1,5 @@
 import numpy as np
+import types
 from stl import mesh
 # mpl.use('TkAgg')  # Use this so we can use matplotlib
 import matplotlib.pyplot as plt
@@ -9,7 +10,7 @@ def get_cross_section(stl_file_name, z_plane, degree=None, augment=None, is_rear
     """
     Get cross-section of an stl file from selected x/y/z plane as well as cross-section of an rotated angle.
     We also have augmentation option to duplicate more data by rotating (Recommend small degree like 1,2,3)
-    :param stl_file_name:   String, Folder name
+    :param stl_file_name:   String, File name
     :param z_plane:         float or int, Selected plane (E.g. get cross-section at plane z = 0)
     :param degree:          List of degree of cross-section you want
     :param augment:         List of rotation degree to increase datasize, None will give only 0 degree
@@ -26,9 +27,14 @@ def get_cross_section(stl_file_name, z_plane, degree=None, augment=None, is_rear
             all_triangle.append(rotatestl(tmain_temp, axis, a))
     else:
         all_triangle = [tmain_temp]
-    if degree is None:
+
+    if degree is None:  # Use default value
         degree = [0, 45, 90, 135]
         print("No degree input found, use default value")
+    elif isinstance(degree, int) or isinstance(degree, float):  # In case of single value, put list over it
+        degree = [degree]
+    else:
+        raise ValueError("degree must be list or int/float")
 
     all_points = []
     for Tmain in all_triangle:  # Loop for every augmentation
@@ -206,3 +212,72 @@ def slicecoor(z_plane, point_a, point_b, i):
         [point_b[0] + (z_plane - point_b[2]) * (point_a[0] - point_b[0]) / (point_a[2] - point_b[2]), point_b[1] +
          (z_plane - point_b[2]) * (point_a[1] - point_b[1]) / (point_a[2] - point_b[2]), i])
     return coor
+
+
+def read_data(file_dir):
+    all_points = None
+    num_points = 2048  # Number of point to retrieve
+    for file in file_dir:
+        data = mesh.Mesh.from_file(file)
+        point = stl_to_point(v1=data.v0, v2=data.v2, v3=data.v1, num_points=num_points)  # Order to get upright shape
+        point = np.expand_dims(point, axis=0)
+        if all_points is None:
+            all_points = point
+        else:
+            all_points = np.concatenate((all_points, point), axis=0)
+    return all_points
+
+
+def stl_to_point(v1, v2, v3, num_points, sampling_mode="weight"):
+    """
+    Function to convert stl file into point cloud
+    https://medium.com/@daviddelaiglesiacastro/3d-point-cloud-generation-from-3d-triangular-mesh-bbb602ecf238
+    :param v1, v2, v3 : (N,3) ndarrays, vi represent x,y,z coordinates of one vertex
+    :param num_points: Number of points we want to sample
+    :param sampling_mode: String, type of sampling from triangle, recommend "weight"
+    :return: points: numpy array of point cloud
+    """
+    print_data = False
+    if not (np.shape(v1)[0] == np.shape(v2)[0] == np.shape(v3)[0]):
+        raise ValueError("Size of all three vertex is not the same")
+    else:
+        if print_data:
+            print("Number of mesh: %s" % np.shape(v1)[0])
+    areas = triangle_area_multi(v1, v2, v3)
+    prob = areas / areas.sum()
+    if sampling_mode == "weight":
+        indices = np.random.choice(range(len(areas)), size=num_points, p=prob)
+    else:
+        indices = np.random.choice(range(len(areas)), size=num_points)
+    points = select_point_from_triangle(v1[indices, :], v2[indices, :], v3[indices, :])
+    return points
+
+
+def triangle_area_multi(v1, v2, v3):
+    """
+    Find area of triangle, used for finding weights
+    :param v1, v2, v3 : (N,3) ndarrays, vi represent x,y,z coordinates of one vertex
+    :return: size of triangle
+    """
+    return 0.5 * np.linalg.norm(np.cross(v2 - v1, v3 - v1), axis=1)
+
+
+def select_point_from_triangle(v1, v2, v3):
+    """
+    Select one point from each three vertex
+    :param v1, v2, v3 : (N,3) ndarrays, vi represent x,y,z coordinates of one vertex
+    :return: ndarrays
+    """
+    n = np.shape(v1)[0]
+    u = np.random.rand(n, 1)
+    v = np.random.rand(n, 1)
+    is_a_problem = u + v > 1
+
+    u[is_a_problem] = 1 - u[is_a_problem]
+    v[is_a_problem] = 1 - v[is_a_problem]
+
+    w = 1 - (u + v)
+
+    points = (v1 * u) + (v2 * v) + (v3 * w)
+
+    return points
