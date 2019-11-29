@@ -5,7 +5,8 @@ After running this, use image_to_tfrecord.py to turn images into tfrecord
 
 # Import Libraries
 import os
-from utils.open_save_file import save_plot, save_coordinate, save_file, get_cross_section
+from utils.open_save_file import save_plot, save_coordinate, save_file, get_cross_section_label, \
+    get_cross_section_label_new_data
 import numpy as np
 
 augment_config = [0, -1, -2, -3, 1, 2, 3, 180, 179, 178, 177, 181, 182, 183]
@@ -111,13 +112,14 @@ def stl_point_to_movement(stl_points):  # stl_points is list of all file (all ex
     return new_stl_points
 
 
-def save_stl_point(stl_points, label_name, error_file_names, out_directory="./data/coordinates"):
+def save_stl_point(stl_points, label_name, error_file_names, out_directory="./data/coordinates", use_diff=True):
     """
     Save all cross-section into an .npy
     :param stl_points: List of cross-section images from stlslicer, can be used directly from 'get_cross_section' function
     :param label_name: List of score associate to each image
     :param error_file_names: List of file with error
     :param out_directory: Directory to save images
+    :param use_diff: Boolean, If true, will use the vector between every two coordinate instead
     :return: File saved: npy, error_file.txt, config.txt
         """
     # Save data as .npy file
@@ -129,7 +131,8 @@ def save_stl_point(stl_points, label_name, error_file_names, out_directory="./da
     open(out_directory + '/config.txt', 'w').close()
 
     # This convert coordinates into vector between each coordinate
-    stl_points = stl_point_to_movement(stl_points)
+    if use_diff:
+        stl_points = stl_point_to_movement(stl_points)
     for j in range(len(label_name)):
         save_coordinate(stl_points[j], out_directory, "%s_%s" % (coor_name, label_name[j]), degree)
 
@@ -151,16 +154,27 @@ if __name__ == '__main__':
     save_coor = True
     is_fix_amount = True
     fix_amount = 300  # Sampling coordinates to specified amount
+    use_diff = True  # Use difference between points instead
 
-    # data_type, stat_type will not be used unless you want to look at lbl value
-    points_all, lbl_all, lbl_name_all, err_name_all, header = get_cross_section(degree=degree,
-                                                                                augment_config=[0],
-                                                                                # augment_config=augment_config,
-                                                                                folder_name='../../global_data/stl_data_debug',
-                                                                                csv_dir='../../global_data/Ground Truth Score_debug.csv',
-                                                                                )
+    is_new_data = True  # New format of score, currently in prototype
+
+    if is_new_data:
+        # data_type, stat_type will not be used unless you want to look at lbl value
+        points_all, lbl_all, header = get_cross_section_label_new_data(degree=degree,
+                                                                       augment_config=augment_config,
+                                                                       folder_name='../../global_data/stl_data_debug',
+                                                                       )
+        degree = [0]
+    else:
+        # data_type, stat_type will not be used unless you want to look at lbl value
+        points_all, lbl_all, header = get_cross_section_label(degree=degree,
+                                                              augment_config=augment_config,
+                                                              # folder_name='../../global_data/stl_data_debug',
+                                                              # csv_dir='../../global_data/Ground Truth Score_debug.csv',
+                                                              )
     if is_fix_amount:
-        fix_amount = fix_amount + 1  # Compensate for the missing data
+        if use_diff:
+            fix_amount = fix_amount + 1  # Compensate for the missing data when finding diffrence
         print("Adjusting number of coordinates... Takes a long time")
         for i in range(len(points_all)):
             for d_index in range(len(degree)):
@@ -170,13 +184,13 @@ if __name__ == '__main__':
 
     if save_img:
         print("Start saving images...")
-        image_dir = "../data/cross_section_no_augment_debug"
-        save_image(points_all, lbl_name_all, err_name_all, out_directory=image_dir)
+        image_dir = "../data/cross_section_14_new"
+        save_image(points_all, lbl_all["name"], lbl_all["error_name"], out_directory=image_dir)
         save_file(os.path.join(image_dir, "score.csv"), lbl_all, data_format="dict_list", field_name=header)
 
     if save_coor:
         print("Start saving coordinates...")
-        file_dir = "../data/coordinate_no_augment_debug"
-        save_stl_point(points_all, lbl_name_all, err_name_all, out_directory=file_dir)
+        file_dir = "../data/coordinate_14_new"
+        save_stl_point(points_all, lbl_all["name"], lbl_all["error_name"], out_directory=file_dir)
         save_file(os.path.join(file_dir, "score.csv"), lbl_all, data_format="dict_list", field_name=header)
     print("stl_to_image.py: done")
