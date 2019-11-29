@@ -79,8 +79,8 @@ def fc_layer(inp,  #
         return output, layer.get_weights()
     else:
         return output, None
-    
-    
+
+
 def avg_pool_layer(layer, pooling_size, name=None, stride=-1):
     # Set stride equals to pooling size unless specified
     if stride == -1:
@@ -108,6 +108,7 @@ l2_regularizer = 0.00
 def model_cnn_1d(features, mode, params, config):
     # print(features)
     require_channel = 2
+    params['dropout_rate'] = 0
     assert len(params['channels']) == require_channel, \
         "This model need %s channels input, current input: %s" % (require_channel, params['channels'])
     # Input size:300x8
@@ -142,19 +143,19 @@ def model_cnn_1d(features, mode, params, config):
     # (3) Filter size: 3x128 (3 times), max pooling of k3 s2
     conv3, conv3_w = cnn_1d(pool2, 3, params['channels'][0] * 64,
                             mode=mode,
-                            activation=params['activation'], name="conv3_1",
+                            activation=params['activation'], name="conv3",
                             kernel_regularizer=l2_regularizer)
     conv3 = tf.layers.batch_normalization(conv3)
     # conv3 = tf.keras.layers.BatchNormalization()(conv3)
     conv4, conv4_w = cnn_1d(conv3, 3, params['channels'][0] * 64,
                             mode=mode,
-                            activation=params['activation'], name="conv3_2",
+                            activation=params['activation'], name="conv4",
                             kernel_regularizer=l2_regularizer)
     conv4 = tf.layers.batch_normalization(conv4)
     # conv4 = tf.keras.layers.BatchNormalization()(conv4)
     conv5, conv5_w = cnn_1d(conv4, 3, params['channels'][0] * 64,
                             mode=mode,
-                            activation=params['activation'], name="conv3_3",
+                            activation=params['activation'], name="conv5",
                             kernel_regularizer=l2_regularizer)
     conv5 = tf.layers.batch_normalization(conv5)
     # conv5 = tf.keras.layers.BatchNormalization()(conv5)
@@ -165,19 +166,19 @@ def model_cnn_1d(features, mode, params, config):
     fc6, fc6_w = fc_layer(fc6, params['channels'][1] * 128,  # 1024
                           mode=mode,
                           activation=params['activation'], kernel_regularizer=l2_regularizer,
-                          name='fc5', )
+                          name='fc6', )
     dropout6 = tf.keras.layers.Dropout(rate=params['dropout_rate'])(fc6)
     # Output: 4096 -> 4096 -> 3
     fc7, fc7_w = fc_layer(dropout6, params['channels'][1] * 128,  #1024
                           mode=mode,
-                          activation=params['activation'], name='fc6',
+                          activation=params['activation'], name='fc7',
                           kernel_regularizer=l2_regularizer)
     dropout7 = tf.keras.layers.Dropout(rate=params['dropout_rate'])(fc7)
-    logits, _ = fc_layer(dropout7, 3,
-                         mode=mode,
-                         activation=None, name='predict', kernel_regularizer=l2_regularizer)
+    logits, out_layer = fc_layer(dropout7, 3,
+                                 mode=mode,
+                                 activation=None, name='predict', kernel_regularizer=l2_regularizer)
     return logits, {'conv1': conv1_w, 'conv2': conv2_w, 'conv3': conv3_w, 'conv4': conv4_w,
-                    'conv5': conv5_w, 'fc6': fc6_w, 'fc7': fc7_w}, fc7
+                    'conv5': conv5_w, 'fc6': fc6_w, 'fc7': fc7_w, 'out_layer': out_layer}
 
 
 def softmax_focal_loss(labels_l, logits_l, gamma=2., alpha=4.):
@@ -232,7 +233,7 @@ def get_loss_weight(labels):
 def my_model(features, labels, mode, params, config):
     params['activation'] = tf.nn.leaky_relu
     # Input: (Batch_size,300,8)
-    logits, weights, fc7 = model_cnn_1d(features, mode, params, config)
+    logits, weights = model_cnn_1d(features, mode, params, config)
     # Predict Mode
     predicted_class = tf.argmax(logits, 1)
     if mode == tf.estimator.ModeKeys.PREDICT:
@@ -253,7 +254,6 @@ def my_model(features, labels, mode, params, config):
     #         params['loss_weight'])
     # weight = tf.constant([[params['loss_weight'][0], params['loss_weight'][1], params['loss_weight'][2]]],
     #                      dtype=tf.float32)
-
     if mode == tf.estimator.ModeKeys.TRAIN:
         loss_weight_raw = get_loss_weight(labels)
         loss_weight = tf.matmul(one_hot_label, loss_weight_raw, transpose_b=True, a_is_sparse=True)
@@ -283,13 +283,24 @@ def my_model(features, labels, mode, params, config):
     # print(d_vars)
     # global_step = tf.summary.scalar("Global steps",tf.train.get_global_step())
 
+    trainable_variable_name = ['conv1/kernel:0', 'conv1/bias:0', 'batch_normalization/gamma:0',
+                               'batch_normalization/beta:0', 'conv2/kernel:0', 'conv2/bias:0',
+                               'batch_normalization_1/gamma:0', 'batch_normalization_1/beta:0',
+                               'conv3/kernel:0', 'conv3/bias:0', 'batch_normalization_2/gamma:0',
+                               'batch_normalization_2/beta:0', 'conv4/kernel:0', 'conv4/bias:0',
+                               'batch_normalization_3/gamma:0', 'batch_normalization_3/beta:0',
+                               'conv5/kernel:0', 'conv5/bias:0', 'batch_normalization_4/gamma:0',
+                               'batch_normalization_4/beta:0', 'dense/kernel:0', 'dense/bias:0',
+                               'dense_1/kernel:0', 'dense_1/bias:0', 'dense_2/kernel:0', 'dense_2/bias:0']
+
+    steps = tf.train.get_global_step()
     # Train Mode
     if mode == tf.estimator.ModeKeys.TRAIN:
-        steps = tf.train.get_global_step()
         learning_rate = tf.train.exponential_decay(params['learning_rate'], steps,
                                                    20000, 0.96, staircase=True)
         optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
-        loss_gradient = optimizer.compute_gradients(loss, fc7)
+        loss_gradient = optimizer.compute_gradients(loss, tf.trainable_variables()[
+            trainable_variable_name.index('dense_1/kernel:0')])
         train_op = optimizer.minimize(loss, global_step=steps)
 
         save_steps = 1000
@@ -302,18 +313,18 @@ def my_model(features, labels, mode, params, config):
         print_loss_hook = PrintValueHook(loss, "Loss", tf.train.get_global_step(), save_steps)
         print_reg_loss_hook = PrintValueHook(tf.losses.get_regularization_loss(), "Regularization Loss",
                                              tf.train.get_global_step(), save_steps)
-        print_input_hook = PrintValueHook(loss_weight_raw, "Loss weight", tf.train.get_global_step(), save_steps)
-        print_lr_hook = PrintValueHook(loss_gradient, "Loss gradient", tf.train.get_global_step(), save_steps)
-        # print(np.shape(weights['conv1'][0]))
-        print_weight_hook = PrintValueHook(tf.convert_to_tensor(weights['fc7'][0], dtype=tf.float32),
-                                           "fc7; weights", tf.train.get_global_step(), save_steps)
+        print_weight_balance_hook = PrintValueHook(loss_weight_raw, "Loss weight", tf.train.get_global_step(),
+                                                   save_steps)
+        print_lg_hook = PrintValueHook(loss_gradient[0][0], "Gradient Loss", tf.train.get_global_step(), save_steps)
+        print_lg2_hook = PrintValueHook(loss_gradient[0][1], "Gradient Variable", tf.train.get_global_step(),
+                                        save_steps)
 
         # Setting logging parameters
         train_hooks = [saver_hook, print_logits_hook, print_label_hook,
                        print_lr_hook,
-                       print_loss_hook, print_reg_loss_hook,
-                       print_input_hook, print_lr_hook,
-                       print_weight_hook
+                       print_loss_hook,  # print_reg_loss_hook,
+                       print_weight_balance_hook,
+                       print_lg_hook, print_lg2_hook,
                        ]
 
         return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op,

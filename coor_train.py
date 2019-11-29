@@ -373,7 +373,7 @@ if __name__ == '__main__':
     if run_mode == "single":
         run_configs['input_path'] = run_configs['input_path'] + "_0"
         model_configs['result_file_name'] = 'result.csv'
-        model_configs['result_path'] = run_configs['result_path']
+        model_configs['result_path'] = run_configs['result_path_base']
         run(model_configs)
     elif run_mode == "kfold":
         model_configs['result_file_name'] = 'result.csv'

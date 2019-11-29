@@ -222,7 +222,7 @@ def coordinate_to_tfrecord(tfrecord_name, dataset_folders, k_fold=None):
         # Get data from dataset_folder
         grouped_train_data, grouped_eval_data = get_input_and_label(tfrecord_name, dataset_folder,
                                                                     configs, seed, get_data=True, k_fold=k_fold)
-
+        print(grouped_train_data[0][0])
         # if k_fold is None:
         #     k_fold = 1
         #     grouped_train_data = [grouped_train_data]

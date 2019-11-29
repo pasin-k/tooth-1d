@@ -50,9 +50,9 @@ class PrintValueHook(tf.train.SessionRunHook):
 
     def after_run(self, run_context, run_values):
         if run_values.results[2] == 0:
-            print("Hook %s [%s]: %s" % (
-            run_values.results[1].decode("utf-8"), np.shape(run_values.results[0]), run_values.results[0]))
+            print("Hook {} [{}]:\n{}".format(
+                run_values.results[1].decode("utf-8"), np.shape(run_values.results[0]), run_values.results[0]))
         else:
             if run_values.results[2] % run_values.results[3] == 0:
-                print("Hook %s [%s]: %s" % (
-                run_values.results[1].decode("utf-8"), np.shape(run_values.results[0]), run_values.results[0]))
+                print("Hook {} [{}]:\n{}".format(
+                    run_values.results[1].decode("utf-8"), np.shape(run_values.results[0]), run_values.results[0]))
