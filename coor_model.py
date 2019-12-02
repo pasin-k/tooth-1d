@@ -271,14 +271,12 @@ def my_model(features, labels, mode, params, config):
     acc = tf.summary.scalar("accuracy_manual", my_accuracy)  # Number of correct answer
 
     # Create parameters to show in Tensorboard
-    ex_prediction = tf.summary.scalar("example_prediction", predicted_class[0])
-    ex_ground_truth = tf.summary.scalar("example_ground_truth", labels[0])
-    if mode == tf.estimator.ModeKeys.TRAIN:
-        for name, w in weights.items():
-            tf.summary.histogram(name + "_weights", w[0])
-            tf.summary.histogram(name + "_biases", w[1])
-    summary = tf.summary.histogram("Prediction", predicted_class)
-    summary2 = tf.summary.histogram("Ground_Truth", labels)
+    ex_prediction = tf.summary.scalar("Prediction Output", predicted_class[0])
+    ex_ground_truth = tf.summary.scalar("Ground Truth", labels[0])
+    # if mode == tf.estimator.ModeKeys.TRAIN:
+    #     for name, w in weights.items():
+    #         tf.summary.histogram(name + "_weights", w[0])
+    #         tf.summary.histogram(name + "_biases", w[1])
     d_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
     # print(d_vars)
     # global_step = tf.summary.scalar("Global steps",tf.train.get_global_step())
@@ -292,7 +290,9 @@ def my_model(features, labels, mode, params, config):
                                'conv5/kernel:0', 'conv5/bias:0', 'batch_normalization_4/gamma:0',
                                'batch_normalization_4/beta:0', 'dense/kernel:0', 'dense/bias:0',
                                'dense_1/kernel:0', 'dense_1/bias:0', 'dense_2/kernel:0', 'dense_2/bias:0']
-
+    summary_weight = []
+    for i, t in enumerate(trainable_variable_name):
+        summary_weight.append(tf.summary.histogram(t, tf.trainable_variables()[i]))
     steps = tf.train.get_global_step()
     # Train Mode
     if mode == tf.estimator.ModeKeys.TRAIN:

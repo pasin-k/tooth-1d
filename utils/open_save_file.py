@@ -311,9 +311,9 @@ def get_cross_section_label_new_data(degree, augment_config=None, folder_name='.
 
     name_dir, image_name = get_file_name(folder_name=folder_name, file_name=file_name)
 
+    # Put label and header of each score category into dictionary
     label = dict()
     label_header = ["name"]
-
     for d in data_type:
         l, label_name = get_label_new_data(d, one_hotted=False, normalized=False, file_dir=csv_dir)
         label[d] = l
@@ -322,6 +322,7 @@ def get_cross_section_label_new_data(degree, augment_config=None, folder_name='.
             assert int(name.split('_')[-1]) in degree, "Degree input is not the same as label in {}, found {}".format(
                 degree, name)
     label["name"] = label_name
+
     # To verify number of coordinates
     min_point = 1000
     max_point = 0
