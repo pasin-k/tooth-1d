@@ -40,6 +40,8 @@ run_configs = {'batch_size': configs.batch_size,
                'label_type': configs.label_type,
                'comment': configs.comment}
 
+use_current_time = configs.use_current_time
+
 # Change folder of input_path into a filename
 assert os.path.isdir(run_configs['input_path']), \
     "Input path should be folder directory, not file directory %s" % run_configs['input_path']
@@ -62,7 +64,10 @@ def get_available_gpus():
 
 
 def get_time_and_date():
-    return datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S")
+    if use_current_time:
+        return datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S")
+    else:
+        return "file"
 
 def run(model_params):
     print("Beginning run..")
@@ -196,7 +201,7 @@ def run(model_params):
 #                     copy2(run_params['config_path'], model_params['result_path'])
 
 
-dim_learning_rate = Real(low=1e-4, high=5e-2, prior='log-uniform', name='learning_rate')
+dim_learning_rate = Real(low=5e-5, high=5e-2, prior='log-uniform', name='learning_rate')
 dim_dropout_rate = Real(low=0, high=0.875, name='dropout_rate')
 dim_activation = Categorical(categories=['0', '1'],
                              name='activation')

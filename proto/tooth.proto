@@ -37,6 +37,8 @@ message TrainConfig{
 
     optional string label_type = 14;
 
+    optional bool use_current_time = 15 [default = true];
+
 }
 
 // Number of channels in each layer

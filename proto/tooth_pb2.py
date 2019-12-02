@@ -7,6 +7,7 @@ from google.protobuf import descriptor as _descriptor
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
+from google.protobuf import descriptor_pb2
 # @@protoc_insertion_point(imports)
 
 _sym_db = _symbol_database.Default()
@@ -18,10 +19,10 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='proto/tooth.proto',
   package='',
   syntax='proto2',
-    serialized_options=None,
     serialized_pb=_b(
-        '\n\x11proto/tooth.proto\"\xa2\x02\n\x0bTrainConfig\x12\x16\n\nbatch_size\x18\x01 \x01(\r:\x02\x31\x36\x12\x19\n\x0e\x63heckpoint_min\x18\x02 \x01(\x02:\x01\x35\x12\x1e\n\x0f\x65\x61rly_stop_step\x18\x03 \x01(\r:\x05\x33\x30\x30\x30\x30\x12\x12\n\ninput_path\x18\x06 \x01(\t\x12\x13\n\x0bresult_path\x18\x04 \x01(\t\x12\r\n\x05steps\x18\x05 \x01(\r\x12\x15\n\rlearning_rate\x18\x07 \x01(\x02\x12\x14\n\x0c\x64ropout_rate\x18\x08 \x01(\x02\x12\x12\n\nactivation\x18\t \x01(\t\x12\x10\n\x08\x63hannels\x18\n \x01(\r\x12\x0f\n\x07\x63omment\x18\x0c \x01(\t\x12\x10\n\x08run_mode\x18\r \x01(\t\x12\x12\n\nlabel_type\x18\x0e \x01(\t\"\x1b\n\x08\x43hannels\x12\x0f\n\x07\x63hannel\x18\x01 \x03(\r')
+        '\n\x11proto/tooth.proto\"\xc2\x02\n\x0bTrainConfig\x12\x16\n\nbatch_size\x18\x01 \x01(\r:\x02\x31\x36\x12\x19\n\x0e\x63heckpoint_min\x18\x02 \x01(\x02:\x01\x35\x12\x1e\n\x0f\x65\x61rly_stop_step\x18\x03 \x01(\r:\x05\x33\x30\x30\x30\x30\x12\x12\n\ninput_path\x18\x06 \x01(\t\x12\x13\n\x0bresult_path\x18\x04 \x01(\t\x12\r\n\x05steps\x18\x05 \x01(\r\x12\x15\n\rlearning_rate\x18\x07 \x01(\x02\x12\x14\n\x0c\x64ropout_rate\x18\x08 \x01(\x02\x12\x12\n\nactivation\x18\t \x01(\t\x12\x10\n\x08\x63hannels\x18\n \x01(\r\x12\x0f\n\x07\x63omment\x18\x0c \x01(\t\x12\x10\n\x08run_mode\x18\r \x01(\t\x12\x12\n\nlabel_type\x18\x0e \x01(\t\x12\x1e\n\x10use_current_time\x18\x0f \x01(\x08:\x04true\"\x1b\n\x08\x43hannels\x12\x0f\n\x07\x63hannel\x18\x01 \x03(\r')
 )
+_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 
 
@@ -39,105 +40,112 @@ _TRAINCONFIG = _descriptor.Descriptor(
       has_default_value=True, default_value=16,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-        serialized_options=None, file=DESCRIPTOR),
+        options=None),
     _descriptor.FieldDescriptor(
       name='checkpoint_min', full_name='TrainConfig.checkpoint_min', index=1,
         number=2, type=2, cpp_type=6, label=1,
         has_default_value=True, default_value=float(5),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-        serialized_options=None, file=DESCRIPTOR),
+        options=None),
     _descriptor.FieldDescriptor(
       name='early_stop_step', full_name='TrainConfig.early_stop_step', index=2,
       number=3, type=13, cpp_type=3, label=1,
       has_default_value=True, default_value=30000,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-        serialized_options=None, file=DESCRIPTOR),
+        options=None),
     _descriptor.FieldDescriptor(
         name='input_path', full_name='TrainConfig.input_path', index=3,
         number=6, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-        serialized_options=None, file=DESCRIPTOR),
+        options=None),
     _descriptor.FieldDescriptor(
         name='result_path', full_name='TrainConfig.result_path', index=4,
         number=4, type=9, cpp_type=9, label=1,
         has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-        serialized_options=None, file=DESCRIPTOR),
+        options=None),
     _descriptor.FieldDescriptor(
         name='steps', full_name='TrainConfig.steps', index=5,
         number=5, type=13, cpp_type=3, label=1,
         has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-        serialized_options=None, file=DESCRIPTOR),
+        options=None),
     _descriptor.FieldDescriptor(
       name='learning_rate', full_name='TrainConfig.learning_rate', index=6,
       number=7, type=2, cpp_type=6, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-        serialized_options=None, file=DESCRIPTOR),
+        options=None),
     _descriptor.FieldDescriptor(
       name='dropout_rate', full_name='TrainConfig.dropout_rate', index=7,
       number=8, type=2, cpp_type=6, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-        serialized_options=None, file=DESCRIPTOR),
+        options=None),
     _descriptor.FieldDescriptor(
       name='activation', full_name='TrainConfig.activation', index=8,
       number=9, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-        serialized_options=None, file=DESCRIPTOR),
+        options=None),
     _descriptor.FieldDescriptor(
       name='channels', full_name='TrainConfig.channels', index=9,
       number=10, type=13, cpp_type=3, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-        serialized_options=None, file=DESCRIPTOR),
+        options=None),
     _descriptor.FieldDescriptor(
         name='comment', full_name='TrainConfig.comment', index=10,
       number=12, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-        serialized_options=None, file=DESCRIPTOR),
+        options=None),
     _descriptor.FieldDescriptor(
         name='run_mode', full_name='TrainConfig.run_mode', index=11,
         number=13, type=9, cpp_type=9, label=1,
         has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-        serialized_options=None, file=DESCRIPTOR),
+        options=None),
     _descriptor.FieldDescriptor(
         name='label_type', full_name='TrainConfig.label_type', index=12,
         number=14, type=9, cpp_type=9, label=1,
         has_default_value=False, default_value=_b("").decode('utf-8'),
         message_type=None, enum_type=None, containing_type=None,
         is_extension=False, extension_scope=None,
-        serialized_options=None, file=DESCRIPTOR),
+        options=None),
+      _descriptor.FieldDescriptor(
+          name='use_current_time', full_name='TrainConfig.use_current_time', index=13,
+          number=15, type=8, cpp_type=7, label=1,
+          has_default_value=True, default_value=True,
+          message_type=None, enum_type=None, containing_type=None,
+          is_extension=False, extension_scope=None,
+          options=None),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-    serialized_options=None,
+    options=None,
   is_extendable=False,
   syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
   serialized_start=22,
-    serialized_end=312,
+    serialized_end=344,
 )
 
 
@@ -154,26 +162,25 @@ _CHANNELS = _descriptor.Descriptor(
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-        serialized_options=None, file=DESCRIPTOR),
+        options=None),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-    serialized_options=None,
+    options=None,
   is_extendable=False,
   syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
-    serialized_start=314,
-    serialized_end=341,
+    serialized_start=346,
+    serialized_end=373,
 )
 
 DESCRIPTOR.message_types_by_name['TrainConfig'] = _TRAINCONFIG
 DESCRIPTOR.message_types_by_name['Channels'] = _CHANNELS
-_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 TrainConfig = _reflection.GeneratedProtocolMessageType('TrainConfig', (_message.Message,), dict(
   DESCRIPTOR = _TRAINCONFIG,

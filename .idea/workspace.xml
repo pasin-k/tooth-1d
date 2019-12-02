@@ -4,9 +4,9 @@
     <list default="true" id="770e0596-62ef-4176-bd6c-3bded3f7c783" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cfg/coor_tooth.config" beforeDir="false" afterPath="$PROJECT_DIR$/cfg/coor_tooth.config" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/coor_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/coor_model.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/coor_train.py" beforeDir="false" afterPath="$PROJECT_DIR$/coor_train.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/open_save_file.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/open_save_file.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/proto/tooth.proto" beforeDir="false" afterPath="$PROJECT_DIR$/proto/tooth.proto" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/proto/tooth_pb2.py" beforeDir="false" afterPath="$PROJECT_DIR$/proto/tooth_pb2.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -62,7 +62,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.coor_train">
+  <component name="RunManager" selected="Python.stl_to_image">
     <configuration name="coor_train" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="my2DCNN" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -195,13 +195,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1554715602048</updated>
-    </task>
-    <task id="LOCAL-00119" summary="Augmentation data now should packed together in either train or validate set seperately">
-      <created>1568108856366</created>
-      <option name="number" value="00119" />
-      <option name="presentableId" value="LOCAL-00119" />
-      <option name="project" value="LOCAL" />
-      <updated>1568108856366</updated>
     </task>
     <task id="LOCAL-00120" summary="Augmentation data now should packed together in either train or validate set seperately">
       <created>1568108898315</created>
@@ -539,7 +532,14 @@
       <option name="project" value="LOCAL" />
       <updated>1575025680308</updated>
     </task>
-    <option name="localTasksCounter" value="168" />
+    <task id="LOCAL-00168" summary="Fix hook now shows realtime weight, weight in tensorboard also updated">
+      <created>1575271420201</created>
+      <option name="number" value="00168" />
+      <option name="presentableId" value="LOCAL-00168" />
+      <option name="project" value="LOCAL" />
+      <updated>1575271420201</updated>
+    </task>
+    <option name="localTasksCounter" value="169" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -570,7 +570,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="More output config, now print name in result" />
     <MESSAGE value="Class weight for each label score, now save in json for readability, easy to program" />
     <MESSAGE value="Save more config in json. Now compatible for multiple dataset combined" />
     <MESSAGE value="Reorganize code" />
@@ -595,7 +594,8 @@
     <MESSAGE value="Small bug fix" />
     <MESSAGE value="Add new parameter use_diff, adjust output of get_cross_section function" />
     <MESSAGE value="Fix bug for run 'single' mode. Fix hook now shows realtime weight" />
-    <option name="LAST_COMMIT_MESSAGE" value="Fix bug for run 'single' mode. Fix hook now shows realtime weight" />
+    <MESSAGE value="Fix hook now shows realtime weight, weight in tensorboard also updated" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fix hook now shows realtime weight, weight in tensorboard also updated" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
 </project>
