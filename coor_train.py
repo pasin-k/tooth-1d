@@ -40,8 +40,6 @@ run_configs = {'batch_size': configs.batch_size,
                'label_type': configs.label_type,
                'comment': configs.comment}
 
-use_current_time = configs.use_current_time
-
 # Change folder of input_path into a filename
 assert os.path.isdir(run_configs['input_path']), \
     "Input path should be folder directory, not file directory %s" % run_configs['input_path']
@@ -63,7 +61,7 @@ def get_available_gpus():
     return [x.name for x in local_device_protos if x.device_type == 'GPU']
 
 
-def get_time_and_date():
+def get_time_and_date(use_current_time):
     if use_current_time:
         return datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S")
     else:
@@ -227,7 +225,7 @@ def fitness(learning_rate, dropout_rate, activation, channels):
     print("Learning_rate, Dropout_rate, Activation, Channels = %s, %s, %s, %s" % (
         learning_rate, dropout_rate, activation, channels))
 
-    run_configs['current_time'] = get_time_and_date()
+    run_configs['current_time'] = get_time_and_date(True)
     # Set result path combine with current time of running
     md_config = {'learning_rate': learning_rate,
                  'dropout_rate': dropout_rate,
@@ -247,7 +245,7 @@ def fitness(learning_rate, dropout_rate, activation, channels):
 
 def run_hyper_parameter_optimize():
     # Name of the summary result from hyperparameter search (This variable is not used in run)
-    current_time = get_time_and_date()
+    current_time = get_time_and_date(configs.use_current_time)
     run_configs['summary_file_path'] = os.path.join(run_configs[
                                                         'result_path_base'],
                                                     "hyperparameters_result_" + current_time + ".csv")
@@ -285,7 +283,7 @@ def run_hyper_parameter_optimize():
                     print("Creating new runs")
             except IndexError:  # If error, stop and end the file, usually occur when the first run is interrupted
                 save_file(previous_record_files[-1],
-                          ['end', 'Error from previous run', get_time_and_date()],
+                          ['end', 'Error from previous run', get_time_and_date(configs.use_current_time)],
                           write_mode='a', data_format="one_row")
                 raise ValueError("Previous file doesn't end completely")
         else:
@@ -307,7 +305,7 @@ def run_hyper_parameter_optimize():
     if n_calls < 11:
         print("Hyper parameter optimize ENDED: run enough calls already")
         save_file(run_configs['summary_file_path'],
-                  ['end', 'Completed (faster than expected)', get_time_and_date()],
+                  ['end', 'Completed (faster than expected)', get_time_and_date(configs.use_current_time)],
                   write_mode='a', data_format="one_row")
     else:
         # Start hyperparameter search. Save each file in seperate folder
@@ -333,7 +331,7 @@ def run_hyper_parameter_optimize():
             new_data.append(data)
 
         save_file(run_configs['summary_file_path'],
-                  ['end', 'Completed', get_time_and_date()],
+                  ['end', 'Completed', get_time_and_date(configs.use_current_time)],
                   write_mode='a', data_format="one_row")
     print("Saving hyperparameters_result in %s" % run_configs['summary_file_path'])
     return best_accuracy
@@ -381,7 +379,8 @@ if __name__ == '__main__':
     if run_mode == "single":
         run_configs['input_path'] = run_configs['input_path'] + "_0"
         model_configs['result_file_name'] = 'result.csv'
-        model_configs['result_path'] = os.path.join(run_configs['result_path_base'], get_time_and_date())
+        model_configs['result_path'] = os.path.join(run_configs['result_path_base'],
+                                                    get_time_and_date(configs.use_current_time))
         run(model_configs)
     elif run_mode == "kfold":
         model_configs['result_file_name'] = 'result.csv'
