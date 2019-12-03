@@ -225,8 +225,7 @@ def get_cross_section_label(degree, augment_config=None, folder_name='../../glob
 
 
 # The two functions below is used for new type of data, currently on prototype
-def get_label_new_data(dataname, file_dir='../global_data/new_score(okuyama).csv',
-                       one_hotted=False, normalized=False, ):
+def get_label_new_data(dataname, file_dir='../global_data/new_score(okuyama).csv', normalized=False, ):
     """
     Get label of Ground Truth Score.csv file for new set of score
     :param dataname:    String, Type of label e.g. [Taper/Occ]
@@ -236,18 +235,23 @@ def get_label_new_data(dataname, file_dir='../global_data/new_score(okuyama).csv
     :return: labels     List of score of requested dat
              label_name List of score name, used to identify order of data
     """
-    label_name_key = {"Taper": 1, "Width": 2, "Sharpness": 4}
+    label_name_key = {"name": 0, "Taper": 1, "Width": 2, "Sharpness": 4}
     max_score = 5
 
+    if not type(dataname) is list:
+        dataname = [dataname]
+
     try:
-        data_column = label_name_key[dataname]
+        label_column = [label_name_key[i] for i in dataname]
     except KeyError:
         raise Exception(
-            "Wrong dataname, Type as %s, Valid name: %s" % (dataname, label_name_key))
+            "There is invalid dataname. Valid ones are", label_name_key.keys())
 
-    labels_name = []
-    labels_data = []
-    print("get_label: Import from %s" % os.path.join(file_dir))
+    # Create an dict of empty list of filename and each datatype
+    dataname.append("name")
+    labels_data = {key: [] for key in dataname}
+    print("get_label_new_data: Import score from %s" % os.path.join(file_dir))
+
     with open(file_dir) as csvfile:
         read_csv = csv.reader(csvfile, delimiter=',')
         header = True  # Ignore first row
@@ -256,34 +260,28 @@ def get_label_new_data(dataname, file_dir='../global_data/new_score(okuyama).csv
                 header = False
             else:
                 try:
-                    if row[data_column] != '':
-                        label = row[0]
-                        val = row[data_column]
-                        if one_hotted or (not normalized):  # Don't normalize if output is one hot encoding
-                            normalized_value = int(val)  # Turn string to int
-                        else:
-                            normalized_value = float(val) / max_score  # Turn string to float
-                        labels_name.append(label)
-                        labels_data.append(normalized_value)
+                    if all([row[key] != '' for key in label_column]):
+                        for key in labels_data:
+                            # print(key)
+                            if key == "name":
+                                labels_data[key].append(row[label_name_key[key]])
+                            else:
+                                val = row[label_name_key[key]]
+                                if normalized:  # Don't normalize if output is one hot encoding
+                                    val = float(val) / max_score  # Turn string to float
+                                else:
+                                    val = int(val)  # Turn string to int
+                                labels_data[key].append(val)
+                            # print(labels_data[key][-1])
                 except IndexError:
                     print("Data incomplete, no data of %s, or missing label in csv file" % file_dir)
+    # # Sort data by name
+    # labels_name, labels_data = zip(*sorted(zip(labels_name, labels_data)))
+    # labels_name = list(labels_name)  # Turn tuples into list
+    # labels_data = list(labels_data)
 
-    # Sort data by name
-    labels_name, labels_data = zip(*sorted(zip(labels_name, labels_data)))
-    labels_name = list(labels_name)  # Turn tuples into list
-    labels_data = list(labels_data)
-
-    # Turn to one hotted if required
-    if one_hotted:
-        one_hot_labels = list()
-        for label in labels_data:
-            label = (label - 1) / 2
-            one_hot_labels.append(np.array([int(i == label) for i in range(3)]))
-        print("get_label: Upload one-hotted label completed (as a list): %d examples" % (len(one_hot_labels)))
-        return one_hot_labels, labels_name
-    else:
-        print("get_label: Upload non one-hotted label completed (as a list): %d examples" % (len(labels_data)))
-        return labels_data, labels_name
+    print("get_label: Upload non one-hotted label completed (as a list): %d examples" % (len(labels_data)))
+    return labels_data
 
 
 def get_cross_section_label_new_data(degree, augment_config=None, folder_name='../../global_data/stl_data',
@@ -312,16 +310,10 @@ def get_cross_section_label_new_data(degree, augment_config=None, folder_name='.
     name_dir, image_name = get_file_name(folder_name=folder_name, file_name=file_name)
 
     # Put label and header of each score category into dictionary
-    label = dict()
-    label_header = ["name"]
-    for d in data_type:
-        l, label_name = get_label_new_data(d, one_hotted=False, normalized=False, file_dir=csv_dir)
-        label[d] = l
-        label_header.append(d)
-        for deg, name in zip(degree, label_name[0:len(degree)]):
-            assert int(name.split('_')[-1]) in degree, "Degree input is not the same as label in {}, found {}".format(
-                degree, name)
-    label["name"] = label_name
+    label = get_label_new_data(data_type, normalized=False, file_dir=csv_dir)
+    for deg, name in zip(degree, label["name"][0:len(degree)]):
+        assert int(name.split('_')[-1]) in degree, "Degree input is not the same as label in {}, found {}".format(
+            degree, name)
 
     # To verify number of coordinates
     min_point = 1000
@@ -331,9 +323,11 @@ def get_cross_section_label_new_data(degree, augment_config=None, folder_name='.
     stl_points_all = []
 
     # Create a dictionary of empty list
-    label_all = {k: [] for k in dict.fromkeys(label.keys())}
-    label_all["name"] = label["name"]
+    label_all = {k: [] for k in label.keys()}
     label_all["error_name"] = []
+
+    # for i in label.values():
+    #     print(len(i))
 
     for l_index, name in enumerate(label["name"]):
         name_id = name.split('_')[0]
@@ -360,8 +354,8 @@ def get_cross_section_label_new_data(degree, augment_config=None, folder_name='.
                     stl_points_all.append(point)
                     label_all["name"].append("{}_{}".format(name, augment_val))
                     for key in label.keys():
-                        print(len(label[key]))
-                        print(l_index)
+                        # print("label[key] has size of ", len(label[key]))
+                        # print("Want to look at index", l_index)
                         label_all[key].append(label[key][l_index])
                     # Check number of points in cross-section
                     if len(point[0]) > max_point:
@@ -375,7 +369,7 @@ def get_cross_section_label_new_data(degree, augment_config=None, folder_name='.
     print("Finished with {} examples".format(len(label_all["name"])))
 
     print("Max amount of coordinates: %s, min  coordinates: %s" % (max_point, min_point))
-    return stl_points_all, label_all, label_header
+    return stl_points_all, label_all, label.keys()
 
 
 def predict_get_cross_section(degree, augment_config=None, folder_name='../../global_data/stl_data',
