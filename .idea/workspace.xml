@@ -4,10 +4,8 @@
     <list default="true" id="770e0596-62ef-4176-bd6c-3bded3f7c783" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cfg/coor_tooth.config" beforeDir="false" afterPath="$PROJECT_DIR$/cfg/coor_tooth.config" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/preprocess/image_to_tfrecord.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocess/image_to_tfrecord.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/preprocess/stl_to_image.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocess/stl_to_image.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/coor_get_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/coor_get_data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/open_save_file.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/open_save_file.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/coor_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/coor_model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/coor_train.py" beforeDir="false" afterPath="$PROJECT_DIR$/coor_train.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -55,7 +53,7 @@
       <recent name="$PROJECT_DIR$/utils" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.image_to_tfrecord">
+  <component name="RunManager" selected="Python.coor_train">
     <configuration name="coor_train" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="my2DCNN" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -170,10 +168,10 @@
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.coor_train" />
         <item itemvalue="Python.image_to_tfrecord" />
         <item itemvalue="Python.stl_to_image" />
         <item itemvalue="Python.scratch_14" />
-        <item itemvalue="Python.coor_train" />
         <item itemvalue="Python.scratch_13" />
       </list>
     </recent_temporary>
@@ -200,13 +198,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1554715602048</updated>
-    </task>
-    <task id="LOCAL-00123" summary="Class weight for each label score, now save in json for readability, easy to program">
-      <created>1568365766744</created>
-      <option name="number" value="00123" />
-      <option name="presentableId" value="LOCAL-00123" />
-      <option name="project" value="LOCAL" />
-      <updated>1568365766744</updated>
     </task>
     <task id="LOCAL-00124" summary="Save more config in json. Now compatible for multiple dataset combined">
       <created>1568984691964</created>
@@ -544,7 +535,14 @@
       <option name="project" value="LOCAL" />
       <updated>1575533872007</updated>
     </task>
-    <option name="localTasksCounter" value="172" />
+    <task id="LOCAL-00172" summary="Fix stl_to_image to produce config.json file instead&#10;Add image_to_tfrecord to accept config.json file">
+      <created>1575548607553</created>
+      <option name="number" value="00172" />
+      <option name="presentableId" value="LOCAL-00172" />
+      <option name="project" value="LOCAL" />
+      <updated>1575548607553</updated>
+    </task>
+    <option name="localTasksCounter" value="173" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -575,7 +573,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Improve code to prevent bug from config" />
     <MESSAGE value="Evaluation on tensorboard should tracked every one min instead of 10" />
     <MESSAGE value="Implemente predict.py" />
     <MESSAGE value="Finding bug where model now overfit" />
@@ -600,7 +597,8 @@
     <MESSAGE value="Add use_current_time parameter in config file" />
     <MESSAGE value="Change code for new data type, probably not going to use this one" />
     <MESSAGE value="New function for image_to_tfrecord for new type of data" />
-    <option name="LAST_COMMIT_MESSAGE" value="New function for image_to_tfrecord for new type of data" />
+    <MESSAGE value="Fix stl_to_image to produce config.json file instead&#10;Add image_to_tfrecord to accept config.json file" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fix stl_to_image to produce config.json file instead&#10;Add image_to_tfrecord to accept config.json file" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
   <component name="WindowStateProjectService">
@@ -608,50 +606,50 @@
       <screen x="1920" y="0" width="1920" height="1080" />
     </state>
     <state x="1920" y="171" width="1375" height="488" key="#xdebugger.XInspectDialog/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575548478730" />
-    <state x="464" y="149" width="1048" height="807" key="CommitChangelistDialog2" timestamp="1575533871950">
+    <state x="464" y="149" width="1048" height="807" key="CommitChangelistDialog2" timestamp="1575548607487">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state x="464" y="149" width="1048" height="807" key="CommitChangelistDialog2/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575533871950" />
+    <state x="464" y="149" width="1048" height="807" key="CommitChangelistDialog2/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575548607487" />
     <state x="776" y="310" width="424" height="484" key="FileChooserDialogImpl" timestamp="1575534303780">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
     <state x="776" y="310" width="424" height="484" key="FileChooserDialogImpl/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575534303780" />
-    <state width="1830" height="353" key="GridCell.Tab.0.bottom" timestamp="1575548228013">
+    <state width="1830" height="210" key="GridCell.Tab.0.bottom" timestamp="1575551553303">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="353" key="GridCell.Tab.0.bottom/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575548228013" />
-    <state width="1830" height="353" key="GridCell.Tab.0.center" timestamp="1575548228013">
+    <state width="1830" height="210" key="GridCell.Tab.0.bottom/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575551553303" />
+    <state width="1830" height="210" key="GridCell.Tab.0.center" timestamp="1575551553303">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="353" key="GridCell.Tab.0.center/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575548228013" />
-    <state width="1830" height="353" key="GridCell.Tab.0.left" timestamp="1575548228013">
+    <state width="1830" height="210" key="GridCell.Tab.0.center/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575551553303" />
+    <state width="1830" height="210" key="GridCell.Tab.0.left" timestamp="1575551553303">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="353" key="GridCell.Tab.0.left/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575548228013" />
-    <state width="1830" height="353" key="GridCell.Tab.0.right" timestamp="1575548228013">
+    <state width="1830" height="210" key="GridCell.Tab.0.left/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575551553303" />
+    <state width="1830" height="210" key="GridCell.Tab.0.right" timestamp="1575551553303">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="353" key="GridCell.Tab.0.right/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575548228013" />
-    <state width="1830" height="353" key="GridCell.Tab.1.bottom" timestamp="1575548238387">
+    <state width="1830" height="210" key="GridCell.Tab.0.right/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575551553303" />
+    <state width="1830" height="353" key="GridCell.Tab.1.bottom" timestamp="1575548610231">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="353" key="GridCell.Tab.1.bottom/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575548238387" />
-    <state width="1830" height="353" key="GridCell.Tab.1.center" timestamp="1575548238387">
+    <state width="1830" height="353" key="GridCell.Tab.1.bottom/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575548610231" />
+    <state width="1830" height="353" key="GridCell.Tab.1.center" timestamp="1575548610231">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="353" key="GridCell.Tab.1.center/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575548238387" />
-    <state width="1830" height="353" key="GridCell.Tab.1.left" timestamp="1575548238387">
+    <state width="1830" height="353" key="GridCell.Tab.1.center/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575548610231" />
+    <state width="1830" height="353" key="GridCell.Tab.1.left" timestamp="1575548610231">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="353" key="GridCell.Tab.1.left/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575548238387" />
-    <state width="1830" height="353" key="GridCell.Tab.1.right" timestamp="1575548238387">
+    <state width="1830" height="353" key="GridCell.Tab.1.left/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575548610231" />
+    <state width="1830" height="353" key="GridCell.Tab.1.right" timestamp="1575548610231">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="353" key="GridCell.Tab.1.right/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575548238387" />
-    <state x="588" y="288" width="800" height="528" key="Vcs.Push.Dialog.v2" timestamp="1575533873446">
+    <state width="1830" height="353" key="GridCell.Tab.1.right/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575548610231" />
+    <state x="588" y="288" width="800" height="528" key="Vcs.Push.Dialog.v2" timestamp="1575548608871">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state x="588" y="288" width="800" height="528" key="Vcs.Push.Dialog.v2/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575533873446" />
+    <state x="588" y="288" width="800" height="528" key="Vcs.Push.Dialog.v2/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575548608871" />
     <state width="926" height="527" key="XDebugger.FullValuePopup" timestamp="1575532717443">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
@@ -664,16 +662,5 @@
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
     <state x="656" y="257" width="672" height="678" key="search.everywhere.popup/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575366146157" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/utils/open_save_file.py</url>
-          <line>763</line>
-          <option name="timeStamp" value="16" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
 </project>

@@ -6,6 +6,7 @@ import argparse
 import json
 import csv
 import datetime
+import shutil
 
 from proto import tooth_pb2
 from google.protobuf import text_format
@@ -67,6 +68,19 @@ def get_time_and_date(use_current_time):
     else:
         return "file"
 
+
+def empty_folder(fold_dir):
+    for filename in os.listdir(fold_dir):
+        file_path = os.path.join(fold_dir, filename)
+        try:
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.unlink(file_path)
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)
+        except Exception as e:
+            print('Failed to delete %s. Reason: %s' % (file_path, e))
+
+
 def run(model_params):
     print("Beginning run..")
     # Check if all values exist
@@ -74,6 +88,10 @@ def run(model_params):
                                channels=None, result_path=None)
     # Note on some model_params:    loss_weight is calculated inside
     #                               channels (in CNN case) is [CNN channels, Dense channels]
+
+    # If on single mode, delete all file first
+    if not configs.use_current_time:
+        empty_folder(os.path.join(run_configs['result_path']))
 
     # Type in file name
     train_data_path = run_configs['input_path'] + '_train.tfrecords'
@@ -246,6 +264,11 @@ def fitness(learning_rate, dropout_rate, activation, channels):
 def run_hyper_parameter_optimize():
     # Name of the summary result from hyperparameter search (This variable is not used in run)
     current_time = get_time_and_date(configs.use_current_time)
+
+    # If on single mode, delete all file first
+    if not configs.use_current_time:
+        empty_folder(os.path.join(run_configs['result_path_base']))
+
     run_configs['summary_file_path'] = os.path.join(run_configs[
                                                         'result_path_base'],
                                                     "hyperparameters_result_" + current_time + ".csv")

@@ -7,6 +7,7 @@ from utils.custom_hook import EvalResultHook, PrintValueHook
 # In case of needing l2-regularization: https://stackoverflow.com/questions/44232566/add-l2-regularization-when-using-high-level-tf-layers/44238354#44238354
 initilizer = "he_uniform"
 
+
 # Default stride of 1, padding:same
 def cnn_1d(inp,
            conv_filter_size,  # [Scalar]
