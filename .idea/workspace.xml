@@ -4,8 +4,6 @@
     <list default="true" id="770e0596-62ef-4176-bd6c-3bded3f7c783" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/preprocess/image_to_tfrecord.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocess/image_to_tfrecord.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/preprocess/stl_to_image.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocess/stl_to_image.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/open_save_file.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/open_save_file.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -198,13 +196,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1554715602048</updated>
-    </task>
-    <task id="LOCAL-00121" summary="Augmentation data now should packed together in either train or validate set seperately">
-      <created>1568109391984</created>
-      <option name="number" value="00121" />
-      <option name="presentableId" value="LOCAL-00121" />
-      <option name="project" value="LOCAL" />
-      <updated>1568109391984</updated>
     </task>
     <task id="LOCAL-00122" summary="More output config, now print name in result">
       <created>1568277421025</created>
@@ -542,7 +533,14 @@
       <option name="project" value="LOCAL" />
       <updated>1575272862667</updated>
     </task>
-    <option name="localTasksCounter" value="170" />
+    <task id="LOCAL-00170" summary="New function for image_to_tfrecord for new type of data">
+      <created>1575533066827</created>
+      <option name="number" value="00170" />
+      <option name="presentableId" value="LOCAL-00170" />
+      <option name="project" value="LOCAL" />
+      <updated>1575533066828</updated>
+    </task>
+    <option name="localTasksCounter" value="171" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -573,7 +571,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Reorganize code" />
     <MESSAGE value="Improve code to prevent bug from config" />
     <MESSAGE value="Evaluation on tensorboard should tracked every one min instead of 10" />
     <MESSAGE value="Implemente predict.py" />
@@ -598,7 +595,8 @@
     <MESSAGE value="Fix hook now shows realtime weight, weight in tensorboard also updated" />
     <MESSAGE value="Add use_current_time parameter in config file" />
     <MESSAGE value="Change code for new data type, probably not going to use this one" />
-    <option name="LAST_COMMIT_MESSAGE" value="Change code for new data type, probably not going to use this one" />
+    <MESSAGE value="New function for image_to_tfrecord for new type of data" />
+    <option name="LAST_COMMIT_MESSAGE" value="New function for image_to_tfrecord for new type of data" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
   <component name="WindowStateProjectService">
@@ -606,42 +604,50 @@
       <screen x="1920" y="0" width="1920" height="1080" />
     </state>
     <state x="1920" y="182" width="1375" height="488" key="#xdebugger.XInspectDialog/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575532947621" />
+    <state x="464" y="149" width="1048" height="807" key="CommitChangelistDialog2" timestamp="1575533066701">
+      <screen x="67" y="27" width="1853" height="1053" />
+    </state>
+    <state x="464" y="149" width="1048" height="807" key="CommitChangelistDialog2/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575533066701" />
     <state x="776" y="310" width="424" height="484" key="FileChooserDialogImpl" timestamp="1575361460244">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
     <state x="776" y="310" width="424" height="484" key="FileChooserDialogImpl/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575361460244" />
-    <state width="1830" height="353" key="GridCell.Tab.0.bottom" timestamp="1575532907000">
+    <state width="1830" height="210" key="GridCell.Tab.0.bottom" timestamp="1575533110598">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="353" key="GridCell.Tab.0.bottom/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575532907000" />
-    <state width="1830" height="353" key="GridCell.Tab.0.center" timestamp="1575532907000">
+    <state width="1830" height="210" key="GridCell.Tab.0.bottom/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575533110598" />
+    <state width="1830" height="210" key="GridCell.Tab.0.center" timestamp="1575533110597">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="353" key="GridCell.Tab.0.center/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575532907000" />
-    <state width="1830" height="353" key="GridCell.Tab.0.left" timestamp="1575532907000">
+    <state width="1830" height="210" key="GridCell.Tab.0.center/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575533110597" />
+    <state width="1830" height="210" key="GridCell.Tab.0.left" timestamp="1575533110597">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="353" key="GridCell.Tab.0.left/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575532907000" />
-    <state width="1830" height="353" key="GridCell.Tab.0.right" timestamp="1575532907000">
+    <state width="1830" height="210" key="GridCell.Tab.0.left/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575533110597" />
+    <state width="1830" height="210" key="GridCell.Tab.0.right" timestamp="1575533110598">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="353" key="GridCell.Tab.0.right/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575532907000" />
-    <state width="1830" height="353" key="GridCell.Tab.1.bottom" timestamp="1575532908054">
+    <state width="1830" height="210" key="GridCell.Tab.0.right/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575533110598" />
+    <state width="1830" height="353" key="GridCell.Tab.1.bottom" timestamp="1575533069268">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="353" key="GridCell.Tab.1.bottom/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575532908054" />
-    <state width="1830" height="353" key="GridCell.Tab.1.center" timestamp="1575532908054">
+    <state width="1830" height="353" key="GridCell.Tab.1.bottom/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575533069268" />
+    <state width="1830" height="353" key="GridCell.Tab.1.center" timestamp="1575533069268">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="353" key="GridCell.Tab.1.center/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575532908054" />
-    <state width="1830" height="353" key="GridCell.Tab.1.left" timestamp="1575532908054">
+    <state width="1830" height="353" key="GridCell.Tab.1.center/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575533069268" />
+    <state width="1830" height="353" key="GridCell.Tab.1.left" timestamp="1575533069268">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="353" key="GridCell.Tab.1.left/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575532908054" />
-    <state width="1830" height="353" key="GridCell.Tab.1.right" timestamp="1575532908054">
+    <state width="1830" height="353" key="GridCell.Tab.1.left/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575533069268" />
+    <state width="1830" height="353" key="GridCell.Tab.1.right" timestamp="1575533069268">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="353" key="GridCell.Tab.1.right/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575532908054" />
+    <state width="1830" height="353" key="GridCell.Tab.1.right/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575533069268" />
+    <state x="588" y="288" width="800" height="528" key="Vcs.Push.Dialog.v2" timestamp="1575533068296">
+      <screen x="67" y="27" width="1853" height="1053" />
+    </state>
+    <state x="588" y="288" width="800" height="528" key="Vcs.Push.Dialog.v2/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575533068296" />
     <state width="926" height="527" key="XDebugger.FullValuePopup" timestamp="1575532717443">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
@@ -659,34 +665,9 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/preprocess/image_to_tfrecord.py</url>
-          <line>270</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/utils/open_save_file.py</url>
-          <line>791</line>
-          <option name="timeStamp" value="5" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/utils/open_save_file.py</url>
-          <line>797</line>
-          <option name="timeStamp" value="6" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/utils/open_save_file.py</url>
-          <line>815</line>
+          <line>816</line>
           <option name="timeStamp" value="8" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/preprocess/image_to_tfrecord.py</url>
-          <line>233</line>
-          <option name="timeStamp" value="9" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/preprocess/image_to_tfrecord.py</url>
-          <line>255</line>
-          <option name="timeStamp" value="10" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

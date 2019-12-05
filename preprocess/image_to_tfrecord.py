@@ -230,8 +230,7 @@ def coordinate_to_tfrecord(tfrecord_name, dataset_folders, mode="default", k_fol
             grouped_train_data, grouped_eval_data = get_input_and_label_new_data(tfrecord_name, dataset_folder,
                                                                                  score_dir="../data/new_score(okuyama).csv",
                                                                                  configs=configs, seed=seed,
-                                                                                 get_data=False, k_fold=None)
-        print(grouped_train_data[0][0])
+                                                                                 get_data=True, k_fold=None)
         # if k_fold is None:
         #     k_fold = 1
         #     grouped_train_data = [grouped_train_data]
@@ -278,9 +277,9 @@ def coordinate_to_tfrecord(tfrecord_name, dataset_folders, mode="default", k_fol
         data_loaded["data_length"] = coordinate_length
         data_loaded["dataset_name"] = list(dataset_folders.keys())
         data_loaded["timestamp"] = time_stamp
-        with open("../data/tfrecord/%s/%s_%s.json" % (tfrecord_name, tfrecord_name, i), 'w') as filehandle:
+        with open("../data/tfrecord/{}/{}_[].json".format(tfrecord_name, tfrecord_name, i), 'w') as filehandle:
             json.dump(data_loaded, filehandle, indent=4, sort_keys=True, separators=(',', ': '), ensure_ascii=False)
-        print("TFrecords created: %s, %s" % (tfrecord_train_name, tfrecord_eval_name))
+        print("TFrecords created: {}, {}".format(tfrecord_train_name, tfrecord_eval_name))
 
 
 if __name__ == '__main__':
@@ -296,8 +295,7 @@ if __name__ == '__main__':
         configs['data_type'] = label_data_new
     else:
         configs['data_type'] = label_data
-    print("Use label from %s with (%s) train:eval ratio" % (
-        configs['data_type'], configs['train_eval_ratio']))
+    print("Use label from {} with ({}) train:eval ratio".format(configs['data_type'], configs['train_eval_ratio']))
 
     if data_mode == "image":
         image_to_tfrecord(tfrecord_name="preparation_img_test", dataset_folder="../data/cross_section",
