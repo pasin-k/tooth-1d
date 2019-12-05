@@ -5,7 +5,7 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/coor_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/coor_model.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/coor_train.py" beforeDir="false" afterPath="$PROJECT_DIR$/coor_train.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/coor_get_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/coor_get_data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/custom_hook.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/custom_hook.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -198,13 +198,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1554715602048</updated>
-    </task>
-    <task id="LOCAL-00125" summary="Save more config in json. Now compatible for multiple dataset combined">
-      <created>1568987243119</created>
-      <option name="number" value="00125" />
-      <option name="presentableId" value="LOCAL-00125" />
-      <option name="project" value="LOCAL" />
-      <updated>1568987243119</updated>
     </task>
     <task id="LOCAL-00126" summary="Reorganize code">
       <created>1569335650271</created>
@@ -542,7 +535,14 @@
       <option name="project" value="LOCAL" />
       <updated>1575551641333</updated>
     </task>
-    <option name="localTasksCounter" value="174" />
+    <task id="LOCAL-00174" summary="Add/Delete comments and unused code">
+      <created>1575552407401</created>
+      <option name="number" value="00174" />
+      <option name="presentableId" value="LOCAL-00174" />
+      <option name="project" value="LOCAL" />
+      <updated>1575552407401</updated>
+    </task>
+    <option name="localTasksCounter" value="175" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -573,7 +573,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Implemente predict.py" />
     <MESSAGE value="Finding bug where model now overfit" />
     <MESSAGE value="COnvert back to model that supposed to work (model, train)" />
     <MESSAGE value="Dynamic Weight" />
@@ -598,7 +597,8 @@
     <MESSAGE value="New function for image_to_tfrecord for new type of data" />
     <MESSAGE value="Fix stl_to_image to produce config.json file instead&#10;Add image_to_tfrecord to accept config.json file" />
     <MESSAGE value="Add a function to run without using current date time, remove all file in the folder first to save memory" />
-    <option name="LAST_COMMIT_MESSAGE" value="Add a function to run without using current date time, remove all file in the folder first to save memory" />
+    <MESSAGE value="Add/Delete comments and unused code" />
+    <option name="LAST_COMMIT_MESSAGE" value="Add/Delete comments and unused code" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
   <component name="WindowStateProjectService">
@@ -606,30 +606,30 @@
       <screen x="1920" y="0" width="1920" height="1080" />
     </state>
     <state x="1920" y="171" width="1375" height="488" key="#xdebugger.XInspectDialog/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575548478730" />
-    <state x="464" y="149" width="1048" height="807" key="CommitChangelistDialog2" timestamp="1575551641255">
+    <state x="464" y="149" width="1048" height="807" key="CommitChangelistDialog2" timestamp="1575552407322">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state x="464" y="149" width="1048" height="807" key="CommitChangelistDialog2/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575551641255" />
+    <state x="464" y="149" width="1048" height="807" key="CommitChangelistDialog2/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575552407322" />
     <state x="776" y="310" width="424" height="484" key="FileChooserDialogImpl" timestamp="1575534303780">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
     <state x="776" y="310" width="424" height="484" key="FileChooserDialogImpl/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575534303780" />
-    <state width="1830" height="210" key="GridCell.Tab.0.bottom" timestamp="1575551914351">
+    <state width="1830" height="210" key="GridCell.Tab.0.bottom" timestamp="1575552409821">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="210" key="GridCell.Tab.0.bottom/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575551914351" />
-    <state width="1830" height="210" key="GridCell.Tab.0.center" timestamp="1575551914351">
+    <state width="1830" height="210" key="GridCell.Tab.0.bottom/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575552409821" />
+    <state width="1830" height="210" key="GridCell.Tab.0.center" timestamp="1575552409821">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="210" key="GridCell.Tab.0.center/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575551914351" />
-    <state width="1830" height="210" key="GridCell.Tab.0.left" timestamp="1575551914351">
+    <state width="1830" height="210" key="GridCell.Tab.0.center/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575552409821" />
+    <state width="1830" height="210" key="GridCell.Tab.0.left" timestamp="1575552409821">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="210" key="GridCell.Tab.0.left/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575551914351" />
-    <state width="1830" height="210" key="GridCell.Tab.0.right" timestamp="1575551914351">
+    <state width="1830" height="210" key="GridCell.Tab.0.left/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575552409821" />
+    <state width="1830" height="210" key="GridCell.Tab.0.right" timestamp="1575552409821">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="210" key="GridCell.Tab.0.right/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575551914351" />
+    <state width="1830" height="210" key="GridCell.Tab.0.right/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575552409821" />
     <state width="1830" height="353" key="GridCell.Tab.1.bottom" timestamp="1575548610231">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
@@ -646,10 +646,10 @@
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
     <state width="1830" height="353" key="GridCell.Tab.1.right/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575548610231" />
-    <state x="588" y="288" width="800" height="528" key="Vcs.Push.Dialog.v2" timestamp="1575551642218">
+    <state x="588" y="288" width="800" height="528" key="Vcs.Push.Dialog.v2" timestamp="1575552408351">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state x="588" y="288" width="800" height="528" key="Vcs.Push.Dialog.v2/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575551642218" />
+    <state x="588" y="288" width="800" height="528" key="Vcs.Push.Dialog.v2/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575552408351" />
     <state width="926" height="527" key="XDebugger.FullValuePopup" timestamp="1575532717443">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>

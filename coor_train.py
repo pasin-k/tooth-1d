@@ -42,7 +42,7 @@ run_configs = {'batch_size': configs.batch_size,
 
 # Change folder of input_path into a filename
 assert os.path.isdir(run_configs['input_path']), \
-    "Input path should be folder directory, not file directory %s" % run_configs['input_path']
+    "Input path should be folder directory, not file directory {}".format(run_configs['input_path'])
 run_configs['input_path'] = os.path.join(run_configs['input_path'], os.path.basename(run_configs['input_path']))
 
 run_mode = configs.run_mode  # Run mode (Single, search, etc.)
@@ -77,7 +77,7 @@ def empty_folder(fold_dir):  # Delete all file in folder
             elif os.path.isdir(file_path):
                 shutil.rmtree(file_path)
         except Exception as e:
-            print('Failed to delete %s. Reason: %s' % (file_path, e))
+            print('Failed to delete {}. Reason: {}'.format(file_path, e))
 
 
 def run(model_params):
@@ -109,12 +109,12 @@ def run(model_params):
         except KeyError:
             run_configs["dataset_timestamp"] = "None"
 
-    assert len(model_params['loss_weight']) == 3, "Label does not have 3 unique value, found %s" % len(
-        model_params['loss_weight'])
+    assert len(model_params['loss_weight']) == 3, "Label does not have 3 unique value, found {}".format(len(
+        model_params['loss_weight']))
     model_params['label_type'] = run_configs['label_type']
 
-    print("Getting training data from %s" % train_data_path)
-    print("Saved model at %s" % model_params['result_path'])
+    print("Getting training data from {}".format(train_data_path))
+    print("Saved model at {}".format(model_params['result_path']))
 
     # tf.logging.set_verbosity(tf.logging.INFO)  # To see some additional info
     # Setting for multiple GPUs
@@ -240,7 +240,7 @@ def fitness(learning_rate, dropout_rate, activation, channels):
     channels           Amount of channel
     """
     # Create the neural network with these hyper-parameters
-    print("Learning_rate, Dropout_rate, Activation, Channels = %s, %s, %s, %s" % (
+    print("Learning_rate, Dropout_rate, Activation, Channels = {}, {}, {}, {}".format(
         learning_rate, dropout_rate, activation, channels))
 
     run_configs['current_time'] = get_time_and_date(True)
@@ -298,7 +298,7 @@ def run_hyper_parameter_optimize():
                     run_configs['summary_file_path'] = previous_record_files[-1]
                     current_time = previous_record_files[-1].split("/")[-1].replace('.csv', '').replace(
                         "hyperparameters_result_", '')
-                    print("Continue from %s" % current_time)
+                    print("Continue from {}".format(current_time))
                 else:  # Otherwise, create new file
                     save_file(run_configs['summary_file_path'], [], field_name=field_name,
                               write_mode='w', create_folder=True, data_format="header_only")  # Create new summary file
@@ -321,8 +321,8 @@ def run_hyper_parameter_optimize():
         default_param = default_parameters
         print("Creating new runs (new folder)")
 
-    print("Saving hyperparameters_result in %s" % run_configs['summary_file_path'])
-    print("Running remaining: %s time" % n_calls)
+    print("Saving hyperparameters_result in {}".format(run_configs['summary_file_path']))
+    print("Running remaining: {} time".format(n_calls))
 
     best_accuracy = 0
     if n_calls < 11:
@@ -339,10 +339,10 @@ def run_hyper_parameter_optimize():
                                     n_calls=n_calls,
                                     x0=default_param)
         print(search_result)
-        print("Best hyper-parameters: %s" % search_result.x)
+        print("Best hyper-parameters: {}".format(search_result.x))
         searched_parameter = list(
             zip(search_result.func_vals, search_result.x_iters))  # List of tuple of (Acc, [Hyperparams])
-        print("All hyper-parameter searched: %s" % searched_parameter)
+        print("All hyper-parameter searched: {}".format(searched_parameter))
 
         new_data = []
         for i in searched_parameter:
@@ -356,7 +356,7 @@ def run_hyper_parameter_optimize():
         save_file(run_configs['summary_file_path'],
                   ['end', 'Completed', get_time_and_date(configs.use_current_time)],
                   write_mode='a', data_format="one_row")
-    print("Saving hyperparameters_result in %s" % run_configs['summary_file_path'])
+    print("Saving hyperparameters_result in {}".format(run_configs['summary_file_path']))
     return best_accuracy
 
 
@@ -371,11 +371,11 @@ def run_kfold(model_params, k_num=5):
         current_run = 0
     all_accuracy = []
     for i in range(current_run, k_num):
-        run_configs['input_path'] = base_input_path + ("_%s" % i)
+        run_configs['input_path'] = base_input_path + ("_%{}".format(i))
         run_configs['result_path'] = os.path.join(result_path, str(i))
         model_params['result_path'] = run_configs['result_path']
         accuracy, _ = run(model_params)
-        save_file(kfold_path, ["%s_%s" % (i, accuracy)], write_mode='a')
+        save_file(kfold_path, ["{}_{}".format(i, accuracy)], write_mode='a')
         all_accuracy.append(accuracy)
     print(all_accuracy)
 
@@ -385,7 +385,7 @@ def run_hyper_parameter_optimize_kfold(k_num=5):
     result_path_base = run_configs['result_path_base']
     all_accuracy = []
     for i in range(k_num):
-        run_configs['input_path'] = base_input_path + ("_%s" % i)
+        run_configs['input_path'] = base_input_path + ("_{}".format(i))
         run_configs['result_path_base'] = os.path.join(result_path_base, str(i))
         accuracy = run_hyper_parameter_optimize()
         all_accuracy.append(accuracy)
@@ -415,5 +415,6 @@ if __name__ == '__main__':
     elif run_mode == "kfold_search":
         run_hyper_parameter_optimize_kfold()
     else:
-        raise ValueError('run_mode invalid. Expect "single", "kfold", "search", "kfold_search". Found %s' % run_mode)
+        raise ValueError(
+            'run_mode invalid. Expect "single", "kfold", "search", "kfold_search". Found {}'.format(run_mode))
     print("train.py completed")

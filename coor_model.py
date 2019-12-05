@@ -113,7 +113,7 @@ def model_cnn_1d(features, mode, params, config):
     require_channel = 2
     params['dropout_rate'] = 0
     assert len(params['channels']) == require_channel, \
-        "This model need %s channels input, current input: %s" % (require_channel, params['channels'])
+        "This model need {} channels input, current input: {}".format(require_channel, params['channels'])
     # Input size:300x8
     '''
     This model is based on "A Comparison of 1-D and 2-D Deep Convolutional Neural Networks in ECG Classification"
@@ -149,21 +149,17 @@ def model_cnn_1d(features, mode, params, config):
                             activation=params['activation'], name="conv3",
                             kernel_regularizer=l2_regularizer)
     conv3 = tf.layers.batch_normalization(conv3)
-    # conv3 = tf.keras.layers.BatchNormalization()(conv3)
     conv4, conv4_w = cnn_1d(conv3, 3, params['channels'][0] * 64,
                             mode=mode,
                             activation=params['activation'], name="conv4",
                             kernel_regularizer=l2_regularizer)
     conv4 = tf.layers.batch_normalization(conv4)
-    # conv4 = tf.keras.layers.BatchNormalization()(conv4)
     conv5, conv5_w = cnn_1d(conv4, 3, params['channels'][0] * 64,
                             mode=mode,
                             activation=params['activation'], name="conv5",
                             kernel_regularizer=l2_regularizer)
     conv5 = tf.layers.batch_normalization(conv5)
-    # conv5 = tf.keras.layers.BatchNormalization()(conv5)
     pool5 = max_pool_layer_1d(conv5, 3, "pool2", stride=2)
-    # print("Pool: %s"% pool3)
     # Output: 65x128 -> 32x128 = 4096
     fc6 = flatten_layer(pool5)
     fc6, fc6_w = fc_layer(fc6, params['channels'][1] * 128,  # 1024
@@ -310,7 +306,7 @@ def my_model(features, labels, mode, params, config):
         save_steps = 1000
         saver_hook = tf.train.SummarySaverHook(save_steps=save_steps, summary_op=tf.summary.merge_all(),
                                                output_dir=config.model_dir)
-        print_logits_hook = PrintValueHook(tf.nn.softmax(logits), "Training logits", tf.train.get_global_step(),
+        print_logits_hook = PrintValueHook(logits, "Training logits", tf.train.get_global_step(),
                                            save_steps)
         print_label_hook = PrintValueHook(labels, "Labels", tf.train.get_global_step(), save_steps)
         print_lr_hook = PrintValueHook(learning_rate, "Learning rate", tf.train.get_global_step(), save_steps)
