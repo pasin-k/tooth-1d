@@ -5,9 +5,9 @@ After running this, use image_to_tfrecord.py to turn images into tfrecord
 
 # Import Libraries
 import os
-from utils.open_save_file import save_plot, save_coordinate, save_file, get_cross_section_label, \
-    get_cross_section_label_new_data
+from utils.open_save_file import save_plot, save_coordinate, save_file, get_cross_section_label
 import numpy as np
+import json
 
 augment_config = [0, -1, -2, -3, 1, 2, 3, 180, 179, 178, 177, 181, 182, 183]
 degree = [0, 45, 90, 135]
@@ -73,26 +73,28 @@ def save_image(stl_points, label_name, error_file_names, out_directory="./data/c
     :param label_name: List of score associate to each image
     :param error_file_names: List of file with error
     :param out_directory: Directory to save images
-    :return: File saved: Images, error_file.txt, config.txt
+    :return: File saved: Images, error_file.json, config.json
     """
     # Save data as png image
     png_name = "PreparationScan"
     if not os.path.exists(out_directory):
         os.makedirs(out_directory)
     # Overwrite if same file exist
-    open(out_directory + '/error_file.txt', 'w').close()
-    open(out_directory + '/config.txt', 'w').close()
+    # open(out_directory + '/error_file.json', 'w').close()
+    # open(out_directory + '/config.txt', 'w').close()
     for j in range(len(label_name)):
         save_plot(stl_points[j], out_directory, "%s_%s" % (png_name, label_name[j]), degree)
         if j % 50 == 0:
             print("Saved %s out of %s" % (j, len(label_name)))
     # Save names which has defect on it, use when convert to tfrecord
-    with open(out_directory + '/error_file.txt', 'a') as filehandle:
-        for listitem in error_file_names:
-            filehandle.write('%s\n' % listitem)
-    with open(out_directory + '/config.txt', 'a') as filehandle:
-        filehandle.write('%s\n' % len(degree))
-        filehandle.write('%s\n' % len(augment_config))
+    with open(out_directory + '/error_file.json', 'w') as filehandle:
+        json.dump({'error_name': error_file_names}, filehandle)
+        # for listitem in error_file_names:
+        #     filehandle.write('%s\n' % listitem)
+    with open(out_directory + '/config.json', 'w') as filehandle:
+        json.dump({'degree': degree, 'augment_config': augment_config}, filehandle)
+        # filehandle.write('%s\n' % len(degree))
+        # filehandle.write('%s\n' % len(augment_config))
     print("Finished saving data")
 
 
@@ -120,15 +122,15 @@ def save_stl_point(stl_points, label_name, error_file_names, out_directory="./da
     :param error_file_names: List of file with error
     :param out_directory: Directory to save images
     :param use_diff: Boolean, If true, will use the vector between every two coordinate instead
-    :return: File saved: npy, error_file.txt, config.txt
+    :return: File saved: npy, error_file.json, config.json
         """
     # Save data as .npy file
     coor_name = "PreparationScan"
     if not os.path.exists(out_directory):
         os.makedirs(out_directory)
-    # Overwrite if same file exist
-    open(out_directory + '/error_file.txt', 'w').close()
-    open(out_directory + '/config.txt', 'w').close()
+    # # Overwrite if same file exist
+    # open(out_directory + '/error_file.txt', 'w').close()
+    # open(out_directory + '/config.txt', 'w').close()
 
     # This convert coordinates into vector between each coordinate
     if use_diff:
@@ -137,14 +139,14 @@ def save_stl_point(stl_points, label_name, error_file_names, out_directory="./da
         save_coordinate(stl_points[j], out_directory, "%s_%s" % (coor_name, label_name[j]), degree)
 
     # Save names which has defect on it, use when convert to tfrecord
-    with open(out_directory + '/error_file.txt', 'a') as filehandle:
-        for listitem in error_file_names:
-            filehandle.write('%s\n' % listitem)
-    print("Finished saving data")
-    # Save some useful data
-    with open(out_directory + '/config.txt', 'a') as filehandle:
-        filehandle.write('%s\n' % len(degree))
-        filehandle.write('%s\n' % len(augment_config))
+    with open(out_directory + '/error_file.json', 'w') as filehandle:
+        json.dump({'error_name': error_file_names}, filehandle)
+        # for listitem in error_file_names:
+        #     filehandle.write('%s\n' % listitem)
+    with open(out_directory + '/config.json', 'w') as filehandle:
+        json.dump({'degree': degree, 'augment_config': augment_config}, filehandle)
+        # filehandle.write('%s\n' % len(degree))
+        # filehandle.write('%s\n' % len(augment_config))
 
 
 # Fetch stl file and save as either image or .npy file of coordinates
@@ -156,22 +158,12 @@ if __name__ == '__main__':
     fix_amount = 300  # Sampling coordinates to specified amount
     use_diff = True  # Use difference between points instead
 
-    is_new_data = False  # New format of score, currently in prototype
-
-    if is_new_data:
-        # data_type, stat_type will not be used unless you want to look at lbl value
-        points_all, lbl_all, header = get_cross_section_label_new_data(degree=degree,
-                                                                       augment_config=augment_config,
-                                                                       folder_name='../../global_data/stl_data_debug',
-                                                                       )
-        degree = [0]
-    else:
-        # data_type, stat_type will not be used unless you want to look at lbl value
-        points_all, lbl_all, header = get_cross_section_label(degree=degree,
-                                                              augment_config=augment_config,
-                                                              # folder_name='../../global_data/stl_data_debug',
-                                                              # csv_dir='../../global_data/Ground Truth Score_debug.csv',
-                                                              )
+    # data_type, stat_type will not be used unless you want to look at lbl value
+    points_all, lbl_all, header = get_cross_section_label(degree=degree,
+                                                          augment_config=augment_config,
+                                                          folder_name='../../global_data/stl_data_debug',
+                                                          csv_dir='../../global_data/Ground Truth Score_debug.csv',
+                                                          )
     if is_fix_amount:
         if use_diff:
             fix_amount = fix_amount + 1  # Compensate for the missing data when finding diffrence
@@ -184,13 +176,13 @@ if __name__ == '__main__':
 
     if save_img:
         print("Start saving images...")
-        image_dir = "../data/cross_section_14_new"
+        image_dir = "../data/cross_section_14_debug2"
         save_image(points_all, lbl_all["name"], lbl_all["error_name"], out_directory=image_dir)
         save_file(os.path.join(image_dir, "score.csv"), lbl_all, data_format="dict_list", field_name=header)
 
     if save_coor:
         print("Start saving coordinates...")
-        file_dir = "../data/coordinate_14_new"
+        file_dir = "../data/coordinate_14_debug2"
         save_stl_point(points_all, lbl_all["name"], lbl_all["error_name"], out_directory=file_dir)
         save_file(os.path.join(file_dir, "score.csv"), lbl_all, data_format="dict_list", field_name=header)
     print("stl_to_image.py: done")

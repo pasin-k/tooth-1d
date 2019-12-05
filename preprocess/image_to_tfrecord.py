@@ -178,7 +178,6 @@ def write_tfrecord(all_data, file_dir, degree, coordinate_length):
             for dname in data.keys():  # Flatten each dataset (in case of more than one)
                 for n in range(degree):  # Flatten each degree
                     for j in range(2):  # Flatten x,y axis
-                        print(np.shape(data[dname][0]))
                         val = data[dname][0][n][:, j].reshape(-1)
                         if np.shape(val)[0] != coordinate_length:
                             print("Error", data[dname][1]["name"])
@@ -218,12 +217,31 @@ def coordinate_to_tfrecord(tfrecord_name, dataset_folders, mode="default", k_fol
     # Convert data into list (kfolds) of dictionary (left/right/...) of list of (train,eval) data
     for dataset_name, dataset_folder in dataset_folders.items():
         # Get amount of degree and augmentation
-        config_data = read_file(os.path.join(dataset_folder, "config.txt"))
-        configs['numdeg'] = int(config_data[0][0])  # Get data from config.txt
-        configs['num_augment'] = int(config_data[1][0])
+        try:  # We have two version, json file and txt file(old)
+            with open(os.path.join(dataset_folder, "config.json"), 'r') as filehandler:
+                data = json.load(filehandler)
+                configs['degree'] = data['degree']
+                configs['augment'] = data['augment_config']
+        except FileNotFoundError:
+            data = read_file(os.path.join(dataset_folder, "config.txt"))
+            if int(data[0][0]) == 4:
+                configs['degree'] = [0, 45, 90, 135]
+            elif int(data[0][0]) == 1:
+                configs['degree'] = [0]
+            else:
+                configs['degree'] = 0
+            if int(data[1][0]) == 14:
+                configs['augment'] = ['0', '1', '2', '3', 'n1', 'n2', 'n3', '180', '181', '182', '183', '179', '178',
+                                      '177']
+            elif int(data[1][0]) == 1:
+                configs['augment'] = ['0']
+            else:
+                raise ValueError("Select correct augment", int(data[1][0]))
+            # configs['numdeg'] = int(data[0][0])  # Get data from config.txt
+            # configs['num_augment'] = int(data[1][0])
 
         # Get data from dataset_folder
-        if mode == "default":
+        if not mode == "new":
             grouped_train_data, grouped_eval_data = get_input_and_label(tfrecord_name, dataset_folder,
                                                                         configs, seed, get_data=True, k_fold=k_fold)
         else:
@@ -277,7 +295,7 @@ def coordinate_to_tfrecord(tfrecord_name, dataset_folders, mode="default", k_fol
         data_loaded["data_length"] = coordinate_length
         data_loaded["dataset_name"] = list(dataset_folders.keys())
         data_loaded["timestamp"] = time_stamp
-        with open("../data/tfrecord/{}/{}_[].json".format(tfrecord_name, tfrecord_name, i), 'w') as filehandle:
+        with open("../data/tfrecord/{}/{}_{}.json".format(tfrecord_name, tfrecord_name, i), 'w') as filehandle:
             json.dump(data_loaded, filehandle, indent=4, sort_keys=True, separators=(',', ': '), ensure_ascii=False)
         print("TFrecords created: {}, {}".format(tfrecord_train_name, tfrecord_eval_name))
 

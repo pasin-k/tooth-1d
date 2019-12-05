@@ -3,7 +3,11 @@
   <component name="ChangeListManager">
     <list default="true" id="770e0596-62ef-4176-bd6c-3bded3f7c783" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cfg/coor_tooth.config" beforeDir="false" afterPath="$PROJECT_DIR$/cfg/coor_tooth.config" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/preprocess/image_to_tfrecord.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocess/image_to_tfrecord.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/preprocess/stl_to_image.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocess/stl_to_image.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/coor_get_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/coor_get_data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/open_save_file.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/open_save_file.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -167,10 +171,10 @@
     <recent_temporary>
       <list>
         <item itemvalue="Python.image_to_tfrecord" />
-        <item itemvalue="Python.scratch_14" />
-        <item itemvalue="Python.scratch_13" />
-        <item itemvalue="Python.coor_train" />
         <item itemvalue="Python.stl_to_image" />
+        <item itemvalue="Python.scratch_14" />
+        <item itemvalue="Python.coor_train" />
+        <item itemvalue="Python.scratch_13" />
       </list>
     </recent_temporary>
   </component>
@@ -196,13 +200,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1554715602048</updated>
-    </task>
-    <task id="LOCAL-00122" summary="More output config, now print name in result">
-      <created>1568277421025</created>
-      <option name="number" value="00122" />
-      <option name="presentableId" value="LOCAL-00122" />
-      <option name="project" value="LOCAL" />
-      <updated>1568277421025</updated>
     </task>
     <task id="LOCAL-00123" summary="Class weight for each label score, now save in json for readability, easy to program">
       <created>1568365766744</created>
@@ -540,7 +537,14 @@
       <option name="project" value="LOCAL" />
       <updated>1575533066828</updated>
     </task>
-    <option name="localTasksCounter" value="171" />
+    <task id="LOCAL-00171" summary="New function for image_to_tfrecord for new type of data">
+      <created>1575533872007</created>
+      <option name="number" value="00171" />
+      <option name="presentableId" value="LOCAL-00171" />
+      <option name="project" value="LOCAL" />
+      <updated>1575533872007</updated>
+    </task>
+    <option name="localTasksCounter" value="172" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -600,54 +604,54 @@
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="1920" y="182" width="1375" height="488" key="#xdebugger.XInspectDialog" timestamp="1575532947621">
+    <state x="1920" y="171" width="1375" height="488" key="#xdebugger.XInspectDialog" timestamp="1575548478730">
       <screen x="1920" y="0" width="1920" height="1080" />
     </state>
-    <state x="1920" y="182" width="1375" height="488" key="#xdebugger.XInspectDialog/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575532947621" />
-    <state x="464" y="149" width="1048" height="807" key="CommitChangelistDialog2" timestamp="1575533066701">
+    <state x="1920" y="171" width="1375" height="488" key="#xdebugger.XInspectDialog/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575548478730" />
+    <state x="464" y="149" width="1048" height="807" key="CommitChangelistDialog2" timestamp="1575533871950">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state x="464" y="149" width="1048" height="807" key="CommitChangelistDialog2/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575533066701" />
-    <state x="776" y="310" width="424" height="484" key="FileChooserDialogImpl" timestamp="1575361460244">
+    <state x="464" y="149" width="1048" height="807" key="CommitChangelistDialog2/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575533871950" />
+    <state x="776" y="310" width="424" height="484" key="FileChooserDialogImpl" timestamp="1575534303780">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state x="776" y="310" width="424" height="484" key="FileChooserDialogImpl/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575361460244" />
-    <state width="1830" height="210" key="GridCell.Tab.0.bottom" timestamp="1575533110598">
+    <state x="776" y="310" width="424" height="484" key="FileChooserDialogImpl/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575534303780" />
+    <state width="1830" height="353" key="GridCell.Tab.0.bottom" timestamp="1575548228013">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="210" key="GridCell.Tab.0.bottom/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575533110598" />
-    <state width="1830" height="210" key="GridCell.Tab.0.center" timestamp="1575533110597">
+    <state width="1830" height="353" key="GridCell.Tab.0.bottom/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575548228013" />
+    <state width="1830" height="353" key="GridCell.Tab.0.center" timestamp="1575548228013">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="210" key="GridCell.Tab.0.center/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575533110597" />
-    <state width="1830" height="210" key="GridCell.Tab.0.left" timestamp="1575533110597">
+    <state width="1830" height="353" key="GridCell.Tab.0.center/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575548228013" />
+    <state width="1830" height="353" key="GridCell.Tab.0.left" timestamp="1575548228013">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="210" key="GridCell.Tab.0.left/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575533110597" />
-    <state width="1830" height="210" key="GridCell.Tab.0.right" timestamp="1575533110598">
+    <state width="1830" height="353" key="GridCell.Tab.0.left/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575548228013" />
+    <state width="1830" height="353" key="GridCell.Tab.0.right" timestamp="1575548228013">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="210" key="GridCell.Tab.0.right/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575533110598" />
-    <state width="1830" height="353" key="GridCell.Tab.1.bottom" timestamp="1575533069268">
+    <state width="1830" height="353" key="GridCell.Tab.0.right/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575548228013" />
+    <state width="1830" height="353" key="GridCell.Tab.1.bottom" timestamp="1575548238387">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="353" key="GridCell.Tab.1.bottom/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575533069268" />
-    <state width="1830" height="353" key="GridCell.Tab.1.center" timestamp="1575533069268">
+    <state width="1830" height="353" key="GridCell.Tab.1.bottom/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575548238387" />
+    <state width="1830" height="353" key="GridCell.Tab.1.center" timestamp="1575548238387">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="353" key="GridCell.Tab.1.center/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575533069268" />
-    <state width="1830" height="353" key="GridCell.Tab.1.left" timestamp="1575533069268">
+    <state width="1830" height="353" key="GridCell.Tab.1.center/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575548238387" />
+    <state width="1830" height="353" key="GridCell.Tab.1.left" timestamp="1575548238387">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="353" key="GridCell.Tab.1.left/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575533069268" />
-    <state width="1830" height="353" key="GridCell.Tab.1.right" timestamp="1575533069268">
+    <state width="1830" height="353" key="GridCell.Tab.1.left/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575548238387" />
+    <state width="1830" height="353" key="GridCell.Tab.1.right" timestamp="1575548238387">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="353" key="GridCell.Tab.1.right/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575533069268" />
-    <state x="588" y="288" width="800" height="528" key="Vcs.Push.Dialog.v2" timestamp="1575533068296">
+    <state width="1830" height="353" key="GridCell.Tab.1.right/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575548238387" />
+    <state x="588" y="288" width="800" height="528" key="Vcs.Push.Dialog.v2" timestamp="1575533873446">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state x="588" y="288" width="800" height="528" key="Vcs.Push.Dialog.v2/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575533068296" />
+    <state x="588" y="288" width="800" height="528" key="Vcs.Push.Dialog.v2/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575533873446" />
     <state width="926" height="527" key="XDebugger.FullValuePopup" timestamp="1575532717443">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
@@ -666,8 +670,8 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/utils/open_save_file.py</url>
-          <line>816</line>
-          <option name="timeStamp" value="8" />
+          <line>763</line>
+          <option name="timeStamp" value="16" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
