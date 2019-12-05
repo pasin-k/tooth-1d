@@ -11,7 +11,6 @@ import shutil
 from proto import tooth_pb2
 from google.protobuf import text_format
 
-import skopt
 from skopt import gp_minimize
 from skopt.space import Real, Categorical, Integer
 from skopt.utils import use_named_args
@@ -69,7 +68,7 @@ def get_time_and_date(use_current_time):
         return "file"
 
 
-def empty_folder(fold_dir):
+def empty_folder(fold_dir):  # Delete all file in folder
     for filename in os.listdir(fold_dir):
         file_path = os.path.join(fold_dir, filename)
         try:
@@ -173,6 +172,7 @@ def run(model_params):
         config=my_checkpoint_config
     )
 
+    # Evaluate training set
     eval_result = classifier.evaluate(
         input_fn=lambda: eval_input_fn(train_data_path, batch_size=run_configs['batch_size'], configs=model_params))
 

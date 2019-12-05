@@ -104,7 +104,9 @@ def max_and_cnn_layer(layer, pl_size, num_filters, activation, name):
     return concat
 
 
-l2_regularizer = 0.00
+l2_regularizer = 0.05
+
+
 # Using max pooling
 def model_cnn_1d(features, mode, params, config):
     # print(features)
@@ -255,6 +257,8 @@ def my_model(features, labels, mode, params, config):
     #         params['loss_weight'])
     # weight = tf.constant([[params['loss_weight'][0], params['loss_weight'][1], params['loss_weight'][2]]],
     #                      dtype=tf.float32)
+
+    # Use loss weight based on each batch
     if mode == tf.estimator.ModeKeys.TRAIN:
         loss_weight_raw = get_loss_weight(labels)
         loss_weight = tf.matmul(one_hot_label, loss_weight_raw, transpose_b=True, a_is_sparse=True)
@@ -274,10 +278,6 @@ def my_model(features, labels, mode, params, config):
     # Create parameters to show in Tensorboard
     ex_prediction = tf.summary.scalar("Prediction Output", predicted_class[0])
     ex_ground_truth = tf.summary.scalar("Ground Truth", labels[0])
-    # if mode == tf.estimator.ModeKeys.TRAIN:
-    #     for name, w in weights.items():
-    #         tf.summary.histogram(name + "_weights", w[0])
-    #         tf.summary.histogram(name + "_biases", w[1])
     d_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
     # print(d_vars)
     # global_step = tf.summary.scalar("Global steps",tf.train.get_global_step())
@@ -291,10 +291,13 @@ def my_model(features, labels, mode, params, config):
                                'conv5/kernel:0', 'conv5/bias:0', 'batch_normalization_4/gamma:0',
                                'batch_normalization_4/beta:0', 'dense/kernel:0', 'dense/bias:0',
                                'dense_1/kernel:0', 'dense_1/bias:0', 'dense_2/kernel:0', 'dense_2/bias:0']
+
+    # tf.summary for all weight and bias
     summary_weight = []
     for i, t in enumerate(trainable_variable_name):
         summary_weight.append(tf.summary.histogram(t, tf.trainable_variables()[i]))
     steps = tf.train.get_global_step()
+
     # Train Mode
     if mode == tf.estimator.ModeKeys.TRAIN:
         learning_rate = tf.train.exponential_decay(params['learning_rate'], steps,

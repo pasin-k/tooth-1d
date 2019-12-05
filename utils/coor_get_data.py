@@ -39,11 +39,8 @@ def decode(data_dict):
                 img = data_dict['%s_%s_%s' % (n, i, j)]
                 img = tf.sparse.to_dense(img)
                 img = tf.reshape(img, [data_length])
-                # file_cropped = tf.squeeze(tf.image.resize_image_with_crop_or_pad(file_decoded, image_height, image_width))
                 image_decoded.append(img)
 
-    # if numdegree != 4:
-    #     raise ValueError("Edit this function as well, this compatible with numdeg=4")
     if single_slice:  # Fetch only the first cross-section
         image_stacked = tf.stack(image_decoded[0:numdegree * dataset_amount * 2:numdegree], axis=1)
         if dataset_amount > 4 or dataset_amount < 1:
