@@ -156,7 +156,7 @@ if __name__ == '__main__':
     fix_amount = 300  # Sampling coordinates to specified amount
     use_diff = True  # Use difference between points instead
 
-    is_new_data = True  # New format of score, currently in prototype
+    is_new_data = False  # New format of score, currently in prototype
 
     if is_new_data:
         # data_type, stat_type will not be used unless you want to look at lbl value

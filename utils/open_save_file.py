@@ -33,6 +33,7 @@ def get_file_name(folder_name='../global_data/', file_name=None, exception_file=
                     pass
                 else:
                     file_dir.append(os.path.abspath(os.path.join(root, filename)))
+                    folder_dir.append(root.split('/')[-1])
             else:
                 if filename.split('/')[-1] == file_name:
                     file_dir.append(os.path.abspath(os.path.join(root, filename)))
@@ -225,29 +226,34 @@ def get_cross_section_label(degree, augment_config=None, folder_name='../../glob
 
 
 # The two functions below is used for new type of data, currently on prototype
-def get_label_new_data(dataname, file_dir='../global_data/new_score(okuyama).csv',
-                       one_hotted=False, normalized=False, ):
+def get_label_new_data(dataname, file_dir='../global_data/new_score(okuyama).csv', normalized=False, ):
     """
     Get label of Ground Truth Score.csv file for new set of score
-    :param dataname:    String, Type of label e.g. [Taper/Occ]
+    :param dataname:    List of strings, Type of label e.g. ["Taper", "Width"]
     :param file_dir:    Directory of csv file
-    :param one_hotted:  Boolean, Return output as one-hot data
     :param normalized:  Boolean, Normalize output to 0-1 (Does not work if one_hotted is True)
     :return: labels     List of score of requested dat
              label_name List of score name, used to identify order of data
     """
-    label_name_key = {"Taper": 1, "Width": 2, "Sharpness": 4}
+    label_name_key = {"name": 0, "Taper": 1, "Width": 2, "Sharpness": 4}
     max_score = 5
 
+    if not type(dataname) is list:
+        dataname = [dataname]
+
     try:
-        data_column = label_name_key[dataname]
+        label_column = [label_name_key[i] for i in dataname]
     except KeyError:
         raise Exception(
-            "Wrong dataname, Type as %s, Valid name: %s" % (dataname, label_name_key))
+            "There is invalid dataname. Valid ones are", label_name_key.keys())
 
-    labels_name = []
+    # Create an dict of empty list of filename and each datatype
+    if "name" not in dataname:
+        dataname.append("name")
+
     labels_data = []
-    print("get_label: Import from %s" % os.path.join(file_dir))
+    print("get_label_new_data: Import score from %s" % os.path.join(file_dir))
+
     with open(file_dir) as csvfile:
         read_csv = csv.reader(csvfile, delimiter=',')
         header = True  # Ignore first row
@@ -256,34 +262,30 @@ def get_label_new_data(dataname, file_dir='../global_data/new_score(okuyama).csv
                 header = False
             else:
                 try:
-                    if row[data_column] != '':
-                        label = row[0]
-                        val = row[data_column]
-                        if one_hotted or (not normalized):  # Don't normalize if output is one hot encoding
-                            normalized_value = int(val)  # Turn string to int
-                        else:
-                            normalized_value = float(val) / max_score  # Turn string to float
-                        labels_name.append(label)
-                        labels_data.append(normalized_value)
+                    if all([row[key] != '' for key in label_column]):
+                        label_dict = {}
+                        for key in dataname:
+                            # print(key)
+                            if key == "name":
+                                label_dict[key] = row[label_name_key[key]]
+                            else:
+                                val = row[label_name_key[key]]
+                                if normalized:  # Don't normalize if output is one hot encoding
+                                    val = float(val) / max_score  # Turn string to float
+                                else:
+                                    val = int(val)  # Turn string to int
+                                label_dict[key] = val
+                            # print(labels_data[key][-1])
+                        labels_data.append(label_dict)
                 except IndexError:
                     print("Data incomplete, no data of %s, or missing label in csv file" % file_dir)
+    # # Sort data by name
+    # labels_name, labels_data = zip(*sorted(zip(labels_name, labels_data)))
+    # labels_name = list(labels_name)  # Turn tuples into list
+    # labels_data = list(labels_data)
 
-    # Sort data by name
-    labels_name, labels_data = zip(*sorted(zip(labels_name, labels_data)))
-    labels_name = list(labels_name)  # Turn tuples into list
-    labels_data = list(labels_data)
-
-    # Turn to one hotted if required
-    if one_hotted:
-        one_hot_labels = list()
-        for label in labels_data:
-            label = (label - 1) / 2
-            one_hot_labels.append(np.array([int(i == label) for i in range(3)]))
-        print("get_label: Upload one-hotted label completed (as a list): %d examples" % (len(one_hot_labels)))
-        return one_hot_labels, labels_name
-    else:
-        print("get_label: Upload non one-hotted label completed (as a list): %d examples" % (len(labels_data)))
-        return labels_data, labels_name
+    print("get_label: Upload non one-hotted label completed (as a list): %d examples" % (len(labels_data)))
+    return labels_data
 
 
 def get_cross_section_label_new_data(degree, augment_config=None, folder_name='../../global_data/stl_data',
@@ -315,7 +317,7 @@ def get_cross_section_label_new_data(degree, augment_config=None, folder_name='.
     label = dict()
     label_header = ["name"]
     for d in data_type:
-        l, label_name = get_label_new_data(d, one_hotted=False, normalized=False, file_dir=csv_dir)
+        l, label_name = get_label_new_data(d, normalized=False, file_dir=csv_dir)
         label[d] = l
         label_header.append(d)
         for deg, name in zip(degree, label_name[0:len(degree)]):
@@ -678,6 +680,142 @@ def get_input_and_label(tfrecord_name, dataset_folder, configs, seed, get_data=F
                         except IndexError:
                             c_weight = np.concatenate(c_weight, 1)
             class_weight[c] = c_weight.tolist()
+
+    if k_fold is not None:  # If k-cross validation, output will be list of each k-fold
+        train_image_temp, eval_image_temp = split_kfold(packed_image, k_fold, seed)
+        train_image = []
+        eval_image = []
+        for i in range(k_fold):
+            single_train_image = train_image_temp[i]
+            single_eval_image = eval_image_temp[i]
+            if not get_data:  # Put in special format for writing tfrecord (pipeline)
+                single_train_image = tuple(
+                    [list(e) for e in zip(*single_train_image)])  # Convert to tuple of list[image address, label]
+
+                single_eval_image = tuple(
+                    [list(e) for e in zip(*single_eval_image)])  # Convert to tuple of list[image address, label]
+                print(
+                    "Train files: %d, Evaluate Files: %d" % (len(single_train_image[0]), len(single_eval_image[0])))
+            else:
+                print("Train files: %d, Evaluate Files: %d" % (len(single_train_image), len(single_eval_image)))
+            train_image.append(single_train_image)
+            eval_image.append(single_eval_image)
+
+            # Save label distribution for weight balancing
+            file_name = "../data/tfrecord/%s/%s_%s.json" % (tfrecord_name, tfrecord_name, i)
+            with open(file_name, 'w') as filehandle:
+                json.dump({"class_weight": class_weight}, filehandle, indent=4, sort_keys=True,
+                          separators=(',', ': '), ensure_ascii=False)
+
+    else:  # Normal operation, but will return as a list of one big data as well
+        train_image, eval_image = split_train_test(packed_image, tfrecord_name, configs, class_weight)
+        if not get_data:  # Put in special format for writing tfrecord (pipeline)
+            train_image = tuple(
+                [list(e) for e in zip(*train_image)])  # Convert to tuple of list[image address, label]
+
+            eval_image = tuple(
+                [list(e) for e in zip(*eval_image)])  # Convert to tuple of list[image address, label]
+            print("Train files: %d, Evaluate Files: %d" % (len(train_image[0]), len(eval_image[0])))
+        else:
+            print("Train files: %d, Evaluate Files: %d" % (len(train_image), len(eval_image)))
+        train_image = [train_image]
+        eval_image = [eval_image]
+
+    return train_image, eval_image
+
+
+def duplicate_label(label_list, augment):
+    """
+    Duplicate label to match the augmented image data
+    """
+    new_label_list = []
+
+    for l in label_list:
+        base_name = l["name"]
+        for a in augment:
+            temp_dict = l
+            # Add augment id to name
+            temp_dict["name"] = "PreparationScan_{}_{}_{}.npy".format(base_name.split('_')[0], a,
+                                                                      (base_name.split('_')[1]))
+            temp_dict["id"] = base_name
+            new_label_list.append(temp_dict.copy())
+    return new_label_list
+
+
+def get_input_and_label_new_data(tfrecord_name, dataset_folder, score_dir, configs, seed, get_data=False, k_fold=None):
+    """
+    This function is specifically used in image_to_tfrecord, fetching
+    :param tfrecord_name:   String, Directory of output file
+    :param dataset_folder:  String, Folder directory of input data [Only data in this folder]
+    :param score_dir:       String, directory of score file
+    :param configs:         Dictionary, containing {numdeg, train_eval_ratio, data_type}
+    :param seed:            Integer, to determine randomness
+    :param get_data:        Boolean, if true will return raw data instead of file name
+    :param k_fold:          Integer, parameter for KFold. If None, will have no K-fold
+    :return:                Train, Eval: Tuple of list[image address, label]. Also save some txt file
+                            loss_weight: numpy array use for loss weight
+    """
+    numdeg = configs['numdeg']
+    # configs['augment'] = ['0']
+    configs['augment'] = ['0', '1', '2', '3', 'n1', 'n2', 'n3', '180', '181', '182', '183', '179', '178', '177']
+    # Get image address and labels
+    temp_image_address, _ = get_file_name(folder_name=dataset_folder, file_name=None,
+                                          exception_file=["config.txt", "error_file.txt", "score.csv"])
+    # Duplicate data to match augmented one
+    labels_temp = get_label_new_data(configs['data_type'], score_dir)
+    labels_temp = duplicate_label(labels_temp, configs['augment'])
+
+    temp_image_id = [a.split('/')[-1] for a in temp_image_address]
+
+    image_address = []
+    labels = []
+    # Sort and remove label which is missing from the image
+    for l in labels_temp:
+        if l["name"] in temp_image_id:
+            image_address.append(temp_image_address[temp_image_id.index(l["name"])])
+            labels.append(l)
+
+    # Group up images and label together, then pack all augmentation together
+    packed_image = []
+    current_id = None
+    for im, la in zip(image_address, labels):
+        if current_id is None or current_id != la["id"]:
+            packed_image.append([[[im], la]])
+        else:
+            packed_image[-1].append([[im], la])
+        current_id = la["id"]
+
+        # Need to find a way to pack data
+
+        # temp_list = [([image_address[i + a]], labels[i + a]) for a in range(configs["num_augment"])]
+        # packed_image.append(temp_list)
+
+    random.Random(seed).shuffle(packed_image)  # Shuffle
+
+    # Unroll nested list
+    packed_image = [item for sublist in packed_image for item in sublist]
+
+    # Calculate loss weight
+    _, labels = [list(e) for e in zip(*packed_image)]
+
+    class_weight = {}
+    for c in configs['data_type']:
+        if not c == "name":
+            score = [i[c] for i in labels]
+            c_weight = compute_class_weight('balanced', np.unique(score), score)  # Assume score always 1,3,5
+            if np.shape(c_weight)[0] < 3:  # Sometime class 1 is missing, use weight 1 instead
+                possible_score = [1, 3, 5]
+                for index, sc in enumerate(possible_score):
+                    if not np.any(np.unique(score) == sc):  # Check if data doesn't exist, insert 1
+                        try:
+                            c_weight = np.insert(c_weight, index, 1)
+                        except IndexError:
+                            c_weight = np.concatenate(c_weight, 1)
+            class_weight[c] = c_weight.tolist()
+
+    # Load data if get_data is True, image address will now be list of ndarray instead
+    if get_data:
+        packed_image = [([np.load(addr[0])], lab) for (addr, lab) in packed_image]
 
     if k_fold is not None:  # If k-cross validation, output will be list of each k-fold
         train_image_temp, eval_image_temp = split_kfold(packed_image, k_fold, seed)

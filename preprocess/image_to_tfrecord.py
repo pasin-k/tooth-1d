@@ -4,7 +4,7 @@ import random
 import os
 import datetime
 import json
-from utils.open_save_file import get_input_and_label, read_file, save_file
+from utils.open_save_file import get_input_and_label, get_input_and_label_new_data, read_file, save_file
 
 numdeg = 4  # Number of images on each example
 
@@ -52,7 +52,7 @@ def read_image(file_name, label):
     return file_values
 
 
-def image_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None, k_fold=None):
+def image_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None, k_fold=None):  # Deprecated
     """
 
     :param tfrecord_name:   String, Name of .tfrecord output file
@@ -62,6 +62,7 @@ def image_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None, k_fold=None):
     :param k_num:           int, If k_fold is true, select amount of k-fold
     :return: save 3 files: train.tfrecord, eval.tfrecord, config (as .json)
     """
+    print("Warning, this function is deprecated")
     # Create new directory if not created, get all info and zip to tfrecord
     if tfrecord_name.split('.')[-1] == "tfrecords":  # Remove extension if exist
         tfrecord_name = os.path.splitext(os.path.basename(tfrecord_name))[0]
@@ -177,6 +178,7 @@ def write_tfrecord(all_data, file_dir, degree, coordinate_length):
             for dname in data.keys():  # Flatten each dataset (in case of more than one)
                 for n in range(degree):  # Flatten each degree
                     for j in range(2):  # Flatten x,y axis
+                        print(np.shape(data[dname][0]))
                         val = data[dname][0][n][:, j].reshape(-1)
                         if np.shape(val)[0] != coordinate_length:
                             print("Error", data[dname][1]["name"])
@@ -188,10 +190,11 @@ def write_tfrecord(all_data, file_dir, degree, coordinate_length):
             writer.write(example.SerializeToString())
 
 
-def coordinate_to_tfrecord(tfrecord_name, dataset_folders, k_fold=None):
+def coordinate_to_tfrecord(tfrecord_name, dataset_folders, mode="default", k_fold=None):
     """
     tfrecord_name   : Name of .tfrecord output file
     dataset_folder  : Folder of the input data  (Not include label)
+    mode            : "default" or "new"
     k_fold          : Integer, amount of K-fold cross validation. Can be None to disable
     save 4 files: train.tfrecord, eval.tfrecord, .txt (Save from another file)
     """
@@ -220,8 +223,14 @@ def coordinate_to_tfrecord(tfrecord_name, dataset_folders, k_fold=None):
         configs['num_augment'] = int(config_data[1][0])
 
         # Get data from dataset_folder
-        grouped_train_data, grouped_eval_data = get_input_and_label(tfrecord_name, dataset_folder,
-                                                                    configs, seed, get_data=True, k_fold=k_fold)
+        if mode == "default":
+            grouped_train_data, grouped_eval_data = get_input_and_label(tfrecord_name, dataset_folder,
+                                                                        configs, seed, get_data=True, k_fold=k_fold)
+        else:
+            grouped_train_data, grouped_eval_data = get_input_and_label_new_data(tfrecord_name, dataset_folder,
+                                                                                 score_dir="../data/new_score(okuyama).csv",
+                                                                                 configs=configs, seed=seed,
+                                                                                 get_data=False, k_fold=None)
         print(grouped_train_data[0][0])
         # if k_fold is None:
         #     k_fold = 1
@@ -275,14 +284,18 @@ def coordinate_to_tfrecord(tfrecord_name, dataset_folders, k_fold=None):
 
 
 if __name__ == '__main__':
-    data_mode = "coordinate"  # image or coordinate
+    data_mode = "new"  # image or coordinate or new
     # Select type of label to use
     label_data = ["name", "Occ_B_median", "Occ_F_median", "Occ_L_median", "BL_median", "MD_median",
                   "Integrity_median", "Width_median", "Surface_median", "Sharpness_median"]
+    label_data_new = ["name", "Taper", "Width", "Sharpness"]
     configs['train_eval_ratio'] = 0.8
     k_fold = None
 
-    configs['data_type'] = label_data
+    if data_mode == "new":
+        configs['data_type'] = label_data_new
+    else:
+        configs['data_type'] = label_data
     print("Use label from %s with (%s) train:eval ratio" % (
         configs['data_type'], configs['train_eval_ratio']))
 
@@ -297,6 +310,9 @@ if __name__ == '__main__':
         # coordinate_to_tfrecord(tfrecord_name="coor_left_right", dataset_folders={'right': "../data/segment_14/right_point",
         #                                                                     'left': "../data/segment_14/left_point"},
         #                        k_fold=k_fold)
+    elif data_mode == "new":
+        coordinate_to_tfrecord(tfrecord_name="debug_new_data_14aug",
+                               dataset_folders="../data/coordinate_14augment", mode="new", k_fold=k_fold)
     else:
         raise ValueError("Wrong data_mode")
     print("Complete")
