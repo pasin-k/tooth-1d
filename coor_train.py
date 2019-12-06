@@ -69,28 +69,30 @@ def get_time_and_date(use_current_time):
 
 
 def empty_folder(fold_dir):  # Delete all file in folder
-    for filename in os.listdir(fold_dir):
-        file_path = os.path.join(fold_dir, filename)
-        try:
-            if os.path.isfile(file_path) or os.path.islink(file_path):
-                os.unlink(file_path)
-            elif os.path.isdir(file_path):
-                shutil.rmtree(file_path)
-        except Exception as e:
-            print('Failed to delete {}. Reason: {}'.format(file_path, e))
+    if os.path.exists(fold_dir):
+        print("Deleting files in:", fold_dir)
+        for filename in os.listdir(fold_dir):
+            file_path = os.path.join(fold_dir, filename)
+            try:
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+            except Exception as e:
+                print('Failed to delete {}. Reason: {}'.format(file_path, e))
 
 
 def run(model_params):
     print("Beginning run..")
     # Check if all values exist
-    model_params = check_exist(model_params, learning_rate=None, dropout_rate=None, activation=None,
+    model_params = check_exist(model_params, learning_rate=None, dropout_rate=None,
                                channels=None, result_path=None)
     # Note on some model_params:    loss_weight is calculated inside
     #                               channels (in CNN case) is [CNN channels, Dense channels]
 
     # If on single mode, delete all file first
     if not configs.use_current_time:
-        empty_folder(os.path.join(run_configs['result_path']))
+        empty_folder(model_params['result_path'])
 
     # Type in file name
     train_data_path = run_configs['input_path'] + '_train.tfrecords'
@@ -219,19 +221,19 @@ def run(model_params):
 
 dim_learning_rate = Real(low=5e-5, high=5e-2, prior='log-uniform', name='learning_rate')
 dim_dropout_rate = Real(low=0, high=0.875, name='dropout_rate')
-dim_activation = Categorical(categories=['0', '1'],
-                             name='activation')
+# dim_activation = Categorical(categories=['0', '1'],
+#                              name='activation')
 dim_channel = Integer(low=1, high=3, name='channels')
 dim_loss_weight = Real(low=0.8, high=2, name='loss_weight')
 dimensions = [dim_learning_rate,
               dim_dropout_rate,
-              dim_activation,
+              # dim_activation,
               dim_channel]
-default_parameters = [configs.learning_rate, configs.dropout_rate, configs.activation, configs.channels]
+default_parameters = [configs.learning_rate, configs.dropout_rate, configs.channels]
 
 
 @use_named_args(dimensions=dimensions)
-def fitness(learning_rate, dropout_rate, activation, channels):
+def fitness(learning_rate, dropout_rate, channels):
     """
     Hyper-parameters search
     learning_rate:     Learning-rate for the optimizer.
@@ -240,14 +242,13 @@ def fitness(learning_rate, dropout_rate, activation, channels):
     channels           Amount of channel
     """
     # Create the neural network with these hyper-parameters
-    print("Learning_rate, Dropout_rate, Activation, Channels = {}, {}, {}, {}".format(
-        learning_rate, dropout_rate, activation, channels))
+    print("Learning_rate, Dropout_rate, Channels = {}, {}, {}".format(
+        learning_rate, dropout_rate, channels))
 
     run_configs['current_time'] = get_time_and_date(True)
     # Set result path combine with current time of running
     md_config = {'learning_rate': learning_rate,
                  'dropout_rate': dropout_rate,
-                 'activation': activation_dict[activation],
                  'channels': [channels, 2],
                  'result_path': os.path.join(run_configs['result_path_base'], run_configs['current_time']),
                  'result_file_name': 'result.csv',
@@ -255,7 +256,7 @@ def fitness(learning_rate, dropout_rate, activation, channels):
 
     accuracy, global_step = run(md_config)
     # Save info of hyperparameter search in a specific csv file
-    save_file(run_configs['summary_file_path'], [accuracy, learning_rate, dropout_rate, activation,
+    save_file(run_configs['summary_file_path'], [accuracy, learning_rate, dropout_rate,
                                                  channels, run_configs['current_time']], write_mode='a',
               data_format="one_row")
     return -accuracy

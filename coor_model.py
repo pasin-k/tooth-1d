@@ -111,7 +111,7 @@ l2_regularizer = 0.05
 def model_cnn_1d(features, mode, params, config):
     # print(features)
     require_channel = 2
-    params['dropout_rate'] = 0
+    # params['dropout_rate'] = 0
     assert len(params['channels']) == require_channel, \
         "This model need {} channels input, current input: {}".format(require_channel, params['channels'])
     # Input size:300x8
@@ -216,11 +216,12 @@ def softmax_focal_loss(labels_l, logits_l, gamma=2., alpha=4.):
     return tf.reduce_mean(reduced_fl)
 
 
-def get_loss_weight(labels):
+def get_loss_weight(labels):  # Calculate loss weight of a single batch
     score_one = tf.reduce_sum(tf.cast(tf.equal(labels, tf.constant(0, dtype=tf.int64)), dtype=tf.float32))
     score_three = tf.reduce_sum(tf.cast(tf.equal(labels, tf.constant(1, dtype=tf.int64)), dtype=tf.float32))
     score_five = tf.reduce_sum(tf.cast(tf.equal(labels, tf.constant(2, dtype=tf.int64)), dtype=tf.float32))
     sum_total = score_one + score_three + score_five
+    # Add 1 to all denominator to prevent overflow
     weight = tf.stack(
         [tf.math.divide(sum_total, score_one + 1), tf.math.divide(sum_total, score_three + 1),
          tf.math.divide(sum_total, score_five + 1)],
@@ -306,7 +307,7 @@ def my_model(features, labels, mode, params, config):
         save_steps = 1000
         saver_hook = tf.train.SummarySaverHook(save_steps=save_steps, summary_op=tf.summary.merge_all(),
                                                output_dir=config.model_dir)
-        print_logits_hook = PrintValueHook(logits, "Training logits", tf.train.get_global_step(),
+        print_logits_hook = PrintValueHook(tf.nn.softmax(logits), "Training logits", tf.train.get_global_step(),
                                            save_steps)
         print_label_hook = PrintValueHook(labels, "Labels", tf.train.get_global_step(), save_steps)
         print_lr_hook = PrintValueHook(learning_rate, "Learning rate", tf.train.get_global_step(), save_steps)
