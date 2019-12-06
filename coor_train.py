@@ -182,15 +182,16 @@ def run(model_params):
 
     # Save necessary info to csv file, as reference
     info_dict = run_configs.copy()
+    info_dict.update(model_params)
     info_dict['accuracy'] = accuracy
-    info_dict['learning_rate'] = model_params['learning_rate']
-    info_dict['dropout_rate'] = model_params['dropout_rate']
-    info_dict['activation'] = model_params['activation']
-    info_dict['channels'] = model_params['channels']
-    info_dict['loss_weight'] = model_params['loss_weight']
     info_dict['steps'] = global_step
-    info_dict['data_length'] = model_params['data_length']
-    info_dict['data_degree'] = model_params['data_degree']
+    # info_dict['learning_rate'] = model_params['learning_rate']
+    # info_dict['dropout_rate'] = model_params['dropout_rate']
+    # info_dict['activation'] = model_params['activation']
+    # info_dict['channels'] = model_params['channels']
+    # info_dict['loss_weight'] = model_params['loss_weight']
+    # info_dict['data_length'] = model_params['data_length']
+    # info_dict['data_degree'] = model_params['data_degree']
 
     # Save information in config.csv
     with open(os.path.join(model_params['result_path'], "config.csv"), "w") as csvfile:

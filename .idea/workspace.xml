@@ -3,8 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="770e0596-62ef-4176-bd6c-3bded3f7c783" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cfg/coor_tooth.config" beforeDir="false" afterPath="$PROJECT_DIR$/cfg/coor_tooth.config" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/coor_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/coor_model.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/coor_train.py" beforeDir="false" afterPath="$PROJECT_DIR$/coor_train.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -198,13 +196,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1554715602048</updated>
-    </task>
-    <task id="LOCAL-00127" summary="Reorganize code">
-      <created>1569384518409</created>
-      <option name="number" value="00127" />
-      <option name="presentableId" value="LOCAL-00127" />
-      <option name="project" value="LOCAL" />
-      <updated>1569384518409</updated>
     </task>
     <task id="LOCAL-00128" summary="Reorganize code">
       <created>1569398338121</created>
@@ -542,7 +533,14 @@
       <option name="project" value="LOCAL" />
       <updated>1575553125892</updated>
     </task>
-    <option name="localTasksCounter" value="176" />
+    <task id="LOCAL-00176" summary="Model now only use leaky relu due to no difference between two. Also enable dropout again">
+      <created>1575619957112</created>
+      <option name="number" value="00176" />
+      <option name="presentableId" value="LOCAL-00176" />
+      <option name="project" value="LOCAL" />
+      <updated>1575619957112</updated>
+    </task>
+    <option name="localTasksCounter" value="177" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -573,7 +571,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="COnvert back to model that supposed to work (model, train)" />
     <MESSAGE value="Dynamic Weight" />
     <MESSAGE value="Dynamic Weight (Dbu)" />
     <MESSAGE value="Updated to the weight-tracking version" />
@@ -598,7 +595,8 @@
     <MESSAGE value="Add a function to run without using current date time, remove all file in the folder first to save memory" />
     <MESSAGE value="Add/Delete comments and unused code" />
     <MESSAGE value="Minor code adjustment" />
-    <option name="LAST_COMMIT_MESSAGE" value="Minor code adjustment" />
+    <MESSAGE value="Model now only use leaky relu due to no difference between two. Also enable dropout again" />
+    <option name="LAST_COMMIT_MESSAGE" value="Model now only use leaky relu due to no difference between two. Also enable dropout again" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
   <component name="WindowStateProjectService">
@@ -606,50 +604,54 @@
       <screen x="1920" y="0" width="1920" height="1080" />
     </state>
     <state x="1920" y="171" width="1375" height="488" key="#xdebugger.XInspectDialog/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575548478730" />
-    <state x="464" y="149" width="1048" height="807" key="CommitChangelistDialog2" timestamp="1575619869247">
+    <state x="861" y="256" width="254" height="593" key="#xdebugger.evaluate" timestamp="1575620724970">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state x="464" y="149" width="1048" height="807" key="CommitChangelistDialog2/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575619869247" />
+    <state x="861" y="256" width="254" height="593" key="#xdebugger.evaluate/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575620724970" />
+    <state x="464" y="149" width="1048" height="807" key="CommitChangelistDialog2" timestamp="1575619957015">
+      <screen x="67" y="27" width="1853" height="1053" />
+    </state>
+    <state x="464" y="149" width="1048" height="807" key="CommitChangelistDialog2/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575619957015" />
     <state x="776" y="310" width="424" height="484" key="FileChooserDialogImpl" timestamp="1575534303780">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
     <state x="776" y="310" width="424" height="484" key="FileChooserDialogImpl/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575534303780" />
-    <state width="1830" height="335" key="GridCell.Tab.0.bottom" timestamp="1575619890503">
+    <state width="1830" height="353" key="GridCell.Tab.0.bottom" timestamp="1575620974518">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="335" key="GridCell.Tab.0.bottom/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575619890503" />
-    <state width="1830" height="335" key="GridCell.Tab.0.center" timestamp="1575619890503">
+    <state width="1830" height="353" key="GridCell.Tab.0.bottom/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575620974518" />
+    <state width="1830" height="353" key="GridCell.Tab.0.center" timestamp="1575620974518">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="335" key="GridCell.Tab.0.center/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575619890503" />
-    <state width="1830" height="335" key="GridCell.Tab.0.left" timestamp="1575619890503">
+    <state width="1830" height="353" key="GridCell.Tab.0.center/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575620974518" />
+    <state width="1830" height="353" key="GridCell.Tab.0.left" timestamp="1575620974518">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="335" key="GridCell.Tab.0.left/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575619890503" />
-    <state width="1830" height="335" key="GridCell.Tab.0.right" timestamp="1575619890503">
+    <state width="1830" height="353" key="GridCell.Tab.0.left/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575620974518" />
+    <state width="1830" height="353" key="GridCell.Tab.0.right" timestamp="1575620974518">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="335" key="GridCell.Tab.0.right/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575619890503" />
-    <state width="1830" height="353" key="GridCell.Tab.1.bottom" timestamp="1575548610231">
+    <state width="1830" height="353" key="GridCell.Tab.0.right/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575620974518" />
+    <state width="1830" height="353" key="GridCell.Tab.1.bottom" timestamp="1575620974518">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="353" key="GridCell.Tab.1.bottom/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575548610231" />
-    <state width="1830" height="353" key="GridCell.Tab.1.center" timestamp="1575548610231">
+    <state width="1830" height="353" key="GridCell.Tab.1.bottom/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575620974518" />
+    <state width="1830" height="353" key="GridCell.Tab.1.center" timestamp="1575620974518">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="353" key="GridCell.Tab.1.center/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575548610231" />
-    <state width="1830" height="353" key="GridCell.Tab.1.left" timestamp="1575548610231">
+    <state width="1830" height="353" key="GridCell.Tab.1.center/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575620974518" />
+    <state width="1830" height="353" key="GridCell.Tab.1.left" timestamp="1575620974518">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="353" key="GridCell.Tab.1.left/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575548610231" />
-    <state width="1830" height="353" key="GridCell.Tab.1.right" timestamp="1575548610231">
+    <state width="1830" height="353" key="GridCell.Tab.1.left/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575620974518" />
+    <state width="1830" height="353" key="GridCell.Tab.1.right" timestamp="1575620974518">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="353" key="GridCell.Tab.1.right/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575548610231" />
-    <state x="588" y="288" width="800" height="528" key="Vcs.Push.Dialog.v2" timestamp="1575553127183">
+    <state width="1830" height="353" key="GridCell.Tab.1.right/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575620974518" />
+    <state x="588" y="288" width="800" height="528" key="Vcs.Push.Dialog.v2" timestamp="1575620277914">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state x="588" y="288" width="800" height="528" key="Vcs.Push.Dialog.v2/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575553127183" />
+    <state x="588" y="288" width="800" height="528" key="Vcs.Push.Dialog.v2/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575620277914" />
     <state width="926" height="527" key="XDebugger.FullValuePopup" timestamp="1575532717443">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
