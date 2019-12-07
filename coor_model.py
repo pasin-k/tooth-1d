@@ -300,8 +300,10 @@ def my_model(features, labels, mode, params, config):
         learning_rate = tf.train.exponential_decay(params['learning_rate'], steps,
                                                    20000, 0.96, staircase=True)
         optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
-        loss_gradient = optimizer.compute_gradients(loss, tf.trainable_variables()[
-            trainable_variable_name.index('dense_1/kernel:0')])
+        loss_gradient = [optimizer.compute_gradients(loss, tf.trainable_variables()[
+            trainable_variable_name.index('dense_1/kernel:0')]),
+                         optimizer.compute_gradients(loss, tf.trainable_variables()[
+                             trainable_variable_name.index('conv1/kernel:0')])]
         train_op = optimizer.minimize(loss, global_step=steps)
 
         save_steps = 1000
@@ -316,8 +318,13 @@ def my_model(features, labels, mode, params, config):
                                              tf.train.get_global_step(), save_steps)
         print_weight_balance_hook = PrintValueHook(loss_weight_raw, "Loss weight", tf.train.get_global_step(),
                                                    save_steps)
-        print_lg_hook = PrintValueHook(loss_gradient[0][0], "Gradient Loss", tf.train.get_global_step(), save_steps)
-        print_lg2_hook = PrintValueHook(loss_gradient[0][1], "Gradient Variable", tf.train.get_global_step(),
+        print_lg_hook = PrintValueHook(loss_gradient[0][0][0], "FC6 Gradient Loss", tf.train.get_global_step(),
+                                       save_steps)
+        print_lg2_hook = PrintValueHook(loss_gradient[0][0][1], "FC6 Gradient Variable", tf.train.get_global_step(),
+                                        save_steps)
+        print_lg3_hook = PrintValueHook(loss_gradient[1][0][0], "Conv1 Gradient Loss", tf.train.get_global_step(),
+                                        save_steps)
+        print_lg4_hook = PrintValueHook(loss_gradient[1][0][1], "Conv1 Gradient Variable", tf.train.get_global_step(),
                                         save_steps)
 
         # Setting logging parameters
@@ -326,6 +333,7 @@ def my_model(features, labels, mode, params, config):
                        print_loss_hook,  # print_reg_loss_hook,
                        print_weight_balance_hook,
                        print_lg_hook, print_lg2_hook,
+                       print_lg3_hook, print_lg4_hook
                        ]
 
         return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op,
