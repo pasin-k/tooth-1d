@@ -29,11 +29,7 @@ def cnn_1d(inp,
                                        activation=activation, input_shape=input_shape, kernel_initializer=initilizer,
                                        kernel_regularizer=tf.keras.regularizers.l2(kernel_regularizer), name=name)
         output = layer(inp)
-    print("Reg loss", tf.losses.get_regularization_loss())
-    if mode == tf.estimator.ModeKeys.TRAIN:
-        return output, layer.get_weights()
-    else:
-        return output, None
+    return output
 
 
 def max_pool_layer_1d(layer, pooling_size, name=None, stride=-1):
@@ -76,10 +72,8 @@ def fc_layer(inp,  #
     layer = tf.keras.layers.Dense(num_outputs, activation=activation, kernel_initializer=initilizer,
                                   kernel_regularizer=tf.keras.regularizers.l2(kernel_regularizer))
     output = layer(inp)
-    if mode == tf.estimator.ModeKeys.TRAIN:
-        return output, layer.get_weights()
-    else:
-        return output, None
+    print(layer.get_config())
+    return output
 
 
 def avg_pool_layer(layer, pooling_size, name=None, stride=-1):
@@ -104,7 +98,7 @@ def max_and_cnn_layer(layer, pl_size, num_filters, activation, name):
     return concat
 
 
-l2_regularizer = 0.05
+l2_regularizer = 0.01
 
 
 # Using max pooling
@@ -120,12 +114,12 @@ def model_cnn_1d(features, mode, params, config):
     '''
     # (1) Filter size: 7x32, max pooling of k3 s2
     print("Input", features['image'])
-    conv1, conv1_w = cnn_1d(features['image'], 7, params['channels'][0] * 16,
-                            mode=mode,
-                            activation=params['activation'],
-                            name="conv1",
-                            input_shape=(300, 8),
-                            kernel_regularizer=l2_regularizer)
+    conv1 = cnn_1d(features['image'], 7, params['channels'][0] * 16,
+                   mode=mode,
+                   activation=params['activation'],
+                   name="conv1",
+                   input_shape=(300, 8),
+                   kernel_regularizer=l2_regularizer)
     print("Conv1", conv1)
     conv1 = tf.layers.batch_normalization(conv1)
     print("Batch1", conv1)
@@ -134,50 +128,49 @@ def model_cnn_1d(features, mode, params, config):
     # Output: 294x32 -> 147x32
     print("Pool1", pool1)
     # (2) Filter size: 5x64, max pooling of k3 s2
-    conv2, conv2_w = cnn_1d(pool1, 5, params['channels'][0] * 32,
-                            mode=mode,
-                            activation=params['activation'], name="conv2",
-                            kernel_regularizer=l2_regularizer)
+    conv2 = cnn_1d(pool1, 5, params['channels'][0] * 32,
+                   mode=mode,
+                   activation=params['activation'], name="conv2",
+                   kernel_regularizer=l2_regularizer)
     conv2 = tf.layers.batch_normalization(conv2)
     # conv2 = tf.keras.layers.BatchNormalization()(conv2)
     pool2 = max_pool_layer_1d(conv2, 3, "pool2", stride=2)
     # Output: 143x64 -> 71x64
 
     # (3) Filter size: 3x128 (3 times), max pooling of k3 s2
-    conv3, conv3_w = cnn_1d(pool2, 3, params['channels'][0] * 64,
-                            mode=mode,
-                            activation=params['activation'], name="conv3",
-                            kernel_regularizer=l2_regularizer)
+    conv3 = cnn_1d(pool2, 3, params['channels'][0] * 64,
+                   mode=mode,
+                   activation=params['activation'], name="conv3",
+                   kernel_regularizer=l2_regularizer)
     conv3 = tf.layers.batch_normalization(conv3)
-    conv4, conv4_w = cnn_1d(conv3, 3, params['channels'][0] * 64,
-                            mode=mode,
-                            activation=params['activation'], name="conv4",
-                            kernel_regularizer=l2_regularizer)
+    conv4 = cnn_1d(conv3, 3, params['channels'][0] * 64,
+                   mode=mode,
+                   activation=params['activation'], name="conv4",
+                   kernel_regularizer=l2_regularizer)
     conv4 = tf.layers.batch_normalization(conv4)
-    conv5, conv5_w = cnn_1d(conv4, 3, params['channels'][0] * 64,
-                            mode=mode,
-                            activation=params['activation'], name="conv5",
-                            kernel_regularizer=l2_regularizer)
+    conv5 = cnn_1d(conv4, 3, params['channels'][0] * 64,
+                   mode=mode,
+                   activation=params['activation'], name="conv5",
+                   kernel_regularizer=l2_regularizer)
     conv5 = tf.layers.batch_normalization(conv5)
     pool5 = max_pool_layer_1d(conv5, 3, "pool2", stride=2)
     # Output: 65x128 -> 32x128 = 4096
     fc6 = flatten_layer(pool5)
-    fc6, fc6_w = fc_layer(fc6, params['channels'][1] * 128,  # 1024
-                          mode=mode,
-                          activation=params['activation'], kernel_regularizer=l2_regularizer,
-                          name='fc6', )
+    fc6 = fc_layer(fc6, params['channels'][1] * 128,  # 1024
+                   mode=mode,
+                   activation=params['activation'], kernel_regularizer=l2_regularizer,
+                   name='fc6', )
     dropout6 = tf.keras.layers.Dropout(rate=params['dropout_rate'])(fc6)
     # Output: 4096 -> 4096 -> 3
-    fc7, fc7_w = fc_layer(dropout6, params['channels'][1] * 128,  #1024
-                          mode=mode,
-                          activation=params['activation'], name='fc7',
-                          kernel_regularizer=l2_regularizer)
+    fc7 = fc_layer(dropout6, params['channels'][1] * 128,  # 1024
+                   mode=mode,
+                   activation=params['activation'], name='fc7',
+                   kernel_regularizer=l2_regularizer)
     dropout7 = tf.keras.layers.Dropout(rate=params['dropout_rate'])(fc7)
-    logits, out_layer = fc_layer(dropout7, 3,
-                                 mode=mode,
-                                 activation=None, name='predict', kernel_regularizer=l2_regularizer)
-    return logits, {'conv1': conv1_w, 'conv2': conv2_w, 'conv3': conv3_w, 'conv4': conv4_w,
-                    'conv5': conv5_w, 'fc6': fc6_w, 'fc7': fc7_w, 'out_layer': out_layer}
+    logits = fc_layer(dropout7, 3,
+                      mode=mode,
+                      activation=None, name='predict', kernel_regularizer=l2_regularizer)
+    return logits
 
 
 def softmax_focal_loss(labels_l, logits_l, gamma=2., alpha=4.):
@@ -229,11 +222,19 @@ def get_loss_weight(labels):  # Calculate loss weight of a single batch
     return tf.expand_dims(weight, axis=0)
 
 
+def custom_l2_reg(loss, lambda_=0.01):
+    ys = tf.reduce_mean(loss)
+    l2_norms = [tf.nn.l2_loss(v) for v in tf.trainable_variables()]
+    l2_norm = tf.reduce_sum(l2_norms)
+    loss = ys + lambda_ * l2_norm
+    return loss
+
+
 # Define Model
 def my_model(features, labels, mode, params, config):
     params['activation'] = tf.nn.leaky_relu
     # Input: (Batch_size,300,8)
-    logits, weights = model_cnn_1d(features, mode, params, config)
+    logits = model_cnn_1d(features, mode, params, config)
     # Predict Mode
     predicted_class = tf.argmax(logits, 1)
     if mode == tf.estimator.ModeKeys.PREDICT:
@@ -264,6 +265,8 @@ def my_model(features, labels, mode, params, config):
     # Cross-entropy loss
     loss = tf.losses.sparse_softmax_cross_entropy(labels, logits,
                                                   weights=loss_weight)  # labels is int of class, logits is vector
+    loss = custom_l2_reg(loss, lambda_=0.01)
+
     # Focal loss
     # loss = softmax_focal_loss(labels, logits, gamma=0., alpha=loss_weight)
 
@@ -289,6 +292,8 @@ def my_model(features, labels, mode, params, config):
                                'batch_normalization_4/beta:0', 'dense/kernel:0', 'dense/bias:0',
                                'dense_1/kernel:0', 'dense_1/bias:0', 'dense_2/kernel:0', 'dense_2/bias:0']
 
+    print("All loss", tf.get_collection(tf.GraphKeys.LOSSES))
+    print("All loss", tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES))
     # tf.summary for all weight and bias
     summary_weight = []
     for i, t in enumerate(trainable_variable_name):
@@ -314,26 +319,24 @@ def my_model(features, labels, mode, params, config):
         print_label_hook = PrintValueHook(labels, "Labels", tf.train.get_global_step(), save_steps)
         print_lr_hook = PrintValueHook(learning_rate, "Learning rate", tf.train.get_global_step(), save_steps)
         print_loss_hook = PrintValueHook(loss, "Loss", tf.train.get_global_step(), save_steps)
-        print_reg_loss_hook = PrintValueHook(tf.losses.get_regularization_loss(), "Regularization Loss",
-                                             tf.train.get_global_step(), save_steps)
+
         print_weight_balance_hook = PrintValueHook(loss_weight_raw, "Loss weight", tf.train.get_global_step(),
                                                    save_steps)
-        print_lg_hook = PrintValueHook(loss_gradient[0][0][0], "FC6 Gradient Loss", tf.train.get_global_step(),
+        print_lg_hook = PrintValueHook(loss_gradient[0][0][0], "FC6 Loss gradient", tf.train.get_global_step(),
                                        save_steps)
-        print_lg2_hook = PrintValueHook(loss_gradient[0][0][1], "FC6 Gradient Variable", tf.train.get_global_step(),
+        print_lg2_hook = PrintValueHook(loss_gradient[0][0][1], "FC6 Variable", tf.train.get_global_step(),
                                         save_steps)
-        print_lg3_hook = PrintValueHook(loss_gradient[1][0][0], "Conv1 Gradient Loss", tf.train.get_global_step(),
+        print_lg3_hook = PrintValueHook(loss_gradient[1][0][0], "Conv1 Loss gradient", tf.train.get_global_step(),
                                         save_steps)
-        print_lg4_hook = PrintValueHook(loss_gradient[1][0][1], "Conv1 Gradient Variable", tf.train.get_global_step(),
+        print_lg4_hook = PrintValueHook(loss_gradient[1][0][1], "Conv1 Variable", tf.train.get_global_step(),
                                         save_steps)
-
         # Setting logging parameters
         train_hooks = [saver_hook, print_logits_hook, print_label_hook,
                        print_lr_hook,
                        print_loss_hook,  # print_reg_loss_hook,
                        print_weight_balance_hook,
                        print_lg_hook, print_lg2_hook,
-                       print_lg3_hook, print_lg4_hook
+                       print_lg3_hook, print_lg4_hook,
                        ]
 
         return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op,

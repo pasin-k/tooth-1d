@@ -5,6 +5,8 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cfg/coor_tooth.config" beforeDir="false" afterPath="$PROJECT_DIR$/cfg/coor_tooth.config" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/coor_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/coor_model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/coor_train.py" beforeDir="false" afterPath="$PROJECT_DIR$/coor_train.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/preprocess/stl_to_image.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocess/stl_to_image.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -37,7 +39,7 @@
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="ToolWindowDocker.ShowToolbar" value="false" />
     <property name="com.intellij.ide.scratch.LRUPopupBuilder$1/New Scratch File" value="Python&#10;TEXT" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/cfg/coor_tooth_workspace.config" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/preprocess/stl_to_image.py" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PythonContentEntriesConfigurable" />
   </component>
   <component name="PyDebuggerOptionsProvider">
@@ -53,6 +55,27 @@
     </key>
   </component>
   <component name="RunManager" selected="Python.coor_train">
+    <configuration name="coor_model" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="my2DCNN" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/coor_model.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="coor_train" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="my2DCNN" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -87,27 +110,6 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/preprocess/image_to_tfrecord.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="scratch_13" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="my2DCNN" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$APPLICATION_CONFIG_DIR$/scratches" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$APPLICATION_CONFIG_DIR$/scratches/scratch_13.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -161,17 +163,17 @@
     <list>
       <item itemvalue="Python.coor_train" />
       <item itemvalue="Python.stl_to_image" />
-      <item itemvalue="Python.scratch_13" />
       <item itemvalue="Python.image_to_tfrecord" />
       <item itemvalue="Python.scratch_14" />
+      <item itemvalue="Python.coor_model" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Python.coor_train" />
+        <item itemvalue="Python.coor_model" />
         <item itemvalue="Python.scratch_14" />
         <item itemvalue="Python.image_to_tfrecord" />
         <item itemvalue="Python.stl_to_image" />
-        <item itemvalue="Python.scratch_13" />
       </list>
     </recent_temporary>
   </component>
@@ -544,6 +546,9 @@
     <option name="localTasksCounter" value="180" />
     <servers />
   </component>
+  <component name="UnknownFeatures">
+    <option featureType="com.intellij.fileTypeFactory" implementationName="*.config" />
+  </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">
       <map>
@@ -609,58 +614,58 @@
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
     <state x="861" y="256" width="254" height="593" key="#xdebugger.evaluate/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575620724970" />
-    <state x="464" y="149" width="1048" height="807" key="CommitChangelistDialog2" timestamp="1575711737507">
+    <state x="464" y="149" width="1048" height="807" key="CommitChangelistDialog2" timestamp="1575711779437">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state x="464" y="149" width="1048" height="807" key="CommitChangelistDialog2/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575711737507" />
-    <state x="776" y="310" width="424" height="484" key="FileChooserDialogImpl" timestamp="1575623549154">
+    <state x="464" y="149" width="1048" height="807" key="CommitChangelistDialog2/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575711779437" />
+    <state x="776" y="310" width="424" height="484" key="FileChooserDialogImpl" timestamp="1575868477101">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state x="776" y="310" width="424" height="484" key="FileChooserDialogImpl/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575623549154" />
-    <state width="1830" height="335" key="GridCell.Tab.0.bottom" timestamp="1575711727431">
+    <state x="776" y="310" width="424" height="484" key="FileChooserDialogImpl/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575868477101" />
+    <state width="1830" height="335" key="GridCell.Tab.0.bottom" timestamp="1575872638369">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="335" key="GridCell.Tab.0.bottom/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575711727431" />
-    <state width="1830" height="335" key="GridCell.Tab.0.center" timestamp="1575711727431">
+    <state width="1830" height="335" key="GridCell.Tab.0.bottom/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575872638369" />
+    <state width="1830" height="335" key="GridCell.Tab.0.center" timestamp="1575872638369">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="335" key="GridCell.Tab.0.center/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575711727431" />
-    <state width="1830" height="335" key="GridCell.Tab.0.left" timestamp="1575711727430">
+    <state width="1830" height="335" key="GridCell.Tab.0.center/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575872638369" />
+    <state width="1830" height="335" key="GridCell.Tab.0.left" timestamp="1575872638368">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="335" key="GridCell.Tab.0.left/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575711727430" />
-    <state width="1830" height="335" key="GridCell.Tab.0.right" timestamp="1575711727431">
+    <state width="1830" height="335" key="GridCell.Tab.0.left/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575872638368" />
+    <state width="1830" height="335" key="GridCell.Tab.0.right" timestamp="1575872638369">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="335" key="GridCell.Tab.0.right/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575711727431" />
-    <state width="1830" height="353" key="GridCell.Tab.1.bottom" timestamp="1575711409769">
+    <state width="1830" height="335" key="GridCell.Tab.0.right/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575872638369" />
+    <state width="1830" height="353" key="GridCell.Tab.1.bottom" timestamp="1575870280178">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="353" key="GridCell.Tab.1.bottom/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575711409769" />
-    <state width="1830" height="353" key="GridCell.Tab.1.center" timestamp="1575711409769">
+    <state width="1830" height="353" key="GridCell.Tab.1.bottom/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575870280178" />
+    <state width="1830" height="353" key="GridCell.Tab.1.center" timestamp="1575870280178">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="353" key="GridCell.Tab.1.center/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575711409769" />
-    <state width="1830" height="353" key="GridCell.Tab.1.left" timestamp="1575711409769">
+    <state width="1830" height="353" key="GridCell.Tab.1.center/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575870280178" />
+    <state width="1830" height="353" key="GridCell.Tab.1.left" timestamp="1575870280178">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="353" key="GridCell.Tab.1.left/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575711409769" />
-    <state width="1830" height="353" key="GridCell.Tab.1.right" timestamp="1575711409769">
+    <state width="1830" height="353" key="GridCell.Tab.1.left/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575870280178" />
+    <state width="1830" height="353" key="GridCell.Tab.1.right" timestamp="1575870280178">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="353" key="GridCell.Tab.1.right/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575711409769" />
-    <state x="588" y="288" width="800" height="528" key="Vcs.Push.Dialog.v2" timestamp="1575711739135">
+    <state width="1830" height="353" key="GridCell.Tab.1.right/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575870280178" />
+    <state x="588" y="288" width="800" height="528" key="Vcs.Push.Dialog.v2" timestamp="1575711782247">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state x="588" y="288" width="800" height="528" key="Vcs.Push.Dialog.v2/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575711739135" />
+    <state x="588" y="288" width="800" height="528" key="Vcs.Push.Dialog.v2/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575711782247" />
     <state width="926" height="527" key="XDebugger.FullValuePopup" timestamp="1575532717443">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
     <state width="926" height="527" key="XDebugger.FullValuePopup/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575532717443" />
-    <state x="649" y="380" key="com.intellij.ide.util.TipDialog" timestamp="1575711488665">
+    <state x="649" y="380" key="com.intellij.ide.util.TipDialog" timestamp="1575874141905">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state x="649" y="380" key="com.intellij.ide.util.TipDialog/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575711488665" />
+    <state x="649" y="380" key="com.intellij.ide.util.TipDialog/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575874141905" />
     <state x="656" y="257" width="672" height="678" key="search.everywhere.popup" timestamp="1575366146157">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>

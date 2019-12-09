@@ -221,7 +221,7 @@ def run(model_params):
 
 
 dim_learning_rate = Real(low=5e-5, high=5e-2, prior='log-uniform', name='learning_rate')
-dim_dropout_rate = Real(low=0, high=0.875, name='dropout_rate')
+dim_dropout_rate = Real(low=0, high=0.6, name='dropout_rate')
 # dim_activation = Categorical(categories=['0', '1'],
 #                              name='activation')
 dim_channel = Integer(low=1, high=3, name='channels')
