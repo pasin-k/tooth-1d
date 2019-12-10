@@ -98,7 +98,7 @@ def max_and_cnn_layer(layer, pl_size, num_filters, activation, name):
     return concat
 
 
-l2_regularizer = 0.01
+l2_regularizer = 0.001
 
 
 # Using max pooling
@@ -216,13 +216,14 @@ def get_loss_weight(labels):  # Calculate loss weight of a single batch
     sum_total = score_one + score_three + score_five
     # Add 1 to all denominator to prevent overflow
     weight = tf.stack(
-        [tf.math.divide(sum_total, score_one + 1), tf.math.divide(sum_total, score_three + 1),
-         tf.math.divide(sum_total, score_five + 1)],
+        [tf.math.divide(1, score_one + 1), tf.math.divide(1, score_three + 1),
+         tf.math.divide(1, score_five + 1)],
         axis=0)
     return tf.expand_dims(weight, axis=0)
 
 
 def custom_l2_reg(loss, lambda_=0.01):
+    # Reference: https://stackoverflow.com/questions/55029716/how-to-regularize-loss-function
     ys = tf.reduce_mean(loss)
     l2_norms = [tf.nn.l2_loss(v) for v in tf.trainable_variables()]
     l2_norm = tf.reduce_sum(l2_norms)
@@ -265,7 +266,7 @@ def my_model(features, labels, mode, params, config):
     # Cross-entropy loss
     loss = tf.losses.sparse_softmax_cross_entropy(labels, logits,
                                                   weights=loss_weight)  # labels is int of class, logits is vector
-    loss = custom_l2_reg(loss, lambda_=0.01)
+    loss = custom_l2_reg(loss, lambda_=0)
 
     # Focal loss
     # loss = softmax_focal_loss(labels, logits, gamma=0., alpha=loss_weight)
@@ -292,8 +293,6 @@ def my_model(features, labels, mode, params, config):
                                'batch_normalization_4/beta:0', 'dense/kernel:0', 'dense/bias:0',
                                'dense_1/kernel:0', 'dense_1/bias:0', 'dense_2/kernel:0', 'dense_2/bias:0']
 
-    print("All loss", tf.get_collection(tf.GraphKeys.LOSSES))
-    print("All loss", tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES))
     # tf.summary for all weight and bias
     summary_weight = []
     for i, t in enumerate(trainable_variable_name):
@@ -314,6 +313,7 @@ def my_model(features, labels, mode, params, config):
         save_steps = 1000
         saver_hook = tf.train.SummarySaverHook(save_steps=save_steps, summary_op=tf.summary.merge_all(),
                                                output_dir=config.model_dir)
+        print_input_hook = PrintValueHook(features['image'], "Input value", tf.train.get_global_step, save_steps)
         print_logits_hook = PrintValueHook(tf.nn.softmax(logits), "Training logits", tf.train.get_global_step(),
                                            save_steps)
         print_label_hook = PrintValueHook(labels, "Labels", tf.train.get_global_step(), save_steps)
