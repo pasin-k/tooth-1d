@@ -369,7 +369,7 @@ def readjust_median_label(label, avg_data):
     return label
 
 
-def save_plot(coor_list, out_directory, image_name, degree, file_type="png", show_axis=False):
+def save_plot(coor_list, out_directory, image_name, degree, file_type="png", marker='o', show_axis=False):
     """
     Save list of coordinates as a PNG image
     :param coor_list:           List of ndarrays <- get from stlSlicer should have slices = len(degree)
@@ -410,7 +410,7 @@ def save_plot(coor_list, out_directory, image_name, degree, file_type="png", sho
             fig.savefig(os.path.join(out_directory, "bugged"), bbox_inches='tight')
             print("Bugged at %s" % output_name)
             raise ValueError("Y-coordinate is beyond limit axis (%s,%s)" % (min_y, max_y))
-        ax.plot(coor[:, 0], coor[:, 1], 'k', linewidth=1.0)
+        ax.plot(coor[:, 0], coor[:, 1], 'k', marker, linewidth=1.0)
         ax.axis([min_x, max_x, min_y, max_y])
 
         if not show_axis:

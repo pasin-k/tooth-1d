@@ -1,9 +1,5 @@
 import numpy as np
-import types
 from stl import mesh
-# mpl.use('TkAgg')  # Use this so we can use matplotlib
-import matplotlib.pyplot as plt
-from matplotlib.pyplot import figure
 
 
 def get_cross_section(stl_file_name, z_plane, degree=None, augment=None, is_rearrange=True, axis=1):

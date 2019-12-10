@@ -9,10 +9,6 @@ from utils.open_save_file import save_plot, save_coordinate, save_file, get_cros
 import numpy as np
 import json
 
-augment_config = [0, -1, -2, -3, 1, 2, 3, 180, 179, 178, 177, 181, 182, 183]
-degree = [0, 45, 90, 135]
-numdeg = len(degree)
-
 
 def get_coor_distance(stl_points, mode_remove):
     """
@@ -149,6 +145,10 @@ def save_stl_point(stl_points, label_name, error_file_names, out_directory="./da
         # filehandle.write('%s\n' % len(augment_config))
 
 
+augment_config = [i for i in np.arange(-5, 5.1, 1)] + [i for i in np.arange(-175, 185.1, 1)]
+print("Augment Config:", len(augment_config), augment_config)
+degree = [0, 45, 90, 135]
+
 # Fetch stl file and save as either image or .npy file of coordinates
 if __name__ == '__main__':
     # Output 'points' as list[list[numpy]] (example_data, degrees, points)
@@ -161,8 +161,8 @@ if __name__ == '__main__':
     # data_type, stat_type will not be used unless you want to look at lbl value
     points_all, lbl_all, header = get_cross_section_label(degree=degree,
                                                           augment_config=augment_config,
-                                                          folder_name='../../global_data/stl_data_debug',
-                                                          csv_dir='../../global_data/Ground Truth Score_debug.csv',
+                                                          # folder_name='../../global_data/stl_data_debug',
+                                                          # csv_dir='../../global_data/Ground Truth Score_debug.csv',
                                                           )
     if is_fix_amount:
         if use_diff:
@@ -176,13 +176,13 @@ if __name__ == '__main__':
 
     if save_img:
         print("Start saving images...")
-        image_dir = "../data/cross_section_14_debug2"
+        image_dir = "../data/cross_section_372augment"
         save_image(points_all, lbl_all["name"], lbl_all["error_name"], out_directory=image_dir)
         save_file(os.path.join(image_dir, "score.csv"), lbl_all, data_format="dict_list", field_name=header)
 
     if save_coor:
         print("Start saving coordinates...")
-        file_dir = "../data/coordinate_14_debug2"
-        save_stl_point(points_all, lbl_all["name"], lbl_all["error_name"], out_directory=file_dir)
+        file_dir = "../data/coordinate_372augment"
+        save_stl_point(points_all, lbl_all["name"], lbl_all["error_name"], out_directory=file_dir, use_diff=use_diff)
         save_file(os.path.join(file_dir, "score.csv"), lbl_all, data_format="dict_list", field_name=header)
     print("stl_to_image.py: done")
