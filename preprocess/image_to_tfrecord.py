@@ -221,7 +221,7 @@ def coordinate_to_tfrecord(tfrecord_name, dataset_folders, mode="default", k_fol
             with open(os.path.join(dataset_folder, "config.json"), 'r') as filehandler:
                 data = json.load(filehandler)
                 configs['degree'] = data['degree']
-                configs['augment'] = [str(i).replace("-", "n").replace(".", "") for i in data['augment_config']]
+                configs['augment'] = [str(i).replace("-", "n").replace(".", "-") for i in data['augment_config']]
         except FileNotFoundError:
             data = read_file(os.path.join(dataset_folder, "config.txt"))
             if int(data[0][0]) == 4:

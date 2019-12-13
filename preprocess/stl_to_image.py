@@ -92,8 +92,6 @@ def save_image(stl_points, label_name, out_directory="./data/cross_section"):
         save_plot(stl_points[j], out_directory, "%s_%s" % (png_name, label_name[j]), degree, marker='x')
         if j % 50 == 0:
             print("Saved %s out of %s" % (j, len(label_name)))
-    with open(out_directory + '/config.json', 'w') as filehandle:
-        json.dump({'degree': degree, 'augment_config': augment_config}, filehandle)
     print("Finished saving data")
 
 
@@ -133,8 +131,6 @@ def save_stl_point(stl_points, label_name, out_directory="./data/coordinates", u
         stl_points = stl_point_to_movement(stl_points)
     for j in range(len(label_name)):
         save_coordinate(stl_points[j], out_directory, "%s_%s" % (coor_name, label_name[j]), degree)
-    with open(out_directory + '/config.json', 'w') as filehandle:
-        json.dump({'degree': degree, 'augment_config': augment_config}, filehandle)
 
 
 # augment_config = [0, 0.5, 1]
@@ -183,8 +179,11 @@ if __name__ == '__main__':
         # Save names with error, for future use
         with open(file_dir + '/error_file.json', 'w') as filehandle:
             json.dump({'error_name': error_name}, filehandle)
+        with open(file_dir + '/config.json', 'w') as filehandle:
+            json.dump({'degree': degree, 'augment_config': augment_config}, filehandle)
         # Save score as csv file
         image_data.to_csv(os.path.join(file_dir, "score.csv"), index=False)
+
         # save_file(os.path.join(file_dir, "score.csv"), image_data, data_format="dict_list", field_name=header)
 
     if save_img:
@@ -196,6 +195,8 @@ if __name__ == '__main__':
         # Save names with error, for future use
         with open(image_dir + '/error_file.json', 'w') as filehandle:
             json.dump({'error_name': error_name}, filehandle)
+        with open(image_dir + '/config.json', 'w') as filehandle:
+            json.dump({'degree': degree, 'augment_config': augment_config}, filehandle)
         # Save score as csv file
         image_data.to_csv(os.path.join(image_dir, "score.csv"), index=False)
         # save_file(os.path.join(image_dir, "score.csv"), image_data, data_format="dict_list", field_name=header)

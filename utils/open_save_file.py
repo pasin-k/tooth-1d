@@ -218,7 +218,7 @@ def get_cross_section_label(degree, augment_config=None, folder_name='../../glob
     image_data = image_data.drop(['points'], axis=1) \
         .melt(id_vars=list(label.keys()) + ['image_id'], value_name='points')
     image_data['image_id'] = image_data['image_id'] + '_' + image_data['variable'].apply(
-        lambda x: str(augment_config[x]).replace('.', ''))
+        lambda x: str(augment_config[x]).replace('-', 'n').replace('.', '-'))
     image_data = image_data.drop(['variable'], axis=1)
 
     # Extract data with None, count number of points for some logging
@@ -733,7 +733,7 @@ def get_input_and_label_new_data(tfrecord_name, dataset_folder, score_dir, confi
 
         # temp_list = [([image_address[i + a]], labels[i + a]) for a in range(configs["num_augment"])]
         # packed_image.append(temp_list)
-
+    assert len(packed_image) != 0, "Cannot find filename correspond to the label"
     random.Random(seed).shuffle(packed_image)  # Shuffle
 
     # Unroll nested list
