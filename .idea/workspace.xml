@@ -3,9 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="770e0596-62ef-4176-bd6c-3bded3f7c783" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/preprocess/image_to_tfrecord.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocess/image_to_tfrecord.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/preprocess/stl_to_image.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocess/stl_to_image.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/open_save_file.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/open_save_file.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -221,14 +218,7 @@
       <option name="presentableId" value="Default" />
       <updated>1554715602048</updated>
       <workItem from="1576167743959" duration="14560000" />
-      <workItem from="1576238885665" duration="3697000" />
-    </task>
-    <task id="LOCAL-00139" summary="Improve code to prevent bug from config">
-      <created>1570157703805</created>
-      <option name="number" value="00139" />
-      <option name="presentableId" value="LOCAL-00139" />
-      <option name="project" value="LOCAL" />
-      <updated>1570157703805</updated>
+      <workItem from="1576238885665" duration="4123000" />
     </task>
     <task id="LOCAL-00140" summary="Improve code to prevent bug from config">
       <created>1570348951535</created>
@@ -566,7 +556,14 @@
       <option name="project" value="LOCAL" />
       <updated>1576239193195</updated>
     </task>
-    <option name="localTasksCounter" value="188" />
+    <task id="LOCAL-00188" summary="Minor debug">
+      <created>1576243839818</created>
+      <option name="number" value="00188" />
+      <option name="presentableId" value="LOCAL-00188" />
+      <option name="project" value="LOCAL" />
+      <updated>1576243839818</updated>
+    </task>
+    <option name="localTasksCounter" value="189" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -603,7 +600,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="More logging to find where gradient disappear" />
     <MESSAGE value="Change config" />
     <MESSAGE value="Greatly reduce dense size" />
     <MESSAGE value="Remove regularization" />
@@ -628,7 +624,8 @@
     <MESSAGE value="Minor edit" />
     <MESSAGE value="Add code so this can run as main" />
     <MESSAGE value="CHange swifter to dask for multiprocessing" />
-    <option name="LAST_COMMIT_MESSAGE" value="CHange swifter to dask for multiprocessing" />
+    <MESSAGE value="Minor debug" />
+    <option name="LAST_COMMIT_MESSAGE" value="Minor debug" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
   <component name="WindowStateProjectService">
@@ -640,10 +637,10 @@
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
     <state x="861" y="256" width="254" height="593" key="#xdebugger.evaluate/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575620724970" />
-    <state x="464" y="149" width="1048" height="807" key="CommitChangelistDialog2" timestamp="1576239192999">
+    <state x="464" y="149" width="1048" height="807" key="CommitChangelistDialog2" timestamp="1576243839469">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state x="464" y="149" width="1048" height="807" key="CommitChangelistDialog2/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576239192999" />
+    <state x="464" y="149" width="1048" height="807" key="CommitChangelistDialog2/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576243839469" />
     <state width="482" height="466" key="DebuggerActiveHint" timestamp="1576163309871">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
@@ -684,10 +681,10 @@
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
     <state width="1807" height="239" key="GridCell.Tab.1.right/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576240894047" />
-    <state x="588" y="288" width="800" height="528" key="Vcs.Push.Dialog.v2" timestamp="1576239194196">
+    <state x="588" y="288" width="800" height="528" key="Vcs.Push.Dialog.v2" timestamp="1576243840832">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state x="588" y="288" width="800" height="528" key="Vcs.Push.Dialog.v2/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576239194196" />
+    <state x="588" y="288" width="800" height="528" key="Vcs.Push.Dialog.v2/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576243840832" />
     <state width="926" height="527" key="XDebugger.FullValuePopup" timestamp="1576164813226">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
