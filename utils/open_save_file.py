@@ -7,6 +7,11 @@ import matplotlib as mpl
 from sklearn.model_selection import KFold, StratifiedKFold
 from sklearn.utils.class_weight import compute_class_weight
 import pandas as pd
+from multiprocessing import cpu_count
+import dask.dataframe as dd
+from dask.diagnostics import ProgressBar
+
+ProgressBar().register()
 
 mpl.use('TkAgg')
 import matplotlib.pyplot as plt
@@ -199,7 +204,10 @@ def get_cross_section_label(degree, augment_config=None, folder_name='../../glob
 
     # Fetch each cross-section image in parallel
     print("Applying get_cross_section...")
-    image_data['points'] = image_data['name_dir'].swifter.apply(get_cross_section, args=(0, degree, augment_config, 1))
+    # image_data['points'] = image_data['name_dir'].swifter.apply(get_cross_section, args=(0, degree, augment_config, 1))
+    ddf = dd.from_pandas(image_data['name_dir'], npartitions=cpu_count() * 2)
+    image_data['points'] = ddf.apply(get_cross_section, args=(0, degree, augment_config, 1), axis=1,
+                                     meta=image_data['name_dir']).compute(scheduler='processes')
     image_data = image_data.drop(['name_dir'], axis=1)  # zplane, degree, augment, axis
 
     # Split a nested list inside 'points' into multiple rows and change image_id on each one based on augmentation angle

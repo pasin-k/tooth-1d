@@ -9,7 +9,11 @@ from utils.open_save_file import save_plot, save_coordinate, save_file, get_cros
 import numpy as np
 import json
 import swifter
-import pandas as pd
+from multiprocessing import cpu_count
+import dask.dataframe as dd
+from dask.diagnostics import ProgressBar
+
+ProgressBar().register()
 
 
 def get_coor_distance(stl_points, mode_remove):
@@ -134,7 +138,10 @@ def save_stl_point(stl_points, label_name, out_directory="./data/coordinates", u
 
 
 # augment_config = [0, 0.5, 1]
-augment_config = [i for i in np.arange(-5, 5.1, 1)] + [i for i in np.arange(-175, 185.1, 1)]
+a_range = 3
+augment_config = [i for i in np.arange(-a_range, a_range + 0.1, 1)] + [i for i in
+                                                                       np.arange(180 - a_range, 180.1 + a_range, 1)]
+# augment_config = [i for i in np.arange(-5, 5.1, 1)] + [i for i in np.arange(-175, 185.1, 1)]
 # print("Augment Config:", len(augment_config), augment_config)
 degree = [0, 45, 90, 135]
 
@@ -145,7 +152,7 @@ if __name__ == '__main__':
     save_img = False
     is_fix_amount = True
     fix_amount = 300  # Sampling coordinates to specified amount
-    use_diff = True  # Use difference between points instead
+    use_diff = False  # Use difference between points instead
 
     # data_type, stat_type will not be used unless you want to look at lbl value
     image_data, error_name, header = get_cross_section_label(degree=degree,
@@ -159,7 +166,9 @@ if __name__ == '__main__':
         if use_diff:
             fix_amount = fix_amount + 1  # Compensate for the missing data when finding diffrence
         print("Adjusting number of coordinates... Takes a long time")
-        points_all = points_all.swifter.apply(point_sampling_wrapper)
+        ddf = dd.from_pandas(points_all, npartitions=cpu_count() * 2)
+        points_all = ddf.apply(point_sampling_wrapper, meta=points_all).compute(scheduler='processes')
+        # points_all = points_all.swifter.apply(point_sampling_wrapper)
         # for i in range(len(points_all)):
         #     for d_index in range(len(degree)):
         #         points_all[i][d_index] = point_sampling(points_all[i][d_index], fix_amount)
@@ -167,7 +176,7 @@ if __name__ == '__main__':
         #         print("Done %s out of %s" % (i + 1, len(points_all)))
     if save_coor:
         print("Start saving coordinates...")
-        file_dir = "../data/coordinate_372augment"
+        file_dir = "../data/coordinate_14augment_points"
 
         # Save image (as coordiantes)
         save_stl_point(points_all, image_data["image_id"].to_list(), out_directory=file_dir, use_diff=use_diff)

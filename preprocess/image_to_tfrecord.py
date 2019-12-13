@@ -221,7 +221,7 @@ def coordinate_to_tfrecord(tfrecord_name, dataset_folders, mode="default", k_fol
             with open(os.path.join(dataset_folder, "config.json"), 'r') as filehandler:
                 data = json.load(filehandler)
                 configs['degree'] = data['degree']
-                configs['augment'] = data['augment_config']
+                configs['augment'] = [str(i).replace("-", "n").replace(".", "") for i in data['augment_config']]
         except FileNotFoundError:
             data = read_file(os.path.join(dataset_folder, "config.txt"))
             if int(data[0][0]) == 4:
@@ -327,8 +327,8 @@ if __name__ == '__main__':
         #                                                                     'left': "../data/segment_14/left_point"},
         #                        k_fold=k_fold)
     elif data_mode == "new":
-        coordinate_to_tfrecord(tfrecord_name="debug_new_data_14aug",
-                               dataset_folders="../data/coordinate_14augment", mode="new", k_fold=k_fold)
+        coordinate_to_tfrecord(tfrecord_name="coor_14augment_real_point",
+                               dataset_folders="../data/coordinate_14augment_points", mode="new", k_fold=k_fold)
     else:
         raise ValueError("Wrong data_mode")
     print("Complete")
