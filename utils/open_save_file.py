@@ -198,6 +198,7 @@ def get_cross_section_label(degree, augment_config=None, folder_name='../../glob
     image_data['image_id'] = image_name
 
     # Fetch each cross-section image in parallel
+    print("Applying get_cross_section...")
     image_data['points'] = image_data['name_dir'].swifter.apply(get_cross_section, args=(0, degree, augment_config, 1))
     image_data = image_data.drop(['name_dir'], axis=1)  # zplane, degree, augment, axis
 
@@ -214,7 +215,6 @@ def get_cross_section_label(degree, augment_config=None, folder_name='../../glob
 
     # Extract data with None, count number of points for some logging
     error_data = image_data[image_data['points'].isnull()]
-    print(error_data)
     image_data = image_data.dropna().sort_values('image_id').reset_index(drop=True)
     image_data['num_point'] = image_data['points'].apply(count_point)
     #
@@ -430,19 +430,19 @@ def save_plot(coor_list, out_directory, image_name, degree, file_type="png", mar
         ax.set_autoscale_on(False)
         min_x, max_x, min_y, max_y = -6.5, 6.5, -6.5, 6.5
         if min(coor[:, 0]) < min_x or max(coor[:, 0]) > max_x:
-            ax.plot(coor[:, 0], coor[:, 1], linewidth=1.0)
+            ax.plot(coor[:, 0], coor[:, 1], marker=marker, linewidth=1.0)
             ax.axis([min_x - 1, max_x + 1, min_y, max_y])
             fig.savefig(os.path.join(out_directory, "bugged"), bbox_inches='tight')
             print("Bugged at %s" % output_name)
             raise ValueError("X-coordinate is beyond limit axis (%s,%s)" % (min_x, max_x))
 
         if min(coor[:, 1]) < min_y or max(coor[:, 1]) > max_y:
-            ax.plot(coor[:, 0], coor[:, 1], linewidth=1.0)
+            ax.plot(coor[:, 0], coor[:, 1], marker=marker, linewidth=1.0)
             ax.axis([min_x, max_x, min_y - 1, max_y + 1])
             fig.savefig(os.path.join(out_directory, "bugged"), bbox_inches='tight')
             print("Bugged at %s" % output_name)
             raise ValueError("Y-coordinate is beyond limit axis (%s,%s)" % (min_y, max_y))
-        ax.plot(coor[:, 0], coor[:, 1], 'k', marker, linewidth=1.0)
+        ax.plot(coor[:, 0], coor[:, 1], 'k', marker=marker, linewidth=1.0)
         ax.axis([min_x, max_x, min_y, max_y])
 
         if not show_axis:

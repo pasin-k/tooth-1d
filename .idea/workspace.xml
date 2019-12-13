@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="770e0596-62ef-4176-bd6c-3bded3f7c783" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/preprocess/stl_to_image.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocess/stl_to_image.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/open_save_file.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/open_save_file.py" afterDir="false" />
@@ -226,14 +225,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1554715602048</updated>
-      <workItem from="1576167743959" duration="266000" />
-    </task>
-    <task id="LOCAL-00135" summary="Reorganize code">
-      <created>1569488606009</created>
-      <option name="number" value="00135" />
-      <option name="presentableId" value="LOCAL-00135" />
-      <option name="project" value="LOCAL" />
-      <updated>1569488606009</updated>
+      <workItem from="1576167743959" duration="2623000" />
     </task>
     <task id="LOCAL-00136" summary="Improve code to prevent bug from config">
       <created>1570096813110</created>
@@ -571,7 +563,14 @@
       <option name="project" value="LOCAL" />
       <updated>1575965799199</updated>
     </task>
-    <option name="localTasksCounter" value="184" />
+    <task id="LOCAL-00184" summary="Bug fix for pandas parts and point sampling">
+      <created>1576168242571</created>
+      <option name="number" value="00184" />
+      <option name="presentableId" value="LOCAL-00184" />
+      <option name="project" value="LOCAL" />
+      <updated>1576168242571</updated>
+    </task>
+    <option name="localTasksCounter" value="185" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -608,7 +607,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Convert back to weight tracking, but with dynamic weight. Also ignore loss weight when not training" />
     <MESSAGE value="Change Checkpoint min to float" />
     <MESSAGE value="Add some parameter to debug, now should print eval every half minutes" />
     <MESSAGE value="Finding bugs where regularization doesn't work" />
@@ -633,7 +631,8 @@
     <MESSAGE value="Removing unnecessary code from keras weight (coor_model.py)&#10;Added custom l2 loss since cannot use api to get one" />
     <MESSAGE value="CHange wieght loss fn" />
     <MESSAGE value="Minor edit, add marker to save_plot" />
-    <option name="LAST_COMMIT_MESSAGE" value="Minor edit, add marker to save_plot" />
+    <MESSAGE value="Bug fix for pandas parts and point sampling" />
+    <option name="LAST_COMMIT_MESSAGE" value="Bug fix for pandas parts and point sampling" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
   <component name="WindowStateProjectService">
@@ -645,10 +644,10 @@
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
     <state x="861" y="256" width="254" height="593" key="#xdebugger.evaluate/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575620724970" />
-    <state x="464" y="149" width="1048" height="807" key="CommitChangelistDialog2" timestamp="1576168158717">
+    <state x="464" y="149" width="1048" height="807" key="CommitChangelistDialog2" timestamp="1576168242359">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state x="464" y="149" width="1048" height="807" key="CommitChangelistDialog2/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576168158717" />
+    <state x="464" y="149" width="1048" height="807" key="CommitChangelistDialog2/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576168242359" />
     <state width="482" height="466" key="DebuggerActiveHint" timestamp="1576163309871">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
@@ -657,22 +656,22 @@
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
     <state x="776" y="310" width="424" height="484" key="FileChooserDialogImpl/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576168176139" />
-    <state width="1830" height="353" key="GridCell.Tab.0.bottom" timestamp="1576167674155">
+    <state width="1807" height="306" key="GridCell.Tab.0.bottom" timestamp="1576219851238">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="353" key="GridCell.Tab.0.bottom/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576167674155" />
-    <state width="1830" height="353" key="GridCell.Tab.0.center" timestamp="1576167674154">
+    <state width="1807" height="306" key="GridCell.Tab.0.bottom/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576219851238" />
+    <state width="1807" height="306" key="GridCell.Tab.0.center" timestamp="1576219851238">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="353" key="GridCell.Tab.0.center/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576167674154" />
-    <state width="1830" height="353" key="GridCell.Tab.0.left" timestamp="1576167674154">
+    <state width="1807" height="306" key="GridCell.Tab.0.center/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576219851238" />
+    <state width="1807" height="306" key="GridCell.Tab.0.left" timestamp="1576219851238">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="353" key="GridCell.Tab.0.left/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576167674154" />
-    <state width="1830" height="353" key="GridCell.Tab.0.right" timestamp="1576167674155">
+    <state width="1807" height="306" key="GridCell.Tab.0.left/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576219851238" />
+    <state width="1807" height="306" key="GridCell.Tab.0.right" timestamp="1576219851238">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="353" key="GridCell.Tab.0.right/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576167674155" />
+    <state width="1807" height="306" key="GridCell.Tab.0.right/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576219851238" />
     <state width="1830" height="353" key="GridCell.Tab.1.bottom" timestamp="1576167674155">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
@@ -689,10 +688,10 @@
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
     <state width="1830" height="353" key="GridCell.Tab.1.right/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576167674155" />
-    <state x="588" y="288" width="800" height="528" key="Vcs.Push.Dialog.v2" timestamp="1575965800727">
+    <state x="588" y="288" width="800" height="528" key="Vcs.Push.Dialog.v2" timestamp="1576168244657">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state x="588" y="288" width="800" height="528" key="Vcs.Push.Dialog.v2/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575965800727" />
+    <state x="588" y="288" width="800" height="528" key="Vcs.Push.Dialog.v2/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576168244657" />
     <state width="926" height="527" key="XDebugger.FullValuePopup" timestamp="1576164813226">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
@@ -701,9 +700,12 @@
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
     <state x="649" y="380" key="com.intellij.ide.util.TipDialog/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576167744657" />
-    <state x="656" y="257" width="672" height="678" key="search.everywhere.popup" timestamp="1575959061248">
+    <state x="656" y="257" width="672" height="678" key="search.everywhere.popup" timestamp="1576168764073">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state x="656" y="257" width="672" height="678" key="search.everywhere.popup/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575959061248" />
+    <state x="656" y="257" width="672" height="678" key="search.everywhere.popup/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576168764073" />
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/my2DCNN$stl_to_image.coverage" NAME="stl_to_image Coverage Results" MODIFIED="1576219851231" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/preprocess" />
   </component>
 </project>

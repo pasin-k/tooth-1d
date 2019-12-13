@@ -85,7 +85,7 @@ def save_image(stl_points, label_name, out_directory="./data/cross_section"):
     if not os.path.exists(out_directory):
         os.makedirs(out_directory)
     for j in range(len(label_name)):
-        save_plot(stl_points[j], out_directory, "%s_%s" % (png_name, label_name[j]), degree)
+        save_plot(stl_points[j], out_directory, "%s_%s" % (png_name, label_name[j]), degree, marker='x')
         if j % 50 == 0:
             print("Saved %s out of %s" % (j, len(label_name)))
     with open(out_directory + '/config.json', 'w') as filehandle:
@@ -133,16 +133,16 @@ def save_stl_point(stl_points, label_name, out_directory="./data/coordinates", u
         json.dump({'degree': degree, 'augment_config': augment_config}, filehandle)
 
 
-augment_config = [0, 0.5, 1]
-# augment_config = [i for i in np.arange(-5, 5.1, 1)] + [i for i in np.arange(-175, 185.1, 1)]
+# augment_config = [0, 0.5, 1]
+augment_config = [i for i in np.arange(-5, 5.1, 1)] + [i for i in np.arange(-175, 185.1, 1)]
 # print("Augment Config:", len(augment_config), augment_config)
 degree = [0, 45, 90, 135]
 
 # Fetch stl file and save as either image or .npy file of coordinates
 if __name__ == '__main__':
     # Output 'points' as list[list[numpy]] (example_data, degrees, points)
-    save_img = True
     save_coor = True
+    save_img = False
     is_fix_amount = True
     fix_amount = 300  # Sampling coordinates to specified amount
     use_diff = True  # Use difference between points instead
@@ -150,8 +150,8 @@ if __name__ == '__main__':
     # data_type, stat_type will not be used unless you want to look at lbl value
     image_data, error_name, header = get_cross_section_label(degree=degree,
                                                              augment_config=augment_config,
-                                                             folder_name='../../global_data/stl_data_debug',
-                                                             csv_dir='../../global_data/Ground Truth Score_debug.csv',
+                                                             # folder_name='../../global_data/stl_data_debug',
+                                                             # csv_dir='../../global_data/Ground Truth Score_debug.csv',
                                                              )
     points_all = image_data.pop('points')
 
@@ -180,7 +180,7 @@ if __name__ == '__main__':
 
     if save_img:
         print("Start saving images...")
-        image_dir = "../data/cross_section_372augment"
+        image_dir = "../data/cross_section_372augment_2"
 
         # Save image
         save_image(points_all, image_data["image_id"].to_list(), out_directory=image_dir)
