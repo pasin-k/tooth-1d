@@ -3,7 +3,9 @@
   <component name="ChangeListManager">
     <list default="true" id="770e0596-62ef-4176-bd6c-3bded3f7c783" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/preprocess/image_to_tfrecord.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocess/image_to_tfrecord.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/preprocess/stl_to_image.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocess/stl_to_image.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/coor_get_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/coor_get_data.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/open_save_file.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/open_save_file.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -53,7 +55,7 @@
       <recent name="$PROJECT_DIR$/utils" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.stl_to_image">
+  <component name="RunManager" selected="Python.coor_get_data">
     <configuration default="true" type="PythonConfigurationType" factoryName="Python">
       <module name="my2DCNN" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -76,29 +78,26 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="coor_model" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="coor_get_data" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="my2DCNN" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/utils" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/coor_model.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/utils/coor_get_data.py" />
       <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
       <option name="REDIRECT_INPUT" value="false" />
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="coor_train" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="image_to_tfrecord" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="my2DCNN" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -106,36 +105,14 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/preprocess" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/coor_train.py" />
-      <option name="PARAMETERS" value="cfg/coor_tooth.config" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="scratch_14" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="my2DCNN" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$APPLICATION_CONFIG_DIR$/scratches" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$APPLICATION_CONFIG_DIR$/scratches/scratch_14.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/preprocess/image_to_tfrecord.py" />
       <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
       <option name="REDIRECT_INPUT" value="false" />
@@ -186,20 +163,42 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="temp" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="my2DCNN" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/preprocess" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/preprocess/temp.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <list>
-      <item itemvalue="Python.coor_train" />
       <item itemvalue="Python.stl_to_image" />
-      <item itemvalue="Python.scratch_14" />
-      <item itemvalue="Python.coor_model" />
       <item itemvalue="Python.scratch_15" />
+      <item itemvalue="Python.temp" />
+      <item itemvalue="Python.image_to_tfrecord" />
+      <item itemvalue="Python.coor_get_data" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.coor_get_data" />
+        <item itemvalue="Python.image_to_tfrecord" />
         <item itemvalue="Python.stl_to_image" />
-        <item itemvalue="Python.scratch_14" />
+        <item itemvalue="Python.temp" />
         <item itemvalue="Python.scratch_15" />
-        <item itemvalue="Python.coor_train" />
-        <item itemvalue="Python.coor_model" />
       </list>
     </recent_temporary>
   </component>
@@ -225,14 +224,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1554715602048</updated>
-      <workItem from="1576167743959" duration="2623000" />
-    </task>
-    <task id="LOCAL-00136" summary="Improve code to prevent bug from config">
-      <created>1570096813110</created>
-      <option name="number" value="00136" />
-      <option name="presentableId" value="LOCAL-00136" />
-      <option name="project" value="LOCAL" />
-      <updated>1570096813110</updated>
+      <workItem from="1576167743959" duration="14560000" />
     </task>
     <task id="LOCAL-00137" summary="Improve code to prevent bug from config">
       <created>1570096964939</created>
@@ -570,7 +562,14 @@
       <option name="project" value="LOCAL" />
       <updated>1576168242571</updated>
     </task>
-    <option name="localTasksCounter" value="185" />
+    <task id="LOCAL-00185" summary="Minor edit">
+      <created>1576219901562</created>
+      <option name="number" value="00185" />
+      <option name="presentableId" value="LOCAL-00185" />
+      <option name="project" value="LOCAL" />
+      <updated>1576219901562</updated>
+    </task>
+    <option name="localTasksCounter" value="186" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -607,7 +606,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Change Checkpoint min to float" />
     <MESSAGE value="Add some parameter to debug, now should print eval every half minutes" />
     <MESSAGE value="Finding bugs where regularization doesn't work" />
     <MESSAGE value="More logging to find where gradient disappear" />
@@ -632,7 +630,8 @@
     <MESSAGE value="CHange wieght loss fn" />
     <MESSAGE value="Minor edit, add marker to save_plot" />
     <MESSAGE value="Bug fix for pandas parts and point sampling" />
-    <option name="LAST_COMMIT_MESSAGE" value="Bug fix for pandas parts and point sampling" />
+    <MESSAGE value="Minor edit" />
+    <option name="LAST_COMMIT_MESSAGE" value="Minor edit" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
   <component name="WindowStateProjectService">
@@ -644,10 +643,10 @@
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
     <state x="861" y="256" width="254" height="593" key="#xdebugger.evaluate/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575620724970" />
-    <state x="464" y="149" width="1048" height="807" key="CommitChangelistDialog2" timestamp="1576168242359">
+    <state x="464" y="149" width="1048" height="807" key="CommitChangelistDialog2" timestamp="1576219901488">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state x="464" y="149" width="1048" height="807" key="CommitChangelistDialog2/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576168242359" />
+    <state x="464" y="149" width="1048" height="807" key="CommitChangelistDialog2/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576219901488" />
     <state width="482" height="466" key="DebuggerActiveHint" timestamp="1576163309871">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
@@ -656,56 +655,58 @@
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
     <state x="776" y="310" width="424" height="484" key="FileChooserDialogImpl/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576168176139" />
-    <state width="1807" height="306" key="GridCell.Tab.0.bottom" timestamp="1576219851238">
+    <state width="1807" height="353" key="GridCell.Tab.0.bottom" timestamp="1576238794160">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1807" height="306" key="GridCell.Tab.0.bottom/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576219851238" />
-    <state width="1807" height="306" key="GridCell.Tab.0.center" timestamp="1576219851238">
+    <state width="1807" height="353" key="GridCell.Tab.0.bottom/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576238794160" />
+    <state width="1807" height="353" key="GridCell.Tab.0.center" timestamp="1576238794160">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1807" height="306" key="GridCell.Tab.0.center/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576219851238" />
-    <state width="1807" height="306" key="GridCell.Tab.0.left" timestamp="1576219851238">
+    <state width="1807" height="353" key="GridCell.Tab.0.center/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576238794160" />
+    <state width="1807" height="353" key="GridCell.Tab.0.left" timestamp="1576238794160">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1807" height="306" key="GridCell.Tab.0.left/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576219851238" />
-    <state width="1807" height="306" key="GridCell.Tab.0.right" timestamp="1576219851238">
+    <state width="1807" height="353" key="GridCell.Tab.0.left/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576238794160" />
+    <state width="1807" height="353" key="GridCell.Tab.0.right" timestamp="1576238794160">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1807" height="306" key="GridCell.Tab.0.right/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576219851238" />
-    <state width="1830" height="353" key="GridCell.Tab.1.bottom" timestamp="1576167674155">
+    <state width="1807" height="353" key="GridCell.Tab.0.right/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576238794160" />
+    <state width="1807" height="353" key="GridCell.Tab.1.bottom" timestamp="1576238794101">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="353" key="GridCell.Tab.1.bottom/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576167674155" />
-    <state width="1830" height="353" key="GridCell.Tab.1.center" timestamp="1576167674155">
+    <state width="1807" height="353" key="GridCell.Tab.1.bottom/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576238794101" />
+    <state width="1807" height="353" key="GridCell.Tab.1.center" timestamp="1576238794101">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="353" key="GridCell.Tab.1.center/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576167674155" />
-    <state width="1830" height="353" key="GridCell.Tab.1.left" timestamp="1576167674155">
+    <state width="1807" height="353" key="GridCell.Tab.1.center/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576238794101" />
+    <state width="1807" height="353" key="GridCell.Tab.1.left" timestamp="1576238794101">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="353" key="GridCell.Tab.1.left/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576167674155" />
-    <state width="1830" height="353" key="GridCell.Tab.1.right" timestamp="1576167674155">
+    <state width="1807" height="353" key="GridCell.Tab.1.left/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576238794101" />
+    <state width="1807" height="353" key="GridCell.Tab.1.right" timestamp="1576238794101">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="353" key="GridCell.Tab.1.right/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576167674155" />
-    <state x="588" y="288" width="800" height="528" key="Vcs.Push.Dialog.v2" timestamp="1576168244657">
+    <state width="1807" height="353" key="GridCell.Tab.1.right/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576238794101" />
+    <state x="588" y="288" width="800" height="528" key="Vcs.Push.Dialog.v2" timestamp="1576219903363">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state x="588" y="288" width="800" height="528" key="Vcs.Push.Dialog.v2/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576168244657" />
+    <state x="588" y="288" width="800" height="528" key="Vcs.Push.Dialog.v2/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576219903363" />
     <state width="926" height="527" key="XDebugger.FullValuePopup" timestamp="1576164813226">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
     <state width="926" height="527" key="XDebugger.FullValuePopup/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576164813226" />
-    <state x="649" y="380" key="com.intellij.ide.util.TipDialog" timestamp="1576167744657">
+    <state x="649" y="380" key="com.intellij.ide.util.TipDialog" timestamp="1576239012502">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state x="649" y="380" key="com.intellij.ide.util.TipDialog/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576167744657" />
+    <state x="649" y="380" key="com.intellij.ide.util.TipDialog/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576239012502" />
     <state x="656" y="257" width="672" height="678" key="search.everywhere.popup" timestamp="1576168764073">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
     <state x="656" y="257" width="672" height="678" key="search.everywhere.popup/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576168764073" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/my2DCNN$stl_to_image.coverage" NAME="stl_to_image Coverage Results" MODIFIED="1576219851231" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/preprocess" />
+    <SUITE FILE_PATH="coverage/my2DCNN$scratch_15.coverage" NAME="scratch_15 Coverage Results" MODIFIED="1576224455038" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$APPLICATION_CONFIG_DIR$/scratches" />
+    <SUITE FILE_PATH="coverage/my2DCNN$stl_to_image.coverage" NAME="stl_to_image Coverage Results" MODIFIED="1576236039409" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/preprocess" />
+    <SUITE FILE_PATH="coverage/my2DCNN$coor_get_data.coverage" NAME="coor_get_data Coverage Results" MODIFIED="1576238793923" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/utils" />
   </component>
 </project>
