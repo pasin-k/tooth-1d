@@ -6,6 +6,12 @@ import numpy as np
 import matplotlib as mpl
 from sklearn.model_selection import KFold, StratifiedKFold
 from sklearn.utils.class_weight import compute_class_weight
+import pandas as pd
+from multiprocessing import cpu_count
+import dask.dataframe as dd
+from dask.diagnostics import ProgressBar
+
+ProgressBar().register()
 
 mpl.use('TkAgg')
 import matplotlib.pyplot as plt
@@ -136,6 +142,13 @@ def get_label(dataname, stattype, double_data=False, one_hotted=False, normalize
         return labels_data, labels_name
 
 
+def count_point(data_list):
+    num_point = 0
+    for d in data_list:
+        num_point += np.shape(d)[0]
+    return num_point / len(data_list)
+
+
 def get_cross_section_label(degree, augment_config=None, folder_name='../../global_data/stl_data',
                             file_name="PreparationScan.stl",
                             csv_dir='../../global_data/Ground Truth Score_new.csv'):
@@ -147,8 +160,9 @@ def get_cross_section_label(degree, augment_config=None, folder_name='../../glob
     :param csv_dir:         String, file directory of label (csv file)
     :param file_name:       String, filename can be None
     :return:
-    stl_points_all          List of all point (ndarray)
-    label_all               Dict of label(Check 'data_type'), name, error_name
+    image_data              Dict of the data points, label score, filename
+    error_data              List of filename which has error
+    label_header            Dict of label(Check 'data_type'), name, error_name
     """
     from utils.stl_slicer import get_cross_section
 
@@ -179,50 +193,76 @@ def get_cross_section_label(degree, augment_config=None, folder_name='../../glob
         raise Exception("ERROR, image and label not similar: %d images, %d labels. Possible missing files: %s"
                         % (len(image_name), (len(label_name)), diff))
 
-    # To verify number of coordinates
-    min_point = 1000
-    max_point = 0
+    # stl_points_all = []
+    # label_all = {k: [] for k in dict.fromkeys(label.keys())}
+    # label_all["name"] = []
+    # label_all["error_name"] = []
 
-    stl_points_all = []
-    label_all = {k: [] for k in dict.fromkeys(label.keys())}
-    label_all["name"] = []
-    label_all["error_name"] = []
-    for i in range(len(name_dir)):
-        # Prepare two set of list, one for data, another for augmented data
-        label_name_temp = []
-        points_all = get_cross_section(name_dir[i], 0, degree, augment=augment_config, axis=1)
-        stl_points = []
-        error_file_names = []  # Names of file that cannot get cross-section image
+    image_data = pd.DataFrame.from_dict(label)
+    image_data['name_dir'] = name_dir
+    image_data['name'] = image_name
 
-        for index, point in enumerate(points_all):
-            augment_val = augment_config[index]
-            if augment_val < 0:
-                augment_val = "n" + str(abs(augment_val))
-            else:
-                augment_val = str(abs(augment_val))
-            if point is None:  # If the output has error, remove label of that file
-                error_file_names.append(image_name[i] + "_" + augment_val)
-            else:
-                stl_points.append(point)
-                label_name_temp.append(image_name[i] + "_" + augment_val)
-                if len(point[0]) > max_point:
-                    max_point = len(point[0])
-                if len(point[0]) < min_point:
-                    min_point = len(point[0])
+    # Fetch each cross-section image in parallel
+    print("Applying get_cross_section...")
+    # image_data['points'] = image_data['name_dir'].swifter.apply(get_cross_section, args=(0, degree, augment_config, 1))
+    ddf = dd.from_pandas(image_data['name_dir'], npartitions=cpu_count() * 2)
+    image_data['points'] = ddf.apply(get_cross_section, args=(0, degree, augment_config, 1), axis=1,
+                                     meta=image_data['name_dir']).compute(scheduler='processes')
+    image_data = image_data.drop(['name_dir'], axis=1)  # zplane, degree, augment, axis
 
-        # Add all label (augmented included)
-        for key, value in label.items():
-            label_all[key] += [value[i] for _ in range(len(stl_points))]
-        stl_points_all += stl_points  # Add these points to the big one
-        label_all["name"] += label_name_temp  # Also add label name to the big one
-        label_all["error_name"] += error_file_names  # Same as error file
+    # Split a nested list inside 'points' into multiple rows and change name on each one based on augmentation angle
+    # Ref: https://www.mikulskibartosz.name/how-to-split-a-list-inside-a-dataframe-cell-into-rows-in-pandas/
+    p = image_data.points.tolist()
+    image_data = image_data.points.apply(pd.Series) \
+        .merge(image_data, right_index=True, left_index=True)
+    image_data = image_data.drop(['points'], axis=1) \
+        .melt(id_vars=list(label.keys()) + ['name'], value_name='points')
+    image_data['name'] = image_data['name'] + '_' + image_data['variable'].apply(
+        lambda x: str(augment_config[x]).replace('-', 'n').replace('.', '-'))
+    image_data = image_data.drop(['variable'], axis=1)
+
+    # Extract data with None, count number of points for some logging
+    error_data = image_data[image_data['points'].isnull()]
+    image_data = image_data.dropna().sort_values('name').reset_index(drop=True)
+    image_data['num_point'] = image_data['points'].apply(count_point)
+    #
+    # for i in range(len(name_dir)):
+    #     # Prepare two set of list, one for data, another for augmented data
+    #     label_name_temp = []
+    #     # points_all = get_cross_section(name_dir[i], 0, degree, augment=augment_config, axis=1)
+    #     stl_points = []
+    #     error_file_names = []  # Names of file that cannot get cross-section image
+    #
+    #     for index, point in enumerate(points_all):  # Loop over each augment
+    #         augment_val = augment_config[index]
+    #         if augment_val < 0:
+    #             augment_val = "n" + str(abs(augment_val))
+    #         else:
+    #             augment_val = str(abs(augment_val))
+    #         if point is None:  # If the output has error, remove label of that file
+    #             error_file_names.append(image_name[i] + "_" + augment_val)
+    #         else:
+    #             stl_points.append(point)
+    #             label_name_temp.append(image_name[i] + "_" + augment_val)
+    #             if len(point[0]) > max_point:
+    #                 max_point = len(point[0])
+    #             if len(point[0]) < min_point:
+    #                 min_point = len(point[0])
+    #
+    #     # Add all label (augmented included)
+    #     for key, value in label.items():
+    #         label_all[key] += [value[i] for _ in range(len(stl_points))]
+    #     stl_points_all += stl_points  # Add these points to the big one
+    #     label_all["name"] += label_name_temp  # Also add label name to the big one
+    #     label_all["error_name"] += error_file_names  # Same as error file
 
     # The output is list(examples) of list(degrees) of numpy array (N*2 coordinates)
-    for label_name in label_all["name"]:
-        print("Finished with %d examples" % (len(label_name)))
+    # for label_name in label_all["name"]:
+    print("Finished with {} examples".format(image_data.size))
 
-    print("Max amount of coordinates: %s, min  coordinates: %s" % (max_point, min_point))
-    return stl_points_all, label_all, label_header
+    print("Max amount of coordinates: {}, min  coordinates: {} with mean: {}".format(
+        image_data['num_point'].max(), image_data['num_point'].min(), image_data['num_point'].mean()))
+    return image_data, error_data['name'].tolist(), label_header
 
 
 # The two functions below is used for new type of data, currently on prototype
@@ -398,19 +438,19 @@ def save_plot(coor_list, out_directory, image_name, degree, file_type="png", mar
         ax.set_autoscale_on(False)
         min_x, max_x, min_y, max_y = -6.5, 6.5, -6.5, 6.5
         if min(coor[:, 0]) < min_x or max(coor[:, 0]) > max_x:
-            ax.plot(coor[:, 0], coor[:, 1], linewidth=1.0)
+            ax.plot(coor[:, 0], coor[:, 1], marker=marker, linewidth=1.0)
             ax.axis([min_x - 1, max_x + 1, min_y, max_y])
             fig.savefig(os.path.join(out_directory, "bugged"), bbox_inches='tight')
             print("Bugged at %s" % output_name)
             raise ValueError("X-coordinate is beyond limit axis (%s,%s)" % (min_x, max_x))
 
         if min(coor[:, 1]) < min_y or max(coor[:, 1]) > max_y:
-            ax.plot(coor[:, 0], coor[:, 1], linewidth=1.0)
+            ax.plot(coor[:, 0], coor[:, 1], marker=marker, linewidth=1.0)
             ax.axis([min_x, max_x, min_y - 1, max_y + 1])
             fig.savefig(os.path.join(out_directory, "bugged"), bbox_inches='tight')
             print("Bugged at %s" % output_name)
             raise ValueError("Y-coordinate is beyond limit axis (%s,%s)" % (min_y, max_y))
-        ax.plot(coor[:, 0], coor[:, 1], 'k', marker, linewidth=1.0)
+        ax.plot(coor[:, 0], coor[:, 1], 'k', marker=marker, linewidth=1.0)
         ax.axis([min_x, max_x, min_y, max_y])
 
         if not show_axis:
@@ -509,7 +549,8 @@ def get_input_and_label(tfrecord_name, dataset_folder, configs, seed, get_data=F
 
     # Get image address and labels
     image_address, _ = get_file_name(folder_name=dataset_folder, file_name=None,
-                                     exception_file=["config.txt", "error_file.txt", "score.csv"])
+                                     exception_file=["config.txt", "error_file.txt", "config.json", "error_file.json",
+                                                     "score.csv"])
 
     labels, _ = read_score(os.path.join(dataset_folder, "score.csv"),
                            data_type=configs['data_type'])
@@ -693,7 +734,7 @@ def get_input_and_label_new_data(tfrecord_name, dataset_folder, score_dir, confi
 
         # temp_list = [([image_address[i + a]], labels[i + a]) for a in range(configs["num_augment"])]
         # packed_image.append(temp_list)
-
+    assert len(packed_image) != 0, "Cannot find filename correspond to the label"
     random.Random(seed).shuffle(packed_image)  # Shuffle
 
     # Unroll nested list

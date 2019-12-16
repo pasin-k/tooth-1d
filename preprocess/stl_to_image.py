@@ -8,6 +8,12 @@ import os
 from utils.open_save_file import save_plot, save_coordinate, save_file, get_cross_section_label
 import numpy as np
 import json
+import swifter
+from multiprocessing import cpu_count
+import dask.dataframe as dd
+from dask.diagnostics import ProgressBar
+
+ProgressBar().register()
 
 
 def get_coor_distance(stl_points, mode_remove):
@@ -19,13 +25,20 @@ def get_coor_distance(stl_points, mode_remove):
     """
     distance = []
     if mode_remove:  # Find distance between points that point and the next two point
-        for i in range((np.shape(stl_points)[0]) - 2):
-            distance.append(np.linalg.norm(stl_points[i, :] - stl_points[i + 1, :]) +
-                            np.linalg.norm(stl_points[i + 1, :] - stl_points[i + 2, :]))
+        for i in range(1, (np.shape(stl_points)[0]) - 1):
+            distance.append(np.linalg.norm(stl_points[i - 1, :] - stl_points[i, :]) +
+                            np.linalg.norm(stl_points[i, :] - stl_points[i + 1, :]))
     else:
         for i in range((np.shape(stl_points)[0]) - 1):  # Find distance between that point and next point
             distance.append(np.linalg.norm(stl_points[i, :] - stl_points[i + 1, :]))
     return distance
+
+
+# To use with pandas.apply
+def point_sampling_wrapper(point_list):
+    for d_index in range(len(degree)):
+        point_list[d_index] = point_sampling(point_list[d_index], fix_amount)
+    return point_list
 
 
 # stl_points are expected to be numpy arrays of coordinate of a single image
@@ -44,7 +57,7 @@ def point_sampling(stl_points, coor_amount):
     # Determine if undersampling or oversampling
     if np.shape(stl_points)[0] > coor_amount:  # Undersampling
         # Remove index of the closest distance until satisfy
-        for j in range(np.shape(stl_points)[0] - coor_amount):
+        while np.shape(stl_points)[0] > coor_amount:
             # Calculate distance between two points which are two space away (Actually focus on i+1, behind and forward)
             distance = get_coor_distance(stl_points, True)
             distance_index = np.argsort(distance)
@@ -52,7 +65,7 @@ def point_sampling(stl_points, coor_amount):
             stl_points = np.delete(stl_points, remove_index + 1, axis=0)  # Remove from the points
     else:  # Oversampling
         # Add point between two points with most distance
-        for j in range(coor_amount - np.shape(stl_points)[0]):
+        while np.shape(stl_points)[0] < coor_amount:
             # Find distance between each point
             distance = get_coor_distance(stl_points, False)
             distance_index = np.argsort(distance)
@@ -62,7 +75,7 @@ def point_sampling(stl_points, coor_amount):
     return stl_points
 
 
-def save_image(stl_points, label_name, error_file_names, out_directory="./data/cross_section"):
+def save_image(stl_points, label_name, out_directory="./data/cross_section"):
     """
     Save all cross-section into an png image
     :param stl_points: List of cross-section images from stlslicer, can be used directly from 'get_cross_section' function
@@ -75,22 +88,10 @@ def save_image(stl_points, label_name, error_file_names, out_directory="./data/c
     png_name = "PreparationScan"
     if not os.path.exists(out_directory):
         os.makedirs(out_directory)
-    # Overwrite if same file exist
-    # open(out_directory + '/error_file.json', 'w').close()
-    # open(out_directory + '/config.txt', 'w').close()
     for j in range(len(label_name)):
-        save_plot(stl_points[j], out_directory, "%s_%s" % (png_name, label_name[j]), degree)
+        save_plot(stl_points[j], out_directory, "%s_%s" % (png_name, label_name[j]), degree, marker='x')
         if j % 50 == 0:
             print("Saved %s out of %s" % (j, len(label_name)))
-    # Save names which has defect on it, use when convert to tfrecord
-    with open(out_directory + '/error_file.json', 'w') as filehandle:
-        json.dump({'error_name': error_file_names}, filehandle)
-        # for listitem in error_file_names:
-        #     filehandle.write('%s\n' % listitem)
-    with open(out_directory + '/config.json', 'w') as filehandle:
-        json.dump({'degree': degree, 'augment_config': augment_config}, filehandle)
-        # filehandle.write('%s\n' % len(degree))
-        # filehandle.write('%s\n' % len(augment_config))
     print("Finished saving data")
 
 
@@ -110,7 +111,7 @@ def stl_point_to_movement(stl_points):  # stl_points is list of all file (all ex
     return new_stl_points
 
 
-def save_stl_point(stl_points, label_name, error_file_names, out_directory="./data/coordinates", use_diff=True):
+def save_stl_point(stl_points, label_name, out_directory="./data/coordinates", use_diff=True):
     """
     Save all cross-section into an .npy
     :param stl_points: List of cross-section images from stlslicer, can be used directly from 'get_cross_section' function
@@ -124,9 +125,6 @@ def save_stl_point(stl_points, label_name, error_file_names, out_directory="./da
     coor_name = "PreparationScan"
     if not os.path.exists(out_directory):
         os.makedirs(out_directory)
-    # # Overwrite if same file exist
-    # open(out_directory + '/error_file.txt', 'w').close()
-    # open(out_directory + '/config.txt', 'w').close()
 
     # This convert coordinates into vector between each coordinate
     if use_diff:
@@ -134,55 +132,75 @@ def save_stl_point(stl_points, label_name, error_file_names, out_directory="./da
     for j in range(len(label_name)):
         save_coordinate(stl_points[j], out_directory, "%s_%s" % (coor_name, label_name[j]), degree)
 
-    # Save names which has defect on it, use when convert to tfrecord
-    with open(out_directory + '/error_file.json', 'w') as filehandle:
-        json.dump({'error_name': error_file_names}, filehandle)
-        # for listitem in error_file_names:
-        #     filehandle.write('%s\n' % listitem)
-    with open(out_directory + '/config.json', 'w') as filehandle:
-        json.dump({'degree': degree, 'augment_config': augment_config}, filehandle)
-        # filehandle.write('%s\n' % len(degree))
-        # filehandle.write('%s\n' % len(augment_config))
 
-
-augment_config = [i for i in np.arange(-5, 5.1, 1)] + [i for i in np.arange(-175, 185.1, 1)]
+# augment_config = [0, 0.5, 1]
+a_range = 5
+step = 0.5
+augment_config = [i for i in np.arange(-a_range, a_range + 0.1, step)] + [i for i in
+                                                                          np.arange(180 - a_range, 180.1 + a_range,
+                                                                                    step)]
+# augment_config = [i for i in np.arange(-5, 5.1, 1)] + [i for i in np.arange(-175, 185.1, 1)]
 print("Augment Config:", len(augment_config), augment_config)
 degree = [0, 45, 90, 135]
 
 # Fetch stl file and save as either image or .npy file of coordinates
 if __name__ == '__main__':
     # Output 'points' as list[list[numpy]] (example_data, degrees, points)
-    save_img = True
     save_coor = True
-    is_fix_amount = True
+    save_img = True
+    is_fix_amount = False
     fix_amount = 300  # Sampling coordinates to specified amount
-    use_diff = True  # Use difference between points instead
+    use_diff = False  # Use difference between points instead
 
     # data_type, stat_type will not be used unless you want to look at lbl value
-    points_all, lbl_all, header = get_cross_section_label(degree=degree,
-                                                          augment_config=augment_config,
-                                                          # folder_name='../../global_data/stl_data_debug',
-                                                          # csv_dir='../../global_data/Ground Truth Score_debug.csv',
-                                                          )
+    image_data, error_name, header = get_cross_section_label(degree=degree,
+                                                             augment_config=augment_config,
+                                                             folder_name='../../global_data/stl_data_debug',
+                                                             csv_dir='../../global_data/Ground Truth Score_debug.csv',
+                                                             )
+    points_all = image_data.pop('points')
+
     if is_fix_amount:
         if use_diff:
             fix_amount = fix_amount + 1  # Compensate for the missing data when finding diffrence
         print("Adjusting number of coordinates... Takes a long time")
-        for i in range(len(points_all)):
-            for d_index in range(len(degree)):
-                points_all[i][d_index] = point_sampling(points_all[i][d_index], fix_amount)
-            if i % 50 == 0:
-                print("Done %s out of %s" % (i + 1, len(points_all)))
+        ddf = dd.from_pandas(points_all, npartitions=cpu_count() * 2)
+        points_all = ddf.apply(point_sampling_wrapper, meta=points_all).compute(scheduler='processes')
+        # points_all = points_all.swifter.apply(point_sampling_wrapper)
+        # for i in range(len(points_all)):
+        #     for d_index in range(len(degree)):
+        #         points_all[i][d_index] = point_sampling(points_all[i][d_index], fix_amount)
+        #     if i % 50 == 0:
+        #         print("Done %s out of %s" % (i + 1, len(points_all)))
+    if save_coor:
+        print("Start saving coordinates...")
+        file_dir = "../data/coordinate_42augment_debug"
+
+        # Save image (as coordiantes)
+        save_stl_point(points_all, image_data["name"].to_list(), out_directory=file_dir, use_diff=use_diff)
+        # Save names with error, for future use
+        with open(file_dir + '/error_file.json', 'w') as filehandle:
+            json.dump({'error_name': error_name}, filehandle)
+        with open(file_dir + '/config.json', 'w') as filehandle:
+            json.dump({'degree': degree, 'augment_config': augment_config}, filehandle)
+        # Save score as csv file
+        image_data.to_csv(os.path.join(file_dir, "score.csv"), index=False)
+
+        # save_file(os.path.join(file_dir, "score.csv"), image_data, data_format="dict_list", field_name=header)
 
     if save_img:
         print("Start saving images...")
-        image_dir = "../data/cross_section_372augment"
-        save_image(points_all, lbl_all["name"], lbl_all["error_name"], out_directory=image_dir)
-        save_file(os.path.join(image_dir, "score.csv"), lbl_all, data_format="dict_list", field_name=header)
+        image_dir = "../data/cross_section_42augment_debug"
 
-    if save_coor:
-        print("Start saving coordinates...")
-        file_dir = "../data/coordinate_372augment"
-        save_stl_point(points_all, lbl_all["name"], lbl_all["error_name"], out_directory=file_dir, use_diff=use_diff)
-        save_file(os.path.join(file_dir, "score.csv"), lbl_all, data_format="dict_list", field_name=header)
+        # Save image
+        save_image(points_all, image_data["name"].to_list(), out_directory=image_dir)
+        # Save names with error, for future use
+        with open(image_dir + '/error_file.json', 'w') as filehandle:
+            json.dump({'error_name': error_name}, filehandle)
+        with open(image_dir + '/config.json', 'w') as filehandle:
+            json.dump({'degree': degree, 'augment_config': augment_config}, filehandle)
+        # Save score as csv file
+        image_data.to_csv(os.path.join(image_dir, "score.csv"), index=False)
+        # save_file(os.path.join(image_dir, "score.csv"), image_data, data_format="dict_list", field_name=header)
+
     print("stl_to_image.py: done")

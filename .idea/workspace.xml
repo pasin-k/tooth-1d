@@ -3,9 +3,10 @@
   <component name="ChangeListManager">
     <list default="true" id="770e0596-62ef-4176-bd6c-3bded3f7c783" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cfg/coor_tooth.config" beforeDir="false" afterPath="$PROJECT_DIR$/cfg/coor_tooth.config" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/preprocess/image_to_tfrecord.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocess/image_to_tfrecord.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/preprocess/stl_to_image.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocess/stl_to_image.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/open_save_file.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/open_save_file.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/stl_slicer.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/stl_slicer.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -37,6 +38,7 @@
   <component name="PropertiesComponent">
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="ToolWindowDocker.ShowToolbar" value="false" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="com.intellij.ide.scratch.LRUPopupBuilder$1/New Scratch File" value="Python&#10;TEXT" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/preprocess/stl_to_image.py" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PythonContentEntriesConfigurable" />
@@ -53,8 +55,8 @@
       <recent name="$PROJECT_DIR$/utils" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.scratch_14">
-    <configuration name="coor_model" type="PythonConfigurationType" factoryName="Python" temporary="true">
+  <component name="RunManager" selected="Python.image_to_tfrecord">
+    <configuration default="true" type="PythonConfigurationType" factoryName="Python">
       <module name="my2DCNN" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -62,20 +64,21 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/coor_model.py" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="" />
       <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
       <option name="REDIRECT_INPUT" value="false" />
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="coor_train" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="coor_get_data" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="my2DCNN" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -83,13 +86,14 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/utils" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/coor_train.py" />
-      <option name="PARAMETERS" value="cfg/coor_tooth.config" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/utils/coor_get_data.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
       <option name="REDIRECT_INPUT" value="false" />
@@ -100,24 +104,22 @@
       <module name="my2DCNN" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/preprocess" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/preprocess/image_to_tfrecord.py" />
       <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
       <option name="REDIRECT_INPUT" value="false" />
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="scratch_14" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="scratch_15" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="my2DCNN" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -129,7 +131,8 @@
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$APPLICATION_CONFIG_DIR$/scratches/scratch_14.py" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$APPLICATION_CONFIG_DIR$/scratches/scratch_15.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -150,6 +153,7 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/preprocess/stl_to_image.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
@@ -159,20 +163,42 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="temp" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="my2DCNN" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/preprocess" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/preprocess/temp.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <list>
-      <item itemvalue="Python.coor_train" />
       <item itemvalue="Python.stl_to_image" />
+      <item itemvalue="Python.scratch_15" />
+      <item itemvalue="Python.temp" />
       <item itemvalue="Python.image_to_tfrecord" />
-      <item itemvalue="Python.scratch_14" />
-      <item itemvalue="Python.coor_model" />
+      <item itemvalue="Python.coor_get_data" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.scratch_14" />
-        <item itemvalue="Python.coor_train" />
-        <item itemvalue="Python.stl_to_image" />
-        <item itemvalue="Python.coor_model" />
         <item itemvalue="Python.image_to_tfrecord" />
+        <item itemvalue="Python.stl_to_image" />
+        <item itemvalue="Python.coor_get_data" />
+        <item itemvalue="Python.temp" />
+        <item itemvalue="Python.scratch_15" />
       </list>
     </recent_temporary>
   </component>
@@ -198,69 +224,9 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1554715602048</updated>
-    </task>
-    <task id="LOCAL-00133" summary="Reorganize code">
-      <created>1569477918641</created>
-      <option name="number" value="00133" />
-      <option name="presentableId" value="LOCAL-00133" />
-      <option name="project" value="LOCAL" />
-      <updated>1569477918641</updated>
-    </task>
-    <task id="LOCAL-00134" summary="Reorganize code">
-      <created>1569485150669</created>
-      <option name="number" value="00134" />
-      <option name="presentableId" value="LOCAL-00134" />
-      <option name="project" value="LOCAL" />
-      <updated>1569485150669</updated>
-    </task>
-    <task id="LOCAL-00135" summary="Reorganize code">
-      <created>1569488606009</created>
-      <option name="number" value="00135" />
-      <option name="presentableId" value="LOCAL-00135" />
-      <option name="project" value="LOCAL" />
-      <updated>1569488606009</updated>
-    </task>
-    <task id="LOCAL-00136" summary="Improve code to prevent bug from config">
-      <created>1570096813110</created>
-      <option name="number" value="00136" />
-      <option name="presentableId" value="LOCAL-00136" />
-      <option name="project" value="LOCAL" />
-      <updated>1570096813110</updated>
-    </task>
-    <task id="LOCAL-00137" summary="Improve code to prevent bug from config">
-      <created>1570096964939</created>
-      <option name="number" value="00137" />
-      <option name="presentableId" value="LOCAL-00137" />
-      <option name="project" value="LOCAL" />
-      <updated>1570096964939</updated>
-    </task>
-    <task id="LOCAL-00138" summary="Improve code to prevent bug from config">
-      <created>1570100215529</created>
-      <option name="number" value="00138" />
-      <option name="presentableId" value="LOCAL-00138" />
-      <option name="project" value="LOCAL" />
-      <updated>1570100215529</updated>
-    </task>
-    <task id="LOCAL-00139" summary="Improve code to prevent bug from config">
-      <created>1570157703805</created>
-      <option name="number" value="00139" />
-      <option name="presentableId" value="LOCAL-00139" />
-      <option name="project" value="LOCAL" />
-      <updated>1570157703805</updated>
-    </task>
-    <task id="LOCAL-00140" summary="Improve code to prevent bug from config">
-      <created>1570348951535</created>
-      <option name="number" value="00140" />
-      <option name="presentableId" value="LOCAL-00140" />
-      <option name="project" value="LOCAL" />
-      <updated>1570348951535</updated>
-    </task>
-    <task id="LOCAL-00141" summary="Evaluation on tensorboard should tracked every one min instead of 10">
-      <created>1570602507875</created>
-      <option name="number" value="00141" />
-      <option name="presentableId" value="LOCAL-00141" />
-      <option name="project" value="LOCAL" />
-      <updated>1570602507876</updated>
+      <workItem from="1576167743959" duration="14560000" />
+      <workItem from="1576238885665" duration="5546000" />
+      <workItem from="1576475049911" duration="1720000" />
     </task>
     <task id="LOCAL-00142" summary="Evaluation on tensorboard should tracked every one min instead of 10">
       <created>1571903997584</created>
@@ -542,8 +508,74 @@
       <option name="project" value="LOCAL" />
       <updated>1575960065788</updated>
     </task>
-    <option name="localTasksCounter" value="182" />
+    <task id="LOCAL-00182" summary="Minor edit, add marker to save_plot">
+      <created>1575965717689</created>
+      <option name="number" value="00182" />
+      <option name="presentableId" value="LOCAL-00182" />
+      <option name="project" value="LOCAL" />
+      <updated>1575965717689</updated>
+    </task>
+    <task id="LOCAL-00183" summary="Minor edit, add marker to save_plot">
+      <created>1575965799199</created>
+      <option name="number" value="00183" />
+      <option name="presentableId" value="LOCAL-00183" />
+      <option name="project" value="LOCAL" />
+      <updated>1575965799199</updated>
+    </task>
+    <task id="LOCAL-00184" summary="Bug fix for pandas parts and point sampling">
+      <created>1576168242571</created>
+      <option name="number" value="00184" />
+      <option name="presentableId" value="LOCAL-00184" />
+      <option name="project" value="LOCAL" />
+      <updated>1576168242571</updated>
+    </task>
+    <task id="LOCAL-00185" summary="Minor edit">
+      <created>1576219901562</created>
+      <option name="number" value="00185" />
+      <option name="presentableId" value="LOCAL-00185" />
+      <option name="project" value="LOCAL" />
+      <updated>1576219901562</updated>
+    </task>
+    <task id="LOCAL-00186" summary="Add code so this can run as main">
+      <created>1576239153249</created>
+      <option name="number" value="00186" />
+      <option name="presentableId" value="LOCAL-00186" />
+      <option name="project" value="LOCAL" />
+      <updated>1576239153250</updated>
+    </task>
+    <task id="LOCAL-00187" summary="CHange swifter to dask for multiprocessing">
+      <created>1576239193195</created>
+      <option name="number" value="00187" />
+      <option name="presentableId" value="LOCAL-00187" />
+      <option name="project" value="LOCAL" />
+      <updated>1576239193195</updated>
+    </task>
+    <task id="LOCAL-00188" summary="Minor debug">
+      <created>1576243839818</created>
+      <option name="number" value="00188" />
+      <option name="presentableId" value="LOCAL-00188" />
+      <option name="project" value="LOCAL" />
+      <updated>1576243839818</updated>
+    </task>
+    <task id="LOCAL-00189" summary="Minor debug">
+      <created>1576244292200</created>
+      <option name="number" value="00189" />
+      <option name="presentableId" value="LOCAL-00189" />
+      <option name="project" value="LOCAL" />
+      <updated>1576244292200</updated>
+    </task>
+    <task id="LOCAL-00190" summary="Creating new dataset">
+      <created>1576475368362</created>
+      <option name="number" value="00190" />
+      <option name="presentableId" value="LOCAL-00190" />
+      <option name="project" value="LOCAL" />
+      <updated>1576475368363</updated>
+    </task>
+    <option name="localTasksCounter" value="191" />
     <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
   </component>
   <component name="UnknownFeatures">
     <option featureType="com.intellij.fileTypeFactory" implementationName="*.config" />
@@ -576,13 +608,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Add datetime in json file to track version of data" />
-    <MESSAGE value="Convert back to weight tracking, but with dynamic weight. Also ignore loss weight when not training" />
-    <MESSAGE value="Change Checkpoint min to float" />
-    <MESSAGE value="Add some parameter to debug, now should print eval every half minutes" />
-    <MESSAGE value="Finding bugs where regularization doesn't work" />
-    <MESSAGE value="More logging to find where gradient disappear" />
-    <MESSAGE value="Change config" />
     <MESSAGE value="Greatly reduce dense size" />
     <MESSAGE value="Remove regularization" />
     <MESSAGE value="Code cleanup and add additional function just in case" />
@@ -601,73 +626,90 @@
     <MESSAGE value="Adjust logging part after removing activation" />
     <MESSAGE value="Removing unnecessary code from keras weight (coor_model.py)&#10;Added custom l2 loss since cannot use api to get one" />
     <MESSAGE value="CHange wieght loss fn" />
-    <option name="LAST_COMMIT_MESSAGE" value="CHange wieght loss fn" />
+    <MESSAGE value="Minor edit, add marker to save_plot" />
+    <MESSAGE value="Bug fix for pandas parts and point sampling" />
+    <MESSAGE value="Minor edit" />
+    <MESSAGE value="Add code so this can run as main" />
+    <MESSAGE value="CHange swifter to dask for multiprocessing" />
+    <MESSAGE value="Minor debug" />
+    <MESSAGE value="Creating new dataset" />
+    <option name="LAST_COMMIT_MESSAGE" value="Creating new dataset" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="1920" y="171" width="1375" height="488" key="#xdebugger.XInspectDialog" timestamp="1575648924519">
+    <state x="2208" y="122" width="1375" height="840" key="#xdebugger.XInspectDialog" timestamp="1576475920350">
       <screen x="1920" y="0" width="1920" height="1080" />
     </state>
-    <state x="1920" y="171" width="1375" height="488" key="#xdebugger.XInspectDialog/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575648924519" />
+    <state x="2208" y="122" width="1375" height="840" key="#xdebugger.XInspectDialog/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576475920350" />
     <state x="861" y="256" width="254" height="593" key="#xdebugger.evaluate" timestamp="1575620724970">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
     <state x="861" y="256" width="254" height="593" key="#xdebugger.evaluate/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575620724970" />
-    <state x="464" y="149" width="1048" height="807" key="CommitChangelistDialog2" timestamp="1575965717616">
+    <state x="464" y="149" width="1048" height="807" key="CommitChangelistDialog2" timestamp="1576475368221">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state x="464" y="149" width="1048" height="807" key="CommitChangelistDialog2/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575965717616" />
-    <state x="776" y="310" width="424" height="484" key="FileChooserDialogImpl" timestamp="1575868477101">
+    <state x="464" y="149" width="1048" height="807" key="CommitChangelistDialog2/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576475368221" />
+    <state width="482" height="466" key="DebuggerActiveHint" timestamp="1576163309871">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state x="776" y="310" width="424" height="484" key="FileChooserDialogImpl/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575868477101" />
-    <state width="1830" height="330" key="GridCell.Tab.0.bottom" timestamp="1575965769053">
+    <state width="482" height="466" key="DebuggerActiveHint/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576163309871" />
+    <state x="776" y="310" width="424" height="484" key="FileChooserDialogImpl" timestamp="1576168176139">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="330" key="GridCell.Tab.0.bottom/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575965769053" />
-    <state width="1830" height="330" key="GridCell.Tab.0.center" timestamp="1575965769053">
+    <state x="776" y="310" width="424" height="484" key="FileChooserDialogImpl/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576168176139" />
+    <state width="1807" height="162" key="GridCell.Tab.0.bottom" timestamp="1576476550821">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="330" key="GridCell.Tab.0.center/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575965769053" />
-    <state width="1830" height="330" key="GridCell.Tab.0.left" timestamp="1575965769053">
+    <state width="1807" height="162" key="GridCell.Tab.0.bottom/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576476550821" />
+    <state width="1807" height="162" key="GridCell.Tab.0.center" timestamp="1576476550821">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="330" key="GridCell.Tab.0.left/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575965769053" />
-    <state width="1830" height="330" key="GridCell.Tab.0.right" timestamp="1575965769053">
+    <state width="1807" height="162" key="GridCell.Tab.0.center/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576476550821" />
+    <state width="1807" height="162" key="GridCell.Tab.0.left" timestamp="1576476550820">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="330" key="GridCell.Tab.0.right/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575965769053" />
-    <state width="1830" height="353" key="GridCell.Tab.1.bottom" timestamp="1575870280178">
+    <state width="1807" height="162" key="GridCell.Tab.0.left/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576476550820" />
+    <state width="1807" height="162" key="GridCell.Tab.0.right" timestamp="1576476550821">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="353" key="GridCell.Tab.1.bottom/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575870280178" />
-    <state width="1830" height="353" key="GridCell.Tab.1.center" timestamp="1575870280178">
+    <state width="1807" height="162" key="GridCell.Tab.0.right/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576476550821" />
+    <state width="1807" height="239" key="GridCell.Tab.1.bottom" timestamp="1576475958578">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="353" key="GridCell.Tab.1.center/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575870280178" />
-    <state width="1830" height="353" key="GridCell.Tab.1.left" timestamp="1575870280178">
+    <state width="1807" height="239" key="GridCell.Tab.1.bottom/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576475958578" />
+    <state width="1807" height="239" key="GridCell.Tab.1.center" timestamp="1576475958578">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="353" key="GridCell.Tab.1.left/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575870280178" />
-    <state width="1830" height="353" key="GridCell.Tab.1.right" timestamp="1575870280178">
+    <state width="1807" height="239" key="GridCell.Tab.1.center/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576475958578" />
+    <state width="1807" height="239" key="GridCell.Tab.1.left" timestamp="1576475958578">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1830" height="353" key="GridCell.Tab.1.right/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575870280178" />
-    <state x="588" y="288" width="800" height="528" key="Vcs.Push.Dialog.v2" timestamp="1575965719024">
+    <state width="1807" height="239" key="GridCell.Tab.1.left/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576475958578" />
+    <state width="1807" height="239" key="GridCell.Tab.1.right" timestamp="1576475958578">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state x="588" y="288" width="800" height="528" key="Vcs.Push.Dialog.v2/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575965719024" />
-    <state width="926" height="527" key="XDebugger.FullValuePopup" timestamp="1575532717443">
+    <state width="1807" height="239" key="GridCell.Tab.1.right/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576475958578" />
+    <state x="588" y="288" width="800" height="528" key="Vcs.Push.Dialog.v2" timestamp="1576475369740">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="926" height="527" key="XDebugger.FullValuePopup/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575532717443" />
-    <state x="649" y="380" key="com.intellij.ide.util.TipDialog" timestamp="1575874141905">
+    <state x="588" y="288" width="800" height="528" key="Vcs.Push.Dialog.v2/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576475369740" />
+    <state width="926" height="527" key="XDebugger.FullValuePopup" timestamp="1576476786233">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state x="649" y="380" key="com.intellij.ide.util.TipDialog/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575874141905" />
-    <state x="656" y="257" width="672" height="678" key="search.everywhere.popup" timestamp="1575959061248">
+    <state width="926" height="527" key="XDebugger.FullValuePopup/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576476786233" />
+    <state x="649" y="380" key="com.intellij.ide.util.TipDialog" timestamp="1576475104574">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state x="656" y="257" width="672" height="678" key="search.everywhere.popup/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575959061248" />
+    <state x="649" y="380" key="com.intellij.ide.util.TipDialog/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576475104574" />
+    <state x="656" y="257" width="672" height="678" key="search.everywhere.popup" timestamp="1576168764073">
+      <screen x="67" y="27" width="1853" height="1053" />
+    </state>
+    <state x="656" y="257" width="672" height="678" key="search.everywhere.popup/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576168764073" />
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/my2DCNN$scratch_15.coverage" NAME="scratch_15 Coverage Results" MODIFIED="1576224455038" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$APPLICATION_CONFIG_DIR$/scratches" />
+    <SUITE FILE_PATH="coverage/my2DCNN$stl_to_image.coverage" NAME="stl_to_image Coverage Results" MODIFIED="1576476296474" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/preprocess" />
+    <SUITE FILE_PATH="coverage/my2DCNN$coor_get_data.coverage" NAME="coor_get_data Coverage Results" MODIFIED="1576238793923" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/utils" />
+    <SUITE FILE_PATH="coverage/my2DCNN$image_to_tfrecord.coverage" NAME="image_to_tfrecord Coverage Results" MODIFIED="1576475882573" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/preprocess" />
   </component>
 </project>

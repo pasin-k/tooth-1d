@@ -221,7 +221,7 @@ def coordinate_to_tfrecord(tfrecord_name, dataset_folders, mode="default", k_fol
             with open(os.path.join(dataset_folder, "config.json"), 'r') as filehandler:
                 data = json.load(filehandler)
                 configs['degree'] = data['degree']
-                configs['augment'] = data['augment_config']
+                configs['augment'] = [str(i).replace("-", "n").replace(".", "-") for i in data['augment_config']]
         except FileNotFoundError:
             data = read_file(os.path.join(dataset_folder, "config.txt"))
             if int(data[0][0]) == 4:
@@ -301,7 +301,7 @@ def coordinate_to_tfrecord(tfrecord_name, dataset_folders, mode="default", k_fol
 
 
 if __name__ == '__main__':
-    data_mode = "new"  # image or coordinate or new
+    data_mode = "coordinate"  # image or coordinate or new
     # Select type of label to use
     label_data = ["name", "Occ_B_median", "Occ_F_median", "Occ_L_median", "BL_median", "MD_median",
                   "Integrity_median", "Width_median", "Surface_median", "Sharpness_median"]
@@ -319,16 +319,16 @@ if __name__ == '__main__':
         image_to_tfrecord(tfrecord_name="preparation_img_test", dataset_folder="../data/cross_section",
                           k_fold=k_fold)
     elif data_mode == "coordinate":
-        coordinate_to_tfrecord(tfrecord_name="debug_coor_no_augment",
-                               dataset_folders="../data/coordinate_no_augment_debug", k_fold=k_fold)
+        coordinate_to_tfrecord(tfrecord_name="coor_42augment",
+                               dataset_folders="../data/coordinate_42augment", k_fold=k_fold)
         # coordinate_to_tfrecord(tfrecord_name="coor_right",
         #                        dataset_folders="../data/segment_14/right_point", k_fold=k_fold)
         # coordinate_to_tfrecord(tfrecord_name="coor_left_right", dataset_folders={'right': "../data/segment_14/right_point",
         #                                                                     'left': "../data/segment_14/left_point"},
         #                        k_fold=k_fold)
     elif data_mode == "new":
-        coordinate_to_tfrecord(tfrecord_name="debug_new_data_14aug",
-                               dataset_folders="../data/coordinate_14augment", mode="new", k_fold=k_fold)
+        coordinate_to_tfrecord(tfrecord_name="coor_new_data_42augment",
+                               dataset_folders="../data/coordinate_42augment", mode="new", k_fold=k_fold)
     else:
         raise ValueError("Wrong data_mode")
     print("Complete")

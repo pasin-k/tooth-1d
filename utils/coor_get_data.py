@@ -4,12 +4,6 @@ import numpy as np
 
 # Read TFRecord file, return as tf.dataset, specifically used for
 
-numdegree = None
-data_length = None
-label_type_global = None
-single_slice = False
-name_type = None
-
 
 # Import tfrecord to dataset
 def deserialize(example):
@@ -117,7 +111,7 @@ def get_data_from_path(data_path, label_type):
 
     label_data = ["name", "Occ_B_median", "Occ_F_median", "Occ_L_median", "BL_median", "MD_median", "Integrity_median",
                   "Width_median", "Surface_median", "Sharpness_median"]
-    numdegree = 4
+    numdegree = 1
     data_length = 300
     name_type = ["img"]
     label_type_global = label_type
@@ -151,3 +145,20 @@ def read_raw_tfrecord(tfrecord_path):  # For debugging purpose, reading all cont
         i += 1
         print(tf.train.Example.FromString(example))
     print(i)
+
+
+numdegree = None
+data_length = None
+label_type_global = None
+single_slice = False
+name_type = None
+
+if __name__ == '__main__':
+    data_path = "/home/pasin/Documents/Link_to_my2DCNN/data/tfrecord/coor_14augment_real_point/coor_14augment_real_point_0_eval.tfrecords"
+    label_type = "Width"
+
+    f, l = get_data_from_path(data_path, label_type)
+    print("Feature", f)
+    print("Label", l)
+
+    # read_raw_tfrecord(data_path)
