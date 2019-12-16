@@ -200,7 +200,7 @@ def get_cross_section_label(degree, augment_config=None, folder_name='../../glob
 
     image_data = pd.DataFrame.from_dict(label)
     image_data['name_dir'] = name_dir
-    image_data['image_id'] = image_name
+    image_data['name'] = image_name
 
     # Fetch each cross-section image in parallel
     print("Applying get_cross_section...")
@@ -210,20 +210,20 @@ def get_cross_section_label(degree, augment_config=None, folder_name='../../glob
                                      meta=image_data['name_dir']).compute(scheduler='processes')
     image_data = image_data.drop(['name_dir'], axis=1)  # zplane, degree, augment, axis
 
-    # Split a nested list inside 'points' into multiple rows and change image_id on each one based on augmentation angle
+    # Split a nested list inside 'points' into multiple rows and change name on each one based on augmentation angle
     # Ref: https://www.mikulskibartosz.name/how-to-split-a-list-inside-a-dataframe-cell-into-rows-in-pandas/
     p = image_data.points.tolist()
     image_data = image_data.points.apply(pd.Series) \
         .merge(image_data, right_index=True, left_index=True)
     image_data = image_data.drop(['points'], axis=1) \
-        .melt(id_vars=list(label.keys()) + ['image_id'], value_name='points')
-    image_data['image_id'] = image_data['image_id'] + '_' + image_data['variable'].apply(
+        .melt(id_vars=list(label.keys()) + ['name'], value_name='points')
+    image_data['name'] = image_data['name'] + '_' + image_data['variable'].apply(
         lambda x: str(augment_config[x]).replace('-', 'n').replace('.', '-'))
     image_data = image_data.drop(['variable'], axis=1)
 
     # Extract data with None, count number of points for some logging
     error_data = image_data[image_data['points'].isnull()]
-    image_data = image_data.dropna().sort_values('image_id').reset_index(drop=True)
+    image_data = image_data.dropna().sort_values('name').reset_index(drop=True)
     image_data['num_point'] = image_data['points'].apply(count_point)
     #
     # for i in range(len(name_dir)):
@@ -262,7 +262,7 @@ def get_cross_section_label(degree, augment_config=None, folder_name='../../glob
 
     print("Max amount of coordinates: {}, min  coordinates: {} with mean: {}".format(
         image_data['num_point'].max(), image_data['num_point'].min(), image_data['num_point'].mean()))
-    return image_data, error_data['image_id'].tolist(), label_header
+    return image_data, error_data['name'].tolist(), label_header
 
 
 # The two functions below is used for new type of data, currently on prototype
@@ -549,7 +549,8 @@ def get_input_and_label(tfrecord_name, dataset_folder, configs, seed, get_data=F
 
     # Get image address and labels
     image_address, _ = get_file_name(folder_name=dataset_folder, file_name=None,
-                                     exception_file=["config.txt", "error_file.txt", "score.csv"])
+                                     exception_file=["config.txt", "error_file.txt", "config.json", "error_file.json",
+                                                     "score.csv"])
 
     labels, _ = read_score(os.path.join(dataset_folder, "score.csv"),
                            data_type=configs['data_type'])

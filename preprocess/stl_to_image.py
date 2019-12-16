@@ -148,15 +148,15 @@ if __name__ == '__main__':
     # Output 'points' as list[list[numpy]] (example_data, degrees, points)
     save_coor = True
     save_img = True
-    is_fix_amount = True
+    is_fix_amount = False
     fix_amount = 300  # Sampling coordinates to specified amount
     use_diff = False  # Use difference between points instead
 
     # data_type, stat_type will not be used unless you want to look at lbl value
     image_data, error_name, header = get_cross_section_label(degree=degree,
                                                              augment_config=augment_config,
-                                                             # folder_name='../../global_data/stl_data_debug',
-                                                             # csv_dir='../../global_data/Ground Truth Score_debug.csv',
+                                                             folder_name='../../global_data/stl_data_debug',
+                                                             csv_dir='../../global_data/Ground Truth Score_debug.csv',
                                                              )
     points_all = image_data.pop('points')
 
@@ -174,10 +174,10 @@ if __name__ == '__main__':
         #         print("Done %s out of %s" % (i + 1, len(points_all)))
     if save_coor:
         print("Start saving coordinates...")
-        file_dir = "../data/coordinate_42augment"
+        file_dir = "../data/coordinate_42augment_debug"
 
         # Save image (as coordiantes)
-        save_stl_point(points_all, image_data["image_id"].to_list(), out_directory=file_dir, use_diff=use_diff)
+        save_stl_point(points_all, image_data["name"].to_list(), out_directory=file_dir, use_diff=use_diff)
         # Save names with error, for future use
         with open(file_dir + '/error_file.json', 'w') as filehandle:
             json.dump({'error_name': error_name}, filehandle)
@@ -190,10 +190,10 @@ if __name__ == '__main__':
 
     if save_img:
         print("Start saving images...")
-        image_dir = "../data/cross_section_42augment"
+        image_dir = "../data/cross_section_42augment_debug"
 
         # Save image
-        save_image(points_all, image_data["image_id"].to_list(), out_directory=image_dir)
+        save_image(points_all, image_data["name"].to_list(), out_directory=image_dir)
         # Save names with error, for future use
         with open(image_dir + '/error_file.json', 'w') as filehandle:
             json.dump({'error_name': error_name}, filehandle)
