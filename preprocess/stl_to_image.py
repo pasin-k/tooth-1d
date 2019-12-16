@@ -8,7 +8,6 @@ import os
 from utils.open_save_file import save_plot, save_coordinate, save_file, get_cross_section_label
 import numpy as np
 import json
-import swifter
 from multiprocessing import cpu_count
 import dask.dataframe as dd
 from dask.diagnostics import ProgressBar
@@ -75,7 +74,7 @@ def point_sampling(stl_points, coor_amount):
     return stl_points
 
 
-def save_image(stl_points, label_name, out_directory="./data/cross_section"):
+def save_image(im_data, out_directory="./data/cross_section"):
     """
     Save all cross-section into an png image
     :param stl_points: List of cross-section images from stlslicer, can be used directly from 'get_cross_section' function
@@ -88,10 +87,12 @@ def save_image(stl_points, label_name, out_directory="./data/cross_section"):
     png_name = "PreparationScan"
     if not os.path.exists(out_directory):
         os.makedirs(out_directory)
-    for j in range(len(label_name)):
-        save_plot(stl_points[j], out_directory, "%s_%s" % (png_name, label_name[j]), degree, marker='x')
-        if j % 50 == 0:
-            print("Saved %s out of %s" % (j, len(label_name)))
+    # for j in range(len(label_name)):
+    #     save_plot(stl_points[j], out_directory, "%s_%s" % (png_name, label_name[j]), degree, marker='x')
+    #     if j % 50 == 0:
+    #         print("Saved %s out of %s" % (j, len(label_name)))
+    ddf = dd.from_pandas(im_data, npartitions=cpu_count() * 2)
+    ddf.apply(save_plot, meta=im_data, args=(out_directory, degree)).compute(scheduler='processes')
     print("Finished saving data")
 
 
@@ -111,12 +112,10 @@ def stl_point_to_movement(stl_points):  # stl_points is list of all file (all ex
     return new_stl_points
 
 
-def save_stl_point(stl_points, label_name, out_directory="./data/coordinates", use_diff=True):
+def save_stl_point(im_data, out_directory="./data/coordinates", use_diff=True):
     """
     Save all cross-section into an .npy
-    :param stl_points: List of cross-section images from stlslicer, can be used directly from 'get_cross_section' function
-    :param label_name: List of score associate to each image
-    :param error_file_names: List of file with error
+    :param im_data: List of cross-section images from stlslicer, can be used directly from 'get_cross_section' function
     :param out_directory: Directory to save images
     :param use_diff: Boolean, If true, will use the vector between every two coordinate instead
     :return: File saved: npy, error_file.json, config.json
@@ -128,14 +127,19 @@ def save_stl_point(stl_points, label_name, out_directory="./data/coordinates", u
 
     # This convert coordinates into vector between each coordinate
     if use_diff:
-        stl_points = stl_point_to_movement(stl_points)
-    for j in range(len(label_name)):
-        save_coordinate(stl_points[j], out_directory, "%s_%s" % (coor_name, label_name[j]), degree)
+        ddf = dd.from_pandas(im_data['points'], npartitions=cpu_count() * 2)
+        im_data['points'] = ddf.apply(stl_point_to_movement, meta=im_data['points']).compute(
+            scheduler='processes')
+        # image_data['points'] = stl_point_to_movement(image_data['points'])
+    # for j in range(len(label_name)):
+    #     save_coordinate(stl_points[j], out_directory, "%s_%s" % (coor_name, label_name[j]), degree)
+    ddf = dd.from_pandas(im_data, npartitions=cpu_count() * 2)
+    ddf.apply(save_coordinate, meta=im_data, args=(out_directory, coor_name, degree)).compute(scheduler='processes')
 
 
 # augment_config = [0, 0.5, 1]
-a_range = 5
-step = 0.5
+a_range = 3
+step = 1
 augment_config = [i for i in np.arange(-a_range, a_range + 0.1, step)] + [i for i in
                                                                           np.arange(180 - a_range, 180.1 + a_range,
                                                                                     step)]
@@ -150,34 +154,32 @@ if __name__ == '__main__':
     save_img = True
     is_fix_amount = False
     fix_amount = 300  # Sampling coordinates to specified amount
-    use_diff = False  # Use difference between points instead
+    use_real_point = False  # Use actual point, else will use difference between each point instead
 
     # data_type, stat_type will not be used unless you want to look at lbl value
     image_data, error_name, header = get_cross_section_label(degree=degree,
                                                              augment_config=augment_config,
-                                                             folder_name='../../global_data/stl_data_debug',
-                                                             csv_dir='../../global_data/Ground Truth Score_debug.csv',
+                                                             # folder_name='../../global_data/stl_data_debug',
+                                                             # csv_dir='../../global_data/Ground Truth Score_debug.csv',
                                                              )
-    points_all = image_data.pop('points')
-
+    # points_all = image_data.pop('points')
+    use_diff = not use_real_point
     if is_fix_amount:
         if use_diff:
             fix_amount = fix_amount + 1  # Compensate for the missing data when finding diffrence
         print("Adjusting number of coordinates... Takes a long time")
-        ddf = dd.from_pandas(points_all, npartitions=cpu_count() * 2)
-        points_all = ddf.apply(point_sampling_wrapper, meta=points_all).compute(scheduler='processes')
+        ddf = dd.from_pandas(image_data['points'], npartitions=cpu_count() * 2)
+        image_data['points'] = ddf.apply(point_sampling_wrapper, meta=image_data['points']).compute(
+            scheduler='processes')
         # points_all = points_all.swifter.apply(point_sampling_wrapper)
-        # for i in range(len(points_all)):
-        #     for d_index in range(len(degree)):
-        #         points_all[i][d_index] = point_sampling(points_all[i][d_index], fix_amount)
-        #     if i % 50 == 0:
-        #         print("Done %s out of %s" % (i + 1, len(points_all)))
+
     if save_coor:
         print("Start saving coordinates...")
-        file_dir = "../data/coordinate_42augment_debug"
+        file_dir = "../data/coor_14aug"
 
         # Save image (as coordiantes)
-        save_stl_point(points_all, image_data["name"].to_list(), out_directory=file_dir, use_diff=use_diff)
+        save_stl_point(image_data, out_directory=file_dir, use_diff=use_diff)
+
         # Save names with error, for future use
         with open(file_dir + '/error_file.json', 'w') as filehandle:
             json.dump({'error_name': error_name}, filehandle)
@@ -185,15 +187,14 @@ if __name__ == '__main__':
             json.dump({'degree': degree, 'augment_config': augment_config}, filehandle)
         # Save score as csv file
         image_data.to_csv(os.path.join(file_dir, "score.csv"), index=False)
-
-        # save_file(os.path.join(file_dir, "score.csv"), image_data, data_format="dict_list", field_name=header)
+        print("Finished saving coordinates")
 
     if save_img:
         print("Start saving images...")
-        image_dir = "../data/cross_section_42augment_debug"
+        image_dir = "../data/image_14aug"
 
         # Save image
-        save_image(points_all, image_data["name"].to_list(), out_directory=image_dir)
+        save_image(image_data, out_directory=image_dir)
         # Save names with error, for future use
         with open(image_dir + '/error_file.json', 'w') as filehandle:
             json.dump({'error_name': error_name}, filehandle)
@@ -201,6 +202,5 @@ if __name__ == '__main__':
             json.dump({'degree': degree, 'augment_config': augment_config}, filehandle)
         # Save score as csv file
         image_data.to_csv(os.path.join(image_dir, "score.csv"), index=False)
-        # save_file(os.path.join(image_dir, "score.csv"), image_data, data_format="dict_list", field_name=header)
 
     print("stl_to_image.py: done")

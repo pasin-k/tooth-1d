@@ -409,7 +409,7 @@ def readjust_median_label(label, avg_data):
     return label
 
 
-def save_plot(coor_list, out_directory, image_name, degree, file_type="png", marker='o', show_axis=False):
+def save_plot(im_data, out_directory, degree, file_type="png", marker='o', show_axis=False):
     """
     Save list of coordinates as a PNG image
     :param coor_list:           List of ndarrays <- get from stlSlicer should have slices = len(degree)
@@ -420,15 +420,15 @@ def save_plot(coor_list, out_directory, image_name, degree, file_type="png", mar
     :param show_axis:           [Optional], if true, will show axis
     :return:                    File saved at out_directory
     """
-    if len(coor_list) != len(degree):
-        raise ValueError("Number of degree is not equal to %s, found %s", (len(degree), len(coor_list)))
+    if len(im_data['points']) != len(degree):
+        raise ValueError("Number of degree is not equal to %s, found %s", (len(degree), len(im_data['points'])))
     out_directory = os.path.abspath(out_directory)
     if not os.path.exists(out_directory):
         os.makedirs(out_directory)
 
     for d in range(len(degree)):
-        coor = coor_list[d]
-        fullname = "%s_%d.%s" % (image_name, degree[d], file_type)
+        coor = im_data['points'][d]
+        fullname = "%s_%d.%s" % (im_data['name'], degree[d], file_type)
         output_name = os.path.join(out_directory, fullname)
 
         dpi = 100
@@ -467,26 +467,26 @@ def save_plot(coor_list, out_directory, image_name, degree, file_type="png", mar
 
 
 # Save coordinate as .npy file
-def save_coordinate(coor_list, out_directory, image_name, degree):
+def save_coordinate(im_data, out_directory, im_name, degree):
     """
     Save list of coordinates as a .npy file
-    :param coor_list: List of coordinates, should have length equals to len(degree)
+    :param im_data: List of coordinates, should have length equals to len(degree)
     :param out_directory: Output directory
-    :param image_name: Name of image
+    :param im_name: Name of image
     :param degree: List of degree of rotation
     :return: File saved at out_directory
     """
     # Check if size coordinate, image name has same length
-    if len(coor_list) != len(degree):
-        raise ValueError("Number of degree is not equal to %s, found %s", (len(degree), len(coor_list)))
+    if len(im_data['points']) != len(degree):
+        raise ValueError("Number of degree is not equal to %s, found %s", (len(degree), len(im_data['points'])))
     out_directory = os.path.abspath(out_directory)
     if not os.path.exists(out_directory):
         os.makedirs(out_directory)
 
     # for corr_index in range(len(coor_list)):
     for deg_index in range(len(degree)):
-        coor = coor_list[deg_index]
-        fullname = "%s_%d.npy" % (image_name, degree[deg_index])
+        coor = im_data['points'][deg_index]
+        fullname = "%s_%s_%d.npy" % (im_name, im_data['points']['name'], degree[deg_index])
         output_name = os.path.join(out_directory, fullname)
         np.save(output_name, coor)
 
