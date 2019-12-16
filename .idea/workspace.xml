@@ -3,6 +3,8 @@
   <component name="ChangeListManager">
     <list default="true" id="770e0596-62ef-4176-bd6c-3bded3f7c783" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/preprocess/image_to_tfrecord.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocess/image_to_tfrecord.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/preprocess/stl_to_image.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocess/stl_to_image.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -78,6 +80,9 @@
       <module name="my2DCNN" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/utils" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -97,6 +102,9 @@
       <module name="my2DCNN" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/preprocess" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -218,14 +226,8 @@
       <option name="presentableId" value="Default" />
       <updated>1554715602048</updated>
       <workItem from="1576167743959" duration="14560000" />
-      <workItem from="1576238885665" duration="4123000" />
-    </task>
-    <task id="LOCAL-00140" summary="Improve code to prevent bug from config">
-      <created>1570348951535</created>
-      <option name="number" value="00140" />
-      <option name="presentableId" value="LOCAL-00140" />
-      <option name="project" value="LOCAL" />
-      <updated>1570348951535</updated>
+      <workItem from="1576238885665" duration="5546000" />
+      <workItem from="1576475049911" duration="302000" />
     </task>
     <task id="LOCAL-00141" summary="Evaluation on tensorboard should tracked every one min instead of 10">
       <created>1570602507875</created>
@@ -563,7 +565,14 @@
       <option name="project" value="LOCAL" />
       <updated>1576243839818</updated>
     </task>
-    <option name="localTasksCounter" value="189" />
+    <task id="LOCAL-00189" summary="Minor debug">
+      <created>1576244292200</created>
+      <option name="number" value="00189" />
+      <option name="presentableId" value="LOCAL-00189" />
+      <option name="project" value="LOCAL" />
+      <updated>1576244292200</updated>
+    </task>
+    <option name="localTasksCounter" value="190" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -637,10 +646,10 @@
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
     <state x="861" y="256" width="254" height="593" key="#xdebugger.evaluate/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1575620724970" />
-    <state x="464" y="149" width="1048" height="807" key="CommitChangelistDialog2" timestamp="1576243839469">
+    <state x="464" y="149" width="1048" height="807" key="CommitChangelistDialog2" timestamp="1576244291848">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state x="464" y="149" width="1048" height="807" key="CommitChangelistDialog2/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576243839469" />
+    <state x="464" y="149" width="1048" height="807" key="CommitChangelistDialog2/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576244291848" />
     <state width="482" height="466" key="DebuggerActiveHint" timestamp="1576163309871">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
@@ -649,22 +658,22 @@
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
     <state x="776" y="310" width="424" height="484" key="FileChooserDialogImpl/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576168176139" />
-    <state width="1807" height="306" key="GridCell.Tab.0.bottom" timestamp="1576243828557">
+    <state width="1807" height="306" key="GridCell.Tab.0.bottom" timestamp="1576245292196">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1807" height="306" key="GridCell.Tab.0.bottom/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576243828557" />
-    <state width="1807" height="306" key="GridCell.Tab.0.center" timestamp="1576243828557">
+    <state width="1807" height="306" key="GridCell.Tab.0.bottom/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576245292196" />
+    <state width="1807" height="306" key="GridCell.Tab.0.center" timestamp="1576245292196">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1807" height="306" key="GridCell.Tab.0.center/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576243828557" />
-    <state width="1807" height="306" key="GridCell.Tab.0.left" timestamp="1576243828557">
+    <state width="1807" height="306" key="GridCell.Tab.0.center/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576245292196" />
+    <state width="1807" height="306" key="GridCell.Tab.0.left" timestamp="1576245292196">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1807" height="306" key="GridCell.Tab.0.left/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576243828557" />
-    <state width="1807" height="306" key="GridCell.Tab.0.right" timestamp="1576243828557">
+    <state width="1807" height="306" key="GridCell.Tab.0.left/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576245292196" />
+    <state width="1807" height="306" key="GridCell.Tab.0.right" timestamp="1576245292196">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1807" height="306" key="GridCell.Tab.0.right/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576243828557" />
+    <state width="1807" height="306" key="GridCell.Tab.0.right/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576245292196" />
     <state width="1807" height="239" key="GridCell.Tab.1.bottom" timestamp="1576240894047">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
@@ -681,18 +690,18 @@
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
     <state width="1807" height="239" key="GridCell.Tab.1.right/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576240894047" />
-    <state x="588" y="288" width="800" height="528" key="Vcs.Push.Dialog.v2" timestamp="1576243840832">
+    <state x="588" y="288" width="800" height="528" key="Vcs.Push.Dialog.v2" timestamp="1576244294187">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state x="588" y="288" width="800" height="528" key="Vcs.Push.Dialog.v2/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576243840832" />
+    <state x="588" y="288" width="800" height="528" key="Vcs.Push.Dialog.v2/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576244294187" />
     <state width="926" height="527" key="XDebugger.FullValuePopup" timestamp="1576164813226">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
     <state width="926" height="527" key="XDebugger.FullValuePopup/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576164813226" />
-    <state x="649" y="380" key="com.intellij.ide.util.TipDialog" timestamp="1576239012502">
+    <state x="649" y="380" key="com.intellij.ide.util.TipDialog" timestamp="1576475104574">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state x="649" y="380" key="com.intellij.ide.util.TipDialog/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576239012502" />
+    <state x="649" y="380" key="com.intellij.ide.util.TipDialog/67.27.1853.1053/1920.0.1920.1080@67.27.1853.1053" timestamp="1576475104574" />
     <state x="656" y="257" width="672" height="678" key="search.everywhere.popup" timestamp="1576168764073">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
@@ -700,7 +709,7 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/my2DCNN$scratch_15.coverage" NAME="scratch_15 Coverage Results" MODIFIED="1576224455038" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$APPLICATION_CONFIG_DIR$/scratches" />
-    <SUITE FILE_PATH="coverage/my2DCNN$stl_to_image.coverage" NAME="stl_to_image Coverage Results" MODIFIED="1576243828551" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/preprocess" />
+    <SUITE FILE_PATH="coverage/my2DCNN$stl_to_image.coverage" NAME="stl_to_image Coverage Results" MODIFIED="1576245292190" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/preprocess" />
     <SUITE FILE_PATH="coverage/my2DCNN$coor_get_data.coverage" NAME="coor_get_data Coverage Results" MODIFIED="1576238793923" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/utils" />
     <SUITE FILE_PATH="coverage/my2DCNN$image_to_tfrecord.coverage" NAME="image_to_tfrecord Coverage Results" MODIFIED="1576239376322" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/preprocess" />
   </component>

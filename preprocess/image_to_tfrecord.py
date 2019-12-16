@@ -328,7 +328,7 @@ if __name__ == '__main__':
         #                        k_fold=k_fold)
     elif data_mode == "new":
         coordinate_to_tfrecord(tfrecord_name="coor_14augment_real_point",
-                               dataset_folders="../data/coordinate_14augment_points", mode="new", k_fold=k_fold)
+                               dataset_folders="../data/coordinate_14augment_real_point", mode="new", k_fold=k_fold)
     else:
         raise ValueError("Wrong data_mode")
     print("Complete")

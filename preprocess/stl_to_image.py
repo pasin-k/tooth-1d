@@ -134,18 +134,20 @@ def save_stl_point(stl_points, label_name, out_directory="./data/coordinates", u
 
 
 # augment_config = [0, 0.5, 1]
-a_range = 3
-augment_config = [i for i in np.arange(-a_range, a_range + 0.1, 1)] + [i for i in
-                                                                       np.arange(180 - a_range, 180.1 + a_range, 1)]
+a_range = 5
+step = 0.5
+augment_config = [i for i in np.arange(-a_range, a_range + 0.1, step)] + [i for i in
+                                                                          np.arange(180 - a_range, 180.1 + a_range,
+                                                                                    step)]
 # augment_config = [i for i in np.arange(-5, 5.1, 1)] + [i for i in np.arange(-175, 185.1, 1)]
-# print("Augment Config:", len(augment_config), augment_config)
+print("Augment Config:", len(augment_config), augment_config)
 degree = [0, 45, 90, 135]
 
 # Fetch stl file and save as either image or .npy file of coordinates
 if __name__ == '__main__':
     # Output 'points' as list[list[numpy]] (example_data, degrees, points)
     save_coor = True
-    save_img = False
+    save_img = True
     is_fix_amount = True
     fix_amount = 300  # Sampling coordinates to specified amount
     use_diff = False  # Use difference between points instead
@@ -172,7 +174,7 @@ if __name__ == '__main__':
         #         print("Done %s out of %s" % (i + 1, len(points_all)))
     if save_coor:
         print("Start saving coordinates...")
-        file_dir = "../data/coordinate_14augment_points"
+        file_dir = "../data/coordinate_42augment"
 
         # Save image (as coordiantes)
         save_stl_point(points_all, image_data["image_id"].to_list(), out_directory=file_dir, use_diff=use_diff)
@@ -188,7 +190,7 @@ if __name__ == '__main__':
 
     if save_img:
         print("Start saving images...")
-        image_dir = "../data/cross_section_372augment_2"
+        image_dir = "../data/cross_section_42augment"
 
         # Save image
         save_image(points_all, image_data["image_id"].to_list(), out_directory=image_dir)
