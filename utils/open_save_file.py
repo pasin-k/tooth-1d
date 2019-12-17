@@ -412,14 +412,15 @@ def readjust_median_label(label, avg_data):
 def save_plot(im_data, out_directory, degree, file_type="png", marker='o', show_axis=False):
     """
     Save list of coordinates as a PNG image
-    :param coor_list:           List of ndarrays <- get from stlSlicer should have slices = len(degree)
+    :param im_data:             pd.Series with ['points'] and ['name'] as columns
     :param out_directory:       String, Directory to save output
-    :param image_name:          List of name of the image
     :param degree:              List of angles used in, add the angle in file name as well
     :param file_type:           [Optional], such as png,jpeg,...
+    :param marker:              Marker of the plot
     :param show_axis:           [Optional], if true, will show axis
     :return:                    File saved at out_directory
     """
+
     if len(im_data['points']) != len(degree):
         raise ValueError("Number of degree is not equal to %s, found %s", (len(degree), len(im_data['points'])))
     out_directory = os.path.abspath(out_directory)
@@ -470,12 +471,13 @@ def save_plot(im_data, out_directory, degree, file_type="png", marker='o', show_
 def save_coordinate(im_data, out_directory, im_name, degree):
     """
     Save list of coordinates as a .npy file
-    :param im_data: List of coordinates, should have length equals to len(degree)
+    :param im_data: pd.Series with ['points'] and ['name'] as columns
     :param out_directory: Output directory
     :param im_name: Name of image
     :param degree: List of degree of rotation
     :return: File saved at out_directory
     """
+
     # Check if size coordinate, image name has same length
     if len(im_data['points']) != len(degree):
         raise ValueError("Number of degree is not equal to %s, found %s", (len(degree), len(im_data['points'])))
@@ -486,7 +488,7 @@ def save_coordinate(im_data, out_directory, im_name, degree):
     # for corr_index in range(len(coor_list)):
     for deg_index in range(len(degree)):
         coor = im_data['points'][deg_index]
-        fullname = "%s_%s_%d.npy" % (im_name, im_data['points']['name'], degree[deg_index])
+        fullname = "%s_%s_%d.npy" % (im_name, im_data['name'], degree[deg_index])
         output_name = os.path.join(out_directory, fullname)
         np.save(output_name, coor)
 

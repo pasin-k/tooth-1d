@@ -60,7 +60,7 @@ if __name__ == '__main__':
             if i % 50 == 0:
                 print("Done %s out of %s" % (i + 1, len(predict_cross_section)))
 
-    predict_cross_section = stl_point_to_movement(predict_cross_section)
+    predict_cross_section = [stl_point_to_movement(i) for i in predict_cross_section]
     my_dataset = create_dataset(predict_cross_section, file_name_all)
     feature = read_data(dataset=my_dataset)
 

@@ -77,9 +77,7 @@ def point_sampling(stl_points, coor_amount):
 def save_image(im_data, out_directory="./data/cross_section"):
     """
     Save all cross-section into an png image
-    :param stl_points: List of cross-section images from stlslicer, can be used directly from 'get_cross_section' function
-    :param label_name: List of score associate to each image
-    :param error_file_names: List of file with error
+    :param im_data: pd.DataFrame with ['points'] and ['name'] as columns
     :param out_directory: Directory to save images
     :return: File saved: Images, error_file.json, config.json
     """
@@ -92,30 +90,27 @@ def save_image(im_data, out_directory="./data/cross_section"):
     #     if j % 50 == 0:
     #         print("Saved %s out of %s" % (j, len(label_name)))
     ddf = dd.from_pandas(im_data, npartitions=cpu_count() * 2)
-    ddf.apply(save_plot, meta=im_data, args=(out_directory, degree)).compute(scheduler='processes')
+    ddf.apply(save_plot, meta=im_data, args=(out_directory, degree), axis=1).compute(scheduler='processes')
     print("Finished saving data")
 
 
-def stl_point_to_movement(stl_points):  # stl_points is list of all file (all examples)
+def stl_point_to_movement(stl_points):  # stl_points is list of points (for each degree)
     """
     Get difference between each coordinates instead
     :param stl_points: list of points
     :return:
     """
-    new_stl_points = []
-    for stl_point_sample in stl_points:  # stl_point_sample is one example of stl_points
-        new_points_sample = []
-        for stl_point_image in stl_point_sample:  # stl_point_image is one degree of cross-section
-            difference = stl_point_image[1:, :] - stl_point_image[0:-1, :]  # Find difference between each position
-            new_points_sample.append(difference)
-        new_stl_points.append(new_points_sample)
-    return new_stl_points
+    new_points_sample = []
+    for stl_point_image in stl_points:  # stl_point_image is one degree of cross-section
+        difference = stl_point_image[1:, :] - stl_point_image[0:-1, :]  # Find difference between each position
+        new_points_sample.append(difference)
+    return new_points_sample
 
 
 def save_stl_point(im_data, out_directory="./data/coordinates", use_diff=True):
     """
     Save all cross-section into an .npy
-    :param im_data: List of cross-section images from stlslicer, can be used directly from 'get_cross_section' function
+    :param im_data: pd.DataFrame with ['points'] and ['name'] as columns
     :param out_directory: Directory to save images
     :param use_diff: Boolean, If true, will use the vector between every two coordinate instead
     :return: File saved: npy, error_file.json, config.json
@@ -134,7 +129,8 @@ def save_stl_point(im_data, out_directory="./data/coordinates", use_diff=True):
     # for j in range(len(label_name)):
     #     save_coordinate(stl_points[j], out_directory, "%s_%s" % (coor_name, label_name[j]), degree)
     ddf = dd.from_pandas(im_data, npartitions=cpu_count() * 2)
-    ddf.apply(save_coordinate, meta=im_data, args=(out_directory, coor_name, degree)).compute(scheduler='processes')
+    ddf.apply(save_coordinate, meta=im_data, args=(out_directory, coor_name, degree), axis=1).compute(
+        scheduler='processes')
 
 
 # augment_config = [0, 0.5, 1]
@@ -175,7 +171,7 @@ if __name__ == '__main__':
 
     if save_coor:
         print("Start saving coordinates...")
-        file_dir = "../data/coor_14aug"
+        file_dir = "../data/coor_14aug_real_point"
 
         # Save image (as coordiantes)
         save_stl_point(image_data, out_directory=file_dir, use_diff=use_diff)
@@ -186,12 +182,12 @@ if __name__ == '__main__':
         with open(file_dir + '/config.json', 'w') as filehandle:
             json.dump({'degree': degree, 'augment_config': augment_config}, filehandle)
         # Save score as csv file
-        image_data.to_csv(os.path.join(file_dir, "score.csv"), index=False)
+        image_data.drop('points', axis=1).to_csv(os.path.join(file_dir, "score.csv"), index=False)
         print("Finished saving coordinates")
 
     if save_img:
         print("Start saving images...")
-        image_dir = "../data/image_14aug"
+        image_dir = "../data/image_14aug_real_point"
 
         # Save image
         save_image(image_data, out_directory=image_dir)
@@ -201,6 +197,6 @@ if __name__ == '__main__':
         with open(image_dir + '/config.json', 'w') as filehandle:
             json.dump({'degree': degree, 'augment_config': augment_config}, filehandle)
         # Save score as csv file
-        image_data.to_csv(os.path.join(image_dir, "score.csv"), index=False)
+        image_data.drop('points', axis=1).to_csv(os.path.join(image_dir, "score.csv"), index=False)
 
     print("stl_to_image.py: done")
