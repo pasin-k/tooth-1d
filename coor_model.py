@@ -233,6 +233,7 @@ def custom_l2_reg(loss, lambda_=0.01):
 
 # Define Model
 def my_model(features, labels, mode, params, config):
+    features['image'] = features['image']*100  # Since the difference is too small
     params['activation'] = tf.nn.leaky_relu
     # Input: (Batch_size,300,8)
     logits = model_cnn_1d(features, mode, params, config)
