@@ -185,13 +185,6 @@ def run(model_params):
     info_dict.update(model_params)
     info_dict['accuracy'] = accuracy
     info_dict['steps'] = global_step
-    # info_dict['learning_rate'] = model_params['learning_rate']
-    # info_dict['dropout_rate'] = model_params['dropout_rate']
-    # info_dict['activation'] = model_params['activation']
-    # info_dict['channels'] = model_params['channels']
-    # info_dict['loss_weight'] = model_params['loss_weight']
-    # info_dict['data_length'] = model_params['data_length']
-    # info_dict['data_degree'] = model_params['data_degree']
 
     # Save information in config.csv
     with open(os.path.join(model_params['result_path'], "config.csv"), "w") as csvfile:
@@ -219,7 +212,9 @@ def run_grid_search(model_params, grid_value):
               create_folder=True)  # Create new summary file
     run_configs['result_path_base'] = os.path.join(run_configs['result_path_base'], current_time)
     for dr in grid_value:
-        model_params['result_path'] = os.path.join(run_configs['result_path_base'], get_time_and_date(True))
+        print("Dropout: ", dr)
+        run_configs['current_time'] = get_time_and_date(True)
+        model_params['result_path'] = os.path.join(run_configs['result_path_base'], run_configs['current_time'])
         model_params['dropout_rate'] = dr
         acc, steps = run(model_params)
         save_file(run_configs['summary_file_path'], [acc, dr,run_configs['current_time']],

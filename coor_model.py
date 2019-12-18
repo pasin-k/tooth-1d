@@ -322,9 +322,9 @@ def my_model(features, labels, mode, params, config):
 
         print_weight_balance_hook = PrintValueHook(loss_weight_raw, "Loss weight", tf.train.get_global_step(),
                                                    save_steps)
-        print_lg_hook = PrintValueHook(loss_gradient[0][0][0][0, :], "FC6 Loss gradient", tf.train.get_global_step(),
+        print_lg_hook = PrintValueHook(loss_gradient[0][0][0][0, 0:16], "FC6 Loss gradient", tf.train.get_global_step(),
                                        save_steps)
-        print_lg2_hook = PrintValueHook(loss_gradient[0][0][1][0, :], "FC6 Variable", tf.train.get_global_step(),
+        print_lg2_hook = PrintValueHook(loss_gradient[0][0][1][0, 0:16], "FC6 Variable", tf.train.get_global_step(),
                                         save_steps)
         print_lg3_hook = PrintValueHook(loss_gradient[1][0][0][0, 0, :], "Conv1 Loss gradient",
                                         tf.train.get_global_step(),
