@@ -322,16 +322,18 @@ def my_model(features, labels, mode, params, config):
 
         print_weight_balance_hook = PrintValueHook(loss_weight_raw, "Loss weight", tf.train.get_global_step(),
                                                    save_steps)
-        print_lg_hook = PrintValueHook(loss_gradient[0][0][0], "FC6 Loss gradient", tf.train.get_global_step(),
+        print_lg_hook = PrintValueHook(loss_gradient[0][0][0][0, :], "FC6 Loss gradient", tf.train.get_global_step(),
                                        save_steps)
-        print_lg2_hook = PrintValueHook(loss_gradient[0][0][1], "FC6 Variable", tf.train.get_global_step(),
+        print_lg2_hook = PrintValueHook(loss_gradient[0][0][1][0, :], "FC6 Variable", tf.train.get_global_step(),
                                         save_steps)
-        print_lg3_hook = PrintValueHook(loss_gradient[1][0][0], "Conv1 Loss gradient", tf.train.get_global_step(),
+        print_lg3_hook = PrintValueHook(loss_gradient[1][0][0][0, 0, :], "Conv1 Loss gradient",
+                                        tf.train.get_global_step(),
                                         save_steps)
-        print_lg4_hook = PrintValueHook(loss_gradient[1][0][1], "Conv1 Variable", tf.train.get_global_step(),
+        print_lg4_hook = PrintValueHook(loss_gradient[1][0][1][0, 0, :], "Conv1 Variable", tf.train.get_global_step(),
                                         save_steps)
         # Setting logging parameters
-        train_hooks = [saver_hook, print_logits_hook, print_label_hook,
+        train_hooks = [print_input_hook,
+                       saver_hook, print_logits_hook, print_label_hook,
                        print_lr_hook,
                        print_loss_hook,  # print_reg_loss_hook,
                        print_weight_balance_hook,

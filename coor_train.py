@@ -7,7 +7,7 @@ import json
 import csv
 import datetime
 import shutil
-
+import numpy as np
 from proto import tooth_pb2
 from google.protobuf import text_format
 
@@ -202,22 +202,31 @@ def run(model_params):
     return accuracy, global_step
 
 
-# # Run with multiple parameters (Grid-search)
-# def run_multiple_params(model_config):
-#     for lr in model_config['learning_rate_list']:
-#         for dr in model_config['dropout_rate_list']:
-#             for act_count, act in enumerate(model_config['activation_list']):
-#                 for ch_count, ch in enumerate(model_config['channel_list']):
-#                     name = ("%s/learning_rate_%s_dropout_%s_activation_%s_channels_%s/"
-#                             % (run_params['result_path_base'], round(lr, 5), dr, act_count, ch_count))
-#                     md_config = {'learning_rate': round(lr, 5),
-#                                  'dropout_rate': dr,
-#                                  'activation': act,
-#                                  'channels': ch}
-#                     model_params['result_path'] = name
-#                     run(md_config)
-#                     # Copy config file to result path as well
-#                     copy2(run_params['config_path'], model_params['result_path'])
+# Run with multiple parameters (Grid-search)
+def run_grid_search(model_params, grid_value):
+    # Name of the summary result from hyperparameter search (This variable is not used in run)
+    current_time = get_time_and_date(configs.use_current_time)
+
+    # If on single mode, delete all file first
+    if not configs.use_current_time:
+        empty_folder(os.path.join(run_configs['result_path_base']))
+
+    run_configs['summary_file_path'] = os.path.join(run_configs[
+                                                        'result_path_base'],
+                                                    "hyperparameters_result_" + current_time + ".csv")
+    field_name = ['accuracy', 'dropout', 'timestamp']
+    save_file(run_configs['summary_file_path'], [], field_name=field_name, write_mode='w',
+              create_folder=True)  # Create new summary file
+    run_configs['result_path_base'] = os.path.join(run_configs['result_path_base'], current_time)
+    for dr in grid_value:
+        model_params['result_path'] = os.path.join(run_configs['result_path_base'], get_time_and_date(True))
+        model_params['dropout_rate'] = dr
+        acc, steps = run(model_params)
+        save_file(run_configs['summary_file_path'], [acc, dr,run_configs['current_time']],
+                  write_mode='a',data_format="one_row")
+    save_file(run_configs['summary_file_path'],
+              ['end', 'Completed', get_time_and_date(configs.use_current_time)],
+              write_mode='a', data_format="one_row")
 
 
 dim_learning_rate = Real(low=5e-5, high=5e-2, prior='log-uniform', name='learning_rate')
@@ -318,6 +327,7 @@ def run_hyper_parameter_optimize():
             default_param = default_parameters
             print("Creating new runs, deleting previous empty file")
     else:  # If no file in folder, create new file
+        print("Create new file")
         save_file(run_configs['summary_file_path'], [], field_name=field_name, write_mode='w',
                   create_folder=True)  # Create new summary file
         default_param = default_parameters
@@ -401,16 +411,18 @@ model_configs = {'learning_rate': configs.learning_rate,
                  }
 
 if __name__ == '__main__':
+    model_configs['result_file_name'] = 'result.csv'
     if run_mode == "single":
         run_configs['input_path'] = run_configs['input_path'] + "_0"
-        model_configs['result_file_name'] = 'result.csv'
         model_configs['result_path'] = os.path.join(run_configs['result_path_base'],
                                                     get_time_and_date(configs.use_current_time))
         run(model_configs)
     elif run_mode == "kfold":
-        model_configs['result_file_name'] = 'result.csv'
         model_configs['result_path'] = run_configs['result_path']
         run_kfold(model_configs)
+    elif run_mode == "grid":
+        run_configs['input_path'] = run_configs['input_path'] + "_0"
+        run_grid_search(model_configs, [i for i in np.arange(0,0.7,0.1)])
     elif run_mode == "search":
         run_configs['input_path'] = run_configs['input_path'] + "_0"
         run_hyper_parameter_optimize()
