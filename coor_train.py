@@ -318,6 +318,7 @@ def run_hyper_parameter_optimize():
             default_param = default_parameters
             print("Creating new runs, deleting previous empty file")
     else:  # If no file in folder, create new file
+        print("Create new file")
         save_file(run_configs['summary_file_path'], [], field_name=field_name, write_mode='w',
                   create_folder=True)  # Create new summary file
         default_param = default_parameters

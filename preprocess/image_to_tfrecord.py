@@ -319,16 +319,16 @@ if __name__ == '__main__':
         image_to_tfrecord(tfrecord_name="preparation_img_test", dataset_folder="../data/cross_section",
                           k_fold=k_fold)
     elif data_mode == "coordinate":
-        coordinate_to_tfrecord(tfrecord_name="coor_0aug_debug",
-                               dataset_folders="../data/coor_0aug_debug", k_fold=k_fold)
+        coordinate_to_tfrecord(tfrecord_name="coor_42aug",
+                               dataset_folders="../data/coor_42aug", k_fold=k_fold)
         # coordinate_to_tfrecord(tfrecord_name="coor_right",
         #                        dataset_folders="../data/segment_14/right_point", k_fold=k_fold)
         # coordinate_to_tfrecord(tfrecord_name="coor_left_right", dataset_folders={'right': "../data/segment_14/right_point",
         #                                                                     'left': "../data/segment_14/left_point"},
         #                        k_fold=k_fold)
     elif data_mode == "new":
-        coordinate_to_tfrecord(tfrecord_name="coor_0aug_debug_real_point",
-                               dataset_folders="../data/coor_0aug_debug", mode="new", k_fold=k_fold)
+        coordinate_to_tfrecord(tfrecord_name="coor_42aug" + "_new_data",
+                               dataset_folders="../data/coor_42aug", mode="new", k_fold=k_fold)
     else:
         raise ValueError("Wrong data_mode")
     print("Complete")
