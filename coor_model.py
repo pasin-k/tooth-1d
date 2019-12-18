@@ -313,7 +313,7 @@ def my_model(features, labels, mode, params, config):
         save_steps = 1000
         saver_hook = tf.train.SummarySaverHook(save_steps=save_steps, summary_op=tf.summary.merge_all(),
                                                output_dir=config.model_dir)
-        print_input_hook = PrintValueHook(features['image'], "Input value", tf.train.get_global_step, save_steps)
+        print_input_hook = PrintValueHook(features['image'], "Input value", tf.train.get_global_step(), save_steps)
         print_logits_hook = PrintValueHook(tf.nn.softmax(logits), "Training logits", tf.train.get_global_step(),
                                            save_steps)
         print_label_hook = PrintValueHook(labels, "Labels", tf.train.get_global_step(), save_steps)
