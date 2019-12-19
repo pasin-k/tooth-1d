@@ -72,7 +72,6 @@ def fc_layer(inp,  #
     layer = tf.keras.layers.Dense(num_outputs, activation=activation, kernel_initializer=initilizer,
                                   kernel_regularizer=tf.keras.regularizers.l2(kernel_regularizer))
     output = layer(inp)
-    print(layer.get_config())
     return output
 
 
@@ -113,20 +112,16 @@ def model_cnn_1d(features, mode, params, config):
     This model is based on "A Comparison of 1-D and 2-D Deep Convolutional Neural Networks in ECG Classification"
     '''
     # (1) Filter size: 7x32, max pooling of k3 s2
-    print("Input", features['image'])
     conv1 = cnn_1d(features['image'], 7, params['channels'][0] * 16,
                    mode=mode,
                    activation=params['activation'],
                    name="conv1",
                    input_shape=(300, 8),
                    kernel_regularizer=l2_regularizer)
-    print("Conv1", conv1)
     conv1 = tf.layers.batch_normalization(conv1)
-    print("Batch1", conv1)
     # conv1 = tf.keras.layers.BatchNormalization()(conv1)
     pool1 = max_pool_layer_1d(conv1, 3, name="pool1", stride=2)
     # Output: 294x32 -> 147x32
-    print("Pool1", pool1)
     # (2) Filter size: 5x64, max pooling of k3 s2
     conv2 = cnn_1d(pool1, 5, params['channels'][0] * 32,
                    mode=mode,
@@ -160,13 +155,15 @@ def model_cnn_1d(features, mode, params, config):
                    mode=mode,
                    activation=params['activation'], kernel_regularizer=l2_regularizer,
                    name='fc6', )
-    dropout6 = tf.keras.layers.Dropout(rate=params['dropout_rate'])(fc6)
+    # dropout6 = tf.keras.layers.Dropout(rate=params['dropout_rate'])(fc6)
     # Output: 4096 -> 4096 -> 3
+    dropout6 = fc6
     fc7 = fc_layer(dropout6, params['channels'][1] * 128,  # 1024
                    mode=mode,
                    activation=params['activation'], name='fc7',
                    kernel_regularizer=l2_regularizer)
-    dropout7 = tf.keras.layers.Dropout(rate=params['dropout_rate'])(fc7)
+    # dropout7 = tf.keras.layers.Dropout(rate=params['dropout_rate'])(fc7)
+    dropout7 = fc7
     logits = fc_layer(dropout7, 3,
                       mode=mode,
                       activation=None, name='predict', kernel_regularizer=l2_regularizer)
@@ -284,15 +281,19 @@ def my_model(features, labels, mode, params, config):
     # print(d_vars)
     # global_step = tf.summary.scalar("Global steps",tf.train.get_global_step())
 
-    trainable_variable_name = ['conv1/kernel:0', 'conv1/bias:0', 'batch_normalization/gamma:0',
-                               'batch_normalization/beta:0', 'conv2/kernel:0', 'conv2/bias:0',
+    trainable_variable_name = ['conv1/kernel:0', 'conv1/bias:0',
+                               'batch_normalization/gamma:0','batch_normalization/beta:0',
+                               'conv2/kernel:0', 'conv2/bias:0',
                                'batch_normalization_1/gamma:0', 'batch_normalization_1/beta:0',
-                               'conv3/kernel:0', 'conv3/bias:0', 'batch_normalization_2/gamma:0',
-                               'batch_normalization_2/beta:0', 'conv4/kernel:0', 'conv4/bias:0',
+                               'conv3/kernel:0', 'conv3/bias:0',
+                               'batch_normalization_2/gamma:0','batch_normalization_2/beta:0',
+                               'conv4/kernel:0', 'conv4/bias:0',
                                'batch_normalization_3/gamma:0', 'batch_normalization_3/beta:0',
-                               'conv5/kernel:0', 'conv5/bias:0', 'batch_normalization_4/gamma:0',
-                               'batch_normalization_4/beta:0', 'dense/kernel:0', 'dense/bias:0',
-                               'dense_1/kernel:0', 'dense_1/bias:0', 'dense_2/kernel:0', 'dense_2/bias:0']
+                               'conv5/kernel:0', 'conv5/bias:0',
+                               'batch_normalization_4/gamma:0','batch_normalization_4/beta:0',
+                               'dense/kernel:0', 'dense/bias:0',
+                               'dense_1/kernel:0', 'dense_1/bias:0',
+                               'dense_2/kernel:0', 'dense_2/bias:0',]
 
     # tf.summary for all weight and bias
     summary_weight = []
@@ -315,6 +316,7 @@ def my_model(features, labels, mode, params, config):
         saver_hook = tf.train.SummarySaverHook(save_steps=save_steps, summary_op=tf.summary.merge_all(),
                                                output_dir=config.model_dir)
         print_input_hook = PrintValueHook(features['image'], "Input value", tf.train.get_global_step(), save_steps)
+        print_input_name_hook = PrintValueHook(features['name'], "Input name", tf.train.get_global_step(), save_steps)
         print_logits_hook = PrintValueHook(tf.nn.softmax(logits), "Training logits", tf.train.get_global_step(),
                                            save_steps)
         print_label_hook = PrintValueHook(labels, "Labels", tf.train.get_global_step(), save_steps)
@@ -333,7 +335,7 @@ def my_model(features, labels, mode, params, config):
         print_lg4_hook = PrintValueHook(loss_gradient[1][0][1][0, 0, :], "Conv1 Variable", tf.train.get_global_step(),
                                         save_steps)
         # Setting logging parameters
-        train_hooks = [print_input_hook,
+        train_hooks = [print_input_hook, print_input_name_hook,
                        saver_hook, print_logits_hook, print_label_hook,
                        print_lr_hook,
                        print_loss_hook,  # print_reg_loss_hook,
