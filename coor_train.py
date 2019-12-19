@@ -251,7 +251,7 @@ def fitness(learning_rate, channels):
     # Create the neural network with these hyper-parameters
     print("Learning_rate, Dropout_rate, Channels = {}, {}, {}".format(
         # learning_rate, dropout_rate, channels))
-        learning_rate, channels))
+        learning_rate, 0, channels))
 
     run_configs['current_time'] = get_time_and_date(True)
     # Set result path combine with current time of running
