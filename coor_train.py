@@ -209,7 +209,7 @@ def run_grid_search(model_params, grid_value):
                                                     "hyperparameters_result_" + current_time + ".csv")
     field_name = ['accuracy', 'dropout', 'timestamp']
     save_file(run_configs['summary_file_path'], [], field_name=field_name, write_mode='w',
-              create_folder=True)  # Create new summary file
+              create_folder=True, data_format="header_only")  # Create new summary file
     run_configs['result_path_base'] = os.path.join(run_configs['result_path_base'], current_time)
     for dr in grid_value:
         print("Dropout: ", dr)
@@ -225,20 +225,22 @@ def run_grid_search(model_params, grid_value):
 
 
 dim_learning_rate = Real(low=5e-5, high=5e-2, prior='log-uniform', name='learning_rate')
-dim_dropout_rate = Real(low=0, high=0.6, name='dropout_rate')
+# dim_dropout_rate = Real(low=0, high=0.6, name='dropout_rate')
 # dim_activation = Categorical(categories=['0', '1'],
 #                              name='activation')
 dim_channel = Integer(low=1, high=3, name='channels')
-dim_loss_weight = Real(low=0.8, high=2, name='loss_weight')
+# dim_loss_weight = Real(low=0.8, high=2, name='loss_weight')
 dimensions = [dim_learning_rate,
-              dim_dropout_rate,
+              # dim_dropout_rate,
               # dim_activation,
               dim_channel]
-default_parameters = [configs.learning_rate, configs.dropout_rate, configs.channels]
+default_parameters = [configs.learning_rate, configs.channels]
+# default_parameters = [configs.learning_rate, configs.dropout_rate, configs.channels]
 
 
 @use_named_args(dimensions=dimensions)
-def fitness(learning_rate, dropout_rate, channels):
+def fitness(learning_rate, channels):
+# def fitness(learning_rate, dropout_rate, channels):
     """
     Hyper-parameters search
     learning_rate:     Learning-rate for the optimizer.
@@ -248,12 +250,13 @@ def fitness(learning_rate, dropout_rate, channels):
     """
     # Create the neural network with these hyper-parameters
     print("Learning_rate, Dropout_rate, Channels = {}, {}, {}".format(
-        learning_rate, dropout_rate, channels))
+        # learning_rate, dropout_rate, channels))
+        learning_rate, channels))
 
     run_configs['current_time'] = get_time_and_date(True)
     # Set result path combine with current time of running
     md_config = {'learning_rate': learning_rate,
-                 'dropout_rate': dropout_rate,
+                 # 'dropout_rate': dropout_rate,
                  'channels': [channels, 2],
                  'result_path': os.path.join(run_configs['result_path_base'], run_configs['current_time']),
                  'result_file_name': 'result.csv',
@@ -261,7 +264,8 @@ def fitness(learning_rate, dropout_rate, channels):
 
     accuracy, global_step = run(md_config)
     # Save info of hyperparameter search in a specific csv file
-    save_file(run_configs['summary_file_path'], [accuracy, learning_rate, dropout_rate,
+    save_file(run_configs['summary_file_path'], [accuracy, learning_rate,
+                                                 # dropout_rate,
                                                  channels, run_configs['current_time']], write_mode='a',
               data_format="one_row")
     return -accuracy
