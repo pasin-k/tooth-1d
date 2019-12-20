@@ -85,7 +85,8 @@ def empty_folder(fold_dir):  # Delete all file in folder
 def run(model_params):
     print("Beginning run..")
     # Check if all values exist
-    model_params = check_exist(model_params, learning_rate=None, dropout_rate=None,
+    model_params = check_exist(model_params, learning_rate=None,
+                               # dropout_rate=None,
                                channels=None, result_path=None)
     # Note on some model_params:    loss_weight is calculated inside
     #                               channels (in CNN case) is [CNN channels, Dense channels]
