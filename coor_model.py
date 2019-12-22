@@ -104,7 +104,7 @@ l2_regularizer = 0.001
 def model_cnn_1d(features, mode, params, config):
     # print(features)
     require_channel = 2
-    # params['dropout_rate'] = 0
+    params['dropout_rate'] = 0.3
     assert len(params['channels']) == require_channel, \
         "This model need {} channels input, current input: {}".format(require_channel, params['channels'])
     # Input size:300x8
@@ -155,15 +155,13 @@ def model_cnn_1d(features, mode, params, config):
                    mode=mode,
                    activation=params['activation'], kernel_regularizer=l2_regularizer,
                    name='fc6', )
-    # dropout6 = tf.keras.layers.Dropout(rate=params['dropout_rate'])(fc6)
+    dropout6 = tf.keras.layers.Dropout(rate=params['dropout_rate'])(fc6)
     # Output: 4096 -> 4096 -> 3
-    dropout6 = fc6
     fc7 = fc_layer(dropout6, params['channels'][1] * 128,  # 1024
                    mode=mode,
                    activation=params['activation'], name='fc7',
                    kernel_regularizer=l2_regularizer)
-    # dropout7 = tf.keras.layers.Dropout(rate=params['dropout_rate'])(fc7)
-    dropout7 = fc7
+    dropout7 = tf.keras.layers.Dropout(rate=params['dropout_rate'])(fc7)
     logits = fc_layer(dropout7, 3,
                       mode=mode,
                       activation=None, name='predict', kernel_regularizer=l2_regularizer)
