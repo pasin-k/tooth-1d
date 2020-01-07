@@ -409,7 +409,7 @@ def readjust_median_label(label, avg_data):
     return label
 
 
-def save_plot(im_data, out_directory, degree, file_type="png", marker='o', show_axis=False):
+def save_plot(im_data, out_directory, degree, file_type="png", marker=None, show_axis=False):
     """
     Save list of coordinates as a PNG image
     :param im_data:             pd.Series with ['points'] and ['name'] as columns

@@ -154,11 +154,11 @@ single_slice = False
 name_type = None
 
 if __name__ == '__main__':
-    data_path = "/home/pasin/Documents/Link_to_my2DCNN/data/tfrecord/coor_14augment_real_point/coor_14augment_real_point_0_eval.tfrecords"
+    data_path = "/home/pasin/Documents/Google_Drive/Aa_TIT_LAB_Comp/Library/Tooth/Model/my2DCNN/data/tfrecord" \
+                "/coor_42aug_real_point_new_data/coor_42aug_real_point_new_data_0_eval.tfrecords"
     label_type = "Width"
 
-    f, l = get_data_from_path(data_path, label_type)
-    print("Feature", f)
-    print("Label", l)
-
-    # read_raw_tfrecord(data_path)
+    # f, l = get_data_from_path(data_path, label_type)
+    # print("Feature", f[0])
+    # print("Label", l[0])
+    read_raw_tfrecord(data_path)

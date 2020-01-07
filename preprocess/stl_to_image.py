@@ -146,8 +146,8 @@ degree = [0, 45, 90, 135]
 # Fetch stl file and save as either image or .npy file of coordinates
 if __name__ == '__main__':
     # Output 'points' as list[list[numpy]] (example_data, degrees, points)
-    save_coor = True
-    save_img = False
+    save_coor = False
+    save_img = True
     is_fix_amount = True
     fix_amount = 300  # Sampling coordinates to specified amount
     use_real_point = True  # Use actual point, else will use difference between each point instead
@@ -155,8 +155,8 @@ if __name__ == '__main__':
     # data_type, stat_type will not be used unless you want to look at lbl value
     image_data, error_name, header = get_cross_section_label(degree=degree,
                                                              augment_config=augment_config,
-                                                             # folder_name='../../global_data/stl_data_debug',
-                                                             # csv_dir='../../global_data/Ground Truth Score_debug.csv',
+                                                             folder_name='../../global_data/stl_data_debug',
+                                                             csv_dir='../../global_data/Ground Truth Score_debug.csv',
                                                              )
     # points_all = image_data.pop('points')
     use_diff = not use_real_point
@@ -170,7 +170,7 @@ if __name__ == '__main__':
         # points_all = points_all.swifter.apply(point_sampling_wrapper)
 
     if save_coor:
-        file_dir = "../data/coor_14aug_real_point"
+        file_dir = "../data/coor_debug_nofix"
         print("Start saving coordinates at", os.path.abspath(file_dir))
         # Save image (as coordiantes)
         save_stl_point(image_data, out_directory=file_dir, use_diff=use_diff)
@@ -185,7 +185,7 @@ if __name__ == '__main__':
         print("Finished saving coordinates")
 
     if save_img:
-        image_dir = "../data/image_14aug_real_point"
+        image_dir = "../data/image_0aug_debug"
         print("Start saving images at", os.path.abspath(image_dir))
 
         # Save image
