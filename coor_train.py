@@ -193,6 +193,15 @@ def run(model_params):
         for key, val in info_dict.items():
             writer.writerow([key, val])
     print("Run completed, finished saving csv file ")
+
+    # Save model if necessary
+    def serving_input_receiver_fn():
+        image = tf.placeholder(dtype=tf.float32, shape=[None, model_params["data_length"], model_params["data_degree"]*2], name='image')
+        print("serving_input", image)
+        receive_tensors = {'image': image}
+        return tf.estimator.export.ServingInputReceiver(features={'image':image}, receiver_tensors=receive_tensors)
+    if model_params['save_model']:
+        classifier.export_saved_model(model_params['result_path'],serving_input_receiver_fn)
     return accuracy, global_step
 
 
@@ -412,10 +421,12 @@ model_configs = {'learning_rate': configs.learning_rate,
 
 if __name__ == '__main__':
     model_configs['result_file_name'] = 'result.csv'
+    model_configs['save_model'] = False  # Default as not saving model
     if run_mode == "single":
         run_configs['input_path'] = run_configs['input_path'] + "_0"
         model_configs['result_path'] = os.path.join(run_configs['result_path_base'],
                                                     get_time_and_date(configs.use_current_time))
+        model_configs['save_model'] = True  # Only save if single run
         run(model_configs)
     elif run_mode == "kfold":
         model_configs['result_path'] = run_configs['result_path']
