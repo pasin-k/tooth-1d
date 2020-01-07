@@ -119,7 +119,6 @@ def model_cnn_1d(features, mode, params, config):
                    input_shape=(300, 8),
                    kernel_regularizer=l2_regularizer)
     conv1 = tf.layers.batch_normalization(conv1)
-    # conv1 = tf.keras.layers.BatchNormalization()(conv1)
     pool1 = max_pool_layer_1d(conv1, 3, name="pool1", stride=2)
     # Output: 294x32 -> 147x32
     # (2) Filter size: 5x64, max pooling of k3 s2
@@ -128,7 +127,6 @@ def model_cnn_1d(features, mode, params, config):
                    activation=params['activation'], name="conv2",
                    kernel_regularizer=l2_regularizer)
     conv2 = tf.layers.batch_normalization(conv2)
-    # conv2 = tf.keras.layers.BatchNormalization()(conv2)
     pool2 = max_pool_layer_1d(conv2, 3, "pool2", stride=2)
     # Output: 143x64 -> 71x64
 
@@ -157,7 +155,7 @@ def model_cnn_1d(features, mode, params, config):
                    name='fc6', )
     dropout6 = tf.keras.layers.Dropout(rate=params['dropout_rate'])(fc6)
     # Output: 4096 -> 4096 -> 3
-    fc7 = fc_layer(dropout6, params['channels'][1] * 128,  # 1024
+    fc7 = fc_layer(dropout6, params['channels'][1] * 64,  # 1024
                    mode=mode,
                    activation=params['activation'], name='fc7',
                    kernel_regularizer=l2_regularizer)
@@ -222,13 +220,16 @@ def custom_l2_reg(loss, lambda_=0.01):
     ys = tf.reduce_mean(loss)
     l2_norms = [tf.nn.l2_loss(v) for v in tf.trainable_variables()]
     l2_norm = tf.reduce_sum(l2_norms)
+    print("L2 norm:", lambda_ * l2_norm)
+    print("Loss:", ys)
     loss = ys + lambda_ * l2_norm
     return loss
 
 
 # Define Model
 def my_model(features, labels, mode, params, config):
-    features['image'] = features['image']*100  # Since the difference is too small
+    # features['image'] = features['image']*100  # Since the difference is too small
+    print("coor_model image", features['image'])
     params['activation'] = tf.nn.leaky_relu
     # Input: (Batch_size,300,8)
     logits = model_cnn_1d(features, mode, params, config)
@@ -262,7 +263,7 @@ def my_model(features, labels, mode, params, config):
     # Cross-entropy loss
     loss = tf.losses.sparse_softmax_cross_entropy(labels, logits,
                                                   weights=loss_weight)  # labels is int of class, logits is vector
-    loss = custom_l2_reg(loss, lambda_=0)
+    loss = custom_l2_reg(loss, lambda_=0.01)
 
     # Focal loss
     # loss = softmax_focal_loss(labels, logits, gamma=0., alpha=loss_weight)
