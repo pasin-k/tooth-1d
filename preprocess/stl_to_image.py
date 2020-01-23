@@ -134,7 +134,7 @@ def save_stl_point(im_data, out_directory="./data/coordinates", use_diff=True):
 
 
 # augment_config = [0, 0.5, 1]
-a_range = 3
+a_range = 5
 step = 1
 augment_config = [i for i in np.arange(-a_range, a_range + 0.1, step)] + [i for i in
                                                                           np.arange(180 - a_range, 180.1 + a_range,
@@ -155,8 +155,8 @@ if __name__ == '__main__':
     # data_type, stat_type will not be used unless you want to look at lbl value
     image_data, error_name, header = get_cross_section_label(degree=degree,
                                                              augment_config=augment_config,
-                                                             folder_name='../../global_data/stl_data_debug',
-                                                             csv_dir='../../global_data/Ground Truth Score_debug.csv',
+                                                             # folder_name='../../global_data/stl_data_debug',
+                                                             # csv_dir='../../global_data/Ground Truth Score_debug.csv',
                                                              )
     # points_all = image_data.pop('points')
     use_diff = not use_real_point
@@ -185,7 +185,7 @@ if __name__ == '__main__':
         print("Finished saving coordinates")
 
     if save_img:
-        image_dir = "../data/image_0aug_debug"
+        image_dir = "../data/image_14aug_new"
         print("Start saving images at", os.path.abspath(image_dir))
 
         # Save image

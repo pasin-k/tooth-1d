@@ -92,6 +92,16 @@ def read_data(dataset):
     return features
 
 
+def predict(model_directory, feature):
+    predict_fn = tf.contrib.predictor.from_saved_model(model_directory)
+
+    for f in feature:
+        predictions = predict_fn({"image": np.expand_dims(f["image"], axis=0)})
+        predict_class = predictions['score'][0][0]
+        predict_confident = predictions['probabilities'][0][predict_class]
+        print("Prediction of %s: Score = %s with probability %s" % (
+            f['name'], predict_class * 2 + 1, predictions['probabilities'][0]))
+
 if __name__ == '__main__':
     print("Degree", args.degree)
     data_type = args.dataset_type.lower()
@@ -130,12 +140,4 @@ if __name__ == '__main__':
     subdirs = [x for x in Path(args.model_directory).iterdir() if x.is_dir() and 'temp' not in str(x)
                and 'eval' not in str(x) and 'train_final' not in str(x)]
     latest = str(sorted(subdirs)[-1])
-    predict_fn = tf.contrib.predictor.from_saved_model(latest)
-
-    print(feature)
-    for f in feature:
-        predictions = predict_fn({"image": np.expand_dims(f["image"], axis=0)})
-        predict_class = predictions['score'][0][0]
-        predict_confident = predictions['probabilities'][0][predict_class]
-        print("Prediction of %s: Score = %s with probability %s" % (
-            f['name'], predict_class * 2 + 1, predictions['probabilities'][0]))
+    predict(latest, feature)

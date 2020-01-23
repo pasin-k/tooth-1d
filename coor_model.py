@@ -166,6 +166,14 @@ def model_cnn_1d(features, mode, params, config):
     return logits
 
 
+def model_deep_sleep_net(features, mode, params, config):
+    # print(features)
+    require_channel = 2
+    params['dropout_rate'] = 0.3
+    assert len(params['channels']) == require_channel, \
+        "This model need {} channels input, current input: {}".format(require_channel, params['channels'])
+
+
 def softmax_focal_loss(labels_l, logits_l, gamma=2., alpha=4.):
     """Focal loss for multi-classification
     https://www.dlology.com/blog/multi-class-classification-with-focal-loss-for-imbalanced-datasets/
@@ -209,8 +217,8 @@ def get_loss_weight(labels):  # Calculate loss weight of a single batch
     sum_total = score_one + score_three + score_five
     # Add 1 to all denominator to prevent overflow
     weight = tf.stack(
-        [tf.math.divide(1, score_one + 1), tf.math.divide(1, score_three + 1),
-         tf.math.divide(1, score_five + 1)],
+        [tf.math.divide(sum_total, score_one + 1), tf.math.divide(sum_total, score_three + 1),
+         tf.math.divide(sum_total, score_five + 1)],
         axis=0)
     return tf.expand_dims(weight, axis=0)
 
@@ -229,7 +237,6 @@ def custom_l2_reg(loss, lambda_=0.01):
 # Define Model
 def my_model(features, labels, mode, params, config):
     # features['image'] = features['image']*100  # Since the difference is too small
-    print("coor_model image", features['image'])
     params['activation'] = tf.nn.leaky_relu
     # Input: (Batch_size,300,8)
     logits = model_cnn_1d(features, mode, params, config)
@@ -277,22 +284,10 @@ def my_model(features, labels, mode, params, config):
     ex_prediction = tf.summary.scalar("Prediction Output", predicted_class[0])
     ex_ground_truth = tf.summary.scalar("Ground Truth", labels[0])
     d_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
-    # print(d_vars)
+    # print("d_vars", d_vars)
     # global_step = tf.summary.scalar("Global steps",tf.train.get_global_step())
 
-    trainable_variable_name = ['conv1/kernel:0', 'conv1/bias:0',
-                               'batch_normalization/gamma:0','batch_normalization/beta:0',
-                               'conv2/kernel:0', 'conv2/bias:0',
-                               'batch_normalization_1/gamma:0', 'batch_normalization_1/beta:0',
-                               'conv3/kernel:0', 'conv3/bias:0',
-                               'batch_normalization_2/gamma:0','batch_normalization_2/beta:0',
-                               'conv4/kernel:0', 'conv4/bias:0',
-                               'batch_normalization_3/gamma:0', 'batch_normalization_3/beta:0',
-                               'conv5/kernel:0', 'conv5/bias:0',
-                               'batch_normalization_4/gamma:0','batch_normalization_4/beta:0',
-                               'dense/kernel:0', 'dense/bias:0',
-                               'dense_1/kernel:0', 'dense_1/bias:0',
-                               'dense_2/kernel:0', 'dense_2/bias:0',]
+    trainable_variable_name = [v.name for v in tf.trainable_variables()]
 
     # tf.summary for all weight and bias
     summary_weight = []
