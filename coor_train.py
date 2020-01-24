@@ -264,7 +264,7 @@ def fitness(learning_rate, channels):
         learning_rate, 0, channels))
 
     run_configs['current_time'] = get_time_and_date(True)
-    run_configs['save_model'] = False
+
     # Set result path combine with current time of running
     md_config = {'learning_rate': learning_rate,
                  # 'dropout_rate': dropout_rate,
@@ -273,6 +273,7 @@ def fitness(learning_rate, channels):
                  'result_file_name': 'result.csv',
                  }
 
+    md_config['save_model'] = False
     accuracy, global_step = run(md_config)
     # Save info of hyperparameter search in a specific csv file
     save_file(run_configs['summary_file_path'], [accuracy, learning_rate,
