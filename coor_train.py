@@ -264,6 +264,7 @@ def fitness(learning_rate, channels):
         learning_rate, 0, channels))
 
     run_configs['current_time'] = get_time_and_date(True)
+    run_configs['save_model'] = False
     # Set result path combine with current time of running
     md_config = {'learning_rate': learning_rate,
                  # 'dropout_rate': dropout_rate,
