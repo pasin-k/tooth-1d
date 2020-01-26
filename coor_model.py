@@ -172,6 +172,71 @@ def model_deep_sleep_net(features, mode, params, config):
     params['dropout_rate'] = 0.3
     assert len(params['channels']) == require_channel, \
         "This model need {} channels input, current input: {}".format(require_channel, params['channels'])
+    lstm_unit = 128
+    init = tf.initializers.truncated_normal(stddev=0.1)
+    regularizer = tf.nn.l2_loss
+    conv1 = cnn_1d(features['image'], 5, params['channels'][0] * 16,
+                   mode=mode,
+                   activation=params['activation'],
+                   name="conv1",
+                   input_shape=(300, 8),
+                   kernel_regularizer=l2_regularizer)
+    conv2 = cnn_1d(conv1, 5, params['channels'][0] * 16,
+                   mode=mode,
+                   activation=params['activation'], name="conv2",
+                   kernel_regularizer=l2_regularizer)
+    conv3 = cnn_1d(conv2, 5, params['channels'][0] * 16,
+                   mode=mode,
+                   activation=params['activation'], name="conv3",
+                   kernel_regularizer=l2_regularizer)
+    pool3 = max_pool_layer_1d(conv3, 2, name="pool3", stride=-1)
+    pool3 = tf.layers.batch_normalization(pool3)
+
+    conv4 = cnn_1d(pool3, 5, params['channels'][0] * 32,
+                   mode=mode,
+                   activation=params['activation'], name="conv4",
+                   kernel_regularizer=l2_regularizer)
+    conv5 = cnn_1d(conv4, 5, params['channels'][0] * 32,
+                   mode=mode,
+                   activation=params['activation'], name="conv5",
+                   kernel_regularizer=l2_regularizer)
+    conv6 = cnn_1d(conv5, 5, params['channels'][0] * 32,
+                   mode=mode,
+                   activation=params['activation'], name="conv6",
+                   kernel_regularizer=l2_regularizer)
+    pool6 = max_pool_layer_1d(conv6, 2, name="pool6", stride=-1)
+    pool6 = tf.layers.batch_normalization(pool6)
+
+    conv7 = cnn_1d(pool6, 5, params['channels'][0] * 64,
+                   mode=mode,
+                   activation=params['activation'], name="conv7",
+                   kernel_regularizer=l2_regularizer)
+    conv8 = cnn_1d(conv7, 5, params['channels'][0] * 64,
+                   mode=mode,
+                   activation=params['activation'], name="conv8",
+                   kernel_regularizer=l2_regularizer)
+    conv9 = cnn_1d(conv8, 5, params['channels'][0] * 64,
+                   mode=mode,
+                   activation=params['activation'], name="conv9",
+                   kernel_regularizer=l2_regularizer)
+    pool9 = max_pool_layer_1d(conv9, 2, name="pool6", stride=-1)
+    pool9 = tf.layers.batch_normalization(pool9)
+
+    #LSTM network
+    cell_1 = tf.keras.layers.LSTMCell(lstm_unit)
+    cell_2 = tf.keras.layers.LSTMCell(lstm_unit)
+    cell_3 = tf.keras.layers.LSTMCell(lstm_unit)
+    multicell = tf.nn.rnn_cell.MultiRNNCell([cell_1,cell_2,cell_3])
+
+    nn, state = tf.nn.dynamic_rnn(multicell, pool9, dtype=tf.float32)
+    nn = tf.transpose(nn, [1,0,2])
+    nn = tf.gather(nn,int(nn.get_shape()[0])-1)
+
+    #Dense
+    logits = fc_layer(nn, 3,
+                      mode=mode,
+                      activation=None, name='predict', kernel_regularizer=l2_regularizer)
+    return logits
 
 
 def softmax_focal_loss(labels_l, logits_l, gamma=2., alpha=4.):
@@ -217,8 +282,8 @@ def get_loss_weight(labels):  # Calculate loss weight of a single batch
     sum_total = score_one + score_three + score_five
     # Add 1 to all denominator to prevent overflow
     weight = tf.stack(
-        [tf.math.divide(sum_total, score_one + 1), tf.math.divide(sum_total, score_three + 1),
-         tf.math.divide(sum_total, score_five + 1)],
+        [tf.math.divide(1, score_one + 1), tf.math.divide(1, score_three + 1),
+         tf.math.divide(1, score_five + 1)],
         axis=0)
     return tf.expand_dims(weight, axis=0)
 
