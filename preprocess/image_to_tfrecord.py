@@ -52,6 +52,37 @@ def read_image(file_name, label):
     return file_values
 
 
+def image_write_tfrecord(all_data, file_dir, degree, image_width, image_height):
+    """
+        Create tfrecord file by adding each datapoint sequentially
+        :param all_data: List of all data to save as tfrecords
+        :param file_dir: Directory and file name to save (End with .tfrecords)
+        :param degree: List of degree used
+        :param coordinate_length: Number of points on each file (Similar to image size but in 1D)
+        :return:
+        """
+    image_address, labels = all_data
+    with tf.python_io.TFRecordWriter(file_dir) as writer:
+        for im_add, label in zip(image_address, labels):
+            # default_key = list(data.keys())[0]  # Use for label since score should be the same
+            # Add general info
+            feature = {'degree': _int64_feature(degree), 'width': _int64_feature(image_width), 'height': _int64_feature(image_height)}
+            # Add labels
+            for d in configs['data_type']:
+                if d == "name":  # Save name as bytes
+                    feature[d] = _bytes_feature(bytes(label[d], encoding='utf8'))
+                else:  # Save other score as int
+                    feature[d] = _int64_feature(label[d])
+            # Add data
+            for n in range(degree):  # Flatten each degree
+                value = open(im_add[n],'rb').read()
+                # Save image as float list
+                feature['img_%s' % n] = _bytes_feature(bytes(value))
+            example = tf.train.Example(features=tf.train.Features(feature=feature))
+            # Write TFrecord file
+            writer.write(example.SerializeToString())
+
+
 def image_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None, k_fold=None):  # Deprecated
     """
 
@@ -70,18 +101,24 @@ def image_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None, k_fold=None):
     if not os.path.exists(tfrecord_dir):
         os.makedirs(tfrecord_dir)
 
+    degree = 4
     # Read config file to get amount of degree and augmentation
-    config_data = read_file(os.path.join(dataset_folder, "config.txt"))
-    configs['numdeg'], configs['num_augment'] = config_data[0], config_data[1]
-
+    # config_data = read_file(os.path.join(dataset_folder, "config.json"))
+    # configs['numdeg'], configs['num_augment'] = config_data[0], config_data[1]
+    with open(os.path.join(dataset_folder, "config.json"), 'r') as filehandler:
+        data = json.load(filehandler)
+        configs['degree'] = data['degree']
+        configs['augment'] = [str(i).replace("-", "n").replace(".", "-") for i in data['augment_config']]
+    seed = random.randint(0, 1000000)  # So that the result is always the same
     # Get file name from dataset_folder
-    grouped_train_address, grouped_eval_address = get_input_and_label(tfrecord_name, dataset_folder, csv_dir, configs,
+    grouped_train_address, grouped_eval_address = get_input_and_label(tfrecord_name, dataset_folder, configs, seed,
                                                                       get_data=False, k_fold=k_fold)
 
     # if not k_fold:
     #     k_num = 1
     #     grouped_train_address = [grouped_train_address]
     #     grouped_eval_address = [grouped_eval_address]
+    time_stamp = datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S")
     if k_fold is None:
         k_fold = 1
     for i in range(k_fold):
@@ -89,45 +126,58 @@ def image_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None, k_fold=None):
         eval_address = grouped_eval_address[i]
 
         # Start writing train dataset
-        train_dataset = tf.data.Dataset.from_tensor_slices(train_address)
-        train_dataset = train_dataset.map(read_image)  # Read file address, and get info as string
-
-        it = train_dataset.make_one_shot_iterator()
-
-        elem = it.get_next()
+        # train_dataset = tf.data.Dataset.from_tensor_slices(train_address)
+        # train_dataset = train_dataset.map(read_image)  # Read file address, and get info as string
+        #
+        # it = train_dataset.make_one_shot_iterator()
+        #
+        # elem = it.get_next()
 
         tfrecord_train_name = os.path.join(tfrecord_dir, "%s_%s_train.tfrecords" % (tfrecord_name, i))
         tfrecord_eval_name = os.path.join(tfrecord_dir, "%s_%s_eval.tfrecords" % (tfrecord_name, i))
 
-        with tf.Session() as sess:
-            writer = tf.python_io.TFRecordWriter(tfrecord_train_name)
-            while True:
-                try:
-                    elem_result = serialize_image(sess.run(elem))
-
-                    writer.write(elem_result)
-                except tf.errors.OutOfRangeError:
-                    break
-            writer.close()
-
-        eval_dataset = tf.data.Dataset.from_tensor_slices(eval_address)
-        eval_dataset = eval_dataset.map(read_image)
-
-        it = eval_dataset.make_one_shot_iterator()
-
-        elem = it.get_next()
-
-        with tf.Session() as sess:
-            writer = tf.python_io.TFRecordWriter(tfrecord_eval_name)
-            while True:
-                try:
-                    elem_result = serialize_image(sess.run(elem))
-                    # print(elem_result)
-                    writer.write(elem_result)
-                except tf.errors.OutOfRangeError:
-                    break
-            writer.close()
+        image_write_tfrecord(train_address, tfrecord_train_name, degree, 360, 240)
+        image_write_tfrecord(eval_address, tfrecord_eval_name, degree, 360, 240)
+        # with tf.Session() as sess:
+        #     writer = tf.python_io.TFRecordWriter(tfrecord_train_name)
+        #     while True:
+        #         try:
+        #             elem_result = serialize_image(sess.run(elem))
+        #
+        #             writer.write(elem_result)
+        #         except tf.errors.OutOfRangeError:
+        #             break
+        #     writer.close()
+        #
+        # eval_dataset = tf.data.Dataset.from_tensor_slices(eval_address)
+        # eval_dataset = eval_dataset.map(read_image)
+        #
+        # it = eval_dataset.make_one_shot_iterator()
+        #
+        # elem = it.get_next()
+        #
+        # with tf.Session() as sess:
+        #     writer = tf.python_io.TFRecordWriter(tfrecord_eval_name)
+        #     while True:
+        #         try:
+        #             elem_result = serialize_image(sess.run(elem))
+        #             # print(elem_result)
+        #             writer.write(elem_result)
+        #         except tf.errors.OutOfRangeError:
+        #             break
+        #     writer.close()
         print("TFrecords created: %s, %s" % (tfrecord_train_name, tfrecord_eval_name))
+        # Update info in json file
+        with open("../data/tfrecord/%s/%s_%s.json" % (tfrecord_name, tfrecord_name, i)) as filehandle:
+            data_loaded = json.load(filehandle)
+        data_loaded["data_degree"] = 4
+        data_loaded["data_width"] = 360
+        data_loaded["data_height"] = 240
+        data_loaded["dataset_name"] = ["img"]
+        data_loaded["timestamp"] = time_stamp
+        with open("../data/tfrecord/{}/{}_{}.json".format(tfrecord_name, tfrecord_name, i), 'w') as filehandle:
+            json.dump(data_loaded, filehandle, indent=4, sort_keys=True, separators=(',', ': '), ensure_ascii=False)
+        print("TFrecords created: {}, {}".format(tfrecord_train_name, tfrecord_eval_name))
 
 
 # Run images from stl_to_image.py into tfrecords, not using right now
@@ -301,7 +351,7 @@ def coordinate_to_tfrecord(tfrecord_name, dataset_folders, mode="default", k_fol
 
 
 if __name__ == '__main__':
-    data_mode = "new"  # image or coordinate or new
+    data_mode = "image"  # image or coordinate or new
     # Select type of label to use
     label_data = ["name", "Occ_B_median", "Occ_F_median", "Occ_L_median", "BL_median", "MD_median",
                   "Integrity_median", "Width_median", "Surface_median", "Sharpness_median"]
@@ -316,7 +366,7 @@ if __name__ == '__main__':
     print("Use label from {} with ({}) train:eval ratio".format(configs['data_type'], configs['train_eval_ratio']))
 
     if data_mode == "image":
-        image_to_tfrecord(tfrecord_name="preparation_img_test", dataset_folder="../data/cross_section",
+        image_to_tfrecord(tfrecord_name="image_14aug", dataset_folder="../data/image_14aug",
                           k_fold=k_fold)
     elif data_mode == "coordinate":
         coordinate_to_tfrecord(tfrecord_name="coor_42aug",
