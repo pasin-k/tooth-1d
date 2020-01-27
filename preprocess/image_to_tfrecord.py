@@ -351,7 +351,7 @@ def coordinate_to_tfrecord(tfrecord_name, dataset_folders, mode="default", k_fol
 
 
 if __name__ == '__main__':
-    data_mode = "image"  # image or coordinate or new
+    data_mode = "coordinate"  # image or coordinate or new
     # Select type of label to use
     label_data = ["name", "Occ_B_median", "Occ_F_median", "Occ_L_median", "BL_median", "MD_median",
                   "Integrity_median", "Width_median", "Surface_median", "Sharpness_median"]
@@ -369,8 +369,8 @@ if __name__ == '__main__':
         image_to_tfrecord(tfrecord_name="image_14aug", dataset_folder="../data/image_14aug",
                           k_fold=k_fold)
     elif data_mode == "coordinate":
-        coordinate_to_tfrecord(tfrecord_name="coor_42aug",
-                               dataset_folders="../data/coor_42aug", k_fold=k_fold)
+        coordinate_to_tfrecord(tfrecord_name="coor_0aug",
+                               dataset_folders="../data/coor_0aug", k_fold=k_fold)
         # coordinate_to_tfrecord(tfrecord_name="coor_right",
         #                        dataset_folders="../data/segment_14/right_point", k_fold=k_fold)
         # coordinate_to_tfrecord(tfrecord_name="coor_left_right", dataset_folders={'right': "../data/segment_14/right_point",

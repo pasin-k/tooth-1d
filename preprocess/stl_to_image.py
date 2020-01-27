@@ -146,9 +146,9 @@ degree = [0, 45, 90, 135]
 # Fetch stl file and save as either image or .npy file of coordinates
 if __name__ == '__main__':
     # Output 'points' as list[list[numpy]] (example_data, degrees, points)
-    save_coor = False
-    save_img = True
-    is_fix_amount = False
+    save_coor = True
+    save_img = False
+    is_fix_amount = True
     fix_amount = 300  # Sampling coordinates to specified amount
     use_real_point = True  # Use actual point, else will use difference between each point instead
 
@@ -170,7 +170,7 @@ if __name__ == '__main__':
         # points_all = points_all.swifter.apply(point_sampling_wrapper)
 
     if save_coor:
-        file_dir = "../data/coor_debug_nofix"
+        file_dir = "../data/coor_0aug"
         print("Start saving coordinates at", os.path.abspath(file_dir))
         # Save image (as coordiantes)
         save_stl_point(image_data, out_directory=file_dir, use_diff=use_diff)
