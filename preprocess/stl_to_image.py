@@ -134,8 +134,8 @@ def save_stl_point(im_data, out_directory="./data/coordinates", use_diff=True):
 
 
 # augment_config = [0, 0.5, 1]
-a_range = 0
-step = 1
+a_range = 20
+step = 5
 augment_config = [i for i in np.arange(-a_range, a_range + 0.1, step)] + [i for i in
                                                                           np.arange(180 - a_range, 180.1 + a_range,
                                                                                     step)]
@@ -146,8 +146,8 @@ degree = [0, 45, 90, 135]
 # Fetch stl file and save as either image or .npy file of coordinates
 if __name__ == '__main__':
     # Output 'points' as list[list[numpy]] (example_data, degrees, points)
-    save_coor = True
-    save_img = False
+    save_coor = False
+    save_img = True
     is_fix_amount = True
     fix_amount = 300  # Sampling coordinates to specified amount
     use_real_point = True  # Use actual point, else will use difference between each point instead
@@ -185,7 +185,7 @@ if __name__ == '__main__':
         print("Finished saving coordinates")
 
     if save_img:
-        image_dir = "../data/image_visualization"
+        image_dir = "../data/image_augment_visualization"
         print("Start saving images at", os.path.abspath(image_dir))
 
         # Save image
