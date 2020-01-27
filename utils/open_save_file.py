@@ -437,6 +437,9 @@ def save_plot(im_data, out_directory, degree, file_type="png", marker=None, show
         fig = plt.figure(figsize=(img_size / dpi, img_size / dpi), dpi=dpi)
         ax = fig.gca()
         ax.set_autoscale_on(False)
+        # min_x, max_x, min_y, max_y = -4,4,-5,4
+        mpl.rcParams.update({'font.size': 22})
+
         min_x, max_x, min_y, max_y = -6.5, 6.5, -6.5, 6.5
         if min(coor[:, 0]) < min_x or max(coor[:, 0]) > max_x:
             ax.plot(coor[:, 0], coor[:, 1], marker=marker, linewidth=1.0)
