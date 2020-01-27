@@ -1,7 +1,10 @@
 import tensorflow as tf
 # tf.enable_eager_execution()
 import numpy as np
-
+import os
+import csv
+import tensorflow_hub as hub
+from utils.custom_hook import EvalResultHook, PrintValueHook
 
 # Default stride of 1, padding:same
 def cnn_2d(layer,
@@ -202,60 +205,108 @@ def customized_incepnet_v3(features, mode, params):
     dropout6 = tf.keras.layers.Dropout(rate=params['dropout_rate'])(fc6)
 
     # logits = fc_layer(dropout6, 11, activation=params['activation'], name='predict')
-    logits = fc_layer(dropout6, 1, activation=tf.nn.tanh, name='predict')  # Regression with one output
+    logits = fc_layer(dropout6, 3, activation=tf.nn.tanh, name='predict')  # Regression with one output
+    return logits
+
+
+def get_loss_weight(labels):  # Calculate loss weight of a single batch
+    score_one = tf.reduce_sum(tf.cast(tf.equal(labels, tf.constant(0, dtype=tf.int64)), dtype=tf.float32))
+    score_three = tf.reduce_sum(tf.cast(tf.equal(labels, tf.constant(1, dtype=tf.int64)), dtype=tf.float32))
+    score_five = tf.reduce_sum(tf.cast(tf.equal(labels, tf.constant(2, dtype=tf.int64)), dtype=tf.float32))
+    sum_total = score_one + score_three + score_five
+    # Add 1 to all denominator to prevent overflow
+    weight = tf.stack(
+        [tf.math.divide(1, score_one + 1), tf.math.divide(1, score_three + 1),
+         tf.math.divide(1, score_five + 1)],
+        axis=0)
+    return tf.expand_dims(weight, axis=0)
+
+
+def custom_l2_reg(loss, lambda_=0.01):
+    # Reference: https://stackoverflow.com/questions/55029716/how-to-regularize-loss-function
+    ys = tf.reduce_mean(loss)
+    l2_norms = [tf.nn.l2_loss(v) for v in tf.trainable_variables()]
+    l2_norm = tf.reduce_sum(l2_norms)
+    print("L2 norm:", lambda_ * l2_norm)
+    print("Loss:", ys)
+    loss = ys + lambda_ * l2_norm
+    return loss
+
+
+def adjust_image(data):
+    # Reshape to [batch, height, width, channels].
+    imgs = tf.reshape(data, [-1, 299, 299, 1])
+    # Adjust image size to Inception-v3 input.
+    imgs = tf.image.resize_images(imgs, (299, 299))
+    # Convert to RGB image.
+    imgs = tf.image.grayscale_to_rgb(imgs)
+    return imgs
+
+
+def customized_inceptnet2(features, model, params):
+    module = hub.Module("https://tfhub.dev/google/imagenet/inception_v3/feature_vector/1")
+    input_layer = adjust_image(features)
+    outputs = module(input_layer)
+    logits = tf.keras.layers.Dense(3, activation='relu', name="new_dense_8")(outputs)
     return logits
 
 
 # Define Model
 def my_model(features, labels, mode, params, config):
     # Input: (Batch_size,240,360,4)
-    logits = customized_incepnet(features, mode, params)
-    logits = tf.squeeze(logits, 1)
-    logits_aft = tf.math.scalar_mul(5, logits) + 5
+    params['activation'] = tf.nn.leaky_relu
+    logits = customized_inceptnet2(features['image'], mode, params)
+    print("Labels", labels)
+    print("Logits", logits)
+    # logits = tf.squeeze(logits, 1)
+    # logits_aft = tf.math.scalar_mul(5, logits) + 5
     # Predict Mode
-    # predicted_class = tf.argmax(logits, 1)
+    predicted_class = tf.argmax(logits, 1)
     if mode == tf.estimator.ModeKeys.PREDICT:
         predictions = {
-            'score': logits_aft
-            # 'probabilities': tf.nn.softmax(logits),
-            # 'logits': logits
+            'score': predicted_class[:, tf.newaxis],
+            'probabilities': tf.nn.softmax(logits),
+            'logits': logits
         }
         return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
 
-    # one_hot_label = tf.one_hot(indices=labels, depth=11)
+    labels = (labels - 1) / 2  # Convert score from 1,3,5 to 0,1,2
+    one_hot_label = tf.one_hot(indices=tf.cast(labels, tf.int32), depth=3)
+    labels = tf.cast(labels, tf.int64)
 
-    loss = tf.losses.mean_squared_error(labels, logits_aft)
+    # Use loss weight based on each batch
+    if mode == tf.estimator.ModeKeys.TRAIN:
+        loss_weight_raw = get_loss_weight(labels)
+        loss_weight = tf.matmul(one_hot_label, loss_weight_raw, transpose_b=True, a_is_sparse=True)
+    else:
+        loss_weight = 1.0
+    # Cross-entropy loss
+    loss = tf.losses.sparse_softmax_cross_entropy(labels, logits, weights=loss_weight)  # labels is int of class, logits is vector
+    # loss = custom_l2_reg(loss, lambda_=0.01)
     # loss = tf.losses.sparse_softmax_cross_entropy(labels, logits)  # Not applicable for score
-    predicted_class = tf.math.round(logits_aft)
+
     accuracy = tf.metrics.accuracy(labels, predicted_class)
     my_accuracy = tf.reduce_mean(tf.cast(tf.equal(labels, predicted_class), dtype=tf.float32))
     acc = tf.summary.scalar("accuracy_manual", my_accuracy)  # Number of correct answer
     # acc2 = tf.summary.scalar("Accuracy_update", accuracy[1])
 
-    img1 = tf.summary.image("Input_image1", tf.expand_dims(features[:, :, :, 0], 3))
-    img2 = tf.summary.image("Input_image2", tf.expand_dims(features[:, :, :, 1], 3))
-    img3 = tf.summary.image("Input_image3", tf.expand_dims(features[:, :, :, 2], 3))
-    img4 = tf.summary.image("Input_image4", tf.expand_dims(features[:, :, :, 3], 3))
+    # img1 = tf.summary.image("Input_image1", tf.expand_dims(features[:, :, :, 0], 3))
+    # img2 = tf.summary.image("Input_image2", tf.expand_dims(features[:, :, :, 1], 3))
+    # img3 = tf.summary.image("Input_image3", tf.expand_dims(features[:, :, :, 2], 3))
+    # img4 = tf.summary.image("Input_image4", tf.expand_dims(features[:, :, :, 3], 3))
 
     ex_prediction = tf.summary.scalar("example_prediction", predicted_class[0])
-    # print(predicted_class[0])
     ex_ground_truth = tf.summary.scalar("example_ground_truth", labels[0])
-    # print(labels[0])
+
+    trainable_variable_name = [v.name for v in tf.trainable_variables()]
 
     d_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
-    # print(d_vars)
-    summary_name = ["conv1", "conv2", "conv3_1", "conv3_2_1", "conv3_2", "conv3_3_1",
-                    "conv3_3_2", "conv3_3_3", "conv4", "fc5", "fc6", "predict"]
-    if len(summary_name) == int(len(d_vars) / 2):
-        for i in range(len(summary_name)):
-            tf.summary.histogram(summary_name[i] + "_weights", d_vars[2 * i])
-            tf.summary.histogram(summary_name[i] + "_biases", d_vars[2 * i + 1])
-    else:
-        print("Warning, expected weight&variable not equals")
-        print(d_vars)
+    # tf.summary for all weight and bias
+    summary_weight = []
+    for i, t in enumerate(trainable_variable_name):
+        summary_weight.append(tf.summary.histogram(t, tf.trainable_variables()[i]))
+    steps = tf.train.get_global_step()
 
-    summary = tf.summary.histogram("Prediction", predicted_class)
-    summary2 = tf.summary.histogram("Ground_Truth", labels)
     # global_step = tf.summary.scalar("Global steps",tf.train.get_global_step())
 
     # Train Mode
@@ -272,7 +323,26 @@ def my_model(features, labels, mode, params, config):
         return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op, training_hooks=[saver_hook])
 
     # Evaluate Mode
-    saver_hook = tf.train.SummarySaverHook(save_steps=10, summary_op=tf.summary.merge_all(),
-                                           output_dir=config.model_dir + 'eval')
+    print("Evaluation Mode")
+    # Create result(.csv) file, if not exist
+    # If change any header here, don't forget to change data in EvalResultHook (custom_hook.py)
+    if not os.path.isfile(params['result_path']):
+        with open(os.path.join(params['result_path'], params['result_file_name']), "w") as csvfile:
+            fieldnames = ['Name', 'Label', 'Predicted Class', 'Confident level', 'All confident level']
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            writer.writeheader()
+
+    # Evaluate Mode
+    eval_hooks = []
+    if params['result_file_name'] == 'train_result.csv':
+        saver_hook = tf.train.SummarySaverHook(save_steps=10, summary_op=tf.summary.merge_all(),
+                                               output_dir=os.path.join(config.model_dir, 'train_final'))
+    else:
+        saver_hook = tf.train.SummarySaverHook(save_steps=10, summary_op=tf.summary.merge_all(),
+                                               output_dir=os.path.join(config.model_dir, 'eval'))
+    csv_name = tf.convert_to_tensor(os.path.join(params['result_path'], params['result_file_name']), dtype=tf.string)
+    print_result_hook = EvalResultHook(features['name'], labels, predicted_class, tf.nn.softmax(logits), csv_name)
+    eval_hooks.append(saver_hook)
+    eval_hooks.append(print_result_hook)
     return tf.estimator.EstimatorSpec(mode=mode, eval_metric_ops={'accuracy': accuracy}, loss=loss,
                                       evaluation_hooks=[saver_hook])
