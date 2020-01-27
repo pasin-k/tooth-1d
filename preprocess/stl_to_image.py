@@ -90,7 +90,7 @@ def save_image(im_data, out_directory="./data/cross_section"):
     #     if j % 50 == 0:
     #         print("Saved %s out of %s" % (j, len(label_name)))
     ddf = dd.from_pandas(im_data, npartitions=cpu_count() * 2)
-    ddf.apply(save_plot, meta=im_data, args=(out_directory, degree), axis=1).compute(scheduler='processes')
+    ddf.apply(save_plot, meta=im_data, args=(out_directory, degree, "png", None, False), axis=1).compute(scheduler='processes')
     print("Finished saving data")
 
 
@@ -134,7 +134,7 @@ def save_stl_point(im_data, out_directory="./data/coordinates", use_diff=True):
 
 
 # augment_config = [0, 0.5, 1]
-a_range = 5
+a_range = 0
 step = 1
 augment_config = [i for i in np.arange(-a_range, a_range + 0.1, step)] + [i for i in
                                                                           np.arange(180 - a_range, 180.1 + a_range,
@@ -148,15 +148,15 @@ if __name__ == '__main__':
     # Output 'points' as list[list[numpy]] (example_data, degrees, points)
     save_coor = False
     save_img = True
-    is_fix_amount = True
+    is_fix_amount = False
     fix_amount = 300  # Sampling coordinates to specified amount
     use_real_point = True  # Use actual point, else will use difference between each point instead
 
     # data_type, stat_type will not be used unless you want to look at lbl value
     image_data, error_name, header = get_cross_section_label(degree=degree,
                                                              augment_config=augment_config,
-                                                             # folder_name='../../global_data/stl_data_debug',
-                                                             # csv_dir='../../global_data/Ground Truth Score_debug.csv',
+                                                             folder_name='../../global_data/stl_data_debug',
+                                                             csv_dir='../../global_data/Ground Truth Score_debug.csv',
                                                              )
     # points_all = image_data.pop('points')
     use_diff = not use_real_point
@@ -185,7 +185,7 @@ if __name__ == '__main__':
         print("Finished saving coordinates")
 
     if save_img:
-        image_dir = "../data/image_14aug_new"
+        image_dir = "../data/image_visualization"
         print("Start saving images at", os.path.abspath(image_dir))
 
         # Save image
