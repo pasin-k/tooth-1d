@@ -333,7 +333,7 @@ def my_model(features, labels, mode, params, config):
     # Cross-entropy loss
     loss = tf.losses.sparse_softmax_cross_entropy(labels, logits,
                                                   weights=loss_weight)  # labels is int of class, logits is vector
-    loss, reg_loss = custom_l2_reg(loss, lambda_=0.01)
+    loss, reg_loss = custom_l2_reg(loss, lambda_=0.0001)
 
     # Focal loss
     # loss = softmax_focal_loss(labels, logits, gamma=0., alpha=loss_weight)
