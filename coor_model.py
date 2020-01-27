@@ -282,8 +282,8 @@ def get_loss_weight(labels):  # Calculate loss weight of a single batch
     sum_total = score_one + score_three + score_five
     # Add 1 to all denominator to prevent overflow
     weight = tf.stack(
-        [tf.math.divide(1, score_one + 1), tf.math.divide(1, score_three + 1),
-         tf.math.divide(1, score_five + 1)],
+        [tf.math.divide(sum_total, score_one + 1), tf.math.divide(sum_total, score_three + 1),
+         tf.math.divide(sum_total, score_five + 1)],
         axis=0)
     return tf.expand_dims(weight, axis=0)
 
@@ -293,10 +293,8 @@ def custom_l2_reg(loss, lambda_=0.01):
     ys = tf.reduce_mean(loss)
     l2_norms = [tf.nn.l2_loss(v) for v in tf.trainable_variables()]
     l2_norm = tf.reduce_sum(l2_norms)
-    print("L2 norm:", lambda_ * l2_norm)
-    print("Loss:", ys)
     loss = ys + lambda_ * l2_norm
-    return loss
+    return loss, lambda_ * l2_norm
 
 
 # Define Model
@@ -335,7 +333,7 @@ def my_model(features, labels, mode, params, config):
     # Cross-entropy loss
     loss = tf.losses.sparse_softmax_cross_entropy(labels, logits,
                                                   weights=loss_weight)  # labels is int of class, logits is vector
-    loss = custom_l2_reg(loss, lambda_=0.01)
+    loss, reg_loss = custom_l2_reg(loss, lambda_=0.01)
 
     # Focal loss
     # loss = softmax_focal_loss(labels, logits, gamma=0., alpha=loss_weight)
@@ -380,7 +378,8 @@ def my_model(features, labels, mode, params, config):
                                            save_steps)
         print_label_hook = PrintValueHook(labels, "Labels", tf.train.get_global_step(), save_steps)
         print_lr_hook = PrintValueHook(learning_rate, "Learning rate", tf.train.get_global_step(), save_steps)
-        print_loss_hook = PrintValueHook(loss, "Loss", tf.train.get_global_step(), save_steps)
+        print_loss_hook = PrintValueHook(loss, "Total Loss", tf.train.get_global_step(), save_steps)
+        print_reg_loss_hook = PrintValueHook(reg_loss, "Regression Loss", tf.train.get_global_step(), save_steps)
 
         print_weight_balance_hook = PrintValueHook(loss_weight_raw, "Loss weight", tf.train.get_global_step(),
                                                    save_steps)
@@ -397,10 +396,10 @@ def my_model(features, labels, mode, params, config):
         train_hooks = [print_input_hook, print_input_name_hook,
                        saver_hook, print_logits_hook, print_label_hook,
                        print_lr_hook,
-                       print_loss_hook,  # print_reg_loss_hook,
+                       print_loss_hook,  print_reg_loss_hook,
                        print_weight_balance_hook,
-                       print_lg_hook, print_lg2_hook,
-                       print_lg3_hook, print_lg4_hook,
+                       # print_lg_hook, print_lg2_hook,
+                       # print_lg3_hook, print_lg4_hook,
                        ]
 
         return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op,
