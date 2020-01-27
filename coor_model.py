@@ -333,7 +333,7 @@ def my_model(features, labels, mode, params, config):
     # Cross-entropy loss
     loss = tf.losses.sparse_softmax_cross_entropy(labels, logits,
                                                   weights=loss_weight)  # labels is int of class, logits is vector
-    loss, reg_loss = custom_l2_reg(loss, lambda_=0.0001)
+    loss, reg_loss = custom_l2_reg(loss, lambda_=0.01)
 
     # Focal loss
     # loss = softmax_focal_loss(labels, logits, gamma=0., alpha=loss_weight)
@@ -379,7 +379,7 @@ def my_model(features, labels, mode, params, config):
         print_label_hook = PrintValueHook(labels, "Labels", tf.train.get_global_step(), save_steps)
         print_lr_hook = PrintValueHook(learning_rate, "Learning rate", tf.train.get_global_step(), save_steps)
         print_loss_hook = PrintValueHook(loss, "Total Loss", tf.train.get_global_step(), save_steps)
-        print_reg_loss_hook = PrintValueHook(reg_loss, "Regression Loss", tf.train.get_global_step(), save_steps)
+        print_reg_loss_hook = PrintValueHook(reg_loss, "Regularization Loss", tf.train.get_global_step(), save_steps)
 
         print_weight_balance_hook = PrintValueHook(loss_weight_raw, "Loss weight", tf.train.get_global_step(),
                                                    save_steps)
