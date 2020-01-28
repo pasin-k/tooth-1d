@@ -134,7 +134,7 @@ def save_stl_point(im_data, out_directory="./data/coordinates", use_diff=True):
 
 
 # augment_config = [0, 0.5, 1]
-a_range = 20
+a_range = 0
 step = 5
 augment_config = [i for i in np.arange(-a_range, a_range + 0.1, step)] + [i for i in
                                                                           np.arange(180 - a_range, 180.1 + a_range,
@@ -146,8 +146,8 @@ degree = [0, 45, 90, 135]
 # Fetch stl file and save as either image or .npy file of coordinates
 if __name__ == '__main__':
     # Output 'points' as list[list[numpy]] (example_data, degrees, points)
-    save_coor = False
-    save_img = True
+    save_coor = True
+    save_img = False
     is_fix_amount = True
     fix_amount = 300  # Sampling coordinates to specified amount
     use_real_point = True  # Use actual point, else will use difference between each point instead
@@ -155,8 +155,8 @@ if __name__ == '__main__':
     # data_type, stat_type will not be used unless you want to look at lbl value
     image_data, error_name, header = get_cross_section_label(degree=degree,
                                                              augment_config=augment_config,
-                                                             folder_name='../../global_data/stl_data_debug',
-                                                             csv_dir='../../global_data/Ground Truth Score_debug.csv',
+                                                             # folder_name='../../global_data/stl_data_debug',
+                                                             # csv_dir='../../global_data/Ground Truth Score_debug.csv',
                                                              )
     # points_all = image_data.pop('points')
     use_diff = not use_real_point
