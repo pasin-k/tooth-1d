@@ -1,8 +1,8 @@
 FROM tensorflow/tensorflow:1.13.1-gpu-py3
 
-RUN git clone https://github.com/jobpasin/tooth-2d
-
 RUN apt-get update && apt-get install -y git
+
+RUN git clone https://github.com/jobpasin/tooth-2d
 
 # RUN apt-get install vim -y
 
