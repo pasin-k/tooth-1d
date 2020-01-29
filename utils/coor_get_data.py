@@ -144,7 +144,7 @@ def read_raw_tfrecord(tfrecord_path):  # For debugging purpose, reading all cont
     for example in tf.python_io.tf_record_iterator(tfrecord_path):
         i += 1
         print(tf.train.Example.FromString(example))
-    print(i)
+    print(type(i))
 
 
 numdegree = None
@@ -154,9 +154,9 @@ single_slice = False
 name_type = None
 
 if __name__ == '__main__':
-    data_path = "/home/pasin/Documents/Google_Drive/Aa_TIT_LAB_Comp/Library/Tooth/Model/my2DCNN/data/tfrecord" \
-                "/coor_42aug_real_point_new_data/coor_42aug_real_point_new_data_0_eval.tfrecords"
-    label_type = "Width"
+    data_path = "/home/pasin/Documents/Google_Drive/Aa_TIT_LAB_Comp/Library/Tooth/Model/my2DCNN/data/tfrecord/image_14aug" \
+                "/image_14aug_0_eval.tfrecords"
+    label_type = "Width_median"
 
     # f, l = get_data_from_path(data_path, label_type)
     # print("Feature", f[0])

@@ -35,7 +35,7 @@ def decode(data_dict):
         image_decoded.append(file_cropped)
 
     # image_stacked = tf.stack([image_decoded[0], image_decoded[1], image_decoded[2], image_decoded[3]], axis=2)
-    image_stacked = [image_decoded[0]]
+    image_stacked = [image_decoded[0]/255]
     image_stacked = tf.cast(image_stacked, tf.float32)
     label = tf.cast(data_dict[label_type_global], tf.float32)
     name = tf.cast(data_dict['name'], tf.string)
@@ -88,11 +88,21 @@ def eval_input_fn(data_path, batch_size, configs):
 
 
 
-def get_data_from_path(data_path):
+def get_data_from_path(data_path, label_type):
+    global numdegree, label_type_global, name_type
     dataset = tf.data.TFRecordDataset(data_path)
+    label_data = ["name", "Occ_B_median", "Occ_F_median", "Occ_L_median", "BL_median", "MD_median", "Integrity_median",
+                  "Width_median", "Surface_median", "Sharpness_median"]
+    numdegree = 4
+    # data_length = 300
+    name_type = ["img"]
+    label_type_global = label_type
+    if not os.path.exists(data_path):
+        raise ValueError("Input file does not exist")
     # print(dataset)
     dataset = dataset.map(deserialize)
     dataset = dataset.map(decode)
+
 
     iterator = dataset.make_one_shot_iterator()
     next_image_data = iterator.get_next()
@@ -121,11 +131,14 @@ def read_raw_tfrecord(tfrecord_path):  # For debugging purpose, reading all cont
 
 
 if __name__ == '__main__':
-    data_path = "/home/pasin/Documents/Google_Drive/Aa_TIT_LAB_Comp/Library/Tooth/Model/my2DCNN/" \
-                "data/tfrecord/image_14aug/image_14aug_0_train.tfrecords"
-    label_type = "Width"
+    data_path = "/home/pasin/Documents/Google_Drive/Aa_TIT_LAB_Comp/Library/Tooth/Model/my2DCNN/data/tfrecord/image_14aug" \
+                "/image_14aug_0_eval.tfrecords"
+    label_type = "Width_median"
 
-    # f, l = get_data_from_path(data_path, label_type)
+    f, l = get_data_from_path(data_path, label_type)
     # print("Feature", f[0])
-    # print("Label", l[0])
-    read_raw_tfrecord(data_path)
+    print("Label", l)
+    print("1", l.count(1.0))
+    print("3", l.count(3.0))
+    print("5", l.count(5.0))
+    # read_raw_tfrecord(data_path)

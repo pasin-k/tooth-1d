@@ -316,11 +316,21 @@ def my_model(features, labels, mode, params, config):
                                                    20000, 0.96, staircase=True)
         optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
         train_op = optimizer.minimize(loss, global_step=steps)
+        save_steps = 1000
         saver_hook = tf.train.SummarySaverHook(save_steps=1000, summary_op=tf.summary.merge_all(),
                                                output_dir=config.model_dir)
         # model_vars = tf.trainable_variables()
         # slim.model_analyzer.analyze_vars(model_vars, print_info=True)
-        return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op, training_hooks=[saver_hook])
+        print_input_hook = PrintValueHook(features['image'], "Input value", tf.train.get_global_step(), save_steps)
+        print_input_min_hook = PrintValueHook(tf.math.reduce_min(features['image']), "Min Input value", tf.train.get_global_step(), save_steps)
+        print_input_name_hook = PrintValueHook(features['name'], "Input name", tf.train.get_global_step(), save_steps)
+        print_logits_hook = PrintValueHook(tf.nn.softmax(logits), "Training logits", tf.train.get_global_step(),
+                                           save_steps)
+        print_label_hook = PrintValueHook(labels, "Labels", tf.train.get_global_step(), save_steps)
+        train_hooks = [saver_hook,
+                       print_input_hook, print_input_name_hook,print_input_min_hook,
+                       print_logits_hook,print_label_hook, ]
+        return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op, training_hooks=train_hooks)
 
     # Evaluate Mode
     print("Evaluation Mode")
