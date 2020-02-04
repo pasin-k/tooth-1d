@@ -36,7 +36,7 @@ def get_coor_distance(stl_points, mode_remove):
 # To use with pandas.apply
 def point_sampling_wrapper(point_list):
     for d_index in range(len(degree)):
-        point_list[d_index] = point_sampling(point_list[d_index], fix_amount)
+        point_list[d_index] = point_sampling(point_list[d_index], fix_points_num)
     return point_list
 
 
@@ -146,11 +146,10 @@ degree = [0, 45, 90, 135]
 # Fetch stl file and save as either image or .npy file of coordinates
 if __name__ == '__main__':
     # Output 'points' as list[list[numpy]] (example_data, degrees, points)
-    save_coor = True
-    save_img = False
-    is_fix_amount = True
-    fix_amount = 300  # Sampling coordinates to specified amount
-    use_real_point = True  # Use actual point, else will use difference between each point instead
+    save_coor, save_img = True, False
+    fix_points = True
+    fix_points_num = 300  # Sampling coordinates to specified amount
+    use_diff = False  # Use actual point, else will use difference between each point instead
 
     # data_type, stat_type will not be used unless you want to look at lbl value
     image_data, error_name, header = get_cross_section_label(degree=degree,
@@ -159,15 +158,13 @@ if __name__ == '__main__':
                                                              # csv_dir='../../global_data/Ground Truth Score_debug.csv',
                                                              )
     # points_all = image_data.pop('points')
-    use_diff = not use_real_point
-    if is_fix_amount:
+    if fix_points:
         if use_diff:
-            fix_amount = fix_amount + 1  # Compensate for the missing data when finding diffrence
+            fix_points_num = fix_points_num + 1  # Compensate for the missing data when finding diffrence
         print("Adjusting number of coordinates... Takes a long time")
         ddf = dd.from_pandas(image_data['points'], npartitions=cpu_count() * 2)
         image_data['points'] = ddf.apply(point_sampling_wrapper, meta=image_data['points']).compute(
             scheduler='processes')
-        # points_all = points_all.swifter.apply(point_sampling_wrapper)
 
     if save_coor:
         file_dir = "../data/coor_0aug"

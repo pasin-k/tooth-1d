@@ -2,7 +2,7 @@ import numpy as np
 from stl import mesh
 
 
-def get_cross_section(stl_file_name, z_plane, degree=None, augment=None, is_rearrange=True, axis=1):
+def get_cross_section(stl_file_name, z_plane, degree=[0, 45, 90, 135], augment=None, is_rearrange=True, axis=1):
     """
     Get cross-section of an stl file from selected x/y/z plane as well as cross-section of an rotated angle.
     We also have augmentation option to duplicate more data by rotating (Recommend small degree like 1,2,3)
@@ -12,30 +12,44 @@ def get_cross_section(stl_file_name, z_plane, degree=None, augment=None, is_rear
     :param augment:         List of rotation degree to increase datasize, None will give only 0 degree
     :param is_rearrange:    Boolean, Rearrange coordinate from bottom left to right, else the data will be unordered
     :param axis:            Axis of rotation (0 = X,1 = Y,2 = Z) (Default at 1 for our data)
-    :return: reP_all:       List of list of numpy array with size of [len(augment),len(degree),[N,2])
+    :return: reP_all:       List of list of numpy array with size of [len(augment),len(degree),[N,2]).
+                            If degree or augment is None, output will have one less list
     """
     # Fetch data and get all triangles
     prep_mesh = mesh.Mesh.from_file(stl_file_name)
     tmain_temp = np.concatenate((prep_mesh.v0, prep_mesh.v1, prep_mesh.v2), axis=1)  # numpy array of N * 9 dimension
+    if axis == 0:
+        for i in range(0, 3):
+            tmain_temp[:, 3 * i + 0], tmain_temp[:, 3 * i + 1], tmain_temp[:, 3 * i + 2] = \
+                np.copy(tmain_temp[:, 3 * i + 1]), np.copy(tmain_temp[:, 3 * i + 2]), np.copy(tmain_temp[:, 3 * i + 0])
+    elif axis == 1:
+        for i in range(0, 3):
+            tmain_temp[:, 3 * i + 0], tmain_temp[:, 3 * i + 1], tmain_temp[:, 3 * i + 2] = \
+                np.copy(tmain_temp[:, 3 * i + 2]), np.copy(tmain_temp[:, 3 * i + 0]), np.copy(tmain_temp[:, 3 * i + 1])
+    elif axis == 2:
+        pass
+    else:
+        raise ValueError("Invalid axis")
+
     if augment is not None:
         all_triangle = []
         for a in augment:
-            all_triangle.append(rotatestl(tmain_temp, axis, a))
+            all_triangle.append(rotatestl(tmain_temp, 2, a))
     else:
         all_triangle = [tmain_temp]
 
     if degree is None:  # Use default value
-        degree = [0, 45, 90, 135]
+        deg = [0]
         print("No degree input found, use default value")
     elif isinstance(degree, int) or isinstance(degree, float):  # In case of single value, put list over it
-        degree = [degree]
+        deg = [degree]
 
     all_points = []
     for Tmain in all_triangle:  # Loop for every augmentation
         points = []  # Output
-        for d in degree:
+        for d in deg:
             P = np.empty([0, 3])  # Unarranged coordinates
-            T = rotatestl(Tmain, axis, d).tolist()  # Default as Z-axis
+            T = rotatestl(Tmain, 2, d).tolist()  # Default as Z-axis
             i = 1  # Special index added as a third column which will be used in 'rearrange' function
             while len(T) != 0:
                 t = np.array(T.pop(0))  # Select some element from t
@@ -75,7 +89,11 @@ def get_cross_section(stl_file_name, z_plane, degree=None, augment=None, is_rear
                     points.append(new_points)
             else:
                 points.append(P)
+        if degree is None or isinstance(degree, int) or isinstance(degree, float):
+            points = points[0]
         all_points.append(points)
+    if augment is None:
+        all_points = all_points[0]
     return all_points
 
 
