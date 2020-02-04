@@ -17,6 +17,8 @@ In total, we would get 4 cross-sections image from one 3D file. Image below is a
 
 We further reduce input dimension by fetching coordinates of the tooth contour instead. For each cross-section image, we will have the data of x-axis and y-axis of 300 sampled coordinates. 
 
+Then, we put the model into 1D-CNN with architecture belows:
+<img src="https://github.com/jobpasin/tooth-1d/blob/master/src/images/1dcnn_architecture.png" width="200" height="200">
 
 ## Data Augmentation
 We do data augmentation by slightly rotating image from the center with small degree (E.g. 1,2,3 degree).
