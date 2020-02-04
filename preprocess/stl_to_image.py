@@ -147,6 +147,7 @@ degree = [0, 45, 90, 135]
 if __name__ == '__main__':
     # Output 'points' as list[list[numpy]] (example_data, degrees, points)
     save_coor, save_img = True, False
+    coor_file_dir, image_dir = "../data/coor_0aug", "../data/image_augment_visualization"
     fix_points = True
     fix_points_num = 300  # Sampling coordinates to specified amount
     use_diff = False  # Use actual point, else will use difference between each point instead
@@ -167,24 +168,23 @@ if __name__ == '__main__':
             scheduler='processes')
 
     if save_coor:
-        file_dir = "../data/coor_0aug"
-        print("Start saving coordinates at", os.path.abspath(file_dir))
+
+        print("Start saving coordinates at", os.path.abspath(coor_file_dir))
         # Save image (as coordiantes)
-        save_stl_point(image_data, out_directory=file_dir, use_diff=use_diff)
+        save_stl_point(image_data, out_directory=coor_file_dir, use_diff=use_diff)
 
         # Save names with error, for future use
-        with open(file_dir + '/error_file.json', 'w') as filehandle:
+        with open(coor_file_dir + '/error_file.json', 'w') as filehandle:
             json.dump({'error_name': error_name}, filehandle)
-        with open(file_dir + '/config.json', 'w') as filehandle:
+        with open(coor_file_dir + '/config.json', 'w') as filehandle:
             json.dump({'degree': degree, 'augment_config': augment_config}, filehandle)
         # Save score as csv file
-        image_data.drop('points', axis=1).to_csv(os.path.join(file_dir, "score.csv"), index=False)
+        image_data.drop('points', axis=1).to_csv(os.path.join(coor_file_dir, "score.csv"), index=False)
         print("Finished saving coordinates")
 
     if save_img:
-        image_dir = "../data/image_augment_visualization"
-        print("Start saving images at", os.path.abspath(image_dir))
 
+        print("Start saving images at", os.path.abspath(image_dir))
         # Save image
         save_image(image_data, out_directory=image_dir)
         # Save names with error, for future use

@@ -102,6 +102,7 @@ def predict(model_directory, feature):
         print("Prediction of %s: Score = %s with probability %s" % (
             f['name'], predict_class * 2 + 1, predictions['probabilities'][0]))
 
+
 if __name__ == '__main__':
     print("Degree", args.degree)
     data_type = args.dataset_type.lower()
