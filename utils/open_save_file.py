@@ -206,7 +206,7 @@ def get_cross_section_label(degree, augment_config=None, folder_name='../../glob
     print("Applying get_cross_section...")
     # image_data['points'] = image_data['name_dir'].swifter.apply(get_cross_section, args=(0, degree, augment_config, 1))
     ddf = dd.from_pandas(image_data['name_dir'], npartitions=cpu_count() * 2)
-    image_data['points'] = ddf.apply(get_cross_section, args=(0, degree, augment_config, 1), axis=1,
+    image_data['points'] = ddf.apply(get_cross_section, args=(0, degree, augment_config, 1), axis=2,
                                      meta=image_data['name_dir']).compute(scheduler='processes')
     image_data = image_data.drop(['name_dir'], axis=1)  # zplane, degree, augment, axis
 
