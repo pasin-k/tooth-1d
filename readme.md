@@ -18,7 +18,7 @@ In total, we would get 4 cross-sections image from one 3D file. Image below is a
 We further reduce input dimension by fetching coordinates of the tooth contour instead. For each cross-section image, we will have the data of x-axis and y-axis of 300 sampled coordinates. 
 
 Then, we put the model into 1D-CNN with architecture belows:
-<img src="https://github.com/jobpasin/tooth-1d/blob/master/src/images/1dcnn_architecture.png" width="200" height="200">
+<img src="https://github.com/jobpasin/tooth-1d/blob/master/src/images/1dcnn_architecture.png">
 
 ## Data Augmentation
 We do data augmentation by slightly rotating image from the center with small degree (E.g. 1,2,3 degree).
@@ -31,7 +31,7 @@ Use `preprocess/stl_to_image.py` to convert STL file into cross-section images a
 
 
 ## Step 2: Convert to tfrecord (Image or 1D data --> tfrecords)
-Use 'image_to_tfrecord.py' to convert image or coordinates into .tfrecords file in order to feed to 'train.py'
+Use `preprocess/image_to_tfrecord.py` to convert image or coordinates into .tfrecords file in order to feed to 'train.py'
 <br> Can select k_fold option if you want to use k_fold cross validation
 
 ## Step 3: Train 
