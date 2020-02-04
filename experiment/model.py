@@ -216,8 +216,8 @@ def get_loss_weight(labels):  # Calculate loss weight of a single batch
     sum_total = score_one + score_three + score_five
     # Add 1 to all denominator to prevent overflow
     weight = tf.stack(
-        [tf.math.divide(1, score_one + 1), tf.math.divide(1, score_three + 1),
-         tf.math.divide(1, score_five + 1)],
+        [tf.math.divide(sum_total, score_one + 1), tf.math.divide(sum_total, score_three + 1),
+         tf.math.divide(sum_total, score_five + 1)],
         axis=0)
     return tf.expand_dims(weight, axis=0)
 
@@ -230,7 +230,7 @@ def custom_l2_reg(loss, lambda_=0.01):
     print("L2 norm:", lambda_ * l2_norm)
     print("Loss:", ys)
     loss = ys + lambda_ * l2_norm
-    return loss
+    return loss, lambda_ * l2_norm
 
 
 def adjust_image(data):
@@ -282,7 +282,7 @@ def my_model(features, labels, mode, params, config):
         loss_weight = 1.0
     # Cross-entropy loss
     loss = tf.losses.sparse_softmax_cross_entropy(labels, logits, weights=loss_weight)  # labels is int of class, logits is vector
-    # loss = custom_l2_reg(loss, lambda_=0.01)
+    loss, reg_loss = custom_l2_reg(loss, lambda_=0.01)
     # loss = tf.losses.sparse_softmax_cross_entropy(labels, logits)  # Not applicable for score
 
     accuracy = tf.metrics.accuracy(labels, predicted_class)
@@ -327,9 +327,19 @@ def my_model(features, labels, mode, params, config):
         print_logits_hook = PrintValueHook(tf.nn.softmax(logits), "Training logits", tf.train.get_global_step(),
                                            save_steps)
         print_label_hook = PrintValueHook(labels, "Labels", tf.train.get_global_step(), save_steps)
+        print_lr_hook = PrintValueHook(learning_rate, "Learning rate", tf.train.get_global_step(), save_steps)
+        print_loss_hook = PrintValueHook(loss, "Total Loss", tf.train.get_global_step(), save_steps)
+        print_reg_loss_hook = PrintValueHook(reg_loss, "Regularization Loss", tf.train.get_global_step(), save_steps)
+
+        print_weight_balance_hook = PrintValueHook(loss_weight_raw, "Loss weight", tf.train.get_global_step(),
+                                                   save_steps)
         train_hooks = [saver_hook,
                        print_input_hook, print_input_name_hook,print_input_min_hook,
-                       print_logits_hook,print_label_hook, ]
+                       print_logits_hook,print_label_hook,
+                       print_lr_hook,
+                       print_loss_hook, print_reg_loss_hook,
+                       print_weight_balance_hook,
+                       ]
         return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op, training_hooks=train_hooks)
 
     # Evaluate Mode
@@ -355,4 +365,4 @@ def my_model(features, labels, mode, params, config):
     eval_hooks.append(saver_hook)
     eval_hooks.append(print_result_hook)
     return tf.estimator.EstimatorSpec(mode=mode, eval_metric_ops={'accuracy': accuracy}, loss=loss,
-                                      evaluation_hooks=[saver_hook])
+                                      evaluation_hooks=eval_hooks)

@@ -42,12 +42,7 @@ def plot_graph(folder, filename):
 
 
 degree = [0,45,90,135]
-# folder_name = "/home/pasin/Documents/Link_to_my2DCNN/data/coor_14aug"
-# folder_name = "/home/pasin/Documents/Link_to_my2DCNN/data/coor_14aug_real_point"
-# folder_name = "/home/pasin/Documents/Link_to_my2DCNN/data/coor_debug_nofix"
-folder_name = "/home/pasin/Documents/Link_to_my2DCNN/data/coor_debug_real_nofix"
+folder_name = "./data/coor_debug_real_nofix"
 file_name = ["PreparationScan_304101_0-0_0.npy"]
-    # ,"PreparationScan_304101_0-0_45.npy",
-    #          "PreparationScan_304101_0-0_90.npy","PreparationScan_304101_0-0_135.npy"]
 
-plot_graph(folder_name,file_name)
+plot_graph(folder_name, file_name)
