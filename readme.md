@@ -6,6 +6,7 @@ This is a collaboration project with Faculty of Dentistry to evaluate the skill 
 ## Data
 We have  3D scanned tooth model (STL file) of students, with the score given on multiple criteria such as angle of tooth, amount of tooth removed, the sharpness of tooth, etc. 
 The score for each criteria can be 1, 3 or 5 points.
+Due to our lack of dataset (365 files in total), we need to reduce the input dimension as well as do some data augmentations.
 
 ## Algorithm
 Due to low amount of dataset, we cannot feed the whole 3D file directly due to too large dimensions. 
@@ -22,7 +23,7 @@ Then, we put the model into 1D-CNN with architecture belows:
 
 ## Data Augmentation
 We do data augmentation by slightly rotating image from the center with small degree (E.g. 1,2,3 degree).
-This process is done by using `get_cross_section` function in 'get_input.py'
+This process is done by during `preprocess/stl_to_image.py`. Augmented degrees can be specified with parameter `augment_config` 
 
 # How to use
 ## Step 1: Data preprocessing (STL File --> Image or 1D data)
