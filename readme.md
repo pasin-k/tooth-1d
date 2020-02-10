@@ -44,7 +44,11 @@ Use `preprocess/image_to_tfrecord.py` to convert image or coordinates into .tfre
 <br> Can select k_fold option if you want to use k_fold cross validation
 
 ## Step 3: Train 
-Use `coor_train.py`. We have multiple mode available.
+Run `coor_train.py`. Require config file for hyperparameters and some settings.
+
+`python coor_train.py --config ./cfg/coor_tooth.config`
+
+We have multiple mode available.
 1. Standard: Standard way, train once.
 2. K-fold: Use this if you select k_fold option in previous step. Will run multiple time for k-fold cross validation.
 3. Hyperparameter search run: Multiple runs with different hyperparameter each time using Scikit-opimize library
@@ -58,6 +62,9 @@ Hyperparameter such as input directory, batch_size, steps, etc.
 
 We use protocol buffer to feed those parameters into our file. Look up `coor_tooth.config` as a reference. 
 <br> Note: label_type is a score category which the instructor gave based on each criteria. You can ask for more info about these label. 
+
+Changing the variables in config file can be done in `proto/tooth.proto` file. 
+Then, run `protoc proto/*.proto --python_out=.`
 
 
 ### Model Architecture
