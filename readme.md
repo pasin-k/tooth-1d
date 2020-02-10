@@ -4,10 +4,10 @@ Evaluation of tooth shape for dental procedure using machine learning approach
 This is a collaboration project with Faculty of Dentistry to evaluate the skill of the dental student to do "Tooth Preparation" process, a dental procedure to remove outer layer of the tooth into an appropriate shape.
 
 Library Version:
-⋅⋅* python: 3.6.8
-⋅⋅* numpy: 1.16.4
-⋅⋅* tensorflow: 1.13.1
-⋅⋅* pandas: 0.25.1
+* python: 3.6.8
+* numpy: 1.16.4
+* tensorflow: 1.13.1
+* pandas: 0.25.1
 
 
 
