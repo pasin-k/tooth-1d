@@ -43,7 +43,7 @@ Use `preprocess/stl_to_image.py` to convert STL file into cross-section images a
 Use `preprocess/image_to_tfrecord.py` to convert image or coordinates into .tfrecords file in order to feed to 'train.py'
 <br> Can select k_fold option if you want to use k_fold cross validation
 
-## Step 3: Train 
+## Step 3: Train and Evaluate
 Run `coor_train.py`. Require config file for hyperparameters and some settings.
 
 `python coor_train.py --config ./cfg/coor_tooth.config`
@@ -71,9 +71,11 @@ Then, run `protoc proto/*.proto --python_out=.`
 For information in model architecture, look up in `coor_model.py` which is AlexNet-like version of 1D-CNN layers.
 
 
-### Output and Evaluation
+### Evaluation and Output analysis
 In the result directory, a `result.csv` file will be generated which shows all validation predictions. `config.csv` shows the accuracy and training settings.
 <br> To analyze loss and accuracy over iterations, use [Tensorboard](https://www.tensorflow.org/guide/summaries_and_tensorboard) to see the result.
 
 ### Testing
-Use `coor_predict` for prediction. This accepts 3 types of data: .stl file, .npy file, and .tfrecord file. Using the first two type of data will take slightly longer time due to data transformation.
+Use `coor_predict` for prediction. This accepts 3 types of input data: .stl file, .npy file, and .tfrecord file. Using the first two type of data will take slightly longer time due to data transformation.
+
+`python coor_predict -t [folder directory of data] -m [folder directory of model] -dt [input data type]`
