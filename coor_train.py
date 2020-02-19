@@ -22,7 +22,7 @@ from utils.open_save_file import read_file, save_file, check_exist
 
 # Read tooth.config file
 parser = argparse.ArgumentParser()
-parser.add_argument('config', help="Directory of config file")
+parser.add_argument('-c', '--config', help="Directory of config file")
 args = parser.parse_args()
 
 configs = tooth_pb2.TrainConfig()

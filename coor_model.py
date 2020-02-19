@@ -345,7 +345,7 @@ def my_model(features, labels, mode, params, config):
 
     # Create parameters to show in Tensorboard
     ex_prediction = tf.summary.scalar("Prediction Output", predicted_class[0])
-    ex_ground_truth = tf.summary.scalar("Ground Truth", labels[0])
+    ex_ground_truth = tf.summary.scalar("Mean Ground Truth", tf.reduce_mean(tf.cast(labels,tf.float32)))
     d_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
     # print("d_vars", d_vars)
     # global_step = tf.summary.scalar("Global steps",tf.train.get_global_step())
@@ -407,6 +407,7 @@ def my_model(features, labels, mode, params, config):
 
     # Evaluate Mode
     print("Evaluation Mode")
+    eval_save_steps = 10
     # Create result(.csv) file, if not exist
     # If change any header here, don't forget to change data in EvalResultHook (custom_hook.py)
     if not os.path.isfile(params['result_path']):
@@ -416,16 +417,22 @@ def my_model(features, labels, mode, params, config):
             writer.writeheader()
 
     # Create hooks
-    eval_hooks = []
     if params['result_file_name'] == 'train_result.csv':
-        saver_hook = tf.train.SummarySaverHook(save_steps=10, summary_op=tf.summary.merge_all(),
+        saver_hook = tf.train.SummarySaverHook(save_steps=eval_save_steps, summary_op=tf.summary.merge_all(),
                                                output_dir=os.path.join(config.model_dir, 'train_final'))
     else:
-        saver_hook = tf.train.SummarySaverHook(save_steps=10, summary_op=tf.summary.merge_all(),
+        saver_hook = tf.train.SummarySaverHook(save_steps=eval_save_steps, summary_op=tf.summary.merge_all(),
                                                output_dir=os.path.join(config.model_dir, 'eval'))
+    tensorboard_hook = tf.train.SummarySaverHook(save_steps=eval_save_steps, summary_op=tf.summary.merge_all(),
+                                           output_dir=config.model_dir)
     csv_name = tf.convert_to_tensor(os.path.join(params['result_path'], params['result_file_name']), dtype=tf.string)
     print_result_hook = EvalResultHook(features['name'], labels, predicted_class, tf.nn.softmax(logits), csv_name)
-    eval_hooks.append(saver_hook)
-    eval_hooks.append(print_result_hook)
+    print_logits_hook = PrintValueHook(tf.nn.softmax(logits), "Validation Training logits", tf.train.get_global_step(),
+                                       0)
+    print_label_hook = PrintValueHook(labels, "Validation Labels", tf.train.get_global_step(), 0)
+
+    eval_hooks = [saver_hook, tensorboard_hook, print_result_hook,
+                  # print_logits_hook, print_label_hook,
+                  ]
     return tf.estimator.EstimatorSpec(mode=mode, eval_metric_ops={'accuracy': accuracy}, loss=loss,
                                       evaluation_hooks=eval_hooks)
