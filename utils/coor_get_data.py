@@ -51,6 +51,15 @@ def decode(data_dict):
     return feature, label
 
 
+def random_jitter(feature, label):
+    global data_length, numdegree
+    data = feature['image']
+    noise = 0.0001*tf.random.truncated_normal((data_length, numdegree*2))
+    data = data + noise
+    feature['image'] = data
+    return feature, label
+
+
 def train_input_fn(data_path, batch_size, configs):
     """
     Use to fetch training dataset
@@ -71,7 +80,8 @@ def train_input_fn(data_path, batch_size, configs):
     dataset = tf.data.TFRecordDataset(data_path)
     dataset = dataset.map(deserialize, num_parallel_calls=7)
     dataset = dataset.map(decode, num_parallel_calls=7)
-    dataset = dataset.shuffle(100)
+    dataset = dataset.map(random_jitter, num_parallel_calls=7)  # Data augmentation
+    dataset = dataset.shuffle(512)
     dataset = dataset.batch(batch_size, drop_remainder=False)  # Maybe batch after repeat?
     dataset = dataset.repeat(None)
     dataset = dataset.prefetch(buffer_size=None)
@@ -120,6 +130,7 @@ def get_data_from_path(data_path, label_type):
     dataset = tf.data.TFRecordDataset(data_path)
     dataset = dataset.map(deserialize)
     dataset = dataset.map(decode)
+    dataset = dataset.map(random_jitter, num_parallel_calls=7)  # Data augmentation
 
     iterator = dataset.make_one_shot_iterator()
     next_image_data = iterator.get_next()
@@ -154,11 +165,12 @@ single_slice = False
 name_type = None
 
 if __name__ == '__main__':
-    data_path = "/home/pasin/Documents/Google_Drive/Aa_TIT_LAB_Comp/Library/Tooth/Model/my2DCNN/data/tfrecord/image_14aug" \
-                "/image_14aug_0_eval.tfrecords"
-    label_type = "Width_median"
-
-    # f, l = get_data_from_path(data_path, label_type)
-    # print("Feature", f[0])
-    # print("Label", l[0])
-    read_raw_tfrecord(data_path)
+    data_path = "/home/pasin/Documents/Google_Drive/Aa_TIT_LAB_Comp/Library/Tooth/Model/my2DCNN/data/tfrecord/" \
+                "coor_42aug_new_data/coor_42aug_new_data_0_eval.tfrecords"
+    label_type = "Width"
+    print(os.path.abspath(data_path))
+    f, l = get_data_from_path(data_path, label_type)
+    print("Feature image", f[0]['image'])
+    print("Feature name", f[0]['name'])
+    # print("Label", l)
+    # read_raw_tfrecord(data_path)
