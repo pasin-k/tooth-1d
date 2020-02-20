@@ -78,10 +78,10 @@ def train_input_fn(data_path, batch_size, configs):
         raise ValueError("Train input file does not exist")
     # data_type=0 -> data is vectorize in to one vector else, stack in different dimension
     dataset = tf.data.TFRecordDataset(data_path)
+    dataset = dataset.shuffle(512)
     dataset = dataset.map(deserialize, num_parallel_calls=7)
     dataset = dataset.map(decode, num_parallel_calls=7)
     dataset = dataset.map(random_jitter, num_parallel_calls=7)  # Data augmentation
-    dataset = dataset.shuffle(512)
     dataset = dataset.batch(batch_size, drop_remainder=False)  # Maybe batch after repeat?
     dataset = dataset.repeat(None)
     dataset = dataset.prefetch(buffer_size=None)
