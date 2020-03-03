@@ -5,7 +5,7 @@ After running this, use image_to_tfrecord.py to turn images into tfrecord
 
 # Import Libraries
 import os
-from utils.open_save_file import save_plot, save_coordinate, save_file, get_cross_section_label
+from utils.open_save_file import save_plot, save_coordinate, get_cross_section_label
 import numpy as np
 import json
 from multiprocessing import cpu_count
@@ -133,12 +133,12 @@ def save_stl_point(im_data, out_directory="./data/coordinates", use_diff=True):
         scheduler='processes')
 
 
-# augment_config = [0, 0.5, 1]
-a_range = 0
+# Create an augmentation angles
+augment_range = 0
 step = 5
-augment_config = [i for i in np.arange(-a_range, a_range + 0.1, step)] + [i for i in
-                                                                          np.arange(180 - a_range, 180.1 + a_range,
-                                                                                    step)]
+augment_config = [i for i in np.arange(-augment_range, augment_range + 0.1, step)] + [i for i in
+                                                                                      np.arange(180 - augment_range, 180.1 + augment_range,
+                                                                                                step)]
 # augment_config = [i for i in np.arange(-5, 5.1, 1)] + [i for i in np.arange(-175, 185.1, 1)]
 print("Augment Config:", len(augment_config), augment_config)
 degree = [0, 45, 90, 135]
@@ -148,9 +148,8 @@ if __name__ == '__main__':
     # Output 'points' as list[list[numpy]] (example_data, degrees, points)
     save_coor, save_img = True, False
     coor_file_dir, image_dir = "../data/coor_0aug", "../data/image_augment_visualization"
-    fix_points = True
-    fix_points_num = 300  # Sampling coordinates to specified amount
-    use_diff = False  # Use actual point, else will use difference between each point instead
+    fix_points_num = 300  # Sampling coordinates to specified amount, use 0 to disable
+    use_distance_point = False  # Use actual point, else will use difference between each point instead
 
     # data_type, stat_type will not be used unless you want to look at lbl value
     image_data, error_name, header = get_cross_section_label(degree=degree,
@@ -158,9 +157,8 @@ if __name__ == '__main__':
                                                              # folder_name='../../global_data/stl_data_debug',
                                                              # csv_dir='../../global_data/Ground Truth Score_debug.csv',
                                                              )
-    # points_all = image_data.pop('points')
-    if fix_points:
-        if use_diff:
+    if fix_points_num:
+        if use_distance_point:
             fix_points_num = fix_points_num + 1  # Compensate for the missing data when finding diffrence
         print("Adjusting number of coordinates... Takes a long time")
         ddf = dd.from_pandas(image_data['points'], npartitions=cpu_count() * 2)
@@ -168,31 +166,19 @@ if __name__ == '__main__':
             scheduler='processes')
 
     if save_coor:
-
         print("Start saving coordinates at", os.path.abspath(coor_file_dir))
-        # Save image (as coordiantes)
-        save_stl_point(image_data, out_directory=coor_file_dir, use_diff=use_diff)
-
-        # Save names with error, for future use
-        with open(coor_file_dir + '/error_file.json', 'w') as filehandle:
-            json.dump({'error_name': error_name}, filehandle)
-        with open(coor_file_dir + '/config.json', 'w') as filehandle:
-            json.dump({'degree': degree, 'augment_config': augment_config}, filehandle)
-        # Save score as csv file
-        image_data.drop('points', axis=1).to_csv(os.path.join(coor_file_dir, "score.csv"), index=False)
-        print("Finished saving coordinates")
+        save_stl_point(image_data, out_directory=coor_file_dir, use_diff=use_distance_point) # Save image (as coordiantes)
 
     if save_img:
-
         print("Start saving images at", os.path.abspath(image_dir))
-        # Save image
-        save_image(image_data, out_directory=image_dir)
-        # Save names with error, for future use
-        with open(image_dir + '/error_file.json', 'w') as filehandle:
-            json.dump({'error_name': error_name}, filehandle)
-        with open(image_dir + '/config.json', 'w') as filehandle:
-            json.dump({'degree': degree, 'augment_config': augment_config}, filehandle)
-        # Save score as csv file
-        image_data.drop('points', axis=1).to_csv(os.path.join(image_dir, "score.csv"), index=False)
+        save_image(image_data, out_directory=image_dir) # Save image
+
+    # Save names with error, for future use
+    with open(image_dir + '/error_file.json', 'w') as filehandle:
+        json.dump({'error_name': error_name}, filehandle)
+    with open(image_dir + '/config.json', 'w') as filehandle:
+        json.dump({'degree': degree, 'augment_config': augment_config}, filehandle)
+    # Save score as csv file
+    image_data.drop('points', axis=1).to_csv(os.path.join(image_dir, "score.csv"), index=False)
 
     print("stl_to_image.py: done")

@@ -4,7 +4,7 @@ import random
 import os
 import datetime
 import json
-from utils.open_save_file import get_input_and_label, get_input_and_label_new_data, read_file, save_file
+from utils.open_save_file import get_input_and_label, get_input_and_label_new_data, read_file
 
 numdeg = 4  # Number of images on each example
 
@@ -114,10 +114,6 @@ def image_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None, k_fold=None):
     grouped_train_address, grouped_eval_address = get_input_and_label(tfrecord_name, dataset_folder, configs, seed,
                                                                       get_data=False, k_fold=k_fold)
 
-    # if not k_fold:
-    #     k_num = 1
-    #     grouped_train_address = [grouped_train_address]
-    #     grouped_eval_address = [grouped_eval_address]
     time_stamp = datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S")
     if k_fold is None:
         k_fold = 1
@@ -125,47 +121,11 @@ def image_to_tfrecord(tfrecord_name, dataset_folder, csv_dir=None, k_fold=None):
         train_address = grouped_train_address[i]
         eval_address = grouped_eval_address[i]
 
-        # Start writing train dataset
-        # train_dataset = tf.data.Dataset.from_tensor_slices(train_address)
-        # train_dataset = train_dataset.map(read_image)  # Read file address, and get info as string
-        #
-        # it = train_dataset.make_one_shot_iterator()
-        #
-        # elem = it.get_next()
-
         tfrecord_train_name = os.path.join(tfrecord_dir, "%s_%s_train.tfrecords" % (tfrecord_name, i))
         tfrecord_eval_name = os.path.join(tfrecord_dir, "%s_%s_eval.tfrecords" % (tfrecord_name, i))
 
         image_write_tfrecord(train_address, tfrecord_train_name, degree, 360, 240)
         image_write_tfrecord(eval_address, tfrecord_eval_name, degree, 360, 240)
-        # with tf.Session() as sess:
-        #     writer = tf.python_io.TFRecordWriter(tfrecord_train_name)
-        #     while True:
-        #         try:
-        #             elem_result = serialize_image(sess.run(elem))
-        #
-        #             writer.write(elem_result)
-        #         except tf.errors.OutOfRangeError:
-        #             break
-        #     writer.close()
-        #
-        # eval_dataset = tf.data.Dataset.from_tensor_slices(eval_address)
-        # eval_dataset = eval_dataset.map(read_image)
-        #
-        # it = eval_dataset.make_one_shot_iterator()
-        #
-        # elem = it.get_next()
-        #
-        # with tf.Session() as sess:
-        #     writer = tf.python_io.TFRecordWriter(tfrecord_eval_name)
-        #     while True:
-        #         try:
-        #             elem_result = serialize_image(sess.run(elem))
-        #             # print(elem_result)
-        #             writer.write(elem_result)
-        #         except tf.errors.OutOfRangeError:
-        #             break
-        #     writer.close()
         print("TFrecords created: %s, %s" % (tfrecord_train_name, tfrecord_eval_name))
         # Update info in json file
         with open("../data/tfrecord/%s/%s_%s.json" % (tfrecord_name, tfrecord_name, i)) as filehandle:
