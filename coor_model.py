@@ -2,6 +2,7 @@ import tensorflow as tf
 import csv
 import os
 import numpy as np
+import tf_metrics
 from utils.custom_hook import EvalResultHook, PrintValueHook
 
 # In case of needing l2-regularization: https://stackoverflow.com/questions/44232566/add-l2-regularization-when-using-high-level-tf-layers/44238354#44238354
@@ -222,17 +223,17 @@ def model_deep_sleep_net(features, mode, params, config):
     pool9 = max_pool_layer_1d(conv9, 2, name="pool6", stride=-1)
     pool9 = tf.layers.batch_normalization(pool9)
 
-    #LSTM network
+    # LSTM network
     cell_1 = tf.keras.layers.LSTMCell(lstm_unit)
     cell_2 = tf.keras.layers.LSTMCell(lstm_unit)
     cell_3 = tf.keras.layers.LSTMCell(lstm_unit)
-    multicell = tf.nn.rnn_cell.MultiRNNCell([cell_1,cell_2,cell_3])
+    multicell = tf.nn.rnn_cell.MultiRNNCell([cell_1, cell_2, cell_3])
 
     nn, state = tf.nn.dynamic_rnn(multicell, pool9, dtype=tf.float32)
-    nn = tf.transpose(nn, [1,0,2])
-    nn = tf.gather(nn,int(nn.get_shape()[0])-1)
+    nn = tf.transpose(nn, [1, 0, 2])
+    nn = tf.gather(nn, int(nn.get_shape()[0]) - 1)
 
-    #Dense
+    # Dense
     logits = fc_layer(nn, 3,
                       mode=mode,
                       activation=None, name='predict', kernel_regularizer=l2_regularizer)
@@ -339,13 +340,21 @@ def my_model(features, labels, mode, params, config):
     # loss = softmax_focal_loss(labels, logits, gamma=0., alpha=loss_weight)
 
     accuracy = tf.metrics.accuracy(labels, predicted_class)
-
+    num_classes = 3
+    pos_indices = [0, 1, 2]
+    average = 'macro'
+    precision = tf_metrics.precision(
+        labels, predicted_class, num_classes, pos_indices, average=average)
+    recall = tf_metrics.recall(
+        labels, predicted_class, num_classes, pos_indices, average=average)
+    accuracy = tf_metrics.precision(
+        labels, predicted_class, num_classes, pos_indices, average="micro")
     my_accuracy = tf.reduce_mean(tf.cast(tf.equal(labels, predicted_class), dtype=tf.float32))
     acc = tf.summary.scalar("accuracy_manual", my_accuracy)  # Number of correct answer
 
     # Create parameters to show in Tensorboard
     ex_prediction = tf.summary.scalar("Prediction Output", predicted_class[0])
-    ex_ground_truth = tf.summary.scalar("Mean Ground Truth", tf.reduce_mean(tf.cast(labels,tf.float32)))
+    ex_ground_truth = tf.summary.scalar("Mean Ground Truth", tf.reduce_mean(tf.cast(labels, tf.float32)))
     d_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
     # print("d_vars", d_vars)
     # global_step = tf.summary.scalar("Global steps",tf.train.get_global_step())
@@ -396,7 +405,7 @@ def my_model(features, labels, mode, params, config):
         train_hooks = [print_input_hook, print_input_name_hook,
                        saver_hook, print_logits_hook, print_label_hook,
                        print_lr_hook,
-                       print_loss_hook,  print_reg_loss_hook,
+                       print_loss_hook, print_reg_loss_hook,
                        print_weight_balance_hook,
                        # print_lg_hook, print_lg2_hook,
                        # print_lg3_hook, print_lg4_hook,
@@ -424,7 +433,7 @@ def my_model(features, labels, mode, params, config):
         saver_hook = tf.train.SummarySaverHook(save_steps=eval_save_steps, summary_op=tf.summary.merge_all(),
                                                output_dir=os.path.join(config.model_dir, 'eval'))
     tensorboard_hook = tf.train.SummarySaverHook(save_steps=eval_save_steps, summary_op=tf.summary.merge_all(),
-                                           output_dir=config.model_dir)
+                                                 output_dir=config.model_dir)
     csv_name = tf.convert_to_tensor(os.path.join(params['result_path'], params['result_file_name']), dtype=tf.string)
     print_result_hook = EvalResultHook(features['name'], labels, predicted_class, tf.nn.softmax(logits), csv_name)
     print_logits_hook = PrintValueHook(tf.nn.softmax(logits), "Validation Training logits", tf.train.get_global_step(),
@@ -434,5 +443,12 @@ def my_model(features, labels, mode, params, config):
     eval_hooks = [saver_hook, tensorboard_hook, print_result_hook,
                   # print_logits_hook, print_label_hook,
                   ]
-    return tf.estimator.EstimatorSpec(mode=mode, eval_metric_ops={'accuracy': accuracy}, loss=loss,
-                                      evaluation_hooks=eval_hooks)
+    metrics = {
+        'accuracy': accuracy,
+        'precision': precision, 'recall': recall,
+    }
+    for metric_name, metric in metrics.items():
+        tf.summary.scalar(metric_name, metric[1])
+
+    return tf.estimator.EstimatorSpec(mode=mode, eval_metric_ops=metrics,
+                                      loss=loss, evaluation_hooks=eval_hooks)

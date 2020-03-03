@@ -29,21 +29,21 @@ configs = tooth_pb2.TrainConfig()
 with open(args.config, 'r') as f:
     text_format.Merge(f.read(), configs)
 
+# Change folder of input_path into a filename
+assert os.path.isdir(configs.input_path), \
+    "Input path should be folder directory, not file directory {}".format(configs.input_path)
+
+
 # Settings used in run
 run_configs = {'batch_size': configs.batch_size,
                'checkpoint_min': configs.checkpoint_min,
                'early_stop_step': configs.early_stop_step,
-               'input_path': configs.input_path,
+               'input_path': os.path.join(configs.input_path, os.path.basename(configs.input_path)),
                'result_path_base': configs.result_path,
                'config_path': os.path.abspath(args.config),
                'steps': configs.steps,
                'label_type': configs.label_type,
                'comment': configs.comment}
-
-# Change folder of input_path into a filename
-assert os.path.isdir(run_configs['input_path']), \
-    "Input path should be folder directory, not file directory {}".format(run_configs['input_path'])
-run_configs['input_path'] = os.path.join(run_configs['input_path'], os.path.basename(run_configs['input_path']))
 
 run_mode = configs.run_mode  # Run mode (Single, search, etc.)
 
@@ -58,8 +58,8 @@ activation_dict = {'0': tf.nn.relu, '1': tf.nn.leaky_relu}
 # For multi-gpu
 def get_available_gpus():
     local_device_protos = device_lib.list_local_devices()
-    return [x.name for x in local_device_protos if x.device_type == 'GPU']
-
+    out = [x.name for x in local_device_protos if x.device_type == 'GPU']
+    return out
 
 def get_time_and_date(use_current_time):
     if use_current_time:
@@ -139,7 +139,10 @@ def run(model_params):
         config=my_checkpoint_config
     )
 
-    train_hook = tf.contrib.estimator.stop_if_no_decrease_hook(classifier, "loss", run_configs['early_stop_step'])
+    try:
+        train_hook = tf.contrib.estimator.stop_if_no_decrease_hook(classifier, "loss", run_configs['early_stop_step'])
+    except AttributeError:
+        train_hook = tf.estimator.experimental.stop_if_no_decrease_hook(classifier, "loss", run_configs['early_stop_step'])
 
     # Fetch training_data and evaluation
     train_spec = tf.estimator.TrainSpec(
@@ -160,10 +163,14 @@ def run(model_params):
     print(eval_result)
     try:
         accuracy = eval_result[0]['accuracy']
+        precision = eval_result[0]['precision']
+        recall = eval_result[0]['recall']
         global_step = eval_result[0]['global_step']
-    except TypeError:
+    except KeyError:
         print("Warning, does receive evaluation result")
         accuracy = 0
+        precision=0
+        recall=0
         global_step = 0
 
     # Evaluate using train set
@@ -185,6 +192,8 @@ def run(model_params):
     info_dict = run_configs.copy()
     info_dict.update(model_params)
     info_dict['accuracy'] = accuracy
+    info_dict['precision'] = precision
+    info_dict['recall'] = recall
     info_dict['steps'] = global_step
 
     # Save information in config.csv
