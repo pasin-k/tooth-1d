@@ -25,7 +25,7 @@ class EvalResultHook(tf.train.SessionRunHook):
         probabilities = run_values.results[3]
         result_path = run_values.results[4]
 
-        # If change any data here, don't forget to change header in my_model (coor_model.py)
+        # If change any data here, don't forget to change header in my_model (model.py)
         with open(result_path, "a") as csvFile:
             writer = csv.writer(csvFile)
             for n, label, pred, prob in zip(name, labels, predicted_classes, probabilities):
@@ -46,7 +46,7 @@ class PrintValueHook(tf.train.SessionRunHook):
         self.step_loop = tf.convert_to_tensor(step_loop, dtype=tf.int32)
 
     def before_run(self, run_context):
-        return tf.train.SessionRunArgs([self.value, self.variable_name, self.global_step, self.step_loop])
+        return tf.estimator.SessionRunArgs([self.value, self.variable_name, self.global_step, self.step_loop])
 
     def after_run(self, run_context, run_values):
         if run_values.results[2] == 0:

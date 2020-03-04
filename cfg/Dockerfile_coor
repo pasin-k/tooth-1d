@@ -18,4 +18,4 @@ WORKDIR tooth-2d
 
 # CMD bash
 
-CMD python3 coor_train.py -c cfg/coor_tooth_workspace.config
+CMD python3 train.py -c cfg/1d_tooth_workspace.config

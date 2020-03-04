@@ -16,7 +16,7 @@ from skopt.space import Real, Categorical, Integer
 from skopt.utils import use_named_args
 
 # from model import my_model
-from coor_model import my_model
+from model import my_model
 from utils.coor_get_data import train_input_fn, eval_input_fn
 from utils.open_save_file import read_file, save_file, check_exist
 
@@ -211,7 +211,7 @@ def run(model_params):
         return tf.estimator.export.ServingInputReceiver(features={'image':image}, receiver_tensors=receive_tensors)
     if model_params['save_model']:
         classifier.export_saved_model(model_params['result_path'],serving_input_receiver_fn)
-    return accuracy, global_step
+    return accuracy, precision, recall, global_step
 
 
 # Run with multiple parameters (Grid-search)
@@ -235,8 +235,8 @@ def run_grid_search(model_params, grid_value):
         run_configs['current_time'] = get_time_and_date(True)
         model_params['result_path'] = os.path.join(run_configs['result_path_base'], run_configs['current_time'])
         model_params['dropout_rate'] = dr
-        acc, steps = run(model_params)
-        save_file(run_configs['summary_file_path'], [acc, dr,run_configs['current_time']],
+        acc, prec, rec, steps = run(model_params)
+        save_file(run_configs['summary_file_path'], [acc, prec, rec, dr,run_configs['current_time']],
                   write_mode='a',data_format="one_row")
     save_file(run_configs['summary_file_path'],
               ['end', 'Completed', get_time_and_date(configs.use_current_time)],
@@ -275,17 +275,13 @@ def fitness(learning_rate, channels):
     run_configs['current_time'] = get_time_and_date(True)
 
     # Set result path combine with current time of running
-    md_config = {'learning_rate': learning_rate,
-                 # 'dropout_rate': dropout_rate,
-                 'channels': [channels, 2],
+    md_config = {'learning_rate': learning_rate, 'channels': [channels, 2],
                  'result_path': os.path.join(run_configs['result_path_base'], run_configs['current_time']),
-                 'result_file_name': 'result.csv',
-                 }
+                 'result_file_name': 'result.csv', 'save_model': False}
 
-    md_config['save_model'] = False
-    accuracy, global_step = run(md_config)
+    accuracy, prec, rec, global_step = run(md_config)
     # Save info of hyperparameter search in a specific csv file
-    save_file(run_configs['summary_file_path'], [accuracy, learning_rate,
+    save_file(run_configs['summary_file_path'], [accuracy, prec, rec, learning_rate,
                                                  # dropout_rate,
                                                  channels, run_configs['current_time']], write_mode='a',
               data_format="one_row")
@@ -303,10 +299,8 @@ def run_hyper_parameter_optimize():
     run_configs['summary_file_path'] = os.path.join(run_configs[
                                                         'result_path_base'],
                                                     "hyperparameters_result_" + current_time + ".csv")
-
     field_name = [i.name for i in dimensions]
-    field_name.insert(0, 'accuracy')
-    field_name.append('timestamp')
+    field_name = ['accuracy'] + field_name + ['time_stmp']
 
     n_calls = 20  # Expected number of trainings
 
@@ -406,7 +400,8 @@ def run_kfold(model_params, k_num=5):
         run_configs['input_path'] = base_input_path + ("_%{}".format(i))
         run_configs['result_path'] = os.path.join(result_path, str(i))
         model_params['result_path'] = run_configs['result_path']
-        accuracy, _ = run(model_params)
+        result = run(model_params)
+        accuracy = result[0]
         save_file(kfold_path, ["{}_{}".format(i, accuracy)], write_mode='a')
         all_accuracy.append(accuracy)
     print(all_accuracy)

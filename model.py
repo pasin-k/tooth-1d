@@ -292,7 +292,7 @@ def get_loss_weight(labels):  # Calculate loss weight of a single batch
 def custom_l2_reg(loss, lambda_=0.01):
     # Reference: https://stackoverflow.com/questions/55029716/how-to-regularize-loss-function
     ys = tf.reduce_mean(loss)
-    l2_norms = [tf.nn.l2_loss(v) for v in tf.trainable_variables()]
+    l2_norms = [tf.nn.l2_loss(v) for v in tf.compat.v1.trainable_variables()]
     l2_norm = tf.reduce_sum(l2_norms)
     loss = ys + lambda_ * l2_norm
     return loss, lambda_ * l2_norm
@@ -332,14 +332,14 @@ def my_model(features, labels, mode, params, config):
     else:
         loss_weight = 1.0
     # Cross-entropy loss
-    loss = tf.losses.sparse_softmax_cross_entropy(labels, logits,
+    loss = tf.compat.v1.losses.sparse_softmax_cross_entropy(labels, logits,
                                                   weights=loss_weight)  # labels is int of class, logits is vector
     loss, reg_loss = custom_l2_reg(loss, lambda_=0.01)
 
     # Focal loss
     # loss = softmax_focal_loss(labels, logits, gamma=0., alpha=loss_weight)
 
-    accuracy = tf.metrics.accuracy(labels, predicted_class)
+    accuracy = tf.compat.v1.metrics.accuracy(labels, predicted_class)
     num_classes = 3
     pos_indices = [0, 1, 2]
     average = 'macro'
@@ -350,56 +350,56 @@ def my_model(features, labels, mode, params, config):
     accuracy = tf_metrics.precision(
         labels, predicted_class, num_classes, pos_indices, average="micro")
     my_accuracy = tf.reduce_mean(tf.cast(tf.equal(labels, predicted_class), dtype=tf.float32))
-    acc = tf.summary.scalar("accuracy_manual", my_accuracy)  # Number of correct answer
+    acc = tf.compat.v1.summary.scalar("accuracy_manual", my_accuracy)  # Number of correct answer
 
     # Create parameters to show in Tensorboard
-    ex_prediction = tf.summary.scalar("Prediction Output", predicted_class[0])
-    ex_ground_truth = tf.summary.scalar("Mean Ground Truth", tf.reduce_mean(tf.cast(labels, tf.float32)))
-    d_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
+    tf.compat.v1.summary.scalar("Prediction Output", predicted_class[0])
+    tf.compat.v1.summary.scalar("Mean Ground Truth", tf.reduce_mean(tf.cast(labels, tf.float32)))
+    d_vars = tf.compat.v1.get_collection(tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES)
     # print("d_vars", d_vars)
     # global_step = tf.summary.scalar("Global steps",tf.train.get_global_step())
 
-    trainable_variable_name = [v.name for v in tf.trainable_variables()]
+    trainable_variable_name = [v.name for v in tf.compat.v1.trainable_variables()]
 
     # tf.summary for all weight and bias
     summary_weight = []
     for i, t in enumerate(trainable_variable_name):
-        summary_weight.append(tf.summary.histogram(t, tf.trainable_variables()[i]))
-    steps = tf.train.get_global_step()
+        summary_weight.append(tf.compat.v1.summary.histogram(t, tf.compat.v1.trainable_variables()[i]))
+    current_step = tf.compat.v1.train.get_global_step()
 
     # Train Mode
     if mode == tf.estimator.ModeKeys.TRAIN:
-        learning_rate = tf.train.exponential_decay(params['learning_rate'], steps,
+        learning_rate = tf.compat.v1.train.exponential_decay(params['learning_rate'], current_step,
                                                    20000, 0.96, staircase=True)
-        optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
+        optimizer = tf.compat.v1.train.AdamOptimizer(learning_rate=learning_rate)
         loss_gradient = [optimizer.compute_gradients(loss, tf.trainable_variables()[
             trainable_variable_name.index('dense_1/kernel:0')]),
                          optimizer.compute_gradients(loss, tf.trainable_variables()[
                              trainable_variable_name.index('conv1/kernel:0')])]
-        train_op = optimizer.minimize(loss, global_step=steps)
+        train_op = optimizer.minimize(loss, global_step=current_step)
 
         save_steps = 1000
-        saver_hook = tf.train.SummarySaverHook(save_steps=save_steps, summary_op=tf.summary.merge_all(),
+        saver_hook = tf.compat.v1.train.SummarySaverHook(save_steps=save_steps, summary_op=tf.compat.v1.summary.merge_all(),
                                                output_dir=config.model_dir)
-        print_input_hook = PrintValueHook(features['image'], "Input value", tf.train.get_global_step(), save_steps)
-        print_input_name_hook = PrintValueHook(features['name'], "Input name", tf.train.get_global_step(), save_steps)
-        print_logits_hook = PrintValueHook(tf.nn.softmax(logits), "Training logits", tf.train.get_global_step(),
+        print_input_hook = PrintValueHook(features['image'], "Input value", current_step, save_steps)
+        print_input_name_hook = PrintValueHook(features['name'], "Input name", current_step, save_steps)
+        print_logits_hook = PrintValueHook(tf.nn.softmax(logits), "Training logits", current_step,
                                            save_steps)
-        print_label_hook = PrintValueHook(labels, "Labels", tf.train.get_global_step(), save_steps)
-        print_lr_hook = PrintValueHook(learning_rate, "Learning rate", tf.train.get_global_step(), save_steps)
-        print_loss_hook = PrintValueHook(loss, "Total Loss", tf.train.get_global_step(), save_steps)
-        print_reg_loss_hook = PrintValueHook(reg_loss, "Regularization Loss", tf.train.get_global_step(), save_steps)
+        print_label_hook = PrintValueHook(labels, "Labels", current_step, save_steps)
+        print_lr_hook = PrintValueHook(learning_rate, "Learning rate", current_step, save_steps)
+        print_loss_hook = PrintValueHook(loss, "Total Loss", current_step, save_steps)
+        print_reg_loss_hook = PrintValueHook(reg_loss, "Regularization Loss", current_step, save_steps)
 
-        print_weight_balance_hook = PrintValueHook(loss_weight_raw, "Loss weight", tf.train.get_global_step(),
+        print_weight_balance_hook = PrintValueHook(loss_weight_raw, "Loss weight", current_step,
                                                    save_steps)
-        print_lg_hook = PrintValueHook(loss_gradient[0][0][0][0, 0:16], "FC6 Loss gradient", tf.train.get_global_step(),
+        print_lg_hook = PrintValueHook(loss_gradient[0][0][0][0, 0:16], "FC6 Loss gradient", current_step,
                                        save_steps)
-        print_lg2_hook = PrintValueHook(loss_gradient[0][0][1][0, 0:16], "FC6 Variable", tf.train.get_global_step(),
+        print_lg2_hook = PrintValueHook(loss_gradient[0][0][1][0, 0:16], "FC6 Variable", current_step,
                                         save_steps)
         print_lg3_hook = PrintValueHook(loss_gradient[1][0][0][0, 0, :], "Conv1 Loss gradient",
-                                        tf.train.get_global_step(),
+                                        current_step,
                                         save_steps)
-        print_lg4_hook = PrintValueHook(loss_gradient[1][0][1][0, 0, :], "Conv1 Variable", tf.train.get_global_step(),
+        print_lg4_hook = PrintValueHook(loss_gradient[1][0][1][0, 0, :], "Conv1 Variable", current_step,
                                         save_steps)
         # Setting logging parameters
         train_hooks = [print_input_hook, print_input_name_hook,
@@ -436,9 +436,9 @@ def my_model(features, labels, mode, params, config):
                                                  output_dir=config.model_dir)
     csv_name = tf.convert_to_tensor(os.path.join(params['result_path'], params['result_file_name']), dtype=tf.string)
     print_result_hook = EvalResultHook(features['name'], labels, predicted_class, tf.nn.softmax(logits), csv_name)
-    print_logits_hook = PrintValueHook(tf.nn.softmax(logits), "Validation Training logits", tf.train.get_global_step(),
+    print_logits_hook = PrintValueHook(tf.nn.softmax(logits), "Validation Training logits", current_step,
                                        0)
-    print_label_hook = PrintValueHook(labels, "Validation Labels", tf.train.get_global_step(), 0)
+    print_label_hook = PrintValueHook(labels, "Validation Labels", current_step, 0)
 
     eval_hooks = [saver_hook, tensorboard_hook, print_result_hook,
                   # print_logits_hook, print_label_hook,

@@ -44,9 +44,9 @@ Use `preprocess/image_to_tfrecord.py` to convert image or coordinates into .tfre
 <br> Can select k_fold option if you want to use k_fold cross validation
 
 ## Step 3: Train and Evaluate
-Run `coor_train.py`. Require config file for hyperparameters and some settings.
+Run `train.py`. Require config file for hyperparameters and some settings.
 
-`python coor_train.py --config ./cfg/coor_tooth.config`
+`python train.py --config ./cfg/1d_tooth.config`
 
 We have multiple mode available.
 1. Standard: Standard way, train once.
@@ -57,18 +57,18 @@ We have multiple mode available.
 Our training process uses `tf.Estimator` API for doing all the training/evaluation process. If you are not familiar with this API, you can lookup [Here](https://www.tensorflow.org/guide/estimator)
 
 ### Hyperparameters
-Hyperparameters and other parameters configs used for `coor_train.py` can be found in `/cfg` folder and is needed to be parsed.
+Hyperparameters and other parameters configs used for `train.py` can be found in `/cfg` folder and is needed to be parsed.
 Hyperparameter such as input directory, batch_size, steps, etc.
 
-We use protocol buffer to feed those parameters into our file. Look up `coor_tooth.config` as a reference. 
+We use protocol buffer to feed those parameters into our file. Look up `1d_tooth.config` as a reference. 
 <br> Note: label_type is a score category which the instructor gave based on each criteria. You can ask for more info about these label. 
 
-Changing the variables in config file can be done in `proto/tooth.proto` file. 
-Then, run `protoc proto/*.proto --python_out=.`
+Changing the variables in config file can edited in `proto/tooth.proto` file. 
+After changing the variables, run the following command line in main directory `protoc proto/*.proto --python_out=.` which will create `tooth_pb2.py` automatically 
 
 
 ### Model Architecture
-For information in model architecture, look up in `coor_model.py` which is AlexNet-like version of 1D-CNN layers.
+For information in model architecture, look up in `model.py` which is AlexNet-like version of 1D-CNN layers.
 
 
 ### Evaluation and Output analysis
@@ -76,6 +76,6 @@ In the result directory, a `result.csv` file will be generated which shows all v
 <br> To analyze loss and accuracy over iterations, use [Tensorboard](https://www.tensorflow.org/guide/summaries_and_tensorboard) to see the result.
 
 ### Testing
-Use `coor_predict` for prediction. This accepts 3 types of input data: .stl file, .npy file, and .tfrecord file. Using the first two type of data will take slightly longer time due to data transformation.
+Use `predict` for prediction. This accepts 3 types of input data: .stl file, .npy file, and .tfrecord file. Using the first two type of data will take slightly longer time due to data transformation.
 
-`python coor_predict -t [folder directory of data] -m [folder directory of model] -dt [input data type]`
+`python predict -t [folder directory of data] -m [folder directory of model] -dt [input data type]`
