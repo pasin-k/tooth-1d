@@ -1,7 +1,7 @@
 Evaluation of tooth shape for dental procedure using machine learning approach
 ======
 ## Overview
-This is a collaboration project with Faculty of Dentistry to evaluate the skill of the dental student to do "Tooth Preparation" process, a dental procedure to remove outer layer of the tooth into an appropriate shape.
+This is a collaboration project with Faculty of Dentistry to evaluate the skill of the dental student to do a dental procedure called "Tooth Preparation" which involves removing outer layer of the tooth into an appropriate shape.
 
 Library Version:
 * python: 3.6.8
@@ -48,15 +48,15 @@ Run `train.py`. Require config file for hyperparameters and some settings.
 
 `python train.py --config ./cfg/1d_tooth.config`
 
-We have multiple mode available.
-1. Standard: Standard way, train once.
+There are four mode available during training.
+1. Single: Standard way, train once.
 2. K-fold: Use this if you select k_fold option in previous step. Will run multiple time for k-fold cross validation.
 3. Hyperparameter search run: Multiple runs with different hyperparameter each time using Scikit-opimize library
 4. Grid search: Hyperparameter search same as above but using grid-search approach
 
 Our training process uses `tf.Estimator` API for doing all the training/evaluation process. If you are not familiar with this API, you can lookup [Here](https://www.tensorflow.org/guide/estimator)
 
-### Hyperparameters
+### Hyperparameters and Configurations
 Hyperparameters and other parameters configs used for `train.py` can be found in `/cfg` folder and is needed to be parsed.
 Hyperparameter such as input directory, batch_size, steps, etc.
 
