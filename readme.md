@@ -22,7 +22,7 @@ Instead, we use *cross-sections* of 3D model from the center of tooth. We retrie
 
 In total, we would get 4 cross-sections image from one 3D file. Image below is an example of cross-section image we get from `stl_to_image.py`
 
-<img src="https://github.com/jobpasin/tooth-1d/blob/master/src/images/cross_section_example.png" width="200" height="200">
+<img src="https://github.com/jobpasin/tooth-1d/blob/master/src/images/visualization.png" width="400" height="200">
 
 We further reduce input dimension by fetching coordinates of the tooth contour instead. For each cross-section image, we will have the data of x-axis and y-axis of 300 sampled coordinates. 
 
