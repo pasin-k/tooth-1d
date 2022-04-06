@@ -26,7 +26,7 @@ mkl-fft==1.0.10
 mkl-random==1.0.2
 nbconvert==5.3.1
 nbformat==4.4.0
-notebook==5.7.8
+notebook==6.4.10
 numpy==1.16.4
 numpy-stl==2.9.0
 open3d==0.7.0.0
