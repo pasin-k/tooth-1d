@@ -1,4 +1,4 @@
-certifi==2019.6.16
+certifi==2022.12.7
 Cython==0.29.13
 dask==2.3.0
 google-pasta==0.1.7
